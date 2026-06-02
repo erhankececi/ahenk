@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ahenk.live"),
   title: "Ahenk — Önce ruh, sonra yüz",
   description: "Karaktere, ilgi alanlarına ve yaşam tarzına göre tanışma uygulaması.",
   manifest: "/manifest.webmanifest",
@@ -18,6 +19,19 @@ export const metadata: Metadata = {
     capable: true,
     title: "Ahenk",
     statusBarStyle: "black-translucent",
+  },
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    url: "https://ahenk.live",
+    siteName: "Ahenk",
+    title: "Ahenk — Önce ruh, sonra yüz",
+    description: "Karaktere göre tanış — fotoğraf değil, önce ruh. Yakınındaki uyumlu insanlarla eşleş.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ahenk — Önce ruh, sonra yüz",
+    description: "Karaktere göre tanışma uygulaması.",
   },
 };
 
