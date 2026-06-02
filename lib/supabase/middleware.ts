@@ -9,6 +9,8 @@ const PUBLIC_PATHS = [
   "/hakkinda", "/indir", "/guvenlik", "/gizlilik", "/kvkk", "/kosullar", "/hesap-sil",
   // Askıya alınan hesap bilgilendirme sayfası
   "/askida",
+  // Sosyal paylaşım görseli + SEO + PWA + service worker (bot/crawler oturumsuz erişir)
+  "/opengraph-image", "/twitter-image", "/robots.txt", "/sitemap.xml", "/manifest", "/sw.js", "/icon",
 ];
 
 export async function updateSession(request: NextRequest) {
