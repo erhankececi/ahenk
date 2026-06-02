@@ -39,6 +39,13 @@ export default function RegisterPage() {
     }
   }
 
+  async function google() {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${location.origin}/auth/callback` },
+    });
+  }
+
   return (
     <div className="relative flex min-h-dvh flex-col justify-center px-6">
       <Link href="/" className="absolute left-5 top-5 text-sm text-muted transition hover:text-text">
@@ -74,6 +81,13 @@ export default function RegisterPage() {
           {loading ? "Oluşturuluyor..." : "Hesap oluştur"}
         </Button>
       </form>
+
+      <div className="my-5 flex items-center gap-3 text-xs text-muted">
+        <div className="h-px flex-1 bg-border" /> veya <div className="h-px flex-1 bg-border" />
+      </div>
+      <Button variant="outline" full onClick={google} type="button">
+        Google ile devam et
+      </Button>
 
       <p className="mt-8 text-center text-sm text-muted">
         Zaten üye misin?{" "}
