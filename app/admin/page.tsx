@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck } from "lucide-react";
+import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck, Lightbulb } from "lucide-react";
 import AdminReportResolve from "@/components/admin/AdminReportResolve";
 import AdminUserActions from "@/components/admin/AdminUserActions";
 import AdminVerifyReview from "@/components/admin/AdminVerifyReview";
+import AdminFeedbackResolve from "@/components/admin/AdminFeedbackResolve";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function Admin() {
     { count: churned },
     { data: modQueue },
     { data: verifs },
+    { data: feedback },
   ] = await Promise.all([
     admin.from("profiles").select("*", { count: "exact", head: true }),
     admin.from("matches").select("*", { count: "exact", head: true }),
@@ -46,6 +48,7 @@ export default async function Admin() {
     admin.from("profiles").select("*", { count: "exact", head: true }).lt("last_active", weekAgo),
     admin.from("moderation_queue").select("*").eq("status", "acik").order("created_at", { ascending: false }).limit(10),
     admin.from("profiles").select("id,name,verification_path").eq("verification_status", "pending").limit(15),
+    admin.from("feedback").select("id,message,created_at,user_id").eq("handled", false).order("created_at", { ascending: false }).limit(20),
   ]);
 
   // Doğrulama selfie'leri private 'photos' kovasında → admin için imzalı URL.
@@ -58,6 +61,14 @@ export default async function Admin() {
         : null,
     }))
   );
+
+  // Öneri sahiplerinin adları.
+  const fbIds = Array.from(new Set((feedback || []).map((f) => f.user_id).filter(Boolean)));
+  const fbNames = new Map<string, string>();
+  if (fbIds.length) {
+    const { data: fbProfs } = await admin.from("profiles_card").select("id,name").in("id", fbIds as string[]);
+    (fbProfs || []).forEach((p: any) => fbNames.set(p.id, p.name));
+  }
 
   const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
 
@@ -156,6 +167,25 @@ export default async function Admin() {
               </div>
             </div>
             {r.details && <p className="mt-1 text-muted">{r.details}</p>}
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <Lightbulb size={18} className="text-accent" /> Öneriler & geri bildirim
+      </h2>
+      <div className="mb-6 space-y-2">
+        {(feedback || []).length === 0 && <p className="text-sm text-muted">Henüz öneri yok.</p>}
+        {(feedback || []).map((f) => (
+          <div key={f.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="flex items-start justify-between gap-2">
+              <p className="flex-1 whitespace-pre-wrap">{f.message}</p>
+              <AdminFeedbackResolve feedbackId={f.id} />
+            </div>
+            <p className="t-caption mt-1 text-muted">
+              {f.user_id ? fbNames.get(f.user_id) || "Bir kullanıcı" : "Silinmiş kullanıcı"} ·{" "}
+              {new Date(f.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </p>
           </div>
         ))}
       </div>

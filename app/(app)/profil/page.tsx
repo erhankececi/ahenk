@@ -6,7 +6,7 @@ import ProfilRetention from "@/components/ProfilRetention";
 import { signPhoto } from "@/lib/storage";
 import { yas } from "@/lib/utils";
 import {
-  BadgeCheck, Crown, Eye, Shield, Pencil, Zap, Wallet, Heart, Ban,
+  BadgeCheck, Crown, Eye, Shield, Pencil, Zap, Wallet, Heart, Ban, MessageSquare,
   Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight,
 } from "lucide-react";
 import { PremiumBadge, tierFrame, tierName, VipTag, MembershipCard } from "@/components/PremiumBadge";
@@ -199,6 +199,9 @@ export default async function Profil() {
         </Link>
         <Link href="/engellenenler" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Ban size={18} /> Engellenenler
+        </Link>
+        <Link href="/oneri" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
+          <MessageSquare size={18} /> Öneri / Geri bildirim
         </Link>
         {p?.is_admin && (
           <Link href="/admin" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">

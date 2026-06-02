@@ -27,6 +27,10 @@ export async function POST(req: Request) {
     await admin.from("reports").update({ status: "kapandi" }).eq("id", body.reportId);
     return NextResponse.json({ ok: true });
   }
+  if (action === "resolve_feedback" && body.feedbackId) {
+    await admin.from("feedback").update({ handled: true }).eq("id", body.feedbackId);
+    return NextResponse.json({ ok: true });
+  }
   if (action === "verify" && body.userId) {
     await admin.from("profiles").update({ is_verified: !!body.value }).eq("id", body.userId);
     return NextResponse.json({ ok: true });
