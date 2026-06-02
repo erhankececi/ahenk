@@ -45,6 +45,12 @@ export function yas(birthdate?: string | null): number | null {
   return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
 }
 
+/** Ad + soyad zorunluluğu: en az 2 kelime, her biri en az 2 harf. */
+export function adSoyadGecerli(n: string): boolean {
+  const parts = (n || "").trim().split(/\s+/).filter(Boolean);
+  return parts.length >= 2 && parts.every((p) => p.length >= 2);
+}
+
 /** Sohbet saati — HH:MM (tr). */
 export function saat(iso: string): string {
   return new Date(iso).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });

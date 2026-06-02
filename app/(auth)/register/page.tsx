@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input, PasswordInput } from "@/components/ui";
+import { adSoyadGecerli } from "@/lib/utils";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -19,6 +20,10 @@ export default function RegisterPage() {
 
   async function kayitOl(e: React.FormEvent) {
     e.preventDefault();
+    if (!adSoyadGecerli(name)) {
+      setErr("Lütfen ad ve soyadını gir (örn. Ahmet Yılmaz).");
+      return;
+    }
     setLoading(true);
     setErr("");
     const { data, error } = await supabase.auth.signUp({
@@ -55,7 +60,7 @@ export default function RegisterPage() {
       <p className="mb-8 text-muted">Karakterinle tanış, yüzün sonra gelir.</p>
 
       <form onSubmit={kayitOl} className="space-y-3">
-        <Input placeholder="Adın" value={name} onChange={(e) => setName(e.target.value)} required />
+        <Input placeholder="Ad Soyad" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input
           type="email"
           placeholder="E-posta"

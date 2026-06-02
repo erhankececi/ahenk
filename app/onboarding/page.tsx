@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, Input, Chip } from "@/components/ui";
 import { INTERESTS, ZODIAC, LANGUAGES, CITY_NAMES, CITIES } from "@/lib/constants";
 import { profilOnerileri } from "@/lib/aiProfile";
-import { yas } from "@/lib/utils";
+import { yas, adSoyadGecerli } from "@/lib/utils";
 import { ImagePlus, X, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 
 export default function Onboarding() {
@@ -111,7 +111,7 @@ export default function Onboarding() {
   const age = form.birthdate ? yas(form.birthdate) : null;
   const tooYoung = age !== null && age < 18;
   const step0Valid =
-    form.name.trim().length >= 2 &&
+    adSoyadGecerli(form.name) &&
     !!form.birthdate &&
     age !== null &&
     age >= 18 &&
@@ -132,7 +132,10 @@ export default function Onboarding() {
 
       {step === 0 && (
         <div className="space-y-4 animate-fade-up">
-          <Input placeholder="Adın" value={form.name} onChange={(e) => set("name", e.target.value)} />
+          <Input placeholder="Ad Soyad" value={form.name} onChange={(e) => set("name", e.target.value)} />
+          {form.name.trim() && !adSoyadGecerli(form.name) && (
+            <p className="-mt-2 text-xs text-muted">Ad ve soyadını yaz (örn. Ahmet Yılmaz).</p>
+          )}
           <div>
             <label className="mb-1 block text-sm text-muted">Doğum tarihin</label>
             <Input type="date" value={form.birthdate} onChange={(e) => set("birthdate", e.target.value)} />
