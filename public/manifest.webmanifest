@@ -1,0 +1,27 @@
+{
+  "name": "Ahenk — Önce ruh, sonra yüz",
+  "short_name": "Ahenk",
+  "description": "Karaktere, ilgi alanlarına ve yaşam tarzına göre tanışma uygulaması.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F1117",
+  "theme_color": "#0F1117",
+  "categories": ["social", "lifestyle"],
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

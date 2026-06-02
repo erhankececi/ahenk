@@ -1,0 +1,22 @@
+<svg width="420" height="120" viewBox="0 0 420 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ahenk logo">
+  <defs>
+    <linearGradient id="ah-mark" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6C63FF"/>
+      <stop offset="1" stop-color="#8B85FF"/>
+    </linearGradient>
+    <linearGradient id="ah-word" x1="120" y1="0" x2="420" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6C63FF"/>
+      <stop offset="1" stop-color="#8B85FF"/>
+    </linearGradient>
+  </defs>
+  <!-- mark -->
+  <g transform="translate(12 12)">
+    <rect width="96" height="96" rx="24" fill="url(#ah-mark)"/>
+    <path d="M48 23 L28 71" stroke="#fff" stroke-width="8.2" stroke-linecap="round"/>
+    <path d="M48 23 L68 71" stroke="#fff" stroke-width="8.2" stroke-linecap="round"/>
+    <path d="M37.4 56 H58.6" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="48" cy="23" r="5.6" fill="#FF7D6B"/>
+  </g>
+  <!-- wordmark -->
+  <text x="128" y="76" font-family="Inter, system-ui, sans-serif" font-size="56" font-weight="800" letter-spacing="-1.5" fill="url(#ah-word)">ahenk</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ahenk">
+  <defs>
+    <linearGradient id="ah-bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6C63FF"/>
+      <stop offset="1" stop-color="#8B85FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#ah-bg)"/>
+  <!-- Ahenk monogramı: birbirine bağlanan iki kişi / uyum (A) -->
+  <path d="M512 250 L300 762" stroke="#FFFFFF" stroke-width="86" stroke-linecap="round"/>
+  <path d="M512 250 L724 762" stroke="#FFFFFF" stroke-width="86" stroke-linecap="round"/>
+  <path d="M398 596 H626" stroke="#FFFFFF" stroke-width="74" stroke-linecap="round"/>
+  <!-- sosyal/sıcaklık aksanı -->
+  <circle cx="512" cy="250" r="58" fill="#FF7D6B"/>
+</svg>
