@@ -56,13 +56,6 @@ export default function LoginPage() {
     }
   }
 
-  async function oauth(provider: "google" | "apple") {
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    });
-  }
-
   return (
     <div className="relative flex min-h-dvh flex-col justify-center px-6">
       <Link href="/" className="absolute left-5 top-5 text-sm text-muted transition hover:text-text">
@@ -113,19 +106,6 @@ export default function LoginPage() {
       >
         Şifreni mi unuttun?
       </Link>
-
-      <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <div className="h-px flex-1 bg-border" /> veya <div className="h-px flex-1 bg-border" />
-      </div>
-
-      <div className="space-y-3">
-        <Button variant="outline" full onClick={() => oauth("google")} type="button">
-          Google ile devam et
-        </Button>
-        <Button variant="outline" full onClick={() => oauth("apple")} type="button">
-          Apple ile devam et
-        </Button>
-      </div>
 
       <p className="mt-8 text-center text-sm text-muted">
         Hesabın yok mu?{" "}
