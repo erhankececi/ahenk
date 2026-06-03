@@ -25,7 +25,10 @@ export async function POST(req: Request) {
     p_iban: String(iban || ""),
     p_name: String(name || ""),
   });
-  if (error) return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
+  if (error) {
+    console.error("withdraw rpc error:", error);
+    return NextResponse.json({ ok: false, error: "db", detail: error.message }, { status: 500 });
+  }
 
   const res = data as { ok: boolean; error?: string; amount_try?: number; min?: number; balance?: number };
   return NextResponse.json(res, { status: res?.ok ? 200 : 400 });

@@ -79,7 +79,8 @@ export default function ParaCek() {
           balance: "Yetersiz bakiye.",
           db: "İşlem şu an yapılamadı — tutarı düşürüp tekrar dene.",
         };
-        setNotice({ ok: false, msg: m[j?.error] || "Talep başarısız, tekrar dene." });
+        const base = m[j?.error] || "Talep başarısız, tekrar dene.";
+        setNotice({ ok: false, msg: j?.detail ? `${base} (${j.detail})` : base });
       }
     } catch {
       setNotice({ ok: false, msg: "Bağlantı hatası." });
