@@ -7,6 +7,35 @@
 
 ---
 
+## Premium ürün katmanı (2026-06 — additive, v13→v42)
+
+Canlı production (ahenk.live) üzerinde, mevcut mimariyi bozmadan eklenen büyük katman:
+
+| Göç | Ne ekler |
+|---|---|
+| v13–v25 | Hesap silme, 18+, rate-limit, moderasyon/ban, profil-kolon koruması, incognito, push, feedback, keşfet cinsiyet-tercih, prompts, süper beğeni, oto-moderasyon |
+| `v26`,`v33` | Hediye/bahşiş + **gift_catalog** (32 hediye, 4 kategori); `send_gift` katalogdan okur |
+| `v27` | Liderlik (`top_gift_earners`/`top_inviters`) |
+| `v28`–`v30` | Para çekme (cash-out): `withdrawals`, `request_withdraw`/`process_withdraw` (admin onaylı) |
+| `v31` | **Soft-delete** hesap (`deleted_at`) + geri yükleme (kullanıcı/admin) |
+| `v32` | Etkinlik RSVP (`event_requests.rsvp`, `set_rsvp`/`manage_rsvp`) |
+| `v34` | **Kimya/Uyum** (`matches.chemistry_score` + trigger + `add_chemistry`) |
+| `v35` | Keşfet sıralama (`discover_candidates` `p_sort`: near/active/new) |
+| `v36` | Günün Sorusu (`daily_answers`) |
+| `v37` | "Yüz yüze görüştük" (`met_confirmations`, `confirm_met`) |
+| `v38` | Ziyaret sayacı (`profile_visits.visit_count`, `record_visit`) — Premium Plus analiz |
+| `v39` | Gerçek buluşma (`meet_requests`, `propose_meet`/`respond_meet`) |
+| `v40` | Stories tepkileri (`story_reactions`) + izleyenler |
+| `v41` | Genel jeton harcama (`spend_jeton`) — ücretli görüntülü görüşme |
+| `v42` | Sohbet arşiv/gizli klasör (`chat_states` + `profiles.chat_pin_hash`) |
+
+**Tasarım:** sinematik lacivert (#0B1220) + champagne gold (#D4B06A) + sıcak terracotta (#C26F56), Manrope display font, desktop 3-kolon kabuk, kurumsal landing.
+**Çağrı:** WebRTC + ücretsiz TURN (Open Relay), canlı ses barları, mic/cam durum sinyali.
+**Diller:** TR/EN/**Kürtçe (kmr)** — landing/marketing i18n (uygulama-içi ekranlar sabit TR).
+**Bilinen sınır:** ekran görüntüsü engelleme web'de imkânsız (native APK gerekir); AI danışman için OpenAI anahtarı bekliyor.
+
+---
+
 ## Güncel katmanlar (2026-06 — additive, v5→v12)
 
 Bu dokümanın gövdesi v1–v4'ü anlatır. Sonradan **mevcut sistemi bozmadan** eklenen additive katmanlar:

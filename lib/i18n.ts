@@ -1,10 +1,11 @@
 // Hafif i18n — herkese açık (pazarlama) site + dil seçici. TR/EN ile başlar,
 // yapı yeni dil eklemeye uygun. Uygulama-içi ekranlar kademeli taşınabilir.
-export type Lang = "tr" | "en";
+export type Lang = "tr" | "en" | "ku";
 
 export const LANGS: { code: Lang; label: string; native: string }[] = [
   { code: "tr", label: "Türkçe", native: "Türkçe" },
   { code: "en", label: "İngilizce", native: "English" },
+  { code: "ku", label: "Kürtçe", native: "Kurdî" },
 ];
 
 type Dict = {
@@ -119,12 +120,62 @@ const en: Dict = {
   legal: { privacy: "Privacy Policy", terms: "Terms of Use", kvkk: "KVKK Disclosure", updated: "Last updated", back: "Home" },
 };
 
-const DICT: Record<Lang, Dict> = { tr, en };
+const ku: Dict = {
+  nav: { features: "Taybetmendî", safety: "Ewlehî", about: "Derbar", download: "Daxistin", login: "Têkeve", signup: "Tomar bibe" },
+  hero: {
+    tagline: "Pêşî giyan, paşê rû.",
+    title: "Bi karakterê xwe nas bike,\nrûyê te paşê tê.",
+    subtitle:
+      "Ahenk; ne bi wêneyan, bi kesayetî û berjewendiyên hevpar dest pê dike. Wêne di destpêkê de tarî ne, gava axaftin kûr dibe zelal dibin.",
+    ctaPrimary: "Niha dest pê bike",
+    ctaSecondary: "Çawa dixebite?",
+  },
+  features: {
+    title: "Çima Ahenk?",
+    items: [
+      { t: "Pêşî karakter", d: "Hevûdîtin li gorî berjewendî, awayê jiyanê û nirxan tê avakirin — ne tenê li gorî rû." },
+      { t: "Zelalbûna gav bi gav", d: "Wêne gava tu diaxivî zelal dibin; pêwendiya rastîn pêşî tê, paşê xuyanî." },
+      { t: "Deng û vîdyo", d: "Bi kesê ku tu pê re hevûdîtî, axaftina deng/vîdyoyê ya ewle di sepanê de." },
+      { t: "Civata rastîn", d: "Rêbazên zelal, moderasyona xurt û amûrên astengkirin/ragihandinê." },
+    ],
+  },
+  how: {
+    title: "Çawa dixebite?",
+    steps: [
+      { t: "Profîla xwe çêke", d: "Berjewendî, awayê jiyanê û danasîna dengî zêde bike." },
+      { t: "Bi karakter keşf bike", d: "Kesên ku li gorî kesayetî û nêzîkahiyê li te tên bibîne." },
+      { t: "Nas bike û zelal bibe", d: "Gava tu diaxivî wêne zelal dibin, pêwendî kûr dibe." },
+    ],
+  },
+  safetyBlock: {
+    title: "Ewlehî pêşî tê",
+    desc: "Bi rêbazên civatê, moderasyon, astengkirin û ragihandinê ji bo herkesî hawîrdorek bi rêz.",
+    cta: "Ewlehî & civat",
+  },
+  download: {
+    title: "Ahenk daxe",
+    subtitle: "Di nêzîk de li iOS û Android. Niha li ser webê tev li bibe.",
+    soon: "Di nêzîk de",
+    web: "Li ser webê bidomîne",
+  },
+  about: {
+    title: "Derbar",
+    body: [
+      "Ahenk hat avakirin da ku nasîn ji rûçikîbûnê rizgar bike. Mirov nabe bi tenê yek wêneyî werin kêmkirin; karakter, berjewendî û nirx divê pêşî werin.",
+      "Ramana me ya sereke hêsan e: wêne di destpêkê de tarî ne û gava tu axaftineke rastîn ava dikî zelal dibin. Pêwendî beriya xuyabûnê tê.",
+      "Li Tirkiyeyê hat pêşxistin; nepenîtî û ewlehî (KVKK/GDPR) pêşînneya me ne.",
+    ],
+  },
+  footer: { rights: "Hemû maf parastî ne.", product: "Hilber", company: "Şirket", legal: "Qanûnî", privacy: "Polîtîkaya Nepenîtiyê", terms: "Mercên Bikaranînê", kvkk: "Agahdariya KVKK", lang: "Ziman" },
+  legal: { privacy: "Polîtîkaya Nepenîtiyê", terms: "Mercên Bikaranînê", kvkk: "Nivîsa Agahdariya KVKK", updated: "Dawî hat nûkirin", back: "Rûpela sereke" },
+};
+
+const DICT: Record<Lang, Dict> = { tr, en, ku };
 
 export function getDict(lang?: string): Dict {
   return DICT[(lang as Lang) in DICT ? (lang as Lang) : "tr"];
 }
 
 export function normalizeLang(lang?: string): Lang {
-  return lang === "en" ? "en" : "tr";
+  return lang === "en" ? "en" : lang === "ku" ? "ku" : "tr";
 }
