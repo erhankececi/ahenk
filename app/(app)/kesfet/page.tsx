@@ -69,6 +69,10 @@ export default function Kesfet() {
   }
 
   const current = cands[i];
+  // Günün profili: en yüksek ahenk uyumlu aday (geri dönüş için öne çıkar).
+  const gunun = cands.length
+    ? cands.reduce((best: any, c: any) => ((c.ortakYuzde ?? 0) > (best?.ortakYuzde ?? -1) ? c : best), cands[0])
+    : null;
 
   async function act(type: string) {
     if (!current) return;
@@ -244,6 +248,40 @@ export default function Kesfet() {
               <div className="shimmer h-7 w-20 rounded-full" />
               <div className="shimmer h-7 w-14 rounded-full" />
             </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "profiller" && view === "kart" && !loading && gunun && (
+        <div className="mb-4 rounded-3xl border border-brand/30 bg-gradient-to-br from-brand/10 to-accent/5 p-4">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-brand">
+            <Sparkles size={13} /> Senin için seçtik
+          </p>
+          <div className="flex items-center gap-3">
+            <Link href={`/u/${gunun.id}`} className={`rounded-2xl ${tierFrame(gunun.tier)}`}>
+              <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-elevated">
+                {gunun.photos?.[0] ? (
+                  <img src={gunun.photos[0]} className="h-full w-full scale-110 object-cover blur-lg" alt="" />
+                ) : (
+                  <div className="brand-gradient h-full w-full opacity-30" />
+                )}
+              </div>
+            </Link>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold">
+                {gunun.name}
+                {gunun.age ? `, ${gunun.age}` : ""}
+              </p>
+              <p className="text-xs text-muted">
+                %{gunun.ortakYuzde} ahenk uyumu{gunun.sameCity ? " · yakınında" : ""}
+              </p>
+            </div>
+            <button
+              onClick={() => interactWith(gunun.id, "tanis")}
+              className="brand-gradient shrink-0 rounded-full px-4 py-2 text-sm font-semibold text-white"
+            >
+              Tanış
+            </button>
           </div>
         </div>
       )}
