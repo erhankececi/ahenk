@@ -12,13 +12,8 @@ export default function RecordVisit({ meId, targetId }: { meId: string; targetId
   useEffect(() => {
     if (!meId || meId === targetId) return;
     const supabase = createClient();
-    supabase
-      .from("profile_visits")
-      .upsert(
-        { visitor_id: meId, visited_id: targetId, visited_at: new Date().toISOString() },
-        { onConflict: "visitor_id,visited_id" }
-      )
-      .then(() => {});
+    // RPC: ziyareti kaydet + tekrar bakışları say (visit_count++).
+    supabase.rpc("record_visit", { p_visited: targetId }).then(() => {});
   }, [meId, targetId]);
 
   return null;

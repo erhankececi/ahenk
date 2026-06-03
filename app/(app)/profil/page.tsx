@@ -7,7 +7,7 @@ import { signPhoto } from "@/lib/storage";
 import { yas } from "@/lib/utils";
 import {
   BadgeCheck, Crown, Eye, Shield, Pencil, Zap, Wallet, Heart, Ban, MessageSquare,
-  Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight, Trophy,
+  Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight, Trophy, TrendingUp,
 } from "lucide-react";
 import { PremiumBadge, tierFrame, tierName, VipTag, MembershipCard } from "@/components/PremiumBadge";
 import CopyButton from "@/components/CopyButton";
@@ -210,6 +210,9 @@ export default async function Profil() {
         </Link>
         <Link href="/liderlik" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Trophy size={18} className="text-accent" /> Liderlik
+        </Link>
+        <Link href="/analiz" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
+          <TrendingUp size={18} className="text-accent" /> Analiz <span className="ml-auto text-[10px] font-semibold text-accent">Premium+</span>
         </Link>
         <Link href="/premium" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Crown size={18} className="text-brand" /> Premium
