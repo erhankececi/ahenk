@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapPin, Plus, Check, Clock, X, CalendarHeart } from "lucide-react";
+import { MapPin, Plus, Check, Clock, X, CalendarHeart, Star, HelpCircle, Users } from "lucide-react";
 import { EVENT_TYPES } from "@/lib/constants";
 
+type Attendee = { user_id: string; name: string; status: string; rsvp: string | null };
 type Ev = {
   id: string;
   title: string;
@@ -14,7 +15,19 @@ type Ev = {
   host_name: string;
   mesafe: number | null;
   my_status: string | null;
+  my_rsvp: string | null;
   mine: boolean;
+  attendees?: Attendee[];
+};
+
+const RSVPS = [
+  { key: "gidecek", label: "Katılacağım", Icon: Check },
+  { key: "belki", label: "Belki", Icon: HelpCircle },
+  { key: "ilgileniyor", label: "İlgileniyorum", Icon: Star },
+  { key: "gelemem", label: "Katılamam", Icon: X },
+];
+const RSVP_LABEL: Record<string, string> = {
+  gidecek: "Katılacak", belki: "Belki", ilgileniyor: "İlgileniyor", gelemem: "Gelemez",
 };
 
 const TYPE = (id: string) => EVENT_TYPES.find((t) => t.id === id) || EVENT_TYPES[4];
@@ -47,13 +60,28 @@ export default function Etkinlikler() {
     load();
   }
 
-  async function katil(id: string) {
+  async function rsvpVer(id: string, rsvp: string) {
+    setEvents((es) => es.map((e) => (e.id === id ? { ...e, my_rsvp: rsvp } : e)));
     await fetch("/api/events/join", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_id: id }),
+      body: JSON.stringify({ event_id: id, rsvp }),
     });
-    setEvents((es) => es.map((e) => (e.id === id ? { ...e, my_status: "bekliyor" } : e)));
+  }
+
+  async function yonet(eventId: string, userId: string, status: string) {
+    setEvents((es) =>
+      es.map((e) =>
+        e.id === eventId
+          ? { ...e, attendees: (e.attendees || []).map((a) => (a.user_id === userId ? { ...a, status } : a)) }
+          : e
+      )
+    );
+    await fetch("/api/events/manage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_id: eventId, user_id: userId, status }),
+    });
   }
 
   return (
@@ -164,31 +192,98 @@ export default function Etkinlikler() {
               )}
               <div className="mt-3">
                 {e.mine ? (
-                  <span className="text-sm text-brand">Senin etkinliğin</span>
-                ) : e.my_status === "bekliyor" ? (
-                  <span className="flex items-center gap-1 text-sm text-muted">
-                    <Clock size={14} /> İstek gönderildi
-                  </span>
-                ) : e.my_status === "kabul" ? (
-                  <span className="flex items-center gap-1 text-sm text-brand">
-                    <Check size={14} /> Katılıyorsun
-                  </span>
-                ) : e.my_status === "red" ? (
-                  <span className="flex items-center gap-1 text-sm text-error">
-                    <X size={14} /> Reddedildi
-                  </span>
+                  <OwnerPanel e={e} onManage={yonet} />
                 ) : (
-                  <button
-                    onClick={() => katil(e.id)}
-                    className="rounded-full border border-brand px-4 py-2 text-sm font-medium text-brand transition active:scale-95"
-                  >
-                    Katılmak istiyorum
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    {RSVPS.map((r) => {
+                      const on = e.my_rsvp === r.key;
+                      return (
+                        <button
+                          key={r.key}
+                          onClick={() => rsvpVer(e.id, r.key)}
+                          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition active:scale-95 ${
+                            on ? "border-transparent bg-brand text-white" : "border-border text-muted hover:text-text"
+                          }`}
+                        >
+                          <r.Icon size={14} /> {r.label}
+                        </button>
+                      );
+                    })}
+                    {e.my_status === "kabul" && (
+                      <span className="flex items-center gap-1 px-1 text-xs text-success">
+                        <Check size={13} /> Sahibi onayladı
+                      </span>
+                    )}
+                    {e.my_status === "red" && (
+                      <span className="flex items-center gap-1 px-1 text-xs text-error">
+                        <X size={13} /> Sahibi reddetti
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+function OwnerPanel({
+  e,
+  onManage,
+}: {
+  e: Ev;
+  onManage: (eventId: string, userId: string, status: string) => void;
+}) {
+  const att = e.attendees || [];
+  const counts: Record<string, number> = {};
+  att.forEach((a) => { if (a.rsvp) counts[a.rsvp] = (counts[a.rsvp] || 0) + 1; });
+  const yonetilecek = att.filter((a) => a.rsvp && a.rsvp !== "gelemem");
+
+  return (
+    <div>
+      <p className="mb-2 flex items-center gap-2 text-sm font-medium text-brand">
+        <Users size={14} /> Senin etkinliğin
+      </p>
+      {att.length === 0 ? (
+        <p className="text-xs text-muted">Henüz yanıt veren yok.</p>
+      ) : (
+        <>
+          <div className="mb-2 flex flex-wrap gap-1.5 text-xs">
+            {RSVPS.map((r) =>
+              counts[r.key] ? (
+                <span key={r.key} className="rounded-full bg-elevated px-2 py-0.5 text-muted">
+                  {RSVP_LABEL[r.key]}: <b className="text-text">{counts[r.key]}</b>
+                </span>
+              ) : null
+            )}
+          </div>
+          <div className="space-y-1.5">
+            {yonetilecek.map((a) => (
+              <div key={a.user_id} className="flex items-center gap-2 rounded-xl border border-border bg-elevated px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{a.name}</p>
+                  <p className="text-[11px] text-muted">
+                    {a.rsvp ? RSVP_LABEL[a.rsvp] : "—"}
+                    {a.status === "kabul" ? " · onaylı" : a.status === "red" ? " · reddedildi" : ""}
+                  </p>
+                </div>
+                {a.status !== "kabul" && (
+                  <button onClick={() => onManage(e.id, a.user_id, "kabul")} aria-label="Onayla" className="rounded-full bg-success/15 p-1.5 text-success">
+                    <Check size={15} />
+                  </button>
+                )}
+                {a.status !== "red" && (
+                  <button onClick={() => onManage(e.id, a.user_id, "red")} aria-label="Reddet" className="rounded-full bg-error/15 p-1.5 text-error">
+                    <X size={15} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

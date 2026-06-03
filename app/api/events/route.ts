@@ -23,20 +23,43 @@ export async function GET() {
     .in("id", hostIds.length ? hostIds : ["00000000-0000-0000-0000-000000000000"]);
   const hMap = new Map((hosts || []).map((h) => [h.id, h.name]));
 
-  // benim isteklerim
+  // benim RSVP'lerim (niyet + onay durumu)
   const { data: myReqs } = await supabase
     .from("event_requests")
-    .select("event_id, status")
+    .select("event_id, status, rsvp")
     .eq("user_id", user.id);
-  const reqMap = new Map((myReqs || []).map((r) => [r.event_id, r.status]));
+  const reqMap = new Map((myReqs || []).map((r) => [r.event_id, r]));
+
+  // Sahibi olduğum etkinliklerin katılımcı dökümü (RLS: host okuyabilir).
+  const ownedIds = (events || []).filter((e) => e.host_id === user.id).map((e) => e.id);
+  const attendeesByEvent = new Map<string, any[]>();
+  if (ownedIds.length) {
+    const { data: reqs } = await supabase
+      .from("event_requests")
+      .select("event_id, user_id, status, rsvp")
+      .in("event_id", ownedIds);
+    const uids = Array.from(new Set((reqs || []).map((r) => r.user_id)));
+    const { data: profs } = await supabase
+      .from("profiles_card")
+      .select("id, name")
+      .in("id", uids.length ? uids : ["00000000-0000-0000-0000-000000000000"]);
+    const nameMap = new Map((profs || []).map((p) => [p.id, p.name]));
+    for (const r of reqs || []) {
+      const arr = attendeesByEvent.get(r.event_id) || [];
+      arr.push({ user_id: r.user_id, name: nameMap.get(r.user_id) || "Biri", status: r.status, rsvp: r.rsvp });
+      attendeesByEvent.set(r.event_id, arr);
+    }
+  }
 
   const list = (events || [])
     .map((e) => ({
       ...e,
       host_name: hMap.get(e.host_id) || "Biri",
       mesafe: distanceKm(me?.lat, me?.lon, e.lat, e.lon),
-      my_status: reqMap.get(e.id) || null,
+      my_status: reqMap.get(e.id)?.status || null,
+      my_rsvp: reqMap.get(e.id)?.rsvp || null,
       mine: e.host_id === user.id,
+      attendees: e.host_id === user.id ? attendeesByEvent.get(e.id) || [] : undefined,
     }))
     .sort((a, b) => (a.mesafe ?? 9999) - (b.mesafe ?? 9999));
 
