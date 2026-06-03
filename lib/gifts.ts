@@ -87,6 +87,10 @@ export const GIFT_CATALOG: Gift[] = [
 ];
 
 export const giftByKey = (key: string) => GIFT_CATALOG.find((g) => g.key === key);
-export const giftByName = (text: string) =>
-  GIFT_CATALOG.find((g) => text.includes(g.name) && text.includes(g.emoji)) ||
-  GIFT_CATALOG.find((g) => text.includes(g.name));
+// En uzun isim eşleşmesini seç (ör. "Elmas Yüzük" > "Yüzük" — aynı emoji çakışması).
+export const giftByName = (text: string): Gift | undefined => {
+  const strong = GIFT_CATALOG.filter((g) => text.includes(g.name) && text.includes(g.emoji));
+  if (strong.length) return strong.sort((a, b) => b.name.length - a.name.length)[0];
+  const weak = GIFT_CATALOG.filter((g) => text.includes(g.name));
+  return weak.sort((a, b) => b.name.length - a.name.length)[0];
+};
