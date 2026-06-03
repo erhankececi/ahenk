@@ -36,6 +36,8 @@ import PhotoLightbox from "@/components/PhotoLightbox";
 import GiftStore from "@/components/GiftStore";
 import GiftAnimation from "@/components/GiftAnimation";
 import { giftByName, type Gift as GiftT } from "@/lib/gifts";
+import { MEET_KINDS, meetByKey } from "@/lib/meet";
+import { CalendarDays } from "lucide-react";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
 import EmojiGifPicker from "@/components/EmojiGifPicker";
@@ -66,6 +68,7 @@ export function ChatWindow({
   initialChemistry = 0,
   metByMe = false,
   metBoth = false,
+  meetInit = null,
 }: {
   matchId: string;
   meId: string;
@@ -81,6 +84,7 @@ export function ChatWindow({
   initialChemistry?: number;
   metByMe?: boolean;
   metBoth?: boolean;
+  meetInit?: { kind: string; status: string; fromMe: boolean } | null;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -105,6 +109,26 @@ export function ChatWindow({
   const [giftAnim, setGiftAnim] = useState<{ gift: GiftT; fromMe: boolean } | null>(null);
   const [chemistry, setChemistry] = useState(initialChemistry);
   const [met, setMet] = useState({ mine: metByMe, both: metBoth });
+  const [meet, setMeet] = useState(meetInit);
+  const [meetOpen, setMeetOpen] = useState(false);
+
+  async function bulusmaOner(kind: string) {
+    setMeetOpen(false);
+    setMeet({ kind, status: "bekliyor", fromMe: true });
+    await fetch("/api/meet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId, action: "propose", kind }),
+    });
+  }
+  async function bulusmaYanit(action: "accept" | "reject") {
+    setMeet((m) => (m ? { ...m, status: action === "accept" ? "kabul" : "red" } : m));
+    await fetch("/api/meet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId, action }),
+    });
+  }
 
   async function gorustukOnayla() {
     if (met.mine) return;
@@ -522,6 +546,13 @@ export function ChatWindow({
           </button>
         )}
         <button
+          onClick={() => setMeetOpen(true)}
+          aria-label="Buluşma öner"
+          className="text-muted transition hover:text-brand"
+        >
+          <CalendarDays size={20} />
+        </button>
+        <button
           onClick={() => setGiftOpen(true)}
           aria-label="Hediye gönder"
           className="text-muted transition hover:text-accent"
@@ -641,6 +672,31 @@ export function ChatWindow({
         </div>
       )}
 
+      {/* Buluşma durumu */}
+      {meet && meet.status !== "red" && (
+        <div className="mx-4 mb-1 rounded-2xl border border-brand/30 bg-brand/5 px-3 py-2 text-sm">
+          {meet.status === "kabul" ? (
+            <span className="flex items-center gap-2 font-medium text-success">
+              <CalendarDays size={15} /> Buluşma planlandı: {meetByKey(meet.kind)?.emoji} {meetByKey(meet.kind)?.label} 🎉
+            </span>
+          ) : meet.fromMe ? (
+            <span className="flex items-center gap-2 text-muted">
+              <CalendarDays size={15} /> {meetByKey(meet.kind)?.label} önerin yanıt bekliyor…
+            </span>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2 font-medium">
+                <CalendarDays size={15} className="text-brand" /> {meetByKey(meet.kind)?.emoji} {meetByKey(meet.kind)?.label} buluşması önerildi
+              </span>
+              <span className="flex shrink-0 gap-1.5">
+                <button onClick={() => bulusmaYanit("accept")} className="rounded-full bg-success px-3 py-1 text-xs font-semibold text-white">Kabul</button>
+                <button onClick={() => bulusmaYanit("reject")} className="rounded-full border border-border px-3 py-1 text-xs">Reddet</button>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {uploading && <p className="px-4 pb-1 text-xs text-muted">Fotoğraf yükleniyor…</p>}
       {warn && <p className="px-4 pb-1 text-xs text-brand-2">{warn}</p>}
 
@@ -742,6 +798,29 @@ export function ChatWindow({
 
       {giftAnim && (
         <GiftAnimation gift={giftAnim.gift} fromMe={giftAnim.fromMe} onDone={() => setGiftAnim(null)} />
+      )}
+
+      {meetOpen && (
+        <div className="fixed inset-0 z-40 flex items-end bg-black/50" onClick={() => setMeetOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="animate-slide-up w-full rounded-t-3xl border-t border-border bg-surface p-5">
+            <p className="t-h4 mb-1 flex items-center gap-2">
+              <CalendarDays size={18} className="text-brand" /> Buluşma öner
+            </p>
+            <p className="mb-4 text-xs text-muted">Gerçek hayatta tanışmak için bir öneri gönder.</p>
+            <div className="grid grid-cols-3 gap-2.5">
+              {MEET_KINDS.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => bulusmaOner(m.key)}
+                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-elevated p-3 transition hover:border-brand active:scale-95"
+                >
+                  <span className="text-2xl">{m.emoji}</span>
+                  <span className="text-[11px] text-muted">{m.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {histOpen && (

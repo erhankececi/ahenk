@@ -67,6 +67,18 @@ export default async function SohbetPage({ params }: { params: { matchId: string
   const metByMe = (metRows || []).some((r) => r.user_id === user!.id);
   const metBoth = (metRows || []).length >= 2;
 
+  // Son buluşma önerisi durumu
+  const { data: meetRow } = await supabase
+    .from("meet_requests")
+    .select("from_user, kind, status")
+    .eq("match_id", params.matchId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const meetInit = meetRow
+    ? { kind: meetRow.kind as string, status: meetRow.status as string, fromMe: meetRow.from_user === user!.id }
+    : null;
+
   return (
     <ChatWindow
       matchId={params.matchId}
@@ -83,6 +95,7 @@ export default async function SohbetPage({ params }: { params: { matchId: string
       initialChemistry={(match.chemistry_score as number) || 0}
       metByMe={metByMe}
       metBoth={metBoth}
+      meetInit={meetInit}
     />
   );
 }
