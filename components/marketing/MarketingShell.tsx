@@ -26,8 +26,13 @@ export default function MarketingShell({
             <Link href="/indir" className="transition hover:text-text">{t.nav.download}</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <LanguageSwitcher current={lang} />
-            <Link href="/login" className="hidden text-sm text-muted transition hover:text-text sm:block">
+            <div className="hidden sm:block">
+              <LanguageSwitcher current={lang} />
+            </div>
+            <Link
+              href="/login"
+              className="rounded-full border border-border px-4 py-2 text-sm font-medium text-text transition hover:border-text/40"
+            >
               {t.nav.login}
             </Link>
             <Link
