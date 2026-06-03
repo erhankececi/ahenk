@@ -6,7 +6,7 @@ import { join } from "node:path";
 
 const REF = "fhuwrwayoenyywexjglj";
 const PAT = process.env.SUPABASE_PAT;
-const FILES = ["schema.sql", "schema_v2.sql", "schema_v3.sql", "schema_v4_security.sql", "schema_v5_jeton.sql", "schema_v6_store.sql", "schema_v7_subscriptions.sql", "schema_v8_geo.sql", "schema_v9_premium_view.sql", "schema_v10_calls.sql", "schema_v11_theme.sql", "schema_v12_member.sql", "schema_v13_account_deletion.sql", "schema_v14_age_min.sql", "schema_v15_rate_limit.sql", "schema_v16_moderation.sql", "schema_v17_ban_enforce.sql", "schema_v18_profile_guard.sql", "schema_v19_incognito.sql", "schema_v20_push.sql", "schema_v21_feedback.sql"];
+const FILES = ["schema.sql", "schema_v2.sql", "schema_v3.sql", "schema_v4_security.sql", "schema_v5_jeton.sql", "schema_v6_store.sql", "schema_v7_subscriptions.sql", "schema_v8_geo.sql", "schema_v9_premium_view.sql", "schema_v10_calls.sql", "schema_v11_theme.sql", "schema_v12_member.sql", "schema_v13_account_deletion.sql", "schema_v14_age_min.sql", "schema_v15_rate_limit.sql", "schema_v16_moderation.sql", "schema_v17_ban_enforce.sql", "schema_v18_profile_guard.sql", "schema_v19_incognito.sql", "schema_v20_push.sql", "schema_v21_feedback.sql", "schema_v22_discover_gender.sql"];
 
 if (!PAT) {
   console.error("HATA: SUPABASE_PAT env değişkeni yok.");
