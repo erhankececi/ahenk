@@ -77,6 +77,7 @@ export default function ParaCek() {
           name: "IBAN sahibinin ad soyadını gir.",
           pending: "Zaten bekleyen bir talebin var. Sonuçlanmasını bekle.",
           balance: "Yetersiz bakiye.",
+          db: "İşlem şu an yapılamadı — tutarı düşürüp tekrar dene.",
         };
         setNotice({ ok: false, msg: m[j?.error] || "Talep başarısız, tekrar dene." });
       }
