@@ -21,6 +21,15 @@ function mimeExt(mime: string): string {
   if (mime.includes("ogg")) return "ogg";
   return "webm";
 }
+
+// Kimya seviyesi (0-100 → etiket)
+function bondLevel(s: number) {
+  if (s >= 80) return { label: "Özel Bağ", emoji: "💞" };
+  if (s >= 60) return { label: "Güçlü Bağ", emoji: "💗" };
+  if (s >= 40) return { label: "Uyumlu", emoji: "💓" };
+  if (s >= 20) return { label: "Isınıyor", emoji: "💛" };
+  return { label: "Yeni Tanışıyor", emoji: "🤍" };
+}
 import { zamanFarki, saat } from "@/lib/utils";
 import { playSound } from "@/lib/sound";
 import PhotoLightbox from "@/components/PhotoLightbox";
@@ -54,6 +63,7 @@ export function ChatWindow({
   myTier = "free",
   otherTier = "free",
   myTheme = "default",
+  initialChemistry = 0,
 }: {
   matchId: string;
   meId: string;
@@ -66,6 +76,7 @@ export function ChatWindow({
   myTier?: string;
   otherTier?: string;
   myTheme?: string;
+  initialChemistry?: number;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -88,6 +99,7 @@ export function ChatWindow({
   const [recSec, setRecSec] = useState(0);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [giftAnim, setGiftAnim] = useState<{ gift: GiftT; fromMe: boolean } | null>(null);
+  const [chemistry, setChemistry] = useState(initialChemistry);
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -119,13 +131,16 @@ export function ChatWindow({
         (payload) => {
           const nm = payload.new as Message;
           // Hediye mesajı → tam ekran sinematik animasyon (iki tarafta da)
-          if (nm.type === "text" && nm.body?.startsWith("🎁")) {
-            const g = giftByName(nm.body);
+          const isGiftMsg = nm.type === "text" && nm.body?.startsWith("🎁");
+          if (isGiftMsg) {
+            const g = giftByName(nm.body || "");
             if (g) setGiftAnim({ gift: g, fromMe: nm.sender_id === meId });
             playSound("purchase");
           } else if (nm.sender_id !== meId) {
             playSound("message");
           }
+          // Kimya artışı (DB trigger ile uyumlu; hediye daha çok artırır)
+          setChemistry((c) => Math.min(100, c + (isGiftMsg ? 10 : 2)));
           setMessages((m) => (m.some((x) => x.id === nm.id) ? m : [...m, nm]));
         }
       )
@@ -496,6 +511,22 @@ export function ChatWindow({
           extra={[{ label: "Arama geçmişi", onClick: aramaGecmisi }]}
         />
       </header>
+
+      {/* Kimya / Uyum çubuğu — iki tarafta da görünür, mesajlaştıkça dolar */}
+      <div className="border-b border-border bg-surface/40 px-4 py-2">
+        <div className="mb-1 flex items-center justify-between text-xs">
+          <span className="flex items-center gap-1 font-medium">
+            {bondLevel(chemistry).emoji} {bondLevel(chemistry).label}
+          </span>
+          <span className="text-muted">%{chemistry} uyum</span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-elevated">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-brand to-accent transition-[width] duration-700 ease-out"
+            style={{ width: `${chemistry}%` }}
+          />
+        </div>
+      </div>
 
       {/* mesajlar */}
       <div className="flex-1 space-y-2 overflow-y-auto p-4">

@@ -34,6 +34,8 @@ export async function POST(req: Request) {
       type: "text",
       body: `🎁 ${res.label} gönderdi`,
     });
+    // Hediye kimyayı ekstra artırır.
+    await admin.rpc("add_chemistry", { p_match: matchId, p_amount: 8 });
   }
 
   // Alıcıya bildirim: hediye geldiğini ve kaç jeton kazandığını gör.

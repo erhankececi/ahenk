@@ -72,6 +72,7 @@ export default async function SohbetPage({ params }: { params: { matchId: string
       myTier={myTier}
       otherTier={(other?.tier as string) || "free"}
       myTheme={(meProf?.theme as string) || "default"}
+      initialChemistry={(match.chemistry_score as number) || 0}
     />
   );
 }
