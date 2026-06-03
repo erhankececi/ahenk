@@ -122,6 +122,15 @@ export function ChatWindow({
     giftAnimRef.current = next;
     setGiftAnim(next);
   }
+  // RARE hediye → sohbet ekranı kısa süre sallanır
+  const [shake, setShake] = useState(false);
+  useEffect(() => {
+    if (giftAnim?.gift.rarity === "rare") {
+      setShake(true);
+      const t = setTimeout(() => setShake(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [giftAnim]);
   const [chemistry, setChemistry] = useState(initialChemistry);
   const [met, setMet] = useState({ mine: metByMe, both: metBoth });
   const [meet, setMeet] = useState(meetInit);
@@ -505,7 +514,7 @@ export function ChatWindow({
   const callsUnlocked = revealLevel >= 100 || messages.length >= 8;
 
   return (
-    <div className="flex h-dvh flex-col overflow-x-hidden bg-bg">
+    <div className={`flex h-dvh flex-col overflow-x-hidden bg-bg ${shake ? "gift-shake" : ""}`}>
       {/* başlık */}
       <header className="flex items-center gap-3 border-b border-border glass px-3 py-3">
         <button onClick={() => router.push("/eslesmeler")} aria-label="Eşleşmelere dön">

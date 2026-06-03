@@ -341,8 +341,26 @@ body {
 @keyframes gift-banner { 0% { opacity: 0; transform: translateY(-12px) scale(0.9);} 100% { opacity: 1; transform: none;} }
 .gift-banner { animation: gift-banner 0.5s cubic-bezier(0.22,1,0.36,1) both; }
 
+/* COMMON/RARE: sohbet içi küçük yükselen hediye (backdrop yok) */
+@keyframes gift-float {
+  0%   { opacity: 0; transform: translateY(46px) scale(0.4); }
+  18%  { opacity: 1; transform: translateY(0) scale(1.1); }
+  30%  { transform: translateY(2px) scale(0.96); }
+  72%  { opacity: 1; transform: translateY(-34px) scale(1.04); }
+  100% { opacity: 0; transform: translateY(-110px) scale(0.85); }
+}
+.gift-float { animation: gift-float var(--d, 1.6s) cubic-bezier(0.22,1,0.36,1) both; }
+
+/* Sahne çıkışı (epic/cine) */
+@keyframes gift-exit { to { opacity: 0; transform: scale(1.06); filter: blur(6px); } }
+.gift-exit { animation: gift-exit 0.4s ease-in forwards; }
+
+/* Kraliyet ışık demetleri (dönen konik) */
+@keyframes gift-rays { to { transform: translate(-50%,-50%) rotate(360deg); } }
+.gift-rays { animation: gift-rays 7s linear infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .gift-drive, .gift-sparkle, .gift-fly, .gift-wave, .gift-bob, .gift-spin, .gift-burst, .gift-shake, .gift-flash { animation-duration: 0.01ms !important; }
+  .gift-drive, .gift-sparkle, .gift-fly, .gift-wave, .gift-bob, .gift-spin, .gift-burst, .gift-shake, .gift-flash, .gift-float, .gift-rays { animation-duration: 0.01ms !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gift-pop, .gift-particle { animation-duration: 0.01ms !important; }

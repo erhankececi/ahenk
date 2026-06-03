@@ -1,11 +1,48 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RARITY, type Gift } from "@/lib/gifts";
 import { playSound } from "@/lib/sound";
 
-const DUR: Record<Gift["rarity"], number> = { common: 2200, rare: 2700, epic: 3600, legendary: 5000, mythic: 6200 };
-const PARTS: Record<Gift["rarity"], number> = { common: 12, rare: 18, epic: 30, legendary: 46, mythic: 64 };
+const DUR: Record<Gift["rarity"], number> = { common: 1600, rare: 2200, epic: 3600, legendary: 5000, mythic: 6400 };
+const PARTS: Record<Gift["rarity"], number> = { common: 0, rare: 0, epic: 28, legendary: 46, mythic: 66 };
+const MODE: Record<Gift["rarity"], "mini" | "epic" | "cine"> = {
+  common: "mini", rare: "mini", epic: "epic", legendary: "cine", mythic: "cine",
+};
+
+// Sahne arka planı (derinlik) — epic/cine
+function Scene({ fx, ring }: { fx: Gift["fx"]; ring: string }) {
+  switch (fx) {
+    case "fly":
+      return <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, #0a1430 0%, #05070f 72%)" }} />;
+    case "sea":
+    case "ocean":
+      return (
+        <>
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, #0a1a2e, #05182a 60%)" }} />
+          <div className="gift-wave absolute inset-x-0 bottom-0 h-2/5" style={{ background: "linear-gradient(to top, rgba(56,189,248,0.5), transparent)" }} />
+        </>
+      );
+    case "spin":
+      return <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 50% 44%, #142446, #04060d 72%)" }} />;
+    case "drive":
+      return (
+        <>
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, #1a1530 56%, #0a0810)" }} />
+          <div className="absolute inset-x-0 top-1/2 h-px bg-white/15" />
+        </>
+      );
+    case "royal":
+      return (
+        <div
+          className="gift-rays absolute left-1/2 top-1/2 h-[150vmin] w-[150vmin]"
+          style={{ background: `conic-gradient(from 0deg, transparent, ${ring}, transparent, ${ring}, transparent, ${ring}, transparent)` }}
+        />
+      );
+    default:
+      return null;
+  }
+}
 
 export default function GiftAnimation({
   gift,
@@ -19,38 +56,49 @@ export default function GiftAnimation({
   onDone: () => void;
 }) {
   const r = RARITY[gift.rarity];
+  const mode = MODE[gift.rarity];
   const dur = DUR[gift.rarity];
-  const big = gift.rarity === "legendary" || gift.rarity === "mythic";
-  const showBanner = gift.rarity !== "common" && gift.rarity !== "rare";
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    playSound(big ? "match" : "purchase");
+    playSound(mode === "cine" ? "match" : "purchase");
+    const tl = setTimeout(() => setLeaving(true), dur - 400);
     const t = setTimeout(onDone, dur);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(tl); clearTimeout(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const psym = gift.fx === "petals" ? "🌸" : gift.fx === "royal" ? "✨" : gift.fx === "burst" ? "✨" : big ? "✨" : gift.emoji;
+  // ---- COMMON / RARE: sohbet içi, küçük, backdrop yok ----
+  if (mode === "mini") {
+    return (
+      <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[80] flex flex-col items-center">
+        {gift.rarity === "rare" && (
+          <span className="absolute bottom-8 h-24 w-24 animate-pulse rounded-full blur-2xl" style={{ background: r.ring }} />
+        )}
+        <span className="gift-float text-6xl leading-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]" style={{ ["--d" as any]: `${dur}ms` }}>
+          {gift.emoji}
+        </span>
+        <span className="-mt-1 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">{gift.name}</span>
+      </div>
+    );
+  }
 
+  // ---- EPIC / CINE: tam sahne ----
+  const big = mode === "cine";
   const Hero = () => {
     switch (gift.fx) {
       case "fly":
-        return <div className="gift-fly absolute text-[20vmin] leading-none drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]">{gift.emoji}</div>;
+        return <div className="gift-fly absolute z-10 text-[20vmin] leading-none drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]">{gift.emoji}</div>;
       case "drive":
-        return <div className="gift-drive absolute text-[18vmin] leading-none drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]">{gift.emoji}</div>;
+        return <div className="gift-drive absolute z-10 text-[18vmin] leading-none drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]">{gift.emoji}</div>;
       case "spin":
-        return <span className="gift-spin block text-[26vmin] leading-none">{gift.emoji}</span>;
+        return <span className="gift-spin relative z-10 block text-[26vmin] leading-none">{gift.emoji}</span>;
       case "sea":
       case "ocean":
-        return (
-          <>
-            <div className="gift-wave pointer-events-none absolute inset-x-0 bottom-0 h-1/2" style={{ background: "linear-gradient(to top, rgba(56,189,248,0.5), rgba(14,42,58,0.05))" }} />
-            <span className="gift-bob relative z-10 text-[24vmin] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]">{gift.emoji}</span>
-          </>
-        );
+        return <span className="gift-bob relative z-10 text-[24vmin] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]">{gift.emoji}</span>;
       case "burst":
         return (
-          <div className="relative flex items-center justify-center">
+          <div className="relative z-10 flex items-center justify-center">
             {[0, 1, 2].map((k) => (
               <span key={k} className="gift-burst absolute rounded-full border-2" style={{ width: "26vmin", height: "26vmin", borderColor: r.ring, animationDelay: `${k * 0.25}s` }} />
             ))}
@@ -58,47 +106,43 @@ export default function GiftAnimation({
           </div>
         );
       case "royal":
-        return <span className="gift-pop text-[26vmin] leading-none drop-shadow-[0_12px_44px_rgba(212,176,106,0.7)]">{gift.emoji}</span>;
+        return <span className="gift-pop relative z-10 text-[26vmin] leading-none drop-shadow-[0_12px_44px_rgba(212,176,106,0.7)]">{gift.emoji}</span>;
       default:
-        return <span className={`gift-pop text-[24vmin] leading-none drop-shadow-[0_10px_36px_rgba(0,0,0,0.7)] ${gift.fx === "build" ? "gift-shake" : ""}`}>{gift.emoji}</span>;
+        return <span className={`gift-pop relative z-10 text-[24vmin] leading-none drop-shadow-[0_10px_36px_rgba(0,0,0,0.7)] ${gift.fx === "build" ? "gift-shake" : ""}`}>{gift.emoji}</span>;
     }
   };
 
   return (
     <div
-      className="gift-fade fixed inset-0 z-[90] flex items-center justify-center overflow-hidden"
-      style={{ background: big ? "rgba(3,5,10,0.88)" : "rgba(0,0,0,0.72)", backdropFilter: "blur(4px)" }}
+      className={`gift-fade fixed inset-0 z-[90] flex items-center justify-center overflow-hidden ${leaving ? "gift-exit" : ""}`}
+      style={{ background: big ? "rgba(3,5,10,0.92)" : "rgba(0,0,0,0.62)", backdropFilter: "blur(5px)" }}
       onClick={onDone}
     >
+      <Scene fx={gift.fx} ring={r.ring} />
       {big && <div className="gift-flash pointer-events-none absolute inset-0" style={{ background: `radial-gradient(circle, ${r.ring}, transparent 62%)` }} />}
-
       <div className="pointer-events-none absolute rounded-full" style={{ width: "72vmin", height: "72vmin", background: `radial-gradient(circle, ${r.ring}, transparent 68%)` }} />
 
-      {/* yükselen parçacıklar */}
       {Array.from({ length: PARTS[gift.rarity] }).map((_, i) => {
         const left = 4 + Math.random() * 92;
         const delay = Math.random() * (big ? 1.4 : 0.7);
         const d = 1.8 + Math.random() * (big ? 2.4 : 1.6);
         const size = 12 + Math.random() * (big ? 30 : 20);
+        const sym = gift.fx === "petals" ? "🌸" : "✨";
         return (
-          <span key={i} className="gift-particle pointer-events-none absolute bottom-[-8%] select-none" style={{ left: `${left}%`, animationDelay: `${delay}s`, animationDuration: `${d}s`, fontSize: `${size}px` }}>
-            {Math.random() > 0.5 ? psym : "✨"}
+          <span key={i} className="gift-particle pointer-events-none absolute bottom-[-8%] z-20 select-none" style={{ left: `${left}%`, animationDelay: `${delay}s`, animationDuration: `${d}s`, fontSize: `${size}px` }}>
+            {sym}
           </span>
         );
       })}
 
-      {/* nadirlik banner */}
-      {showBanner && (
-        <div className="gift-banner pointer-events-none absolute top-[13%] flex flex-col items-center">
-          <span className="text-sm font-extrabold uppercase tracking-[0.35em]" style={{ color: r.text }}>✦ {r.label} ✦</span>
-        </div>
-      )}
+      <div className="gift-banner pointer-events-none absolute top-[12%] z-20 flex flex-col items-center">
+        <span className="text-sm font-extrabold uppercase tracking-[0.35em]" style={{ color: r.text }}>✦ {r.label} ✦</span>
+      </div>
 
       <Hero />
 
-      {/* başlık */}
-      <div className="pointer-events-none absolute bottom-[15%] flex flex-col items-center gap-1 px-6 text-center">
-        <p className="font-display text-3xl font-extrabold text-white sm:text-4xl" style={{ textShadow: `0 4px 34px ${r.ring}` }}>{gift.name}</p>
+      <div className="pointer-events-none absolute bottom-[15%] z-20 flex flex-col items-center gap-1 px-6 text-center">
+        <p className="font-display text-3xl font-extrabold text-white sm:text-5xl" style={{ textShadow: `0 4px 34px ${r.ring}` }}>{gift.name}</p>
         <p className="text-sm" style={{ color: r.text }}>
           {fromMe ? "Gönderdin 🎁" : senderName ? `${senderName} sana gönderdi 🎁` : "Sana geldi 🎁"}
         </p>
