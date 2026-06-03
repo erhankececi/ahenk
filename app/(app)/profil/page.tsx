@@ -4,10 +4,10 @@ import { ProfileActions } from "@/components/ProfileActions";
 import VibeVoiceCard from "@/components/VibeVoiceCard";
 import ProfilRetention from "@/components/ProfilRetention";
 import { signPhoto } from "@/lib/storage";
-import { yas } from "@/lib/utils";
+import { yas, uyeNo } from "@/lib/utils";
 import {
   BadgeCheck, Crown, Eye, Shield, Pencil, Zap, Wallet, Heart, Ban, MessageSquare,
-  Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight, Trophy, TrendingUp,
+  Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight, Trophy, TrendingUp, Settings,
 } from "lucide-react";
 import { PremiumBadge, tierFrame, tierName, VipTag, MembershipCard } from "@/components/PremiumBadge";
 import CopyButton from "@/components/CopyButton";
@@ -55,7 +55,7 @@ export default async function Profil() {
     ? new Date(p.created_at).toLocaleDateString("tr-TR", { year: "numeric", month: "long" })
     : null;
   const attrs = [
-    { Icon: Hash, label: "Üye No", value: p?.member_no ? String(p.member_no) : null, copy: p?.member_no ? String(p.member_no) : null },
+    { Icon: Hash, label: "Üye No", value: uyeNo(p?.member_no), copy: uyeNo(p?.member_no) },
     { Icon: Briefcase, label: "Meslek", value: p?.profession || null, copy: null },
     { Icon: MapPin, label: "Şehir", value: p?.city || null, copy: null },
     { Icon: Sparkles, label: "Burç", value: p?.zodiac || null, copy: null },
@@ -205,9 +205,6 @@ export default async function Profil() {
         <Link href="/etkilesimlerim" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Sparkles size={18} className="text-brand" /> Bağlantılarım (eşleşme/beğeni)
         </Link>
-        <Link href="/ziyaretciler" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
-          <Eye size={18} /> Profilimi kimler ziyaret etti
-        </Link>
         <Link href="/cuzdan" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Wallet size={18} className="text-accent" /> Cüzdan & Jeton
         </Link>
@@ -217,20 +214,11 @@ export default async function Profil() {
         <Link href="/topluluk" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <MapPin size={18} className="text-brand" /> Şehir topluluğum
         </Link>
-        <Link href="/analiz" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
-          <TrendingUp size={18} className="text-accent" /> Analiz <span className="ml-auto text-[10px] font-semibold text-accent">Premium+</span>
+        <Link href="/premium" className="flex items-center gap-2 rounded-2xl border border-accent/30 bg-accent/5 px-4 py-3">
+          <Crown size={18} className="text-accent" /> Premium
         </Link>
-        <Link href="/premium" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
-          <Crown size={18} className="text-brand" /> Premium
-        </Link>
-        <Link href="/guvenlik" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
-          <Shield size={18} /> Güvenlik & Topluluk
-        </Link>
-        <Link href="/engellenenler" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
-          <Ban size={18} /> Engellenenler
-        </Link>
-        <Link href="/oneri" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
-          <MessageSquare size={18} /> Öneri / Geri bildirim
+        <Link href="/ayarlar" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
+          <Settings size={18} /> Ayarlar
         </Link>
         {p?.is_admin && (
           <Link href="/admin" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">

@@ -5,6 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Üye numarası — profesyonel format: AHK-0001A (sıralı + tahmin edilmesi zor sağlama harfi). */
+export function uyeNo(n?: number | null): string | null {
+  if (!n || n < 1) return null;
+  const L = "ABCDEFGHJKLMNPRSTUVYZ"; // karışmayan harfler (I/O/Q yok)
+  const check = L[(n * 7 + 11) % L.length];
+  return `AHK-${String(n).padStart(4, "0")}${check}`;
+}
+
 /** İki coğrafi nokta arası mesafe (km) — Haversine. */
 export function distanceKm(
   lat1?: number | null,

@@ -34,13 +34,40 @@ export default function Onboarding() {
   const [files, setFiles] = useState<File[]>([]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.push("/login");
-      else {
-        setUid(data.user.id);
-        setForm((f: any) => ({ ...f, name: data.user!.user_metadata?.name || "" }));
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push("/login"); return; }
+      setUid(user.id);
+      const [{ data: p }, { count: photoCount }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("photos").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      if (!p) { setForm((f: any) => ({ ...f, name: user.user_metadata?.name || "" })); return; }
+      // Mevcut alanları doldur (düzenlemede sıfırdan başlama)
+      setForm((f: any) => ({
+        ...f,
+        name: p.name || user.user_metadata?.name || "",
+        birthdate: p.birthdate || "",
+        gender: p.gender || f.gender,
+        looking_for: p.looking_for?.length ? p.looking_for : f.looking_for,
+        city: p.city || f.city,
+        profession: p.profession || "",
+        bio: p.bio || "",
+        interests: p.interests || [],
+        hobbies: p.hobbies || [],
+        languages: p.languages?.length ? p.languages : f.languages,
+        zodiac: p.zodiac || "",
+        smoking: p.smoking || f.smoking,
+        pets: p.pets || f.pets,
+      }));
+      // Zaten onboarded ise (düzenleme) → İLK EKSİK adıma götür
+      if (p.onboarded) {
+        const nameOk = !!p.name && !!p.birthdate;
+        const interestsOk = (p.interests?.length || 0) > 0;
+        const photoOk = (photoCount || 0) > 0;
+        setStep(!nameOk ? 0 : !interestsOk ? 2 : !photoOk ? 3 : 0);
       }
-    });
+    })();
   }, []);
 
   // Orijinali ifşa etmeyen, küçük + bulanık PUBLIC önizleme üretir (canvas).
