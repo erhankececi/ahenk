@@ -15,6 +15,7 @@ import DiscoveryFilters from "@/components/DiscoveryFilters";
 import DiscoveryRails from "@/components/DiscoveryRails";
 import DiscoveryList from "@/components/DiscoveryList";
 import WelcomeTour from "@/components/WelcomeTour";
+import DailyQuestion from "@/components/DailyQuestion";
 import { PremiumBadge, tierName, tierGlow, tierCard, tierFrame, VipTag } from "@/components/PremiumBadge";
 import { DEFAULT_FILTER, filterToQuery, kmLabel, type DiscoveryFilter } from "@/lib/discoveryFilters";
 
@@ -154,6 +155,12 @@ export default function Kesfet() {
           <SlidersHorizontal size={15} /> Filtre
         </button>
       </header>
+
+      {tab === "profiller" && (
+        <div className="mb-3">
+          <DailyQuestion />
+        </div>
+      )}
 
       {/* İstatistik + aktif filtre rozetleri */}
       {tab === "profiller" && meta && (
