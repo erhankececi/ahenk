@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Card, Skeleton } from "@/components/ui";
-import { Coins, Plus, Minus, ArrowLeft, Crown, Zap } from "lucide-react";
+import { Coins, Plus, Minus, ArrowLeft, Crown, Zap, Banknote, ArrowRight } from "lucide-react";
 
 const PACKAGES = [
   { id: "p100", jeton: 100, price: 29, label: "100 Jeton" },
@@ -129,6 +129,20 @@ export default function Cuzdan() {
           </p>
         )}
       </Card>
+
+      <Link
+        href="/para-cek"
+        className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3"
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/15">
+          <Banknote size={18} className="text-success" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">Para çek</p>
+          <p className="text-xs text-muted">Kazandığın jetonu nakde çevir (1 jeton = ₺0,10)</p>
+        </div>
+        <ArrowRight size={18} className="text-muted" />
+      </Link>
 
       {notice && (
         <p

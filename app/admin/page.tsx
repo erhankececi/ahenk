@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck, Lightbulb } from "lucide-react";
+import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck, Lightbulb, Banknote } from "lucide-react";
 import AdminReportResolve from "@/components/admin/AdminReportResolve";
 import AdminUserActions from "@/components/admin/AdminUserActions";
 import AdminVerifyReview from "@/components/admin/AdminVerifyReview";
 import AdminFeedbackResolve from "@/components/admin/AdminFeedbackResolve";
+import AdminWithdrawAction from "@/components/admin/AdminWithdrawAction";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,7 @@ export default async function Admin() {
     { data: modQueue },
     { data: verifs },
     { data: feedback },
+    { data: withdrawals },
   ] = await Promise.all([
     admin.from("profiles").select("*", { count: "exact", head: true }),
     admin.from("matches").select("*", { count: "exact", head: true }),
@@ -49,6 +51,7 @@ export default async function Admin() {
     admin.from("moderation_queue").select("*").eq("status", "acik").order("created_at", { ascending: false }).limit(10),
     admin.from("profiles").select("id,name,verification_path").eq("verification_status", "pending").limit(15),
     admin.from("feedback").select("id,message,created_at,user_id").eq("handled", false).order("created_at", { ascending: false }).limit(20),
+    admin.from("withdrawals").select("id,user_id,jeton,amount_try,iban,full_name,created_at").eq("status", "pending").order("created_at", { ascending: true }).limit(30),
   ]);
 
   // Doğrulama selfie'leri private 'photos' kovasında → admin için imzalı URL.
@@ -205,6 +208,37 @@ export default async function Admin() {
               {f.user_id ? fbNames.get(f.user_id) || "Bir kullanıcı" : "Silinmiş kullanıcı"} ·{" "}
               {new Date(f.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
             </p>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <Banknote size={18} className="text-success" /> Para çekme talepleri
+        {(withdrawals || []).length > 0 && (
+          <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs text-success">
+            {(withdrawals || []).length}
+          </span>
+        )}
+      </h2>
+      <div className="mb-6 space-y-2">
+        {(withdrawals || []).length === 0 && (
+          <p className="text-sm text-muted">Bekleyen para çekme talebi yok.</p>
+        )}
+        {(withdrawals || []).map((w: any) => (
+          <div key={w.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-semibold text-success">
+                  ₺{w.amount_try} <span className="text-muted">· {w.jeton} jeton</span>
+                </p>
+                <p className="truncate">{w.full_name}</p>
+                <p className="select-all break-all font-mono text-xs text-muted">{w.iban}</p>
+                <p className="t-caption mt-0.5 text-muted">
+                  {new Date(w.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+              <AdminWithdrawAction withdrawId={w.id} />
+            </div>
           </div>
         ))}
       </div>

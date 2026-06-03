@@ -54,6 +54,15 @@ export async function POST(req: Request) {
       .eq("id", body.userId);
     return NextResponse.json({ ok: true });
   }
+  if (action === "process_withdraw" && body.withdrawId && body.status) {
+    const { data, error } = await admin.rpc("process_withdraw", {
+      p_id: body.withdrawId,
+      p_status: body.status, // 'paid' | 'rejected'
+      p_note: body.note ?? null,
+    });
+    if (error) return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
+    return NextResponse.json(data ?? { ok: true });
+  }
   if (action === "delete_user" && body.userId) {
     if (body.userId === user.id) {
       return NextResponse.json({ ok: false, error: "kendini_silemezsin" }, { status: 400 });
