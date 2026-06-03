@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { sendPush } from "@/lib/push";
 
 /**
  * Hediye gönder: gönderenin jetonu düşer, alıcı %70 kazanır (send_gift RPC,
@@ -34,6 +35,19 @@ export async function POST(req: Request) {
       body: `🎁 ${res.label} gönderdi`,
     });
   }
+
+  // Alıcıya bildirim: hediye geldiğini ve kaç jeton kazandığını gör.
+  await admin.from("notifications").insert({
+    user_id: to_user,
+    type: "gift",
+    payload: { from: user.id, label: res.label, earned: res.earned },
+  });
+  await sendPush(to_user, {
+    title: "Sana bir hediye geldi! 🎁",
+    body: `${res.label} aldın — +${res.earned} jeton kazandın.`,
+    url: "/eslesmeler",
+    tag: "gift",
+  });
 
   return NextResponse.json(res);
 }

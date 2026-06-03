@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { TopBar } from "@/components/TopBar";
 import { EmptyState } from "@/components/ui";
 import { zamanFarki } from "@/lib/utils";
-import { Heart, MessageCircle, Eye, Bell } from "lucide-react";
+import { Heart, MessageCircle, Eye, Bell, Gift } from "lucide-react";
 import PushOptIn from "@/components/PushOptIn";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ const META: Record<string, { icon: any; href?: string; label: (p: any) => string
   like: { icon: Heart, href: "/begenenler", label: () => "Biri seni beğendi — kim olduğunu gör" },
   message: { icon: MessageCircle, href: "/eslesmeler", label: () => "Yeni mesajın var" },
   visit: { icon: Eye, href: "/ziyaretciler", label: () => "Profilini biri ziyaret etti" },
+  gift: { icon: Gift, href: "/eslesmeler", label: (p) => `Sana ${p?.label || "bir hediye"} geldi${p?.earned ? ` — +${p.earned} jeton kazandın 🎁` : ""}` },
   system: { icon: Bell, label: (p) => p?.text || "Bildirim" },
 };
 
