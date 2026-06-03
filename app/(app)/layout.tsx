@@ -14,9 +14,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("onboarded, banned")
+    .select("onboarded, banned, deleted_at")
     .eq("id", user.id)
     .single();
+  if (profile?.deleted_at) redirect("/hesap-silindi");
   if (profile?.banned) redirect("/askida");
   if (!profile?.onboarded) redirect("/onboarding");
 

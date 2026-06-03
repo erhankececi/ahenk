@@ -63,6 +63,11 @@ export async function POST(req: Request) {
     if (error) return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
     return NextResponse.json(data ?? { ok: true });
   }
+  if (action === "restore_account" && body.userId) {
+    const { error } = await admin.rpc("restore_account", { p_user: body.userId });
+    if (error) return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
   if (action === "delete_user" && body.userId) {
     if (body.userId === user.id) {
       return NextResponse.json({ ok: false, error: "kendini_silemezsin" }, { status: 400 });

@@ -91,10 +91,10 @@ export function ProfileActions() {
 
             {stage === 1 ? (
               <>
-                <h3 className="t-h4 text-center">Hesabını kalıcı olarak sil</h3>
+                <h3 className="t-h4 text-center">Hesabını sil</h3>
                 <p className="mt-1.5 text-center text-sm text-muted">
-                  Profilin, fotoğrafların, eşleşmelerin, mesajların ve jetonların kalıcı olarak silinir.
-                  Bu işlem <b className="text-text">geri alınamaz</b>.
+                  Hesabın devre dışı kalır ve profilin gizlenir. Verilerin <b className="text-text">korunur</b> —
+                  fikrini değiştirirsen tekrar giriş yapıp <b className="text-text">geri yükleyebilirsin</b>.
                 </p>
                 <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning/10 p-3">
                   <CreditCard size={16} className="mt-0.5 shrink-0 text-warning" />
@@ -151,7 +151,7 @@ export function ProfileActions() {
                     disabled={!onayli || busy}
                     className="flex-1 rounded-full bg-error py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
                   >
-                    {busy ? "Siliniyor…" : "Kalıcı olarak sil"}
+                    {busy ? "Siliniyor…" : "Hesabımı sil"}
                   </button>
                 </div>
               </>
