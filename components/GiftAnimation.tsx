@@ -21,6 +21,14 @@ export default function GiftAnimation({
   onDone: () => void;
 }) {
   const cfg = CFG[gift.category];
+  const VEHICLES = ["sporaraba", "superaraba", "jet", "helikopter", "yat", "superyat", "megayat", "uzay", "dunyaturu"];
+  const FLOWERS = ["gul", "cicek", "buket"];
+  const SPARKLE = ["elmas", "elmasyuzuk", "tac", "kraliyet"];
+  const drive = VEHICLES.includes(gift.key);
+  const flower = FLOWERS.includes(gift.key);
+  const sparkle = SPARKLE.includes(gift.key);
+  const particleSym = flower ? "🌸" : sparkle ? "✨" : gift.emoji;
+
   useEffect(() => {
     const t = setTimeout(onDone, cfg.dur);
     return () => clearTimeout(t);
@@ -41,7 +49,7 @@ export default function GiftAnimation({
         const delay = Math.random() * 0.7;
         const dur = 1.8 + Math.random() * 1.8;
         const size = 12 + Math.random() * 22;
-        const sym = Math.random() > 0.5 ? gift.emoji : "✨";
+        const sym = Math.random() > 0.5 ? particleSym : "✨";
         return (
           <span
             key={i}
@@ -53,9 +61,16 @@ export default function GiftAnimation({
         );
       })}
 
-      <div className="relative flex flex-col items-center gap-3 px-6 text-center">
-        <div className="gift-pop text-[24vmin] leading-none drop-shadow-[0_10px_36px_rgba(0,0,0,0.7)]">
+      {/* Araç hediyeleri: boydan boya uçuş */}
+      {drive && (
+        <div className="gift-drive pointer-events-none absolute text-[18vmin] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.7)]">
           {gift.emoji}
+        </div>
+      )}
+
+      <div className="relative flex flex-col items-center gap-3 px-6 text-center">
+        <div className={`gift-pop text-[24vmin] leading-none drop-shadow-[0_10px_36px_rgba(0,0,0,0.7)] ${sparkle ? "gift-sparkle" : ""}`}>
+          {drive ? "" : gift.emoji}
         </div>
         <p className="font-display text-2xl font-bold text-white">{gift.name}</p>
         {(gift.category === "luxury" || gift.category === "legend") && (

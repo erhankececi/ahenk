@@ -293,6 +293,21 @@ body {
 .gift-particle { animation-name: gift-rise; animation-timing-function: ease-out; animation-fill-mode: both; }
 @keyframes gift-fade { from { opacity: 0; } to { opacity: 1; } }
 .gift-fade { animation: gift-fade 0.25s ease-out both; }
+/* Araç hediyeleri: ekranı boydan boya geçen uçuş/sürüş */
+@keyframes gift-drive {
+  0%   { opacity: 0; transform: translateX(-130%) translateY(0) scale(0.9); }
+  12%  { opacity: 1; }
+  50%  { transform: translateX(0) translateY(-6%) scale(1); }
+  88%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(130%) translateY(0) scale(0.9); }
+}
+.gift-drive { animation: gift-drive 2.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+/* Parıltı (elmas) */
+@keyframes gift-sparkle { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
+.gift-sparkle { animation: gift-sparkle 1.1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .gift-drive, .gift-sparkle { animation-duration: 0.01ms !important; }
+}
 @media (prefers-reduced-motion: reduce) {
   .gift-pop, .gift-particle { animation-duration: 0.01ms !important; }
 }
