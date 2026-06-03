@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Heart, Sparkles, Bookmark, MessageCircle, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Heart, Sparkles, Bookmark, MessageCircle, Plus, X, ImagePlus } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 type Moment = {
   id: string;
@@ -27,7 +28,12 @@ export default function MomentsFeed() {
   const [moments, setMoments] = useState<Moment[]>([]);
   const [composing, setComposing] = useState(false);
   const [text, setText] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [warn, setWarn] = useState("");
   const [loading, setLoading] = useState(true);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const supabase = createClient();
 
   function load() {
     fetch("/api/moments")
@@ -39,14 +45,50 @@ export default function MomentsFeed() {
   }
   useEffect(load, []);
 
-  async function paylas() {
-    if (!text.trim()) return;
-    await fetch("/api/moments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "text", text }),
+  function dosyaSec(selected: File[]) {
+    const ok = selected.filter((f) => {
+      if (f.type.startsWith("video")) return f.size <= 50 * 1024 * 1024;
+      if (f.type.startsWith("image")) return f.size <= 10 * 1024 * 1024;
+      return false;
     });
+    if (ok.length < selected.length) setWarn("Bazı dosyalar atlandı (foto ≤10MB, video ≤50MB).");
+    setFiles((p) => [...p, ...ok].slice(0, 6));
+  }
+
+  async function paylas() {
+    if (uploading) return;
+    if (!files.length && !text.trim()) return;
+    setUploading(true);
+    setWarn("");
+    try {
+      if (files.length) {
+        const { data } = await supabase.auth.getUser();
+        const meId = data.user?.id;
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          const isVid = f.type.startsWith("video");
+          const ext = (f.name.split(".").pop() || (isVid ? "mp4" : "jpg")).toLowerCase();
+          const path = `${meId}/moments/${crypto.randomUUID()}.${ext}`;
+          const { error } = await supabase.storage.from("media").upload(path, f, { contentType: f.type, upsert: false });
+          if (error) continue;
+          await fetch("/api/moments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: isVid ? "video" : "photo", text: i === 0 ? text.trim() || null : null, media_path: path }),
+          });
+        }
+      } else {
+        await fetch("/api/moments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "text", text }),
+        });
+      }
+    } finally {
+      setUploading(false);
+    }
     setText("");
+    setFiles([]);
     setComposing(false);
     load();
   }
@@ -93,18 +135,53 @@ export default function MomentsFeed() {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={3}
-            placeholder="Şu an ne yapıyorsun?"
+            rows={2}
+            placeholder="Bir şeyler yaz… (isteğe bağlı)"
             className="w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand"
           />
-          <div className="mt-2 flex gap-2">
+
+          {files.length > 0 && (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {files.map((f, i) => (
+                <div key={i} className="relative aspect-square overflow-hidden rounded-xl bg-elevated">
+                  {f.type.startsWith("video") ? (
+                    <video src={URL.createObjectURL(f)} className="h-full w-full object-cover" muted />
+                  ) : (
+                    <img src={URL.createObjectURL(f)} alt="" className="h-full w-full object-cover" />
+                  )}
+                  <button
+                    onClick={() => setFiles((p) => p.filter((_, k) => k !== i))}
+                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {warn && <p className="mt-2 text-xs text-brand-2">{warn}</p>}
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            className="hidden"
+            onChange={(e) => { dosyaSec(Array.from(e.target.files || [])); if (fileRef.current) fileRef.current.value = ""; }}
+          />
+          <div className="mt-3 flex items-center gap-2">
+            <button onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-2xl border border-border px-3 py-2.5 text-sm font-medium text-muted">
+              <ImagePlus size={16} /> Foto/Video
+            </button>
             <button
               onClick={paylas}
-              className="brand-gradient flex-1 rounded-2xl py-2.5 text-sm font-semibold text-white"
+              disabled={uploading || (!files.length && !text.trim())}
+              className="brand-gradient flex-1 rounded-2xl py-2.5 text-sm font-semibold text-white disabled:opacity-50"
             >
-              Paylaş
+              {uploading ? "Paylaşılıyor…" : "Paylaş"}
             </button>
-            <button onClick={() => setComposing(false)} className="rounded-2xl px-4 text-muted">
+            <button onClick={() => { setComposing(false); setFiles([]); }} className="rounded-2xl px-4 text-muted">
               <X size={18} />
             </button>
           </div>
