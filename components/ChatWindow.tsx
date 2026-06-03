@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { spamMi } from "@/lib/moderation";
 import {
-  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile,
+  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift,
 } from "lucide-react";
 import { zamanFarki, saat } from "@/lib/utils";
 import { useCall } from "@/components/call/CallProvider";
@@ -23,6 +23,14 @@ const MEDIA_URL = (p: string) =>
   p.startsWith("http")
     ? p
     : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${p}`;
+
+const GIFTS = [
+  { key: "ates", emoji: "🔥", name: "Ateş", cost: 10 },
+  { key: "gul", emoji: "🌹", name: "Gül", cost: 20 },
+  { key: "kalp", emoji: "💖", name: "Kalp", cost: 50 },
+  { key: "elmas", emoji: "💎", name: "Elmas", cost: 150 },
+  { key: "tac", emoji: "👑", name: "Taç", cost: 500 },
+];
 
 export function ChatWindow({
   matchId,
@@ -65,6 +73,7 @@ export function ChatWindow({
   const [otherTyping, setOtherTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recSec, setRecSec] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
@@ -220,6 +229,25 @@ export function ChatWindow({
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  }
+
+  async function hediyeGonder(giftKey: string) {
+    setGiftOpen(false);
+    const res = await fetch("/api/gift", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to_user: otherId, gift: giftKey, matchId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      setWarn(
+        data?.error === "insufficient"
+          ? `Yetersiz jeton — bu hediye ${data.cost} jeton. Cüzdandan jeton alabilirsin.`
+          : "Hediye gönderilemedi, tekrar dene."
+      );
+      return;
+    }
+    // Hediye mesajı realtime ile gelir.
   }
 
   async function gifGonder(url: string) {
@@ -385,6 +413,13 @@ export function ChatWindow({
             <Video size={20} />
           </button>
         )}
+        <button
+          onClick={() => setGiftOpen(true)}
+          aria-label="Hediye gönder"
+          className="text-muted transition hover:text-accent"
+        >
+          <Gift size={20} />
+        </button>
         <SafetyMenu
           meId={meId}
           targetId={otherId}
@@ -566,6 +601,38 @@ export function ChatWindow({
           </>
         )}
       </div>
+
+      {giftOpen && (
+        <div
+          className="animate-fade-in fixed inset-0 z-30 flex items-end bg-black/50"
+          onClick={() => setGiftOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="animate-slide-up w-full rounded-t-3xl border-t border-border bg-surface p-5"
+          >
+            <p className="t-h4 mb-1 flex items-center gap-2">
+              <Gift size={18} className="text-accent" /> Hediye gönder
+            </p>
+            <p className="mb-4 text-xs text-muted">
+              {otherName} bu hediyenin %70'ini jeton olarak kazanır.
+            </p>
+            <div className="grid grid-cols-5 gap-2">
+              {GIFTS.map((g) => (
+                <button
+                  key={g.key}
+                  onClick={() => hediyeGonder(g.key)}
+                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-elevated p-2 transition hover:border-accent active:scale-95"
+                >
+                  <span className="text-2xl">{g.emoji}</span>
+                  <span className="text-[10px] text-muted">{g.name}</span>
+                  <span className="text-[11px] font-semibold text-accent">{g.cost}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {histOpen && (
         <div
