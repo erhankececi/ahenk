@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+// Başlıklar için premium display font — gövdeden ayrı, güçlü hiyerarşi.
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ahenk.live"),
@@ -36,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0F1117",
+  themeColor: "#0B1220",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -45,7 +52,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" className="dark">
-      <body className={inter.variable}>
+      <body className={`${inter.variable} ${manrope.variable}`}>
         <ThemeProvider>
           <div className="min-h-dvh bg-bg">{children}</div>
         </ThemeProvider>

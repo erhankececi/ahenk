@@ -6,18 +6,18 @@
    AHENK — Tasarım Tokenları (renkler RGB kanal olarak, alpha desteği için)
    ===================================================================== */
 :root {
-  /* Yüzeyler (Dark — varsayılan) */
-  --bg: 15 17 23;            /* #0F1117 */
-  --surface: 23 25 35;       /* #171923 */
-  --elevated: 30 33 46;      /* biraz daha açık kart */
-  --border: 39 43 54;        /* #272B36 */
-  --text: 255 255 255;       /* #FFFFFF */
-  --muted: 182 188 200;      /* #B6BCC8 */
+  /* Yüzeyler (Dark — varsayılan) · sinematik premium lacivert */
+  --bg: 11 18 32;            /* #0B1220 derin gece lacivert */
+  --surface: 19 26 43;       /* #131A2B kart yüzeyi */
+  --elevated: 27 37 58;      /* #1B253A yükseltilmiş kart */
+  --border: 35 45 67;        /* #232D43 ince ayraç */
+  --text: 244 246 250;       /* #F4F6FA premium kırık-beyaz */
+  --muted: 140 150 168;      /* #8C96A8 ikincil metin */
 
-  /* Marka */
-  --brand: 108 99 255;       /* #6C63FF primary */
-  --brand-2: 139 133 255;    /* #8B85FF secondary */
-  --accent: 255 125 107;     /* #FF7D6B accent */
+  /* Marka — sıcak terracotta (birincil aksiyon) + champagne gold (premium vurgu) */
+  --brand: 194 111 86;       /* #C26F56 sıcak terracotta */
+  --brand-2: 214 139 111;    /* #D68B6F aynı tonda hafif degrade */
+  --accent: 212 176 106;     /* #D4B06A champagne gold */
 
   /* Durum renkleri */
   --success: 34 197 94;      /* #22C55E */
@@ -26,6 +26,7 @@
 
   /* Tipografi */
   --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Manrope", "Inter", system-ui, sans-serif;
 
   /* Radius ölçeği */
   --radius-sm: 0.5rem;
@@ -45,15 +46,15 @@
 }
 
 .light {
-  --bg: 247 248 251;
+  --bg: 245 246 250;         /* #F5F6FA */
   --surface: 255 255 255;
   --elevated: 255 255 255;
-  --border: 226 229 236;
-  --text: 17 19 27;
-  --muted: 96 104 120;
-  --brand: 108 99 255;
-  --brand-2: 139 133 255;
-  --accent: 255 109 88;
+  --border: 226 230 238;
+  --text: 16 22 36;          /* #101624 derin lacivert metin */
+  --muted: 92 102 122;
+  --brand: 181 95 69;        /* beyazda kontrast için biraz koyu terracotta */
+  --brand-2: 201 120 95;
+  --accent: 173 137 64;      /* beyazda okunur koyu altın */
   --success: 22 163 74;
   --warning: 217 119 6;
   --error: 220 38 38;
@@ -101,22 +102,25 @@ body {
 }
 
 .brand-text {
-  /* Profesyonel görünüm: başlıklar düz renk (beyaz/siyah). Vurgu rengi yalnız
-     butonlarda (brand-gradient) ve etkileşimli ögelerde kullanılır. */
+  /* Profesyonel görünüm: başlıklar düz renk + premium display font.
+     Vurgu rengi yalnız butonlarda (brand-gradient) ve etkileşimli ögelerde. */
   color: rgb(var(--text));
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 .glass {
-  background: rgb(var(--surface) / 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgb(var(--surface) / 0.82);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
 }
 
-/* ---------- Tipografi ölçeği ---------- */
-.t-h1 { font-size: 2rem; line-height: 2.25rem; font-weight: 800; letter-spacing: -0.02em; }
-.t-h2 { font-size: 1.5rem; line-height: 1.875rem; font-weight: 700; letter-spacing: -0.015em; }
-.t-h3 { font-size: 1.25rem; line-height: 1.625rem; font-weight: 700; }
-.t-h4 { font-size: 1.0625rem; line-height: 1.5rem; font-weight: 600; }
+/* ---------- Tipografi ölçeği (başlıklar = Manrope display) ---------- */
+.t-h1, .t-h2, .t-h3, .t-h4 { font-family: var(--font-display); }
+.t-h1 { font-size: 2.125rem; line-height: 2.375rem; font-weight: 800; letter-spacing: -0.025em; }
+.t-h2 { font-size: 1.5rem; line-height: 1.875rem; font-weight: 700; letter-spacing: -0.02em; }
+.t-h3 { font-size: 1.25rem; line-height: 1.625rem; font-weight: 700; letter-spacing: -0.015em; }
+.t-h4 { font-size: 1.0625rem; line-height: 1.5rem; font-weight: 600; letter-spacing: -0.01em; }
 .t-body-lg { font-size: 1.0625rem; line-height: 1.625rem; font-weight: 400; }
 .t-body-md { font-size: 0.9375rem; line-height: 1.5rem; font-weight: 400; }
 .t-body-sm { font-size: 0.8125rem; line-height: 1.25rem; font-weight: 400; }

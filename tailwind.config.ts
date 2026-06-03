@@ -24,6 +24,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-sans)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         md: "0.875rem",
@@ -32,9 +33,11 @@ const config: Config = {
         "3xl": "2rem",
       },
       boxShadow: {
-        glow: "0 0 40px -10px rgb(var(--brand) / 0.55)",
-        card: "0 8px 24px -8px rgb(0 0 0 / 0.4)",
-        float: "0 24px 48px -16px rgb(0 0 0 / 0.55)",
+        // Premium minimal: yumuşak, derin gölgeler — glow sakinleştirildi.
+        glow: "0 0 28px -14px rgb(var(--brand) / 0.32)",
+        card: "0 6px 22px -10px rgb(0 0 0 / 0.5)",
+        float: "0 24px 48px -18px rgb(0 0 0 / 0.62)",
+        soft: "0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.45)",
       },
       transitionDuration: {
         "200": "200ms",
