@@ -35,7 +35,7 @@ import { playSound } from "@/lib/sound";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import GiftStore from "@/components/GiftStore";
 import GiftAnimation from "@/components/GiftAnimation";
-import { giftByName, type Gift as GiftT } from "@/lib/gifts";
+import { giftByName, giftByKey, RARITY, type Gift as GiftT } from "@/lib/gifts";
 import { MEET_KINDS, meetByKey } from "@/lib/meet";
 import { CalendarDays } from "lucide-react";
 import { useCall } from "@/components/call/CallProvider";
@@ -106,7 +106,22 @@ export function ChatWindow({
   const [recording, setRecording] = useState(false);
   const [recSec, setRecSec] = useState(0);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
-  const [giftAnim, setGiftAnim] = useState<{ gift: GiftT; fromMe: boolean } | null>(null);
+  const [giftAnim, setGiftAnim] = useState<{ gift: GiftT; fromMe: boolean; senderName?: string } | null>(null);
+  const giftAnimRef = useRef<any>(null);
+  const giftQ = useRef<any[]>([]);
+  function enqueueGift(item: { gift: GiftT; fromMe: boolean; senderName?: string }) {
+    if (giftAnimRef.current) {
+      giftQ.current.push(item);
+    } else {
+      giftAnimRef.current = item;
+      setGiftAnim(item);
+    }
+  }
+  function giftDone() {
+    const next = giftQ.current.shift() || null;
+    giftAnimRef.current = next;
+    setGiftAnim(next);
+  }
   const [chemistry, setChemistry] = useState(initialChemistry);
   const [met, setMet] = useState({ mine: metByMe, both: metBoth });
   const [meet, setMeet] = useState(meetInit);
@@ -186,12 +201,14 @@ export function ChatWindow({
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const nm = payload.new as Message;
-          // Hediye mesajı → tam ekran sinematik animasyon (iki tarafta da)
+          // Hediye mesajı → tam ekran olay. Kendi gönderdiğim anında (hediyeGonder)
+          // tetiklenir; realtime'da yalnız KARŞI tarafınkini oynat (çift oynatma yok).
           const isGiftMsg = nm.type === "text" && nm.body?.startsWith("🎁");
           if (isGiftMsg) {
-            const g = giftByName(nm.body || "");
-            if (g) setGiftAnim({ gift: g, fromMe: nm.sender_id === meId });
-            playSound("purchase");
+            if (nm.sender_id !== meId) {
+              const g = giftByName(nm.body || "");
+              if (g) enqueueGift({ gift: g, fromMe: false, senderName: otherName });
+            }
           } else if (nm.sender_id !== meId) {
             playSound("message");
           }
@@ -358,7 +375,10 @@ export function ChatWindow({
       );
       return;
     }
-    // Hediye mesajı realtime ile gelir.
+    // Gönderende ANINDA tam ekran olay oynat (realtime echo'su beklenmez;
+    // realtime'da kendi mesajım atlanır → çift oynatma olmaz).
+    const g = giftByKey(giftKey);
+    if (g) enqueueGift({ gift: g, fromMe: true });
   }
 
   async function gifGonder(url: string) {
@@ -617,6 +637,28 @@ export function ChatWindow({
           const mine = m.sender_id === meId;
           const isImg = m.type === "image" && !!m.media_path;
           const isVoice = m.type === "voice" && !!m.media_path;
+
+          // Hediye mesajı → mesaj balonundan AYRI, nadirlik renkli özel kart
+          if (m.type === "text" && m.body?.startsWith("🎁")) {
+            const g = giftByName(m.body);
+            const rr = g ? RARITY[g.rarity] : null;
+            return (
+              <div key={m.id} className="flex flex-col items-center py-1">
+                <div
+                  className="flex items-center gap-2.5 rounded-2xl px-4 py-2"
+                  style={rr ? { background: `linear-gradient(135deg, ${rr.from}, ${rr.to})`, boxShadow: `0 0 0 1px ${rr.ring}, 0 6px 18px -10px ${rr.ring}` } : undefined}
+                >
+                  <span className="text-2xl leading-none">{g?.emoji || "🎁"}</span>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white">{mine ? "Gönderdin" : `${otherName}`}: {g?.name || "Hediye"}</p>
+                    {rr && <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: rr.text }}>{rr.label}</p>}
+                  </div>
+                </div>
+                <span className="mt-0.5 text-[10px] text-muted">{saat(m.created_at)}</span>
+              </div>
+            );
+          }
+
           return (
             <div key={m.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
               <div
@@ -814,7 +856,7 @@ export function ChatWindow({
       )}
 
       {giftAnim && (
-        <GiftAnimation gift={giftAnim.gift} fromMe={giftAnim.fromMe} onDone={() => setGiftAnim(null)} />
+        <GiftAnimation gift={giftAnim.gift} fromMe={giftAnim.fromMe} senderName={giftAnim.senderName} onDone={giftDone} />
       )}
 
       {meetOpen && (

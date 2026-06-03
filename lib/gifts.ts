@@ -1,63 +1,89 @@
-// Ahenk — Hediye kataloğu (tek kaynak). DB gift_catalog seed'i bununla AYNI olmalı
-// (fiyat otoritesi DB'de; send_gift gift_catalog'tan okur). Kategoriler + sinematik
-// animasyon seviyesi (tier) burada tanımlı.
+// Ahenk — Hediye kataloğu (TikTok/Bigo seviyesi). Tek kaynak; DB gift_catalog seed'i
+// bununla AYNI key/cost olmalı (fiyat otoritesi DB; send_gift oradan okur).
+// category + rarity + fx (animasyon) frontend metadata'sıdır.
 
-export type GiftTier = "daily" | "premium" | "luxury" | "legend";
+export type GiftCategory =
+  | "romantik" | "luks" | "vip" | "seyahat" | "kraliyet" | "efsane" | "ozel";
+export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic";
+export type GiftFx =
+  | "petals" | "burst" | "drive" | "fly" | "sea" | "build" | "spin" | "ocean" | "royal" | "rise";
 
 export type Gift = {
   key: string;
   name: string;
   emoji: string;
-  category: GiftTier;
-  cost: number; // jeton
+  category: GiftCategory;
+  cost: number;
+  rarity: Rarity;
+  fx: GiftFx;
+};
+
+export const GIFT_CATEGORIES: { id: GiftCategory; label: string; emoji: string }[] = [
+  { id: "romantik", label: "Romantik", emoji: "❤️" },
+  { id: "luks", label: "Lüks", emoji: "💎" },
+  { id: "vip", label: "VIP", emoji: "🏆" },
+  { id: "seyahat", label: "Seyahat", emoji: "🌍" },
+  { id: "kraliyet", label: "Kraliyet", emoji: "👑" },
+  { id: "efsane", label: "Efsane", emoji: "🚀" },
+  { id: "ozel", label: "Özel", emoji: "🎉" },
+];
+
+export const RARITY: Record<Rarity, { label: string; from: string; to: string; ring: string; text: string }> = {
+  common:    { label: "Common",    from: "#1b2336", to: "#131a2b", ring: "rgba(148,163,184,0.5)", text: "#cbd5e1" },
+  rare:      { label: "Rare",      from: "#0e2a3a", to: "#0b1726", ring: "rgba(56,189,248,0.6)",  text: "#7dd3fc" },
+  epic:      { label: "Epic",      from: "#241433", to: "#160d22", ring: "rgba(168,85,247,0.65)", text: "#d8b4fe" },
+  legendary: { label: "Legendary", from: "#2a2113", to: "#1a1408", ring: "rgba(212,176,106,0.8)", text: "#f6e27a" },
+  mythic:    { label: "Mythic",    from: "#2a0f1a", to: "#1a0a12", ring: "rgba(244,114,128,0.85)",text: "#fda4af" },
 };
 
 export const GIFT_CATALOG: Gift[] = [
-  // ---- Günlük ----
-  { key: "ates", name: "Ateş", emoji: "🔥", category: "daily", cost: 10 },
-  { key: "kahve", name: "Kahve", emoji: "☕", category: "daily", cost: 15 },
-  { key: "gul", name: "Gül", emoji: "🌹", category: "daily", cost: 20 },
-  { key: "tatli", name: "Tatlı", emoji: "🧁", category: "daily", cost: 25 },
-  { key: "cikolata", name: "Çikolata", emoji: "🍫", category: "daily", cost: 30 },
-  { key: "cicek", name: "Çiçek", emoji: "🌷", category: "daily", cost: 35 },
-  { key: "kitap", name: "Kitap", emoji: "📚", category: "daily", cost: 40 },
-  { key: "kalp", name: "Kalp", emoji: "💖", category: "daily", cost: 50 },
+  // ❤️ Romantik
+  { key: "kahve", name: "Kahve", emoji: "☕", category: "romantik", cost: 15, rarity: "common", fx: "rise" },
+  { key: "gul", name: "Gül", emoji: "🌹", category: "romantik", cost: 20, rarity: "common", fx: "petals" },
+  { key: "cikolata", name: "Çikolata", emoji: "🍫", category: "romantik", cost: 30, rarity: "common", fx: "rise" },
+  { key: "pasta", name: "Pasta", emoji: "🎂", category: "romantik", cost: 45, rarity: "common", fx: "rise" },
+  { key: "kalp", name: "Kalp", emoji: "💖", category: "romantik", cost: 60, rarity: "common", fx: "petals" },
+  { key: "pelus", name: "Peluş", emoji: "🧸", category: "romantik", cost: 80, rarity: "common", fx: "rise" },
+  { key: "buket", name: "Buket", emoji: "💐", category: "romantik", cost: 150, rarity: "rare", fx: "petals" },
 
-  // ---- Premium ----
-  { key: "parfum", name: "Parfüm", emoji: "🧴", category: "premium", cost: 150 },
-  { key: "buket", name: "Çiçek Buketi", emoji: "💐", category: "premium", cost: 200 },
-  { key: "yemek", name: "Akşam Yemeği", emoji: "🍽️", category: "premium", cost: 250 },
-  { key: "kolye", name: "Kolye", emoji: "📿", category: "premium", cost: 300 },
-  { key: "taki", name: "Takı Kutusu", emoji: "💍", category: "premium", cost: 350 },
-  { key: "saat", name: "Saat", emoji: "⌚", category: "premium", cost: 450 },
-  { key: "tac", name: "Taç", emoji: "👑", category: "premium", cost: 500 },
-  { key: "vipdavet", name: "VIP Davet", emoji: "🎟️", category: "premium", cost: 600 },
+  // 💎 Lüks
+  { key: "parfum", name: "Parfüm", emoji: "🧴", category: "luks", cost: 200, rarity: "rare", fx: "burst" },
+  { key: "kolye", name: "Kolye", emoji: "📿", category: "luks", cost: 350, rarity: "rare", fx: "burst" },
+  { key: "saat", name: "Saat", emoji: "⌚", category: "luks", cost: 500, rarity: "rare", fx: "burst" },
+  { key: "yuzuk", name: "Yüzük", emoji: "💍", category: "luks", cost: 900, rarity: "rare", fx: "burst" },
+  { key: "elmas", name: "Elmas", emoji: "💎", category: "luks", cost: 1500, rarity: "epic", fx: "burst" },
+  { key: "birkin", name: "Birkin", emoji: "👜", category: "luks", cost: 3000, rarity: "epic", fx: "burst" },
 
-  // ---- Lüks ----
-  { key: "aksamyemegi", name: "Lüks Akşam Yemeği", emoji: "🥂", category: "luxury", cost: 1000 },
-  { key: "elmas", name: "Elmas", emoji: "💎", category: "luxury", cost: 1500 },
-  { key: "elmasyuzuk", name: "Elmas Yüzük", emoji: "💍", category: "luxury", cost: 2500 },
-  { key: "helikopter", name: "Helikopter Turu", emoji: "🚁", category: "luxury", cost: 3000 },
-  { key: "yat", name: "Yat Turu", emoji: "🛥️", category: "luxury", cost: 4000 },
-  { key: "sporaraba", name: "Spor Araba", emoji: "🏎️", category: "luxury", cost: 5000 },
-  { key: "villa", name: "Lüks Villa Tatili", emoji: "🏖️", category: "luxury", cost: 6000 },
-  { key: "superaraba", name: "Süper Araba", emoji: "🚗", category: "luxury", cost: 7000 },
-  { key: "jet", name: "Özel Jet", emoji: "✈️", category: "luxury", cost: 8000 },
+  // 🏆 VIP
+  { key: "vipdavet", name: "VIP Davet", emoji: "🎟️", category: "vip", cost: 700, rarity: "rare", fx: "royal" },
+  { key: "elmasyuzuk", name: "Elmas Yüzük", emoji: "💍", category: "vip", cost: 2500, rarity: "epic", fx: "burst" },
+  { key: "rolex", name: "Rolex", emoji: "⌚", category: "vip", cost: 5000, rarity: "epic", fx: "burst" },
+  { key: "ferrari", name: "Ferrari", emoji: "🏎️", category: "vip", cost: 8000, rarity: "epic", fx: "drive" },
 
-  // ---- Efsane ----
-  { key: "superyat", name: "Süper Yat", emoji: "🛳️", category: "legend", cost: 20000 },
-  { key: "dunyaturu", name: "Dünya Turu", emoji: "🌍", category: "legend", cost: 30000 },
-  { key: "megayat", name: "Mega Yat", emoji: "🚢", category: "legend", cost: 40000 },
-  { key: "ozada", name: "Özel Ada", emoji: "🏝️", category: "legend", cost: 60000 },
-  { key: "kraliyet", name: "Kraliyet Paketi", emoji: "👑", category: "legend", cost: 80000 },
-  { key: "uzay", name: "Uzay Yolculuğu", emoji: "🚀", category: "legend", cost: 100000 },
-];
+  // 🌍 Seyahat
+  { key: "helikopter", name: "Helikopter", emoji: "🚁", category: "seyahat", cost: 3000, rarity: "epic", fx: "fly" },
+  { key: "yat", name: "Yat", emoji: "🛥️", category: "seyahat", cost: 5000, rarity: "epic", fx: "sea" },
+  { key: "villa", name: "Villa Tatili", emoji: "🏖️", category: "seyahat", cost: 7000, rarity: "epic", fx: "ocean" },
+  { key: "jet", name: "Özel Jet", emoji: "✈️", category: "seyahat", cost: 9000, rarity: "epic", fx: "fly" },
 
-export const GIFT_CATEGORIES: { id: GiftTier; label: string }[] = [
-  { id: "daily", label: "Günlük" },
-  { id: "premium", label: "Premium" },
-  { id: "luxury", label: "Lüks" },
-  { id: "legend", label: "Efsane" },
+  // 👑 Kraliyet
+  { key: "tac", name: "Taç", emoji: "👑", category: "kraliyet", cost: 600, rarity: "rare", fx: "royal" },
+  { key: "sato", name: "Şato", emoji: "🏰", category: "kraliyet", cost: 15000, rarity: "legendary", fx: "build" },
+  { key: "kraliyet", name: "Kraliyet Paketi", emoji: "👑", category: "kraliyet", cost: 80000, rarity: "mythic", fx: "royal" },
+
+  // 🚀 Efsane
+  { key: "superaraba", name: "Süper Araba", emoji: "🚗", category: "efsane", cost: 12000, rarity: "legendary", fx: "drive" },
+  { key: "superyat", name: "Süper Yat", emoji: "🛳️", category: "efsane", cost: 20000, rarity: "legendary", fx: "sea" },
+  { key: "dunya", name: "Dünya Turu", emoji: "🌎", category: "efsane", cost: 30000, rarity: "legendary", fx: "spin" },
+  { key: "megayat", name: "Mega Yat", emoji: "🚢", category: "efsane", cost: 40000, rarity: "legendary", fx: "sea" },
+  { key: "ada", name: "Özel Ada", emoji: "🏝️", category: "efsane", cost: 60000, rarity: "mythic", fx: "ocean" },
+  { key: "uzay", name: "Uzay Yolculuğu", emoji: "🚀", category: "efsane", cost: 100000, rarity: "mythic", fx: "fly" },
+
+  // 🎉 Özel
+  { key: "ates", name: "Ateş", emoji: "🔥", category: "ozel", cost: 10, rarity: "common", fx: "rise" },
+  { key: "tatli", name: "Tatlı", emoji: "🧁", category: "ozel", cost: 25, rarity: "common", fx: "rise" },
+  { key: "cicek", name: "Çiçek", emoji: "🌷", category: "ozel", cost: 35, rarity: "common", fx: "petals" },
+  { key: "konfeti", name: "Konfeti", emoji: "🎉", category: "ozel", cost: 100, rarity: "rare", fx: "royal" },
 ];
 
 export const giftByKey = (key: string) => GIFT_CATALOG.find((g) => g.key === key);

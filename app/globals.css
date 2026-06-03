@@ -305,8 +305,44 @@ body {
 /* Parıltı (elmas) */
 @keyframes gift-sparkle { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
 .gift-sparkle { animation: gift-sparkle 1.1s ease-in-out infinite; }
+
+/* Uçuş (jet/uzay/helikopter): sol-alt → sağ-üst çapraz */
+@keyframes gift-fly {
+  0%   { opacity: 0; transform: translate(-120%, 60%) rotate(-8deg) scale(0.8); }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(120%, -60%) rotate(-8deg) scale(1.05); }
+}
+.gift-fly { animation: gift-fly 3s cubic-bezier(0.45,0,0.25,1) both; }
+
+/* Deniz (yat): dalga yükselir, tekne sallanır */
+@keyframes gift-wave-rise { 0% { transform: translateY(100%); } 30% { transform: translateY(40%);} 100% { transform: translateY(30%);} }
+.gift-wave { animation: gift-wave-rise 1.4s ease-out both; }
+@keyframes gift-bob { 0%,100% { transform: translateY(0) rotate(-3deg);} 50% { transform: translateY(-14px) rotate(3deg);} }
+.gift-bob { animation: gift-bob 1.8s ease-in-out infinite; }
+
+/* Dünya: dönen küre */
+@keyframes gift-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.gift-spin { animation: gift-spin 2.4s linear infinite; }
+
+/* Patlama (yüzük/elmas): genişleyen ışık halkaları */
+@keyframes gift-burst { 0% { opacity: 0.9; transform: scale(0.2); } 100% { opacity: 0; transform: scale(3.2); } }
+.gift-burst { animation: gift-burst 1.1s ease-out forwards; }
+
+/* Ekran sarsıntısı (efsane gelişi) */
+@keyframes gift-shake { 0%,100% { transform: translate(0,0);} 20% { transform: translate(-6px,4px);} 40% { transform: translate(5px,-5px);} 60% { transform: translate(-4px,-3px);} 80% { transform: translate(4px,4px);} }
+.gift-shake { animation: gift-shake 0.5s ease-in-out 2; }
+
+/* Tam ekran ışık patlaması (legendary/mythic giriş) */
+@keyframes gift-flash { 0% { opacity: 0;} 20% { opacity: 0.55;} 100% { opacity: 0;} }
+.gift-flash { animation: gift-flash 0.7s ease-out both; }
+
+/* Nadirlik banner kayması */
+@keyframes gift-banner { 0% { opacity: 0; transform: translateY(-12px) scale(0.9);} 100% { opacity: 1; transform: none;} }
+.gift-banner { animation: gift-banner 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .gift-drive, .gift-sparkle { animation-duration: 0.01ms !important; }
+  .gift-drive, .gift-sparkle, .gift-fly, .gift-wave, .gift-bob, .gift-spin, .gift-burst, .gift-shake, .gift-flash { animation-duration: 0.01ms !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gift-pop, .gift-particle { animation-duration: 0.01ms !important; }
