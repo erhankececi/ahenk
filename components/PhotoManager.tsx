@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Plus, Trash2, Loader2 } from "lucide-react";
+import PhotoLightbox from "@/components/PhotoLightbox";
 
 type Photo = {
   id: string;
@@ -19,9 +20,11 @@ export default function PhotoManager({ userId, initial }: { userId: string; init
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [box, setBox] = useState<number | null>(null);
 
   const photos = [...initial].sort((a, b) => a.position - b.position);
   const mainId = photos[0]?.id;
+  const urls = photos.map((p) => p.url).filter(Boolean) as string[];
 
   // Orijinali ifşa etmeyen küçük + bulanık public önizleme (keşifte gösterilir).
   async function blurOnizleme(file: File): Promise<Blob | null> {
@@ -137,7 +140,14 @@ export default function PhotoManager({ userId, initial }: { userId: string; init
       <div className="grid grid-cols-3 gap-2">
         {photos.map((ph) => (
           <div key={ph.id} className="relative aspect-square overflow-hidden rounded-2xl bg-elevated">
-            {ph.url && <img src={ph.url} className="h-full w-full object-cover" alt="" />}
+            {ph.url && (
+              <img
+                src={ph.url}
+                onClick={() => setBox(Math.max(0, urls.indexOf(ph.url!)))}
+                className="h-full w-full cursor-pointer object-cover"
+                alt=""
+              />
+            )}
             {ph.id === mainId && (
               <span className="absolute left-1.5 top-1.5 rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-white">
                 Ana
@@ -186,6 +196,10 @@ export default function PhotoManager({ userId, initial }: { userId: string; init
         }}
       />
       {msg && <p className="mt-2 text-xs text-muted">{msg}</p>}
+
+      {box !== null && urls.length > 0 && (
+        <PhotoLightbox images={urls} startIndex={box} onClose={() => setBox(null)} />
+      )}
     </div>
   );
 }

@@ -90,7 +90,7 @@ export function ChatWindow({
   const supabase = createClient();
   const { start, busy } = useCall();
   const canVoice = myTier !== "free";
-  const canVideo = myTier === "platinum";
+  const canVideo = true; // herkes deneyebilir; kimya<100 ise ücretli (50 jeton), >=100 ücretsiz
   const [messages, setMessages] = useState<Message[]>(initial);
   const [text, setText] = useState("");
   const [warn, setWarn] = useState("");
@@ -120,6 +120,19 @@ export function ChatWindow({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ matchId, action: "propose", kind }),
     });
+  }
+  const videoFree = chemistry >= 100 || myTier === "platinum" || myTier === "legend";
+  async function videoBaslat() {
+    if (!callsUnlocked) { setWarn("Arama biraz sohbet edince açılır 🔓"); return; }
+    if (videoFree) {
+      start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto });
+      return;
+    }
+    if (!confirm("Görüntülü görüşme 50 jeton (kimya %100 olunca ücretsiz). Devam edilsin mi?")) return;
+    const r = await fetch("/api/call/pay-video", { method: "POST" });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto });
+    else setWarn(j.error === "insufficient" ? "Yetersiz jeton — 50 jeton gerekli (Cüzdandan al)." : "Görüşme başlatılamadı.");
   }
   async function bulusmaYanit(action: "accept" | "reject") {
     setMeet((m) => (m ? { ...m, status: action === "accept" ? "kabul" : "red" } : m));
@@ -537,17 +550,16 @@ export function ChatWindow({
         )}
         {canVideo && (
           <button
-            onClick={() =>
-              callsUnlocked
-                ? start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto })
-                : setWarn("Görüntülü arama biraz sohbet edince açılır 🔓")
-            }
+            onClick={videoBaslat}
             disabled={busy}
-            className="text-muted transition hover:text-brand disabled:opacity-40"
+            className="relative text-muted transition hover:text-brand disabled:opacity-40"
             aria-label={callsUnlocked ? "Görüntülü ara" : "Arama kilitli"}
-            title={callsUnlocked ? "Görüntülü ara" : "Biraz sohbet edince açılır"}
+            title={!callsUnlocked ? "Biraz sohbet edince açılır" : videoFree ? "Görüntülü ara (ücretsiz)" : "Görüntülü ara (50 jeton · %100 kimyada ücretsiz)"}
           >
-            {callsUnlocked ? <Video size={20} /> : <Lock size={18} />}
+            {!callsUnlocked ? <Lock size={18} /> : <Video size={20} />}
+            {callsUnlocked && !videoFree && (
+              <span className="absolute -right-1.5 -top-1.5 rounded-full bg-accent px-1 text-[8px] font-bold text-[#0B1220]">50</span>
+            )}
           </button>
         )}
         <button
