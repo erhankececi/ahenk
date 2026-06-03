@@ -19,6 +19,7 @@ import VerifyRequest from "@/components/VerifyRequest";
 import IncognitoToggle from "@/components/IncognitoToggle";
 import PhotoManager from "@/components/PhotoManager";
 import PromptEditor from "@/components/PromptEditor";
+import Achievements from "@/components/Achievements";
 
 export const dynamic = "force-dynamic";
 
@@ -176,6 +177,10 @@ export default async function Profil() {
           ))}
         </div>
       )}
+
+      <div className="mb-6">
+        <Achievements />
+      </div>
 
       <div className="mb-3 space-y-2">
         <Link href="/onboarding" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
