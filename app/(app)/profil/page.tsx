@@ -211,6 +211,9 @@ export default async function Profil() {
         <Link href="/liderlik" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Trophy size={18} className="text-accent" /> Liderlik
         </Link>
+        <Link href="/topluluk" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
+          <MapPin size={18} className="text-brand" /> Şehir topluluğum
+        </Link>
         <Link href="/analiz" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <TrendingUp size={18} className="text-accent" /> Analiz <span className="ml-auto text-[10px] font-semibold text-accent">Premium+</span>
         </Link>
