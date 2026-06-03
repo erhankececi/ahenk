@@ -23,6 +23,7 @@ function mimeExt(mime: string): string {
 }
 import { zamanFarki, saat } from "@/lib/utils";
 import { playSound } from "@/lib/sound";
+import PhotoLightbox from "@/components/PhotoLightbox";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
 import EmojiGifPicker from "@/components/EmojiGifPicker";
@@ -89,6 +90,7 @@ export function ChatWindow({
   const [giftOpen, setGiftOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recSec, setRecSec] = useState(0);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -395,6 +397,14 @@ export function ChatWindow({
     setHistOpen(true);
   }
 
+  function fotoAc(clicked: Message) {
+    const imgs = messages
+      .filter((x) => x.type === "image" && x.media_path)
+      .map((x) => MEDIA_URL(x.media_path!));
+    const url = MEDIA_URL(clicked.media_path!);
+    setLightbox({ images: imgs, index: Math.max(0, imgs.indexOf(url)) });
+  }
+
   const myLast = [...messages].reverse().find((m) => m.sender_id === meId);
   // Arama "sohbet ilerledikçe" açılır: yeterince mesajlaşınca ya da fotoğraf tam açılınca.
   const callsUnlocked = revealLevel >= 100 || messages.length >= 8;
@@ -505,14 +515,13 @@ export function ChatWindow({
                 }`}
               >
                 {isImg ? (
-                  <a href={MEDIA_URL(m.media_path!)} target="_blank" rel="noopener noreferrer">
-                    <img
-                      src={MEDIA_URL(m.media_path!)}
-                      alt="Fotoğraf"
-                      loading="lazy"
-                      className="max-h-72 w-full rounded-xl object-cover"
-                    />
-                  </a>
+                  <img
+                    src={MEDIA_URL(m.media_path!)}
+                    alt="Fotoğraf"
+                    loading="lazy"
+                    onClick={(e) => { e.stopPropagation(); fotoAc(m); }}
+                    className="max-h-72 w-full cursor-pointer rounded-xl object-cover"
+                  />
                 ) : isVoice ? (
                   <audio
                     controls
@@ -739,6 +748,14 @@ export function ChatWindow({
             )}
           </div>
         </div>
+      )}
+
+      {lightbox && (
+        <PhotoLightbox
+          images={lightbox.images}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
       )}
     </div>
   );
