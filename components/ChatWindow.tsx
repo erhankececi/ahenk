@@ -64,6 +64,8 @@ export function ChatWindow({
   otherTier = "free",
   myTheme = "default",
   initialChemistry = 0,
+  metByMe = false,
+  metBoth = false,
 }: {
   matchId: string;
   meId: string;
@@ -77,6 +79,8 @@ export function ChatWindow({
   otherTier?: string;
   myTheme?: string;
   initialChemistry?: number;
+  metByMe?: boolean;
+  metBoth?: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -100,6 +104,21 @@ export function ChatWindow({
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [giftAnim, setGiftAnim] = useState<{ gift: GiftT; fromMe: boolean } | null>(null);
   const [chemistry, setChemistry] = useState(initialChemistry);
+  const [met, setMet] = useState({ mine: metByMe, both: metBoth });
+
+  async function gorustukOnayla() {
+    if (met.mine) return;
+    const r = await fetch("/api/met", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) {
+      setMet({ mine: true, both: !!j.both });
+      setWarn(j.both ? "Görüşüldü olarak işaretlendi ✓" : "Onayın alındı — karşı taraf da onaylayınca rozet açılır.");
+    }
+  }
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -450,6 +469,11 @@ export function ChatWindow({
               {otherName}
             </Link>
             {otherVerified && <BadgeCheck size={16} className="text-brand" />}
+            {met.both && (
+              <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
+                Görüşüldü ✓
+              </span>
+            )}
             <PremiumBadge tier={otherTier} />
             {(otherTier === "platinum" || otherTier === "legend") && <VipTag tier={otherTier} />}
           </p>
@@ -508,7 +532,13 @@ export function ChatWindow({
           meId={meId}
           targetId={otherId}
           onBlocked={() => router.push("/eslesmeler")}
-          extra={[{ label: "Arama geçmişi", onClick: aramaGecmisi }]}
+          extra={[
+            { label: "Arama geçmişi", onClick: aramaGecmisi },
+            {
+              label: met.mine ? "Görüşmeyi onayladın ✓" : "Yüz yüze görüştük",
+              onClick: gorustukOnayla,
+            },
+          ]}
         />
       </header>
 

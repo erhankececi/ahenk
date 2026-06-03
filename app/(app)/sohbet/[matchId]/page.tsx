@@ -59,6 +59,14 @@ export default async function SohbetPage({ params }: { params: { matchId: string
     .eq("match_id", params.matchId)
     .order("created_at");
 
+  // "Yüz yüze görüştük" durumu
+  const { data: metRows } = await supabase
+    .from("met_confirmations")
+    .select("user_id")
+    .eq("match_id", params.matchId);
+  const metByMe = (metRows || []).some((r) => r.user_id === user!.id);
+  const metBoth = (metRows || []).length >= 2;
+
   return (
     <ChatWindow
       matchId={params.matchId}
@@ -73,6 +81,8 @@ export default async function SohbetPage({ params }: { params: { matchId: string
       otherTier={(other?.tier as string) || "free"}
       myTheme={(meProf?.theme as string) || "default"}
       initialChemistry={(match.chemistry_score as number) || 0}
+      metByMe={metByMe}
+      metBoth={metBoth}
     />
   );
 }
