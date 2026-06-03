@@ -23,8 +23,10 @@ export default function VibeVoiceCard({
   );
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [hata, setHata] = useState<string | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const localUrlRef = useRef<string | null>(null);
   const supabase = createClient();
 
   async function secVibe(id: string) {
@@ -45,6 +47,12 @@ export default function VibeVoiceCard({
     rec.onstop = async () => {
       stream.getTracks().forEach((t) => t.stop());
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+      // Anında yerel önizleme — kullanıcı kendi sesini hemen dinleyip tekrar oynatabilir
+      // (yükleme/bucket erişiminden bağımsız, güvenli).
+      if (localUrlRef.current) URL.revokeObjectURL(localUrlRef.current);
+      const localUrl = URL.createObjectURL(blob);
+      localUrlRef.current = localUrl;
+      setVoiceUrl(localUrl);
       await yukle(blob);
     };
     rec.start();
@@ -64,21 +72,31 @@ export default function VibeVoiceCard({
 
   async function yukle(blob: Blob) {
     setBusy(true);
-    const path = `voice/${userId}-${Date.now()}.webm`;
+    setHata(null);
+    // RLS: 'media' kovasında ilk klasör auth.uid() olmalı (s_media_write politikası).
+    // Önceki 'voice/...' yolu bu yüzden reddediliyordu → ses kartı hiç kaydedilmiyordu.
+    const path = `${userId}/voice-${Date.now()}.webm`;
     const { error } = await supabase.storage.from("media").upload(path, blob, {
       contentType: "audio/webm",
       upsert: true,
     });
     if (!error) {
       await supabase.from("profiles").update({ voice_card_path: path }).eq("id", userId);
-      setVoiceUrl(MEDIA_URL(path));
+      // Yerel önizlemeyi koru (anında çalar); kayıtlı yol DB'de — diğerleri remote'tan dinler.
+    } else {
+      setHata("Ses yüklenemedi ama önizlemeyi dinleyebilirsin. Tekrar dene.");
     }
     setBusy(false);
   }
 
   async function sil() {
     await supabase.from("profiles").update({ voice_card_path: null }).eq("id", userId);
+    if (localUrlRef.current) {
+      URL.revokeObjectURL(localUrlRef.current);
+      localUrlRef.current = null;
+    }
     setVoiceUrl(null);
+    setHata(null);
   }
 
   return (
@@ -105,11 +123,16 @@ export default function VibeVoiceCard({
       <div>
         <p className="mb-2 text-sm font-medium text-muted">Sesli tanıtım kartı (30 sn)</p>
         {voiceUrl ? (
-          <div className="flex items-center gap-2">
-            <audio controls src={voiceUrl} className="flex-1" preload="none" />
-            <button onClick={sil} className="rounded-2xl border border-border p-2.5 text-muted">
-              <Trash2 size={18} />
-            </button>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <audio controls src={voiceUrl} className="flex-1" preload="metadata" />
+              <button onClick={sil} aria-label="Sesi sil" className="rounded-2xl border border-border p-2.5 text-muted">
+                <Trash2 size={18} />
+              </button>
+            </div>
+            <p className="text-xs text-muted">
+              {busy ? "Kaydediliyor…" : hata ? hata : "Kendi sesini dinle. Beğenmediysen sil ve tekrar kaydet."}
+            </p>
           </div>
         ) : recording ? (
           <button

@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,14 @@ export default function RegisterPage() {
     e.preventDefault();
     if (!adSoyadGecerli(name)) {
       setErr("Lütfen ad ve soyadını gir (örn. Ahmet Yılmaz).");
+      return;
+    }
+    if (password.length < 6) {
+      setErr("Şifre en az 6 karakter olmalı.");
+      return;
+    }
+    if (password !== password2) {
+      setErr("Şifreler eşleşmiyor. Lütfen aynı şifreyi iki kez gir.");
       return;
     }
     setLoading(true);
@@ -75,6 +84,16 @@ export default function RegisterPage() {
           minLength={6}
           required
         />
+        <PasswordInput
+          placeholder="Şifre (tekrar)"
+          value={password2}
+          onChange={(e) => setPassword2(e.target.value)}
+          minLength={6}
+          required
+        />
+        {password2.length > 0 && password !== password2 && (
+          <p className="text-sm text-warning">Şifreler henüz eşleşmiyor.</p>
+        )}
         {ref && (
           <p className="rounded-2xl bg-brand/10 px-3 py-2 text-sm text-brand">
             🎁 Bir davetle geldin ({ref}) — hesabın 25 jeton hediyeyle başlayacak.

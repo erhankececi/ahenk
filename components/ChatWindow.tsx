@@ -207,7 +207,7 @@ export function ChatWindow({
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `chat/${matchId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${meId}/chat/${matchId}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("media")
         .upload(path, file, { contentType: file.type, upsert: false });
@@ -273,7 +273,7 @@ export function ChatWindow({
   async function sesYukle(blob: Blob) {
     setUploading(true);
     try {
-      const path = `chat/${matchId}/voice-${crypto.randomUUID()}.webm`;
+      const path = `${meId}/chat/${matchId}/voice-${crypto.randomUUID()}.webm`;
       const { error } = await supabase.storage
         .from("media")
         .upload(path, blob, { contentType: "audio/webm", upsert: false });

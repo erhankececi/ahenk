@@ -157,6 +157,10 @@ export default function CallProvider({ children }: { children: ReactNode }) {
         <CallScreen
           state={state}
           vip={myTier === "platinum" || myTier === "legend"}
+          onConnected={() => {
+            const cur = stateRef.current;
+            if (cur.phase === "outgoing") setState({ ...cur, phase: "active" });
+          }}
           onEnd={() => endLocal(state.callId, state.phase === "outgoing" ? "cancelled" : "ended", true)}
         />
       )}
@@ -216,9 +220,21 @@ function IncomingScreen({
   );
 }
 
-function CallScreen({ state, onEnd, vip }: { state: Outgoing | Active; onEnd: () => void; vip?: boolean }) {
+function CallScreen({
+  state,
+  onEnd,
+  onConnected,
+  vip,
+}: {
+  state: Outgoing | Active;
+  onEnd: () => void;
+  onConnected: () => void;
+  vip?: boolean;
+}) {
   const isVideo = state.type === "video";
-  const remoteRef = useRef<HTMLVideoElement>(null);
+  // Görüntülü aramada <video> hem görüntü hem sesi oynatır; sesli aramada ayrı <audio>.
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const localRef = useRef<HTMLVideoElement>(null);
   const [mic, setMic] = useState(true);
   const [cam, setCam] = useState(true);
@@ -226,16 +242,28 @@ function CallScreen({ state, onEnd, vip }: { state: Outgoing | Active; onEnd: ()
   const active = state.phase === "active";
 
   useEffect(() => {
-    state.mgr.onRemote = (s) => {
-      if (remoteRef.current) remoteRef.current.srcObject = s;
+    // Uzak medyayı doğru elemana bağla + autoplay politikasını aşmak için play() çağır.
+    const attach = (s: MediaStream) => {
+      const el = isVideo ? remoteVideoRef.current : remoteAudioRef.current;
+      if (el && el.srcObject !== s) {
+        el.srcObject = s;
+        el.play?.().catch(() => {/* autoplay engeli — kullanıcı etkileşiminde tekrar denenir */});
+      }
+      onConnected();
     };
-    if (state.mgr.remote && remoteRef.current) remoteRef.current.srcObject = state.mgr.remote;
+    state.mgr.onRemote = attach;
+    if (state.mgr.remote) attach(state.mgr.remote);
+
+    // Yerel önizleme (yalnız görüntülü) — stream hazır olunca bağla.
     const t = setInterval(() => {
-      if (state.mgr.local && localRef.current && !localRef.current.srcObject)
+      if (state.mgr.local && localRef.current && !localRef.current.srcObject) {
         localRef.current.srcObject = state.mgr.local;
-    }, 500);
+        localRef.current.play?.().catch(() => {});
+      }
+    }, 400);
     return () => clearInterval(t);
-  }, [state.mgr]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.mgr, isVideo]);
 
   useEffect(() => {
     if (!active) return;
@@ -251,14 +279,16 @@ function CallScreen({ state, onEnd, vip }: { state: Outgoing | Active; onEnd: ()
       {/* Uzak taraf */}
       <div className="relative flex flex-1 items-center justify-center">
         {isVideo ? (
-          <video ref={remoteRef} autoPlay playsInline className="h-full w-full object-cover" />
+          <video ref={remoteVideoRef} autoPlay playsInline className="h-full w-full object-cover" />
         ) : (
-          <div className="flex flex-col items-center gap-4">
-            <Avatar name={state.other.name} size={120} />
-            <p className="text-xl font-bold text-white">{state.other.name}</p>
-          </div>
+          <>
+            <div className="flex flex-col items-center gap-4">
+              <Avatar name={state.other.name} size={120} />
+              <p className="text-xl font-bold text-white">{state.other.name}</p>
+            </div>
+            <audio ref={remoteAudioRef} autoPlay />
+          </>
         )}
-        <audio ref={remoteRef as any} autoPlay hidden={isVideo} />
 
         {/* Yerel önizleme (video) */}
         {isVideo && (
