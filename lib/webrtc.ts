@@ -11,7 +11,11 @@ export type CallSignal =
   | { kind: "end" };
 
 function iceServers(): RTCIceServer[] {
-  const list: RTCIceServer[] = [{ urls: "stun:stun.l.google.com:19302" }];
+  const list: RTCIceServer[] = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+  ];
+  // Özel TURN (env) — production için önerilen (Twilio/Metered ücretli, güvenilir).
   const turn = process.env.NEXT_PUBLIC_TURN_URL;
   if (turn) {
     list.push({
@@ -19,6 +23,14 @@ function iceServers(): RTCIceServer[] {
       username: process.env.NEXT_PUBLIC_TURN_USER,
       credential: process.env.NEXT_PUBLIC_TURN_CRED,
     });
+  } else {
+    // Env yoksa ÜCRETSİZ kamuya açık TURN (Open Relay / Metered) — farklı ağlar
+    // arasında (mobil veri, katı NAT) bağlantıyı mümkün kılar. Best-effort.
+    list.push(
+      { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+      { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+      { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+    );
   }
   return list;
 }
@@ -33,6 +45,8 @@ export class CallManager {
   remote: MediaStream | null = null;
   onRemote?: (s: MediaStream) => void;
   onEnded?: () => void;
+  onFailed?: () => void;
+  onConnected?: () => void;
 
   constructor(
     private supabase: SupabaseClient,
@@ -51,8 +65,14 @@ export class CallManager {
       this.onRemote?.(e.streams[0]);
     };
     pc.onconnectionstatechange = () => {
-      if (["failed", "closed", "disconnected"].includes(pc.connectionState)) {
-        // bağlantı koptu — UI end_call'ı tetikler
+      const st = pc.connectionState;
+      if (st === "connected") this.onConnected?.();
+      // 'failed' = ICE müzakeresi tutmadı (genelde TURN gerekli / ağ engeli).
+      if (st === "failed") this.onFailed?.();
+    };
+    pc.oniceconnectionstatechange = () => {
+      if (pc.iceConnectionState === "failed") {
+        try { pc.restartIce?.(); } catch { /* yoksay */ }
       }
     };
     return pc;

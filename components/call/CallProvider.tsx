@@ -104,6 +104,10 @@ export default function CallProvider({ children }: { children: ReactNode }) {
     if (!r?.ok) return setToast(ERR[r?.error || ""] || "Arama başlatılamadı.");
     const mgr = new CallManager(supabase, r.call_id!, type === "video", callQuality(type));
     mgr.onEnded = () => endLocal(r.call_id!, "ended", false);
+    mgr.onFailed = () => {
+      setToast("Bağlantı kurulamadı — ağ/güvenlik duvarı engeli olabilir. Aynı Wi-Fi'da dene.");
+      endLocal(r.call_id!, "failed", true);
+    };
     mgr.onRemote = () => {
       const cur = stateRef.current;
       if (cur.phase === "outgoing") setState({ ...cur, phase: "active" });
@@ -125,6 +129,10 @@ export default function CallProvider({ children }: { children: ReactNode }) {
     }
     const mgr = new CallManager(supabase, call.callId, call.type === "video", callQuality(call.type));
     mgr.onEnded = () => endLocal(call.callId, "ended", false);
+    mgr.onFailed = () => {
+      setToast("Bağlantı kurulamadı — ağ/güvenlik duvarı engeli olabilir.");
+      endLocal(call.callId, "failed", true);
+    };
     setState({ phase: "active", callId: call.callId, type: call.type, other: call.other, mgr });
     try {
       await mgr.startAsCallee();
