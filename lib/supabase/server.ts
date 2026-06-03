@@ -7,6 +7,7 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: { path: "/", sameSite: "lax", secure: true, maxAge: 60 * 60 * 24 * 400 },
       cookies: {
         getAll() {
           return cookieStore.getAll();

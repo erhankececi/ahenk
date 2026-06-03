@@ -22,6 +22,7 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: { path: "/", sameSite: "lax", secure: true, maxAge: 60 * 60 * 24 * 400 },
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -49,7 +50,10 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    // Yenilenen oturum çerezlerini redirect yanıtına KOPYALA (kaybolmasın).
+    const redirectRes = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((c) => redirectRes.cookies.set(c));
+    return redirectRes;
   }
 
   return response;
