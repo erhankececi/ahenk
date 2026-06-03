@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, MapPin, Check } from "lucide-react";
-import { KM_OPTIONS, type DiscoveryFilter } from "@/lib/discoveryFilters";
+import { KM_OPTIONS, SORT_OPTIONS, type DiscoveryFilter, type SortValue } from "@/lib/discoveryFilters";
 import { CITY_NAMES } from "@/lib/constants";
 
 export default function DiscoveryFilters({
@@ -26,6 +26,7 @@ export default function DiscoveryFilters({
     initial.cities.length ? "select" : "all"
   );
   const [cities, setCities] = useState<string[]>(initial.cities);
+  const [sort, setSort] = useState<SortValue>(initial.sort || "smart");
   const [q, setQ] = useState("");
 
   const km = KM_OPTIONS[kmIdx];
@@ -41,7 +42,7 @@ export default function DiscoveryFilters({
     let cs: string[] = [];
     if (mode === "mine" && myCity) cs = [myCity];
     else if (mode === "select") cs = cities;
-    onApply({ km: km.value, cities: cs });
+    onApply({ km: km.value, cities: cs, sort });
     onClose();
   }
 
@@ -90,6 +91,24 @@ export default function DiscoveryFilters({
               <div className="mt-1 flex justify-between text-[10px] text-muted">
                 <span>5 km</span>
                 <span>Türkiye geneli</span>
+              </div>
+            </div>
+
+            {/* Sıralama */}
+            <div className="mb-6">
+              <p className="mb-2 font-medium">Sıralama</p>
+              <div className="flex flex-wrap gap-2">
+                {SORT_OPTIONS.map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setSort(s.value)}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                      sort === s.value ? "border-brand bg-brand/10 text-brand" : "border-border text-muted"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
               </div>
             </div>
 

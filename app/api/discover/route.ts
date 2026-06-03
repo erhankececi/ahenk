@@ -28,6 +28,9 @@ export async function GET(req: Request) {
     : null;
   const limit = Math.min(60, parseInt(url.searchParams.get("limit") || "40", 10) || 40);
   const offset = Math.max(0, parseInt(url.searchParams.get("offset") || "0", 10) || 0);
+  const sort = url.searchParams.get("sort") || "smart";
+  // 'uyum' SQL'de hesaplanmaz → RPC 'smart', sıralama JS'te (ortak ilgi yüzdesi).
+  const rpcSort = sort === "uyum" ? "smart" : sort;
 
   const admin = createAdminClient();
   const { data: me } = await admin
@@ -44,6 +47,7 @@ export async function GET(req: Request) {
       p_cities: cities,
       p_limit: limit,
       p_offset: offset,
+      p_sort: rpcSort,
     }),
     admin.rpc("discover_count", { p_user: user.id, p_max_km: maxKm, p_cities: cities }),
   ]);
@@ -117,6 +121,11 @@ export async function GET(req: Request) {
       lastActive: p.last_active,
     };
   });
+
+  // 'En uyumlu' sıralaması: boost'lular önde, sonra ortak ilgi yüzdesi.
+  if (sort === "uyum") {
+    candidates.sort((a, b) => Number(b.boosted) - Number(a.boosted) || b.ortakYuzde - a.ortakYuzde);
+  }
 
   const online = candidates.filter((c) => c.online).length;
   const vibeCounts = candidates.reduce((acc, c) => {

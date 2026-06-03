@@ -14,14 +14,25 @@ export function kmLabel(v: string): string {
   return KM_OPTIONS.find((o) => o.value === v)?.label || v;
 }
 
-export type DiscoveryFilter = { km: string; cities: string[] };
+export const SORT_OPTIONS = [
+  { value: "smart", label: "Akıllı" },
+  { value: "near", label: "En yakın" },
+  { value: "active", label: "En aktif" },
+  { value: "new", label: "En yeni" },
+  { value: "uyum", label: "En uyumlu" },
+] as const;
 
-export const DEFAULT_FILTER: DiscoveryFilter = { km: "all", cities: [] };
+export type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+export type DiscoveryFilter = { km: string; cities: string[]; sort: SortValue };
+
+export const DEFAULT_FILTER: DiscoveryFilter = { km: "all", cities: [], sort: "smart" };
 
 /** Filtreyi /api/discover query string'ine çevir. */
 export function filterToQuery(f: DiscoveryFilter): string {
   const p = new URLSearchParams();
   if (f.km && f.km !== "all") p.set("km", f.km);
   if (f.cities.length) p.set("cities", f.cities.join(","));
+  if (f.sort && f.sort !== "smart") p.set("sort", f.sort);
   return p.toString();
 }
