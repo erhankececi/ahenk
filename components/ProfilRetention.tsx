@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Flame, Check, Circle, Gift, Copy, Share2, Coins, Crown, ChevronRight } from "lucide-react";
+import { Flame, Check, Circle, Gift, Copy, Share2, Coins, Crown, ChevronRight, MessageCircle } from "lucide-react";
 import { Card, Skeleton } from "@/components/ui";
 
 type Task = { id: string; label: string; reward: number; done: boolean };
@@ -34,6 +34,11 @@ export default function ProfilRetention() {
     await navigator.clipboard.writeText(metin);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  function whatsappDavet() {
+    const metin = `Ahenk'te tanışalım — önce ruh, sonra yüz 💜 Davet kodum: ${data!.referralCode}\n${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(metin)}`, "_blank");
   }
 
   return (
@@ -148,6 +153,12 @@ export default function ProfilRetention() {
             <Share2 size={16} /> Paylaş
           </button>
         </div>
+        <button
+          onClick={whatsappDavet}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-2.5 text-sm font-semibold text-white transition active:scale-95"
+        >
+          <MessageCircle size={17} /> WhatsApp'tan davet et
+        </button>
         {copied && <p className="mt-2 t-caption text-success">Kopyalandı!</p>}
       </Card>
     </div>
