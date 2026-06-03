@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, MessageCircle, User, CalendarHeart, Sparkles } from "lucide-react";
+import { Compass, MessageCircle, User, CalendarHeart, Sparkles, Film } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/kesfet", icon: Compass, label: "Keşfet" },
-  { href: "/moments", icon: Sparkles, label: "Moments" },
-  { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar" },
+  { href: "/moments", icon: Sparkles, label: "Anlar" },
+  { href: "/reels", icon: Film, label: "Reels" },
+  { href: "/eslesmeler", icon: MessageCircle, label: "Mesaj" },
   { href: "/etkinlikler", icon: CalendarHeart, label: "Etkinlik" },
   { href: "/profil", icon: User, label: "Profil" },
 ];

@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Compass, MessageCircle, User, CalendarHeart, Sparkles, Trophy, Wallet, Crown, Bell,
+  Compass, MessageCircle, User, CalendarHeart, Sparkles, Trophy, Wallet, Crown, Bell, Film,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const primary = [
   { href: "/kesfet", icon: Compass, label: "Keşfet" },
-  { href: "/moments", icon: Sparkles, label: "Moments" },
+  { href: "/moments", icon: Sparkles, label: "Anlar" },
+  { href: "/reels", icon: Film, label: "Reels" },
   { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar", badge: true },
   { href: "/etkinlikler", icon: CalendarHeart, label: "Etkinlikler" },
   { href: "/bildirimler", icon: Bell, label: "Bildirimler" },
