@@ -49,7 +49,7 @@ export function BottomNav() {
   }, [path]);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-border glass">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-border glass lg:hidden">
       <div className="flex items-center justify-around px-2 py-2">
         {items.map(({ href, icon: Icon, label }) => {
           const active = path.startsWith(href);
