@@ -202,6 +202,9 @@ export default async function Profil() {
         <Link href="/begenenler" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Heart size={18} className="text-accent" /> Seni beğenenler
         </Link>
+        <Link href="/etkilesimlerim" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
+          <Sparkles size={18} className="text-brand" /> Bağlantılarım (eşleşme/beğeni)
+        </Link>
         <Link href="/ziyaretciler" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Eye size={18} /> Profilimi kimler ziyaret etti
         </Link>
