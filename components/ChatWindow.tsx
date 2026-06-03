@@ -22,6 +22,7 @@ function mimeExt(mime: string): string {
   return "webm";
 }
 import { zamanFarki, saat } from "@/lib/utils";
+import { playSound } from "@/lib/sound";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
 import EmojiGifPicker from "@/components/EmojiGifPicker";
@@ -118,6 +119,7 @@ export function ChatWindow({
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const nm = payload.new as Message;
+          if (nm.sender_id !== meId) playSound("message");
           setMessages((m) => (m.some((x) => x.id === nm.id) ? m : [...m, nm]));
         }
       )

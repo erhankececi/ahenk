@@ -4,7 +4,9 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { createClient } from "@/lib/supabase/client";
 import { CallManager } from "@/lib/webrtc";
 import { isActivePremium } from "@/lib/plans";
-import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff, Volume2, SwitchCamera, Crown } from "lucide-react";
+import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff, SwitchCamera, Crown } from "lucide-react";
+import { useAudioLevel, SpeakingBars } from "@/components/call/AudioLevel";
+import { playSound } from "@/lib/sound";
 
 type CallType = "voice" | "video";
 type Other = { id: string; name: string; photo?: string | null };
@@ -73,6 +75,7 @@ export default function CallProvider({ children }: { children: ReactNode }) {
           .select("name")
           .eq("id", c.caller_id)
           .single();
+        playSound("call");
         setState({
           phase: "incoming",
           callId: c.id,
@@ -240,134 +243,158 @@ function CallScreen({
   vip?: boolean;
 }) {
   const isVideo = state.type === "video";
-  // Görüntülü aramada <video> hem görüntü hem sesi oynatır; sesli aramada ayrı <audio>.
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const localRef = useRef<HTMLVideoElement>(null);
   const [mic, setMic] = useState(true);
   const [cam, setCam] = useState(true);
   const [seconds, setSeconds] = useState(0);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteMic, setRemoteMic] = useState(true);
+  const [remoteCam, setRemoteCam] = useState(true);
   const active = state.phase === "active";
 
+  // Canlı ses seviyeleri (konuşma animasyonu + "konuşuyor" göstergesi)
+  const localLevel = useAudioLevel(mic ? localStream : null);
+  const remoteLevel = useAudioLevel(remoteStream);
+  const remoteSpeaking = active && remoteMic && remoteLevel > 0.09;
+
   useEffect(() => {
-    // Uzak medyayı doğru elemana bağla + autoplay politikasını aşmak için play() çağır.
     const attach = (s: MediaStream) => {
       const el = isVideo ? remoteVideoRef.current : remoteAudioRef.current;
       if (el && el.srcObject !== s) {
         el.srcObject = s;
-        el.play?.().catch(() => {/* autoplay engeli — kullanıcı etkileşiminde tekrar denenir */});
+        el.play?.().catch(() => {});
       }
+      setRemoteStream(s);
       onConnected();
     };
     state.mgr.onRemote = attach;
+    state.mgr.onState = (m, c) => { setRemoteMic(m); setRemoteCam(c); };
     if (state.mgr.remote) attach(state.mgr.remote);
 
-    // Yerel önizleme (yalnız görüntülü) — stream hazır olunca bağla.
     const t = setInterval(() => {
-      if (state.mgr.local && localRef.current && !localRef.current.srcObject) {
-        localRef.current.srcObject = state.mgr.local;
-        localRef.current.play?.().catch(() => {});
+      if (state.mgr.local) {
+        setLocalStream((cur) => cur || state.mgr.local);
+        if (localRef.current && !localRef.current.srcObject) {
+          localRef.current.srcObject = state.mgr.local;
+          localRef.current.play?.().catch(() => {});
+        }
       }
-    }, 400);
+    }, 300);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.mgr, isVideo]);
 
   useEffect(() => {
     if (!active) return;
+    state.mgr.sendState();
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   const dk = String(Math.floor(seconds / 60)).padStart(2, "0");
   const sn = String(seconds % 60).padStart(2, "0");
+  const statusText = active ? `${dk}:${sn}` : state.phase === "outgoing" ? "Çalıyor…" : "Bağlanıyor…";
+  const ctrl = "flex h-14 w-14 items-center justify-center rounded-full backdrop-blur transition active:scale-95";
+  function toggleMic() { const v = !mic; setMic(v); state.mgr.setMic(v); }
+  function toggleCam() { const v = !cam; setCam(v); state.mgr.setCam(v); }
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-black">
-      {/* Uzak taraf */}
-      <div className="relative flex flex-1 items-center justify-center">
-        {isVideo ? (
-          <video ref={remoteVideoRef} autoPlay playsInline className="h-full w-full object-cover" />
-        ) : (
-          <>
-            <div className="flex flex-col items-center gap-4">
-              <Avatar name={state.other.name} size={120} />
-              <p className="text-xl font-bold text-white">{state.other.name}</p>
-            </div>
-            <audio ref={remoteAudioRef} autoPlay />
-          </>
+    <div className="fixed inset-0 z-[60] flex flex-col bg-gradient-to-b from-[#0B1220] via-[#0a0f1c] to-[#05080f] text-white">
+      {/* ÜST — durum */}
+      <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center gap-1.5 px-6 pt-[max(2.5rem,env(safe-area-inset-top))]">
+        {vip && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-accent/50 bg-black/40 px-2.5 py-0.5 text-[11px] font-semibold text-accent">
+            <Crown size={11} /> VIP · 1080p
+          </span>
         )}
-
-        {/* Yerel önizleme (video) */}
-        {isVideo && (
-          <video
-            ref={localRef}
-            autoPlay
-            playsInline
-            muted
-            className="absolute right-4 top-4 h-40 w-28 rounded-2xl border border-white/20 object-cover"
-          />
-        )}
-
-        {/* Durum / süre */}
-        <div className="absolute left-0 right-0 top-8 flex flex-col items-center gap-1 text-center">
-          {vip && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-[#d4af37]/60 bg-black/60 px-2.5 py-0.5 text-[11px] font-bold text-[#f4e6a1]">
-              <Crown size={11} /> VIP Görüşme · 1080p
-            </span>
-          )}
-          <p className={`text-lg font-semibold ${vip ? "name-premium" : "text-white"}`}>{state.other.name}</p>
-          <p className="text-sm text-white/70">
-            {active ? `${dk}:${sn}` : state.phase === "outgoing" ? "Çalıyor…" : "Bağlanıyor…"}
-          </p>
-        </div>
+        <p className="font-display text-xl font-bold">{state.other.name}</p>
+        <p className="text-sm text-white/55">
+          {isVideo ? "Görüntülü görüşme" : "Sesli görüşme"} · {statusText}
+        </p>
       </div>
 
-      {/* Kontroller */}
-      <div className="flex items-center justify-center gap-4 bg-black/40 px-6 py-8">
+      {/* ORTA */}
+      {isVideo ? (
+        <div className="relative flex-1">
+          <video ref={remoteVideoRef} autoPlay playsInline className="h-full w-full object-cover" />
+          {!remoteCam && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0B1220]">
+              <Avatar name={state.other.name} size={120} />
+            </div>
+          )}
+          {remoteSpeaking && (
+            <div className="absolute left-1/2 top-[max(7rem,calc(env(safe-area-inset-top)+5.5rem))] -translate-x-1/2 text-accent">
+              <SpeakingBars level={remoteLevel} max={20} />
+            </div>
+          )}
+          {!remoteMic && (
+            <div className="absolute left-4 top-[max(2.5rem,env(safe-area-inset-top))] flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-xs">
+              <MicOff size={13} /> Sessizde
+            </div>
+          )}
+          {/* yerel önizleme */}
+          <div className="absolute right-4 top-[max(2.5rem,env(safe-area-inset-top))] h-40 w-28 overflow-hidden rounded-2xl border border-white/15 bg-[#0B1220] shadow-float">
+            <video ref={localRef} autoPlay playsInline muted className={`h-full w-full object-cover ${cam ? "" : "hidden"}`} />
+            {!cam && <div className="flex h-full w-full items-center justify-center"><Avatar name="S" size={52} /></div>}
+            {!mic && <div className="absolute bottom-1 left-1 rounded-full bg-black/60 p-1"><MicOff size={12} /></div>}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col items-center justify-center gap-6">
+          <div className="relative">
+            <div
+              className="absolute -inset-2 rounded-full transition-all duration-100"
+              style={{
+                boxShadow: remoteSpeaking
+                  ? `0 0 ${14 + remoteLevel * 64}px ${remoteLevel * 9}px rgba(212,176,106,${0.22 + remoteLevel * 0.4})`
+                  : "none",
+              }}
+            />
+            <div className="relative"><Avatar name={state.other.name} size={132} /></div>
+          </div>
+          <div className="h-7 text-accent">
+            <SpeakingBars level={remoteLevel} max={28} bars={7} />
+          </div>
+          {!remoteMic && <p className="text-sm text-white/50">Mikrofonunu kapattı</p>}
+          <audio ref={remoteAudioRef} autoPlay />
+        </div>
+      )}
+
+      {/* ALT — kontroller */}
+      <div className="relative z-10 flex items-center justify-center gap-4 px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-6">
         <button
-          onClick={() => {
-            const v = !mic;
-            setMic(v);
-            state.mgr.setMic(v);
-          }}
-          className={`flex h-14 w-14 items-center justify-center rounded-full ${mic ? "bg-white/15 text-white" : "bg-white text-black"}`}
+          onClick={toggleMic}
+          aria-label={mic ? "Mikrofonu kapat" : "Mikrofonu aç"}
+          className={`${ctrl} relative ${mic ? "bg-white/12 text-white" : "bg-white text-[#0B1220]"}`}
         >
           {mic ? <Mic /> : <MicOff />}
+          {mic && active && (
+            <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-accent">
+              <SpeakingBars level={localLevel} max={9} bars={4} />
+            </span>
+          )}
         </button>
 
         {isVideo && (
           <>
             <button
-              onClick={() => {
-                const v = !cam;
-                setCam(v);
-                state.mgr.setCam(v);
-              }}
-              className={`flex h-14 w-14 items-center justify-center rounded-full ${cam ? "bg-white/15 text-white" : "bg-white text-black"}`}
+              onClick={toggleCam}
+              aria-label={cam ? "Kamerayı kapat" : "Kamerayı aç"}
+              className={`${ctrl} ${cam ? "bg-white/12 text-white" : "bg-white text-[#0B1220]"}`}
             >
               {cam ? <Video /> : <VideoOff />}
             </button>
-            <button
-              onClick={() => state.mgr.switchCamera()}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-white/15 text-white"
-            >
+            <button onClick={() => state.mgr.switchCamera()} aria-label="Kamerayı değiştir" className={`${ctrl} bg-white/12 text-white`}>
               <SwitchCamera />
             </button>
           </>
         )}
 
-        {!isVideo && (
-          <button className="flex h-14 w-14 items-center justify-center rounded-full bg-white/15 text-white">
-            <Volume2 />
-          </button>
-        )}
-
-        <button
-          onClick={onEnd}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-error text-white"
-          aria-label="Bitir"
-        >
+        <button onClick={onEnd} aria-label="Görüşmeyi bitir" className={`${ctrl} bg-error text-white`}>
           <PhoneOff />
         </button>
       </div>

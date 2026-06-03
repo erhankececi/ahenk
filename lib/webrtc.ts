@@ -8,6 +8,7 @@ export type CallSignal =
   | { kind: "offer"; sdp: RTCSessionDescriptionInit }
   | { kind: "answer"; sdp: RTCSessionDescriptionInit }
   | { kind: "ice"; candidate: RTCIceCandidateInit }
+  | { kind: "state"; mic: boolean; cam: boolean }
   | { kind: "end" };
 
 function iceServers(): RTCIceServer[] {
@@ -47,6 +48,9 @@ export class CallManager {
   onEnded?: () => void;
   onFailed?: () => void;
   onConnected?: () => void;
+  onState?: (mic: boolean, cam: boolean) => void;
+  private micOn = true;
+  private camOn = true;
 
   constructor(
     private supabase: SupabaseClient,
@@ -146,6 +150,8 @@ export class CallManager {
         await this.applyRemote(s.sdp);
       } else if (s.kind === "ice") {
         await this.addIce(s.candidate);
+      } else if (s.kind === "state") {
+        this.onState?.(s.mic, s.cam);
       } else if (s.kind === "end") {
         this.cleanup();
         this.onEnded?.();
@@ -165,6 +171,8 @@ export class CallManager {
         this.send({ kind: "answer", sdp: ans });
       } else if (s.kind === "ice") {
         await this.addIce(s.candidate);
+      } else if (s.kind === "state") {
+        this.onState?.(s.mic, s.cam);
       } else if (s.kind === "end") {
         this.cleanup();
         this.onEnded?.();
@@ -173,11 +181,19 @@ export class CallManager {
     this.send({ kind: "ready" });
   }
 
+  /** Karşı tarafa mevcut mikrofon/kamera durumunu bildir. */
+  sendState() {
+    this.send({ kind: "state", mic: this.micOn, cam: this.camOn });
+  }
   setMic(on: boolean) {
+    this.micOn = on;
     this.local?.getAudioTracks().forEach((t) => (t.enabled = on));
+    this.sendState();
   }
   setCam(on: boolean) {
+    this.camOn = on;
     this.local?.getVideoTracks().forEach((t) => (t.enabled = on));
+    this.sendState();
   }
 
   /** Ön/arka kamera değiştir (yalnız görüntülü). */
