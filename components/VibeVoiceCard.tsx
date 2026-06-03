@@ -41,12 +41,18 @@ export default function VibeVoiceCard({
 
   async function kaydetBasla() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const rec = new MediaRecorder(stream);
+    // iOS Safari webm SESİ çalamaz → desteklenen formatı seç (öncelik audio/mp4=AAC).
+    const cands = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"];
+    const mime =
+      typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported
+        ? cands.find((c) => MediaRecorder.isTypeSupported(c)) || ""
+        : "";
+    const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
     chunksRef.current = [];
     rec.ondataavailable = (e) => chunksRef.current.push(e.data);
     rec.onstop = async () => {
       stream.getTracks().forEach((t) => t.stop());
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+      const blob = new Blob(chunksRef.current, { type: mime || "audio/webm" });
       // Anında yerel önizleme — kullanıcı kendi sesini hemen dinleyip tekrar oynatabilir
       // (yükleme/bucket erişiminden bağımsız, güvenli).
       if (localUrlRef.current) URL.revokeObjectURL(localUrlRef.current);
@@ -75,9 +81,11 @@ export default function VibeVoiceCard({
     setHata(null);
     // RLS: 'media' kovasında ilk klasör auth.uid() olmalı (s_media_write politikası).
     // Önceki 'voice/...' yolu bu yüzden reddediliyordu → ses kartı hiç kaydedilmiyordu.
-    const path = `${userId}/voice-${Date.now()}.webm`;
+    const mime = blob.type || "audio/webm";
+    const ext = mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : "webm";
+    const path = `${userId}/voice-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("media").upload(path, blob, {
-      contentType: "audio/webm",
+      contentType: mime,
       upsert: true,
     });
     if (!error) {

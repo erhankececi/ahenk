@@ -6,14 +6,26 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { spamMi } from "@/lib/moderation";
 import {
-  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift,
+  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift, Lock,
 } from "lucide-react";
+
+// iOS Safari webm/opus SESİ ÇALAMAZ → kaydederken cihazın desteklediği formatı seç
+// (öncelik audio/mp4 = AAC, iOS dahil her yerde çalar). Yoksa webm'e düş.
+function pickAudioMime(): string {
+  if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) return "";
+  const cands = ["audio/mp4", "audio/aac", "audio/webm;codecs=opus", "audio/webm", "audio/ogg"];
+  return cands.find((c) => MediaRecorder.isTypeSupported(c)) || "";
+}
+function mimeExt(mime: string): string {
+  if (mime.includes("mp4") || mime.includes("aac")) return "m4a";
+  if (mime.includes("ogg")) return "ogg";
+  return "webm";
+}
 import { zamanFarki, saat } from "@/lib/utils";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
 import EmojiGifPicker from "@/components/EmojiGifPicker";
 import { PremiumBadge, tierFrame, tierName, tierBubble, VipTag } from "@/components/PremiumBadge";
-import { themeClass } from "@/lib/themes";
 import type { Message } from "@/lib/types";
 
 const REACTIONS = ["❤️", "😂", "😮", "👍", "🔥"];
@@ -81,6 +93,7 @@ export function ChatWindow({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeRef = useRef<string>("audio/webm");
   const cancelRef = useRef(false);
   const recTimerRef = useRef<any>(null);
   const roomRef = useRef<any>(null);
@@ -190,11 +203,28 @@ export function ChatWindow({
       setWarn("Mesaj gönderilemedi — çok hızlı olabilirsin, biraz bekle.");
       return;
     }
-    if (inserted) setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+    if (inserted) {
+      setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+      pingMesaj();
+    }
+  }
+
+  // Birden çok fotoğrafı sırayla gönder (tek seferde hepsi).
+  async function fotolarGonder(files: File[]) {
+    for (const f of files) await fotoGonder(f);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  // Karşı tarafa "yeni mesaj" push'u (fire-and-forget; sohbeti yavaşlatmaz).
+  function pingMesaj() {
+    fetch("/api/chat/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId }),
+    }).catch(() => {});
   }
 
   async function fotoGonder(file: File) {
-    if (uploading) return;
     if (!file.type.startsWith("image/")) {
       setWarn("Yalnız fotoğraf gönderebilirsin.");
       return;
@@ -224,10 +254,12 @@ export function ChatWindow({
         setWarn("Gönderilemedi — biraz yavaşla ve tekrar dene.");
         return;
       }
-      if (inserted) setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+      if (inserted) {
+        setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+        pingMesaj();
+      }
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
@@ -261,7 +293,10 @@ export function ChatWindow({
       setWarn("Gönderilemedi, tekrar dene.");
       return;
     }
-    if (inserted) setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+    if (inserted) {
+      setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+      pingMesaj();
+    }
   }
 
   function durdurStream() {
@@ -273,10 +308,11 @@ export function ChatWindow({
   async function sesYukle(blob: Blob) {
     setUploading(true);
     try {
-      const path = `${meId}/chat/${matchId}/voice-${crypto.randomUUID()}.webm`;
+      const mime = blob.type || mimeRef.current || "audio/webm";
+      const path = `${meId}/chat/${matchId}/voice-${crypto.randomUUID()}.${mimeExt(mime)}`;
       const { error } = await supabase.storage
         .from("media")
-        .upload(path, blob, { contentType: "audio/webm", upsert: false });
+        .upload(path, blob, { contentType: mime, upsert: false });
       if (error) {
         setWarn("Ses gönderilemedi, tekrar dene.");
         return;
@@ -290,7 +326,10 @@ export function ChatWindow({
         setWarn("Ses gönderilemedi — biraz yavaşla ve tekrar dene.");
         return;
       }
-      if (inserted) setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+      if (inserted) {
+        setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
+        pingMesaj();
+      }
     } finally {
       setUploading(false);
     }
@@ -301,7 +340,9 @@ export function ChatWindow({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      const mr = new MediaRecorder(stream);
+      const mime = pickAudioMime();
+      mimeRef.current = mime || "audio/webm";
+      const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
       chunksRef.current = [];
       cancelRef.current = false;
       mr.ondataavailable = (e) => {
@@ -312,7 +353,7 @@ export function ChatWindow({
         setRecording(false);
         setRecSec(0);
         if (cancelRef.current) return;
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: mimeRef.current });
         if (blob.size > 1200) await sesYukle(blob);
       };
       recorderRef.current = mr;
@@ -353,9 +394,11 @@ export function ChatWindow({
   }
 
   const myLast = [...messages].reverse().find((m) => m.sender_id === meId);
+  // Arama "sohbet ilerledikçe" açılır: yeterince mesajlaşınca ya da fotoğraf tam açılınca.
+  const callsUnlocked = revealLevel >= 100 || messages.length >= 8;
 
   return (
-    <div className={`flex h-dvh flex-col ${themeClass(myTheme)}`}>
+    <div className="flex h-dvh flex-col bg-bg">
       {/* başlık */}
       <header className="flex items-center gap-3 border-b border-border glass px-3 py-3">
         <button onClick={() => router.push("/eslesmeler")} aria-label="Eşleşmelere dön">
@@ -395,22 +438,32 @@ export function ChatWindow({
         </div>
         {canVoice && (
           <button
-            onClick={() => start(matchId, "voice", { id: otherId, name: otherName, photo: otherPhoto })}
+            onClick={() =>
+              callsUnlocked
+                ? start(matchId, "voice", { id: otherId, name: otherName, photo: otherPhoto })
+                : setWarn("Arama biraz sohbet edince açılır 🔓")
+            }
             disabled={busy}
             className="text-muted transition hover:text-brand disabled:opacity-40"
-            aria-label="Sesli ara"
+            aria-label={callsUnlocked ? "Sesli ara" : "Arama kilitli"}
+            title={callsUnlocked ? "Sesli ara" : "Biraz sohbet edince açılır"}
           >
-            <Phone size={20} />
+            {callsUnlocked ? <Phone size={20} /> : <Lock size={18} />}
           </button>
         )}
         {canVideo && (
           <button
-            onClick={() => start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto })}
+            onClick={() =>
+              callsUnlocked
+                ? start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto })
+                : setWarn("Görüntülü arama biraz sohbet edince açılır 🔓")
+            }
             disabled={busy}
             className="text-muted transition hover:text-brand disabled:opacity-40"
-            aria-label="Görüntülü ara"
+            aria-label={callsUnlocked ? "Görüntülü ara" : "Arama kilitli"}
+            title={callsUnlocked ? "Görüntülü ara" : "Biraz sohbet edince açılır"}
           >
-            <Video size={20} />
+            {callsUnlocked ? <Video size={20} /> : <Lock size={18} />}
           </button>
         )}
         <button
@@ -461,7 +514,7 @@ export function ChatWindow({
                 ) : isVoice ? (
                   <audio
                     controls
-                    preload="none"
+                    preload="metadata"
                     src={MEDIA_URL(m.media_path!)}
                     className="h-10 w-56 max-w-full"
                   />
@@ -555,10 +608,11 @@ export function ChatWindow({
               ref={fileRef}
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
               onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) fotoGonder(f);
+                const files = Array.from(e.target.files || []);
+                if (files.length) fotolarGonder(files);
               }}
             />
             <button
