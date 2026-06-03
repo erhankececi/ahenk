@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles, Heart, Send, Search, BadgeCheck, MapPin, Briefcase, X, Zap,
-  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw,
+  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui";
 import StoriesBar from "@/components/StoriesBar";
@@ -41,6 +41,7 @@ export default function Kesfet() {
   const [loading, setLoading] = useState(true);
   const [revealMore, setRevealMore] = useState(false);
   const [matchPop, setMatchPop] = useState<{ name: string; matchId: string; tier?: string } | null>(null);
+  const [superMsg, setSuperMsg] = useState("");
   const [tab, setTab] = useState<"profiller" | "anlar">("profiller");
   const [filter, setFilter] = useState<DiscoveryFilter>(DEFAULT_FILTER);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -77,6 +78,27 @@ export default function Kesfet() {
       body: JSON.stringify({ to_user: current.id, type }),
     });
     const data = await res.json();
+    if (data.matched) setMatchPop({ name: current.name, matchId: data.matchId, tier: current.tier });
+    next();
+  }
+
+  async function superBegen() {
+    if (!current) return;
+    const res = await fetch("/api/interact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to_user: current.id, type: "super" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setSuperMsg(
+        data?.error === "insufficient"
+          ? "Bugünkü ücretsiz süper beğenini kullandın. Bir tane daha için 30 jeton gerekli."
+          : "Süper beğeni gönderilemedi, tekrar dene."
+      );
+      setTimeout(() => setSuperMsg(""), 4500);
+      return;
+    }
     if (data.matched) setMatchPop({ name: current.name, matchId: data.matchId, tier: current.tier });
     next();
   }
@@ -377,7 +399,17 @@ export default function Kesfet() {
             </motion.div>
           </AnimatePresence>
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          {superMsg && (
+            <p className="mt-4 rounded-2xl bg-accent/10 px-3 py-2 text-center text-xs text-accent">{superMsg}</p>
+          )}
+          <button
+            onClick={superBegen}
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent to-brand py-3 text-sm font-semibold text-white shadow-glow transition active:scale-95"
+          >
+            <Star size={18} fill="currentColor" /> Süper Beğen
+            <span className="text-xs font-normal text-white/80">· günde 1 ücretsiz</span>
+          </button>
+          <div className="mt-3 grid grid-cols-2 gap-3">
             {ACTIONS.map(({ type, label, icon: Icon }) => (
               <button
                 key={type}

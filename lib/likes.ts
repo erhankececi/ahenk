@@ -12,6 +12,7 @@ export type IncomingLike = {
   is_verified: boolean | null;
   vibe: string | null;
   type: string;
+  super?: boolean;
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -73,6 +74,14 @@ export async function getIncomingLikes(
     (profs || []).filter((p: any) => p.onboarded).map((p: any) => [p.id as string, p])
   );
 
+  // Süper beğeni gönderenleri işaretle.
+  const { data: supers } = await admin
+    .from("super_likes")
+    .select("from_user")
+    .eq("to_user", meId)
+    .in("from_user", pending);
+  const superSet = new Set<string>((supers || []).map((s: any) => s.from_user as string));
+
   const people: IncomingLike[] = pending
     .filter((id) => byId.has(id))
     .map((id) => {
@@ -86,6 +95,7 @@ export async function getIncomingLikes(
         is_verified: p.is_verified,
         vibe: p.vibe,
         type: typeBy.get(id) || "ilginc",
+        super: superSet.has(id),
       };
     });
 

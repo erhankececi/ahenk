@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 const META: Record<string, { icon: any; href?: string; label: (p: any) => string }> = {
   match: { icon: Heart, href: "/eslesmeler", label: () => "Yeni bir ahenk yakaladın!" },
+  super: { icon: Heart, href: "/begenenler", label: () => "Biri seni ÇOK beğendi 💫 — kim olduğunu gör" },
   like: { icon: Heart, href: "/begenenler", label: () => "Biri seni beğendi — kim olduğunu gör" },
   message: { icon: MessageCircle, href: "/eslesmeler", label: () => "Yeni mesajın var" },
   visit: { icon: Eye, href: "/ziyaretciler", label: () => "Profilini biri ziyaret etti" },

@@ -5,7 +5,7 @@ import { isActivePremium } from "@/lib/plans";
 import { PremiumBadge, tierFrame, tierName } from "@/components/PremiumBadge";
 import LikeBackButton from "@/components/LikeBackButton";
 import BackButton from "@/components/BackButton";
-import { Heart, BadgeCheck, Lock, Crown, Sparkles } from "lucide-react";
+import { Heart, BadgeCheck, Lock, Crown, Sparkles, Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -69,9 +69,15 @@ export default async function Begenenler() {
                   {p.is_verified && <BadgeCheck size={14} className="shrink-0 text-brand" />}
                 </p>
                 <p className="truncate text-xs text-muted">{p.city || "—"}</p>
-                <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
-                  <Heart size={10} fill="currentColor" /> {likeLabel(p.type)}
-                </p>
+                {p.super ? (
+                  <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-accent to-brand px-2 py-0.5 text-[11px] font-semibold text-white">
+                    <Star size={10} fill="currentColor" /> Süper beğeni
+                  </p>
+                ) : (
+                  <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+                    <Heart size={10} fill="currentColor" /> {likeLabel(p.type)}
+                  </p>
+                )}
               </Link>
               {p.tier && p.tier !== "free" && (
                 <div className="mt-1.5 flex justify-center">
