@@ -32,6 +32,7 @@ export async function GET() {
         user_id: s.user_id,
         name: (pMap.get(s.user_id) as any)?.name || "Biri",
         tier: (pMap.get(s.user_id) as any)?.tier || "free",
+        mine: s.user_id === user.id,
         items: [],
       };
     groups[s.user_id].items.push({
@@ -42,7 +43,7 @@ export async function GET() {
     });
   });
 
-  return NextResponse.json({ stories: Object.values(groups) });
+  return NextResponse.json({ stories: Object.values(groups), me: user.id });
 }
 
 export async function POST(request: Request) {
