@@ -70,6 +70,14 @@ export default async function Admin() {
     (fbProfs || []).forEach((p: any) => fbNames.set(p.id, p.name));
   }
 
+  // Moderasyon kuyruğundaki hesapların bilgisi (isim + aksiyon için).
+  const modIds = Array.from(new Set((modQueue || []).map((m) => m.user_id).filter(Boolean)));
+  const modInfo = new Map<string, any>();
+  if (modIds.length) {
+    const { data: mp } = await admin.from("profiles").select("id,name,is_verified,banned").in("id", modIds as string[]);
+    (mp || []).forEach((p: any) => modInfo.set(p.id, p));
+  }
+
   const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
 
   const stats = [
@@ -141,17 +149,28 @@ export default async function Admin() {
         {(modQueue || []).length === 0 && (
           <p className="text-sm text-muted">Bekleyen moderasyon kaydı yok.</p>
         )}
-        {(modQueue || []).map((m) => (
-          <div key={m.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
-            <div className="flex justify-between">
-              <span className="font-medium">Şüpheli hesap</span>
-              <span className="rounded-full bg-elevated px-2 py-0.5 text-xs">risk {m.risk_score ?? "-"}</span>
+        {(modQueue || []).map((m) => {
+          const u = modInfo.get(m.user_id);
+          return (
+            <div key={m.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate font-medium">
+                  {u?.name || "Şüpheli hesap"}
+                  {u?.banned && <span className="ml-1 text-xs text-error">(yasaklı)</span>}
+                </span>
+                <span className="shrink-0 rounded-full bg-elevated px-2 py-0.5 text-xs">risk {m.risk_score ?? "-"}</span>
+              </div>
+              {Array.isArray(m.reasons) && m.reasons.length > 0 && (
+                <p className="mt-1 text-muted">{(m.reasons as string[]).join(", ")}</p>
+              )}
+              {u && (
+                <div className="mt-2 flex justify-end">
+                  <AdminUserActions userId={m.user_id} verified={!!u.is_verified} banned={!!u.banned} />
+                </div>
+              )}
             </div>
-            {Array.isArray(m.reasons) && m.reasons.length > 0 && (
-              <p className="mt-1 text-muted">{(m.reasons as string[]).join(", ")}</p>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <h2 className="mb-2 font-semibold">Son şikayetler</h2>
