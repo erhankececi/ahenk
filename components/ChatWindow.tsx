@@ -6,11 +6,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { spamMi } from "@/lib/moderation";
 import {
-  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock,
+  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile,
 } from "lucide-react";
 import { zamanFarki, saat } from "@/lib/utils";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
+import EmojiGifPicker from "@/components/EmojiGifPicker";
 import { PremiumBadge, tierFrame, tierName, tierBubble, VipTag } from "@/components/PremiumBadge";
 import { themeClass } from "@/lib/themes";
 import type { Message } from "@/lib/types";
@@ -19,7 +20,9 @@ const REACTIONS = ["❤️", "😂", "😮", "👍", "🔥"];
 
 // Sohbet medyası public 'media' kovasında (ses kartı/story ile aynı desen).
 const MEDIA_URL = (p: string) =>
-  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${p}`;
+  p.startsWith("http")
+    ? p
+    : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${p}`;
 
 export function ChatWindow({
   matchId,
@@ -61,6 +64,7 @@ export function ChatWindow({
   const [otherOnline, setOtherOnline] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recSec, setRecSec] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
@@ -216,6 +220,20 @@ export function ChatWindow({
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  }
+
+  async function gifGonder(url: string) {
+    setPickerOpen(false);
+    const { data: inserted, error } = await supabase
+      .from("messages")
+      .insert({ match_id: matchId, sender_id: meId, type: "image", media_path: url })
+      .select()
+      .single();
+    if (error) {
+      setWarn("Gönderilemedi, tekrar dene.");
+      return;
+    }
+    if (inserted) setMessages((m) => (m.some((x) => x.id === inserted.id) ? m : [...m, inserted]));
   }
 
   function durdurStream() {
@@ -463,7 +481,10 @@ export function ChatWindow({
       {warn && <p className="px-4 pb-1 text-xs text-brand-2">{warn}</p>}
 
       {/* giriş */}
-      <div className="flex items-center gap-2 border-t border-border bg-bg p-3">
+      <div className="relative flex items-center gap-2 border-t border-border bg-bg p-3">
+        {pickerOpen && !recording && (
+          <EmojiGifPicker onEmoji={(e) => setText((t) => t + e)} onGif={gifGonder} />
+        )}
         {recording ? (
           <>
             <span className="flex flex-1 items-center gap-2 text-sm">
@@ -513,6 +534,14 @@ export function ChatWindow({
               className="text-muted transition hover:text-brand disabled:opacity-50"
             >
               <ImageIcon />
+            </button>
+            <button
+              onClick={() => setPickerOpen((v) => !v)}
+              title="Emoji / GIF"
+              aria-label="Emoji ve GIF"
+              className={`transition hover:text-brand ${pickerOpen ? "text-brand" : "text-muted"}`}
+            >
+              <Smile />
             </button>
             <input
               value={text}
