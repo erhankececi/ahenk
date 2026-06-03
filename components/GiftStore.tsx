@@ -34,7 +34,7 @@ export default function GiftStore({
     <div className="fixed inset-0 z-40 flex items-end bg-black/60" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="animate-slide-up w-full overflow-hidden rounded-t-3xl border-t border-border bg-surface"
+        className="animate-slide-up flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-border bg-surface"
       >
         <div className="flex items-center justify-between px-5 pt-4">
           <p className="t-h4 flex items-center gap-2">
@@ -53,7 +53,7 @@ export default function GiftStore({
         </div>
         <p className="px-5 pt-0.5 text-xs text-muted">{otherName} hediyenin %70&apos;ini jeton kazanır.</p>
 
-        <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto px-5">
+        <div className="no-scrollbar mt-3 flex shrink-0 gap-2 overflow-x-auto px-5">
           {GIFT_CATEGORIES.map((c) => (
             <button
               key={c.id}
@@ -67,7 +67,7 @@ export default function GiftStore({
           ))}
         </div>
 
-        <div className="grid max-h-[52dvh] grid-cols-3 gap-2.5 overflow-y-auto p-5">
+        <div className="grid flex-1 grid-cols-3 gap-2.5 overflow-y-auto p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {items.map((g) => {
             const afford = balance == null || balance >= g.cost;
             return (

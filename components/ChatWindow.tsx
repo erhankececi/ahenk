@@ -472,13 +472,18 @@ export function ChatWindow({
   const callsUnlocked = revealLevel >= 100 || messages.length >= 8;
 
   return (
-    <div className="flex h-dvh flex-col bg-bg">
+    <div className="flex h-dvh flex-col overflow-x-hidden bg-bg">
       {/* başlık */}
       <header className="flex items-center gap-3 border-b border-border glass px-3 py-3">
         <button onClick={() => router.push("/eslesmeler")} aria-label="Eşleşmelere dön">
           <ArrowLeft />
         </button>
-        <div className={`rounded-full ${tierFrame(otherTier)}`}>
+        <button
+          type="button"
+          onClick={() => otherPhoto && revealLevel >= 100 && setLightbox({ images: [otherPhoto], index: 0 })}
+          className={`rounded-full ${tierFrame(otherTier)}`}
+          aria-label="Profil fotoğrafı"
+        >
           <div className="relative h-10 w-10 overflow-hidden rounded-full bg-elevated">
             {otherPhoto ? (
               <img src={otherPhoto} className="h-full w-full object-cover" style={{ filter: `blur(${blurPx}px)` }} alt="" />
@@ -486,7 +491,7 @@ export function ChatWindow({
               <div className="brand-gradient h-full w-full" />
             )}
           </div>
-        </div>
+        </button>
         <div className="flex-1">
           <p className="flex items-center gap-1.5 font-semibold">
             <Link href={`/u/${otherId}`} className={tierName(otherTier)}>
@@ -604,7 +609,7 @@ export function ChatWindow({
             <div key={m.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
               <div
                 onClick={() => !mine && setReactingTo(reactingTo === m.id ? null : m.id)}
-                className={`relative max-w-[78%] overflow-hidden rounded-2xl text-sm ${
+                className={`relative max-w-[78%] overflow-hidden whitespace-pre-wrap break-words rounded-2xl text-sm ${
                   isImg ? "p-1" : isVoice ? "p-1.5" : "px-4 py-2"
                 } ${
                   mine ? "brand-gradient text-white" : `bg-surface border border-border ${tierBubble(otherTier)}`
