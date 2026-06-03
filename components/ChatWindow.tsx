@@ -24,6 +24,9 @@ function mimeExt(mime: string): string {
 import { zamanFarki, saat } from "@/lib/utils";
 import { playSound } from "@/lib/sound";
 import PhotoLightbox from "@/components/PhotoLightbox";
+import GiftStore from "@/components/GiftStore";
+import GiftAnimation from "@/components/GiftAnimation";
+import { giftByName, type Gift as GiftT } from "@/lib/gifts";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
 import EmojiGifPicker from "@/components/EmojiGifPicker";
@@ -38,13 +41,6 @@ const MEDIA_URL = (p: string) =>
     ? p
     : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${p}`;
 
-const GIFTS = [
-  { key: "ates", emoji: "🔥", name: "Ateş", cost: 10 },
-  { key: "gul", emoji: "🌹", name: "Gül", cost: 20 },
-  { key: "kalp", emoji: "💖", name: "Kalp", cost: 50 },
-  { key: "elmas", emoji: "💎", name: "Elmas", cost: 150 },
-  { key: "tac", emoji: "👑", name: "Taç", cost: 500 },
-];
 
 export function ChatWindow({
   matchId,
@@ -91,6 +87,7 @@ export function ChatWindow({
   const [recording, setRecording] = useState(false);
   const [recSec, setRecSec] = useState(0);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [giftAnim, setGiftAnim] = useState<{ gift: GiftT; fromMe: boolean } | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -121,7 +118,14 @@ export function ChatWindow({
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const nm = payload.new as Message;
-          if (nm.sender_id !== meId) playSound("message");
+          // Hediye mesajı → tam ekran sinematik animasyon (iki tarafta da)
+          if (nm.type === "text" && nm.body?.startsWith("🎁")) {
+            const g = giftByName(nm.body);
+            if (g) setGiftAnim({ gift: g, fromMe: nm.sender_id === meId });
+            playSound("purchase");
+          } else if (nm.sender_id !== meId) {
+            playSound("message");
+          }
           setMessages((m) => (m.some((x) => x.id === nm.id) ? m : [...m, nm]));
         }
       )
@@ -668,35 +672,15 @@ export function ChatWindow({
       </div>
 
       {giftOpen && (
-        <div
-          className="animate-fade-in fixed inset-0 z-30 flex items-end bg-black/50"
-          onClick={() => setGiftOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="animate-slide-up w-full rounded-t-3xl border-t border-border bg-surface p-5"
-          >
-            <p className="t-h4 mb-1 flex items-center gap-2">
-              <Gift size={18} className="text-accent" /> Hediye gönder
-            </p>
-            <p className="mb-4 text-xs text-muted">
-              {otherName} bu hediyenin %70'ini jeton olarak kazanır.
-            </p>
-            <div className="grid grid-cols-5 gap-2">
-              {GIFTS.map((g) => (
-                <button
-                  key={g.key}
-                  onClick={() => hediyeGonder(g.key)}
-                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-elevated p-2 transition hover:border-accent active:scale-95"
-                >
-                  <span className="text-2xl">{g.emoji}</span>
-                  <span className="text-[10px] text-muted">{g.name}</span>
-                  <span className="text-[11px] font-semibold text-accent">{g.cost}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <GiftStore
+          otherName={otherName}
+          onSend={(key) => hediyeGonder(key)}
+          onClose={() => setGiftOpen(false)}
+        />
+      )}
+
+      {giftAnim && (
+        <GiftAnimation gift={giftAnim.gift} fromMe={giftAnim.fromMe} onDone={() => setGiftAnim(null)} />
       )}
 
       {histOpen && (
