@@ -89,10 +89,15 @@ export class CallManager {
   }
 
   private async getMedia() {
-    this.local = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: this.video ? { facingMode: this.facing, ...this.videoRes() } : false,
-    });
+    try {
+      this.local = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: this.video ? { facingMode: this.facing, ...this.videoRes() } : false,
+      });
+    } catch {
+      // Bazı cihazlarda facingMode/çözünürlük kısıtı kamerayı açmaz → sade istekle dene.
+      this.local = await navigator.mediaDevices.getUserMedia({ audio: true, video: this.video });
+    }
     return this.local;
   }
 

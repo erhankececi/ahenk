@@ -89,7 +89,7 @@ export function ChatWindow({
   const router = useRouter();
   const supabase = createClient();
   const { start, busy } = useCall();
-  const canVoice = myTier !== "free";
+  const canVoice = true; // eşleşen herkes sesli arayabilir (v45 ile gating kaldırıldı)
   const canVideo = true; // herkes deneyebilir; kimya<100 ise ücretli (50 jeton), >=100 ücretsiz
   const [messages, setMessages] = useState<Message[]>(initial);
   const [text, setText] = useState("");
