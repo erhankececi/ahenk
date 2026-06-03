@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Eye } from "lucide-react";
+import { Plus, X, Eye, Trash2, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Item = { id: string; type: string; text: string | null; media: string | null };
@@ -25,7 +26,9 @@ export default function StoriesBar() {
   const [text, setText] = useState("");
   const [reacted, setReacted] = useState<string | null>(null);
   const [viewers, setViewers] = useState<{ count: number; viewers: any[] } | null>(null);
+  const [replyText, setReplyText] = useState("");
   const supabase = createClient();
+  const router = useRouter();
 
   function load() {
     fetch("/api/stories")
@@ -60,6 +63,26 @@ export default function StoriesBar() {
     const r = await fetch(`/api/stories/viewers?storyId=${curId}`);
     const d = await r.json().catch(() => ({}));
     if (d.viewers) setViewers({ count: d.count, viewers: d.viewers });
+  }
+
+  async function hikayeSil() {
+    if (!curId || !confirm("Bu hikayeyi silmek istediğine emin misin?")) return;
+    await fetch(`/api/stories?id=${curId}`, { method: "DELETE" });
+    setActive(null);
+    load();
+  }
+
+  async function yanitla() {
+    if (!curId || !replyText.trim()) return;
+    const t = replyText;
+    setReplyText("");
+    const r = await fetch("/api/stories/reply", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ storyId: curId, text: t }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setActive(null);
+    if (j.matchId) router.push(`/sohbet/${j.matchId}`);
+    else if (j.ownerId) router.push(`/u/${j.ownerId}`);
   }
 
   async function paylas() {
@@ -179,27 +202,39 @@ export default function StoriesBar() {
               ))}
             </div>
 
-            {/* Alt: tepki çubuğu (başkasınınki) / izleyenler (kendi) */}
-            <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            {/* Alt: kendi (izleyenler+sil) / başkası (yanıt + emoji) */}
+            <div className="space-y-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {active.mine ? (
-                <button
-                  onClick={izleyenleriAc}
-                  className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white"
-                >
-                  <Eye size={16} /> Görüntüleyenler
-                </button>
-              ) : (
-                <div className="flex items-center justify-center gap-3">
-                  {STORY_EMOJIS.map((e) => (
-                    <button
-                      key={e}
-                      onClick={() => tepkiVer(e)}
-                      className={`text-2xl transition active:scale-125 ${reacted === e ? "scale-125" : reacted ? "opacity-40" : ""}`}
-                    >
-                      {e}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <button onClick={izleyenleriAc} className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white">
+                    <Eye size={16} /> Görüntüleyenler
+                  </button>
+                  <button onClick={hikayeSil} className="rounded-full bg-white/10 p-2.5 text-white" aria-label="Hikayeyi sil">
+                    <Trash2 size={16} />
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center gap-3">
+                    {STORY_EMOJIS.map((e) => (
+                      <button key={e} onClick={() => tepkiVer(e)} className={`text-2xl transition active:scale-125 ${reacted === e ? "scale-125" : reacted ? "opacity-40" : ""}`}>
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={replyText}
+                      onChange={(ev) => setReplyText(ev.target.value)}
+                      onKeyDown={(ev) => ev.key === "Enter" && yanitla()}
+                      placeholder="Hikayeye yanıt yaz…"
+                      className="flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/50"
+                    />
+                    <button onClick={yanitla} disabled={!replyText.trim()} className="rounded-full bg-white p-2.5 text-black disabled:opacity-40" aria-label="Gönder">
+                      <Send size={16} />
+                    </button>
+                  </div>
+                </>
               )}
             </div>
 

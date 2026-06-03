@@ -63,3 +63,14 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(request: Request) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ ok: false }, { status: 401 });
+  const id = new URL(request.url).searchParams.get("id");
+  if (!id) return NextResponse.json({ ok: false }, { status: 400 });
+  const { error } = await supabase.from("stories").delete().eq("id", id).eq("user_id", user.id);
+  if (error) return NextResponse.json({ ok: false }, { status: 400 });
+  return NextResponse.json({ ok: true });
+}
