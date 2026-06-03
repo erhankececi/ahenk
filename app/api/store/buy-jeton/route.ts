@@ -72,5 +72,17 @@ export async function POST(req: Request) {
     p_reason: `${pack.label} (demo satın alma)`,
   });
   if (error) return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
+
+  // Davet komisyonu: bu kullanıcıyı davet eden varsa, alınan jetonun %10'unu kazanır.
+  const { data: me } = await admin.from("profiles").select("referred_by").eq("id", user.id).single();
+  if (me?.referred_by) {
+    await admin.rpc("award_jeton", {
+      p_user: me.referred_by,
+      p_key: `refcom:${crypto.randomUUID()}`,
+      p_amount: Math.floor(pack.jeton * 0.1),
+      p_reason: "Davet komisyonu (davetlin jeton aldı)",
+    });
+  }
+
   return NextResponse.json({ ok: true, demo: true, jeton: pack.jeton, balance });
 }

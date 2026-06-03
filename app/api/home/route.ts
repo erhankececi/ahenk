@@ -33,6 +33,9 @@ export async function GET() {
     { count: momentsToday },
     { count: totalMsgs },
     { count: matchCount },
+    { count: giftToday },
+    { count: promptCount },
+    { count: invitedCount },
   ] = await Promise.all([
     supabase.from("photos").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     supabase
@@ -50,6 +53,13 @@ export async function GET() {
       .from("matches")
       .select("*", { count: "exact", head: true })
       .or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
+    supabase
+      .from("gift_sends")
+      .select("*", { count: "exact", head: true })
+      .eq("from_user", user.id)
+      .gt("created_at", sod),
+    supabase.from("prompt_answers").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("referred_by", user.id),
   ]);
 
   // ---------- streak güncelle ----------
@@ -84,6 +94,9 @@ export async function GET() {
     { id: "ilkmesaj", label: "İlk sohbetini başlat", reward: 30, key: "task:ilkmesaj", done: (totalMsgs ?? 0) > 0 },
     { id: "ilkeslesme", label: "İlk eşleşmeni yap", reward: 75, key: "task:ilkeslesme", done: (matchCount ?? 0) > 0 },
     { id: "seri7", label: "7 gün üst üste gir", reward: 100, key: "task:seri7", done: streak >= 7 },
+    { id: "prompt", label: "Bir soruya yanıt ver (prompt)", reward: 25, key: "task:prompt", done: (promptCount ?? 0) > 0 },
+    { id: "hediye", label: "Bir hediye gönder", reward: 20, key: `task:hediye:${today}`, done: (giftToday ?? 0) > 0 },
+    { id: "davet", label: "Bir arkadaşını davet et", reward: 150, key: "task:davet", done: (invitedCount ?? 0) > 0 },
   ];
 
   // Tamamlanan görevlerin jetonunu ver (server-only RPC, idempotent — aynı key tekrar ödemez).

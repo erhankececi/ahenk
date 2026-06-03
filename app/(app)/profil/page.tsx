@@ -7,7 +7,7 @@ import { signPhoto } from "@/lib/storage";
 import { yas } from "@/lib/utils";
 import {
   BadgeCheck, Crown, Eye, Shield, Pencil, Zap, Wallet, Heart, Ban, MessageSquare,
-  Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight,
+  Hash, Briefcase, MapPin, Languages, Calendar, Sparkles, ChevronRight, Trophy,
 } from "lucide-react";
 import { PremiumBadge, tierFrame, tierName, VipTag, MembershipCard } from "@/components/PremiumBadge";
 import CopyButton from "@/components/CopyButton";
@@ -189,6 +189,9 @@ export default async function Profil() {
         </Link>
         <Link href="/cuzdan" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Wallet size={18} className="text-accent" /> Cüzdan & Jeton
+        </Link>
+        <Link href="/liderlik" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
+          <Trophy size={18} className="text-accent" /> Liderlik
         </Link>
         <Link href="/premium" className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3">
           <Crown size={18} className="text-brand" /> Premium
