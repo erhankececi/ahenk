@@ -64,7 +64,7 @@ export const GIFT_CATALOG: Gift[] = [
   { key: "helikopter", name: "Helikopter", emoji: "🚁", category: "seyahat", cost: 3000, rarity: "epic", fx: "fly" },
   { key: "yat", name: "Yat", emoji: "🛥️", category: "seyahat", cost: 5000, rarity: "epic", fx: "sea" },
   { key: "villa", name: "Villa Tatili", emoji: "🏖️", category: "seyahat", cost: 7000, rarity: "epic", fx: "ocean" },
-  { key: "jet", name: "Özel Jet", emoji: "✈️", category: "seyahat", cost: 9000, rarity: "epic", fx: "fly" },
+  { key: "jet", name: "Özel Jet", emoji: "✈️", category: "seyahat", cost: 9000, rarity: "legendary", fx: "fly" },
 
   // 👑 Kraliyet
   { key: "tac", name: "Taç", emoji: "👑", category: "kraliyet", cost: 600, rarity: "rare", fx: "royal" },
