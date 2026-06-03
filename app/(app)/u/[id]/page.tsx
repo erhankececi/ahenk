@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Hash, Briefcase, MapPin, Sparkles, Languages, BadgeCheck, MessageCircle } from "lucide-react";
 import { PremiumBadge, tierFrame, tierName, VipTag } from "@/components/PremiumBadge";
+import TrustBadge from "@/components/TrustBadge";
 import { themeClass } from "@/lib/themes";
 import UserProfileActions from "@/components/UserProfileActions";
 import BackButton from "@/components/BackButton";
@@ -75,9 +76,18 @@ export default async function UserProfile({ params }: { params: { id: string } }
           </h1>
           {p.is_verified && <BadgeCheck size={20} className="text-brand" />}
         </div>
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           <PremiumBadge tier={tier} />
           {(tier === "platinum" || tier === "legend") && <VipTag tier={tier} />}
+          <TrustBadge
+            compact
+            data={{
+              is_verified: p.is_verified,
+              verification_status: (p as any).verification_status,
+              created_at: (p as any).created_at,
+              behavior_score: (p as any).behavior_score,
+            }}
+          />
         </div>
         {match && (
           <Link

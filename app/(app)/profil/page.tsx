@@ -20,6 +20,7 @@ import IncognitoToggle from "@/components/IncognitoToggle";
 import PhotoManager from "@/components/PhotoManager";
 import PromptEditor from "@/components/PromptEditor";
 import Achievements from "@/components/Achievements";
+import TrustBadge from "@/components/TrustBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,18 @@ export default async function Profil() {
       )}
 
       <ProfileCompletion items={completionItems} />
+
+      <div className="mb-4">
+        <TrustBadge
+          data={{
+            created_at: p?.created_at,
+            is_verified: p?.is_verified,
+            verification_status: p?.verification_status,
+            behavior_score: p?.behavior_score,
+            photoCount: photos?.length || 0,
+          }}
+        />
+      </div>
 
       <VerifyRequest
         userId={user!.id}
