@@ -35,7 +35,7 @@ export async function GET(req: Request) {
   const admin = createAdminClient();
   const { data: me } = await admin
     .from("profiles")
-    .select("interests, hobbies, city")
+    .select("interests, hobbies, city, music, movies")
     .eq("id", user.id)
     .single();
 
@@ -80,9 +80,20 @@ export async function GET(req: Request) {
 
   const now = Date.now();
   const meInt = [...(me?.interests || []), ...(me?.hobbies || [])];
+  const meMusic: string[] = me?.music || [];
+  const meMovies: string[] = me?.movies || [];
 
   const candidates = list.map((p) => {
-    const overlap = overlapPercent(meInt, [...(p.interests || []), ...(p.hobbies || [])]);
+    const candInt = [...(p.interests || []), ...(p.hobbies || [])];
+    const overlap = overlapPercent(meInt, candInt);
+    // "Neden uyumlu?" — somut nedenler (en fazla 3)
+    const reasons: string[] = [];
+    const sharedI = meInt.filter((x: string) => candInt.includes(x));
+    if (sharedI.length) reasons.push(sharedI.length > 1 ? `${sharedI.length} ortak ilgi` : `Ortak ilgi: ${sharedI[0]}`);
+    if (meMusic.some((x) => (p.music || []).includes(x))) reasons.push("Benzer müzik zevki");
+    if (meMovies.some((x) => (p.movies || []).includes(x))) reasons.push("Ortak film/dizi");
+    if (p.same_city && p.city) reasons.push(`Aynı şehir`);
+    if (overlap >= 60) reasons.unshift("Yüksek karakter uyumu");
     const aktifVibe = vibeAktif(p.vibe, p.vibe_at) ? vibeBilgisi(p.vibe) : null;
     const lastMs = p.last_active ? new Date(p.last_active).getTime() : 0;
     const createdAt = createdMap.get(p.id);
@@ -112,6 +123,7 @@ export async function GET(req: Request) {
       vibe: aktifVibe,
       voice_card: p.voice_card_path ? VOICE_URL(p.voice_card_path) : null,
       ortakYuzde: Math.min(100, overlap + Math.min(15, affMap.get(p.id) || 0)),
+      reasons: reasons.slice(0, 3),
       mesafe: p.distance_km,
       sameCity: p.same_city,
       tier,

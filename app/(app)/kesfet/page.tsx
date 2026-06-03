@@ -408,6 +408,19 @@ export default function Kesfet() {
                   </div>
                 </div>
 
+                {current.reasons?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {current.reasons.map((r: string) => (
+                      <span
+                        key={r}
+                        className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent"
+                      >
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 {current.voice_card && (
                   <audio controls src={current.voice_card} className="w-full" preload="none">
                     Sesli tanıtım
