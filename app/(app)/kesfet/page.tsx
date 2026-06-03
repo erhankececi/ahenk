@@ -14,6 +14,7 @@ import MomentsFeed from "@/components/MomentsFeed";
 import DiscoveryFilters from "@/components/DiscoveryFilters";
 import DiscoveryRails from "@/components/DiscoveryRails";
 import DiscoveryList from "@/components/DiscoveryList";
+import WelcomeTour from "@/components/WelcomeTour";
 import { PremiumBadge, tierName, tierGlow, tierCard, tierFrame, VipTag } from "@/components/PremiumBadge";
 import { DEFAULT_FILTER, filterToQuery, kmLabel, type DiscoveryFilter } from "@/lib/discoveryFilters";
 
@@ -139,6 +140,7 @@ export default function Kesfet() {
 
   return (
     <div className="px-4 pt-6">
+      <WelcomeTour />
       <header className="mb-3 flex items-center justify-between">
         <h1 className="text-2xl font-bold brand-text">Keşfet</h1>
         <button
