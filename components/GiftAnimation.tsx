@@ -71,14 +71,12 @@ export default function GiftAnimation({
   // ---- COMMON / RARE: sohbet içi, küçük, backdrop yok ----
   if (mode === "mini") {
     return (
-      <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[80] flex flex-col items-center">
-        {gift.rarity === "rare" && (
-          <span className="absolute bottom-8 h-24 w-24 animate-pulse rounded-full blur-2xl" style={{ background: r.ring }} />
-        )}
-        <span className="gift-float text-6xl leading-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]" style={{ ["--d" as any]: `${dur}ms` }}>
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 top-1/3 z-[80] flex flex-col items-center justify-center">
+        <span className="absolute h-40 w-40 rounded-full blur-3xl" style={{ background: r.ring, opacity: 0.5 }} />
+        <span className="gift-float text-[22vmin] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.55)]" style={{ ["--d" as any]: `${dur}ms` }}>
           {gift.emoji}
         </span>
-        <span className="-mt-1 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">{gift.name}</span>
+        <span className="-mt-2 rounded-full bg-black/60 px-3.5 py-1 text-sm font-semibold text-white">{gift.name}</span>
       </div>
     );
   }

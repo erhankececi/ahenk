@@ -638,9 +638,7 @@ export function ChatWindow({
       {/* mesajlar */}
       <div className="flex-1 space-y-2 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <p className="mt-10 text-center text-sm text-muted">
-            Eşleştiniz! Ortak yönlerinizden konuşmaya başlayın — yazdıkça fotoğraf netleşecek.
-          </p>
+          <p className="mt-10 text-center text-sm text-muted">İlk mesajı sen at 👋</p>
         )}
         {messages.map((m) => {
           const mine = m.sender_id === meId;
