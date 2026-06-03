@@ -17,6 +17,7 @@ import ThemePicker from "@/components/ThemePicker";
 import ProfileCompletion from "@/components/ProfileCompletion";
 import VerifyRequest from "@/components/VerifyRequest";
 import IncognitoToggle from "@/components/IncognitoToggle";
+import PhotoManager from "@/components/PhotoManager";
 
 export const dynamic = "force-dynamic";
 
@@ -29,14 +30,17 @@ export default async function Profil() {
   const { data: p } = await supabase.from("profiles").select("*").eq("id", user!.id).single();
   const { data: photoRows } = await supabase
     .from("photos")
-    .select("path")
+    .select("id, path, preview_path, position")
     .eq("user_id", user!.id)
     .order("position");
 
   // Kendi fotoğrafları private kovada — sahibi imzalı URL ile görür.
   const photos = await Promise.all(
     (photoRows || []).map(async (ph) => ({
-      path: ph.path,
+      id: ph.id as string,
+      path: ph.path as string,
+      preview_path: (ph.preview_path as string) ?? null,
+      position: (ph.position as number) ?? 0,
       url: await signPhoto(supabase, ph.path),
     }))
   );
@@ -148,15 +152,7 @@ export default async function Profil() {
         </div>
       )}
 
-      {photos && photos.length > 0 && (
-        <div className="mb-6 grid grid-cols-3 gap-2">
-          {photos.map((ph) =>
-            ph.url ? (
-              <img key={ph.path} src={ph.url} className="aspect-square rounded-2xl object-cover" alt="" />
-            ) : null
-          )}
-        </div>
-      )}
+      <PhotoManager userId={user!.id} initial={photos} />
 
       <ProfilRetention />
 
