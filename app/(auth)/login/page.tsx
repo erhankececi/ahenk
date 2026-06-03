@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +16,14 @@ export default function LoginPage() {
   const [info, setInfo] = useState("");
   const [needConfirm, setNeedConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Doğrulama linki süresi geçmiş/geçersizse (auth/confirm hata yönlendirmesi)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("dogrulama") === "hata") {
+      setNeedConfirm(true);
+      setErr("Doğrulama bağlantısı geçersiz veya süresi geçmiş. Girişini yapıp yeni bağlantı isteyebilirsin.");
+    }
+  }, []);
 
   async function girisYap(e: React.FormEvent) {
     e.preventDefault();
