@@ -40,6 +40,11 @@ export default async function UserProfile({ params }: { params: { id: string } }
         .maybeSingle()
     : { data: null };
 
+  const { data: promptAnswers } = await supabase
+    .from("prompt_answers")
+    .select("prompt_id, answer, prompt:prompts(text)")
+    .eq("user_id", params.id);
+
   const tier = (p.tier as string) || "free";
   const attrs = [
     { Icon: Hash, label: "Üye No", value: p.member_no ? String(p.member_no) : null },
@@ -104,6 +109,17 @@ export default async function UserProfile({ params }: { params: { id: string } }
       )}
 
       {p.bio && <p className="mt-6 text-sm leading-relaxed text-text/90">{p.bio}</p>}
+
+      {Array.isArray(promptAnswers) && promptAnswers.length > 0 && (
+        <div className="mt-6 space-y-2">
+          {promptAnswers.map((pa: any) => (
+            <div key={pa.prompt_id} className="rounded-2xl border border-border bg-surface p-4">
+              <p className="text-xs font-medium text-brand">{pa.prompt?.text}</p>
+              <p className="mt-1 text-sm leading-relaxed">{pa.answer}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {p.interests?.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">

@@ -18,6 +18,7 @@ import ProfileCompletion from "@/components/ProfileCompletion";
 import VerifyRequest from "@/components/VerifyRequest";
 import IncognitoToggle from "@/components/IncognitoToggle";
 import PhotoManager from "@/components/PhotoManager";
+import PromptEditor from "@/components/PromptEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -153,6 +154,8 @@ export default async function Profil() {
       )}
 
       <PhotoManager userId={user!.id} initial={photos} />
+
+      <PromptEditor userId={user!.id} />
 
       <ProfilRetention />
 
