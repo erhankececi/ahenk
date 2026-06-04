@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isActivePremium } from "@/lib/plans";
 import PushOptIn from "@/components/PushOptIn";
+import SoundToggle from "@/components/SoundToggle";
 import IncognitoToggle from "@/components/IncognitoToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { normalizeLang } from "@/lib/i18n";
@@ -46,8 +47,9 @@ export default async function Ayarlar() {
         <h1 className="font-display text-2xl font-bold">Ayarlar</h1>
       </div>
 
-      <Group title="Bildirimler">
+      <Group title="Bildirimler & Sesler">
         <div className="p-4"><PushOptIn /></div>
+        <SoundToggle />
       </Group>
 
       <Group title="Gizlilik">

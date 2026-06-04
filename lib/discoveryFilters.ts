@@ -24,9 +24,14 @@ export const SORT_OPTIONS = [
 
 export type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
-export type DiscoveryFilter = { km: string; cities: string[]; sort: SortValue };
+export type DiscoveryFilter = {
+  km: string; cities: string[]; sort: SortValue;
+  minAge: number; maxAge: number; verified: boolean;
+};
 
-export const DEFAULT_FILTER: DiscoveryFilter = { km: "all", cities: [], sort: "smart" };
+export const DEFAULT_FILTER: DiscoveryFilter = {
+  km: "all", cities: [], sort: "smart", minAge: 18, maxAge: 60, verified: false,
+};
 
 /** Filtreyi /api/discover query string'ine çevir. */
 export function filterToQuery(f: DiscoveryFilter): string {
@@ -34,5 +39,8 @@ export function filterToQuery(f: DiscoveryFilter): string {
   if (f.km && f.km !== "all") p.set("km", f.km);
   if (f.cities.length) p.set("cities", f.cities.join(","));
   if (f.sort && f.sort !== "smart") p.set("sort", f.sort);
+  if (f.minAge > 18) p.set("minAge", String(f.minAge));
+  if (f.maxAge < 60) p.set("maxAge", String(f.maxAge));
+  if (f.verified) p.set("verified", "1");
   return p.toString();
 }

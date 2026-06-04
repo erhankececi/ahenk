@@ -4,6 +4,18 @@
 
 let ctx: AudioContext | null = null;
 
+// Ses açık/kapalı tercihi (localStorage). Varsayılan açık.
+let soundOn = true;
+if (typeof window !== "undefined") soundOn = localStorage.getItem("ahenk_sound") !== "off";
+export function isSoundOn(): boolean {
+  if (typeof window !== "undefined") return localStorage.getItem("ahenk_sound") !== "off";
+  return soundOn;
+}
+export function setSoundOn(v: boolean) {
+  soundOn = v;
+  if (typeof window !== "undefined") localStorage.setItem("ahenk_sound", v ? "on" : "off");
+}
+
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   try {
@@ -57,6 +69,7 @@ const PRESETS: Record<SoundKind, () => void> = {
 };
 
 export function playSound(kind: SoundKind) {
+  if (!isSoundOn()) return;
   const c = getCtx();
   if (!c) return;
   try {

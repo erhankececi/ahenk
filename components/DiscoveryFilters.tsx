@@ -27,6 +27,9 @@ export default function DiscoveryFilters({
   );
   const [cities, setCities] = useState<string[]>(initial.cities);
   const [sort, setSort] = useState<SortValue>(initial.sort || "smart");
+  const [minAge, setMinAge] = useState(initial.minAge ?? 18);
+  const [maxAge, setMaxAge] = useState(initial.maxAge ?? 60);
+  const [verified, setVerified] = useState(!!initial.verified);
   const [q, setQ] = useState("");
 
   const km = KM_OPTIONS[kmIdx];
@@ -42,7 +45,7 @@ export default function DiscoveryFilters({
     let cs: string[] = [];
     if (mode === "mine" && myCity) cs = [myCity];
     else if (mode === "select") cs = cities;
-    onApply({ km: km.value, cities: cs, sort });
+    onApply({ km: km.value, cities: cs, sort, minAge, maxAge, verified });
     onClose();
   }
 
@@ -93,6 +96,26 @@ export default function DiscoveryFilters({
                 <span>Türkiye geneli</span>
               </div>
             </div>
+
+            {/* Yaş aralığı */}
+            <div className="mb-6">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="font-medium">Yaş</p>
+                <span className="rounded-full bg-brand/15 px-3 py-1 text-sm font-semibold text-brand">{minAge}–{maxAge}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="range" min={18} max={70} value={minAge} onChange={(e) => setMinAge(Math.min(parseInt(e.target.value), maxAge))} className="w-full accent-brand" />
+                <input type="range" min={18} max={70} value={maxAge} onChange={(e) => setMaxAge(Math.max(parseInt(e.target.value), minAge))} className="w-full accent-brand" />
+              </div>
+            </div>
+
+            {/* Doğrulanmış */}
+            <button onClick={() => setVerified((v) => !v)} className="mb-6 flex w-full items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3">
+              <span className="text-sm font-medium">Yalnız doğrulanmış profiller</span>
+              <span className={`relative h-6 w-11 rounded-full transition ${verified ? "bg-brand" : "bg-border"}`}>
+                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${verified ? "left-[22px]" : "left-0.5"}`} />
+              </span>
+            </button>
 
             {/* Sıralama */}
             <div className="mb-6">

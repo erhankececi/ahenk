@@ -31,6 +31,9 @@ export async function GET(req: Request) {
   const sort = url.searchParams.get("sort") || "smart";
   // 'uyum' SQL'de hesaplanmaz → RPC 'smart', sıralama JS'te (ortak ilgi yüzdesi).
   const rpcSort = sort === "uyum" ? "smart" : sort;
+  const minAge = url.searchParams.get("minAge") ? parseInt(url.searchParams.get("minAge")!, 10) : null;
+  const maxAge = url.searchParams.get("maxAge") ? parseInt(url.searchParams.get("maxAge")!, 10) : null;
+  const verified = url.searchParams.get("verified") === "1";
 
   const admin = createAdminClient();
   const { data: me } = await admin
@@ -48,6 +51,9 @@ export async function GET(req: Request) {
       p_limit: limit,
       p_offset: offset,
       p_sort: rpcSort,
+      p_min_age: minAge,
+      p_max_age: maxAge,
+      p_verified: verified,
     }),
     admin.rpc("discover_count", { p_user: user.id, p_max_km: maxKm, p_cities: cities }),
   ]);
