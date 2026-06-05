@@ -77,7 +77,7 @@ export default async function Profil() {
     <div className={`min-h-dvh px-4 pb-8 pt-6 ${themeClass(p?.theme)}`}>
       <div className={`mb-6 flex items-center gap-4 ${premiumActive ? "lux-enter" : ""}`}>
         <div className={`rounded-3xl ${tierFrame(tier)}`}>
-          <div className="relative h-20 w-20 overflow-hidden rounded-3xl bg-elevated">
+          <div className="relative h-24 w-24 overflow-hidden rounded-3xl bg-elevated">
             {photos?.[0]?.url ? (
               <img src={photos[0].url} className="h-full w-full object-cover" alt="" />
             ) : (
@@ -87,8 +87,8 @@ export default async function Profil() {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className={`text-2xl font-bold ${tierName(tier)}`}>{p?.name}</h1>
-            {p?.is_verified && <BadgeCheck className="text-brand" size={20} />}
+            <h1 className={`font-display text-[26px] font-bold tracking-tight ${tierName(tier)}`}>{p?.name}</h1>
+            {p?.is_verified && <BadgeCheck className="text-sky-400" size={20} />}
           </div>
           <p className="text-muted">
             {yas(p?.birthdate) ? `${yas(p?.birthdate)} · ` : ""}
