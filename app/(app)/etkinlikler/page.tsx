@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Plus, Check, Clock, X, CalendarHeart, Star, HelpCircle, Users, ImagePlus, Loader2 } from "lucide-react";
+import { MapPin, Plus, Check, Clock, X, CalendarHeart, Star, HelpCircle, Users, ImagePlus, Loader2, MessageCircle } from "lucide-react";
 import { EVENT_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
+import EventChat from "@/components/EventChat";
 
 type Attendee = { user_id: string; name: string; status: string; rsvp: string | null };
 type Ev = {
@@ -41,6 +42,7 @@ export default function Etkinlikler() {
   const [form, setForm] = useState({ title: "", type: "kahve", description: "", starts_at: "" });
   const [cover, setCover] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [chatFor, setChatFor] = useState<Ev | null>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -231,6 +233,14 @@ export default function Etkinlikler() {
                   <Clock size={12} /> {new Date(e.starts_at).toLocaleString("tr-TR")}
                 </p>
               )}
+              {(e.mine || e.my_rsvp) && (
+                <button
+                  onClick={() => setChatFor(e)}
+                  className="mt-3 flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm text-muted transition hover:border-accent/50 hover:text-text"
+                >
+                  <MessageCircle size={14} /> Etkinlik sohbeti
+                </button>
+              )}
               <div className="mt-3">
                 {e.mine ? (
                   <OwnerPanel e={e} onManage={yonet} />
@@ -268,6 +278,8 @@ export default function Etkinlikler() {
           ))}
         </div>
       )}
+
+      {chatFor && <EventChat eventId={chatFor.id} title={chatFor.title} onClose={() => setChatFor(null)} />}
     </div>
   );
 }
