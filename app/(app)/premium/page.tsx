@@ -58,6 +58,8 @@ export default function Premium() {
   const [packages, setPackages] = useState<StorePackage[]>([]);
   const [plan, setPlan] = useState<string>("free");
   const [until, setUntil] = useState<string | null>(null);
+  const [name, setName] = useState<string>("");
+  const [memberNo, setMemberNo] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -68,11 +70,13 @@ export default function Premium() {
     if (!user) return;
     const { data: p } = await supabase
       .from("profiles")
-      .select("premium_plan, premium_until")
+      .select("premium_plan, premium_until, name, member_no")
       .eq("id", user.id)
       .single();
     setPlan(p?.premium_plan || "free");
     setUntil(p?.premium_until || null);
+    setName(p?.name || "");
+    setMemberNo(p?.member_no ?? null);
     if (isNativeApp()) {
       setNative(true);
       await initPurchases(user.id);
@@ -100,27 +104,44 @@ export default function Premium() {
   }
 
   const aktif = isActivePremium({ premium_plan: plan, premium_until: until });
+  const tierLabel = plan === "legend" ? "Legend" : plan === "platinum" ? "Premium+" : plan === "gold" ? "Premium" : aktif ? "Plus" : "Standart";
+  // Kart malzemesi — Amex Black / Apple Card / Raya hissi
+  const cardBg =
+    plan === "legend" ? "linear-gradient(150deg,#14141b,#050507 72%)"
+    : plan === "platinum" ? "linear-gradient(150deg,#1d1a14,#0d0c0a 72%)"
+    : plan === "gold" ? "linear-gradient(150deg,#221d12,#100d08 72%)"
+    : "linear-gradient(150deg,#201d23,#0e0d10 72%)";
 
   return (
     <div className="px-4 pb-24 pt-6">
-      <div className="brand-gradient mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl">
-        <Crown className="text-white" />
-      </div>
-      <h1 className="text-center text-2xl font-bold brand-text">Ahenk Premium</h1>
-      <p className="mb-4 mt-1 text-center text-muted">Daha çok kişiye ulaş, daha derin tanış.</p>
-
-      {/* Mevcut durum */}
+      {/* Üyelik kartı — statü, özellik değil */}
       <div
-        className={`mb-6 rounded-2xl border p-3 text-center text-sm ${
-          aktif ? "border-brand bg-brand/10 text-brand" : "border-border bg-surface text-muted"
-        }`}
+        className="relative mx-auto mb-3 flex aspect-[1.6/1] max-w-[400px] flex-col justify-between overflow-hidden rounded-[22px] border border-accent/25 p-5 shadow-float"
+        style={{ background: cardBg }}
       >
-        {aktif
-          ? `Aktif plan: ${plan === "legend" ? "Legend" : plan === "platinum" ? "Premium Plus" : plan === "gold" ? "Premium" : "Plus"}${
-              until ? ` · bitiş ${new Date(until).toLocaleDateString("tr-TR")}` : ""
-            }`
-          : "Şu an ücretsiz plandasın"}
+        {/* kayan parlama */}
+        <span className="pointer-events-none absolute inset-0 opacity-60" style={{ background: "linear-gradient(115deg,transparent 42%,rgba(199,169,119,0.10) 49%,transparent 58%)" }} />
+        <div className="flex items-start justify-between">
+          <span className="font-display text-base font-bold uppercase tracking-[0.32em] text-accent">Ahenk</span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-accent/90">{tierLabel}</span>
+        </div>
+        {/* çip */}
+        <div className="mt-1 h-8 w-11 rounded-md bg-gradient-to-br from-amber-200/80 to-amber-600/50 ring-1 ring-amber-200/20" />
+        <div className="flex items-end justify-between">
+          <div className="min-w-0">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-muted">Üye</p>
+            <p className="truncate font-display text-lg font-semibold text-text">{name || "Ahenk Üyesi"}</p>
+          </div>
+          <p className="shrink-0 font-mono text-xs tracking-widest text-muted">
+            {memberNo ? `AHK ${String(memberNo).padStart(4, "0").slice(-4)}` : ""}
+          </p>
+        </div>
       </div>
+      <p className="mb-6 text-center text-sm text-muted">
+        {aktif
+          ? `Aktif · ${tierLabel}${until ? ` · bitiş ${new Date(until).toLocaleDateString("tr-TR")}` : ""}`
+          : "Statünü yükselt — özellik değil, ayrıcalık."}
+      </p>
 
       {/* Web'de jeton köprüsü — IAP yalnız native; web kullanıcısı çıkmaza düşmesin. */}
       {!native && (
