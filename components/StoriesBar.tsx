@@ -11,11 +11,9 @@ type Group = { user_id: string; name: string; tier?: string; mine?: boolean; ite
 
 const STORY_EMOJIS = ["❤️", "🔥", "😍", "👏", "😮", "😂"];
 
-function ringClass(tier?: string): string {
-  if (tier === "legend" || tier === "platinum") return "ring-premium";
-  if (tier === "gold") return "ring-gold";
-  if (tier === "plus") return "bg-gradient-to-tr from-slate-300 to-slate-100";
-  return "bg-gradient-to-tr from-brand to-brand-2";
+// Mono ince pirinç halka — Instagram gradyan halkaları yok (VISION V1).
+function ringClass(_tier?: string): string {
+  return "bg-accent/45";
 }
 
 export default function StoriesBar() {
@@ -132,8 +130,8 @@ export default function StoriesBar() {
           onClick={() => setComposing(true)}
           className="flex shrink-0 flex-col items-center gap-1"
         >
-          <span className="brand-gradient flex h-16 w-16 items-center justify-center rounded-full">
-            <Plus className="text-white" size={22} />
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-border text-muted transition hover:border-accent/50 hover:text-text">
+            <Plus size={22} strokeWidth={1.6} />
           </span>
           <span className="text-xs text-muted">Ekle</span>
         </button>
