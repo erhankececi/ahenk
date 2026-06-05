@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { CalendarHeart, Crown, Trophy, UserPlus, Sparkles, MapPin } from "lucide-react";
+import { CalendarHeart, Crown, Trophy, UserPlus, Sparkles, MapPin, Gift } from "lucide-react";
 
 type Ev = { id: string; title: string; city: string | null; starts_at: string | null };
 
@@ -89,6 +89,9 @@ export default function RightRail() {
       <div className="rounded-2xl border border-border bg-surface p-4">
         <p className="mb-2 font-semibold">Keşfet & kazan</p>
         <div className="space-y-1">
+          <Link href="/magaza" className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-muted transition hover:bg-elevated hover:text-text">
+            <Gift size={16} className="text-accent" /> Hediye mağazası
+          </Link>
           <Link href="/liderlik" className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-muted transition hover:bg-elevated hover:text-text">
             <Trophy size={16} className="text-accent" /> Liderlik tablosu
           </Link>

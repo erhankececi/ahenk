@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles, Heart, Send, Search, BadgeCheck, MapPin, Briefcase, X, Zap,
-  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw,
+  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw, Gift,
 } from "lucide-react";
 import { Badge } from "@/components/ui";
 import StoriesBar from "@/components/StoriesBar";
@@ -149,12 +149,21 @@ export default function Kesfet() {
       <WelcomeTour />
       <header className="mb-3 flex items-center justify-between">
         <h1 className="text-2xl font-bold brand-text">Keşfet</h1>
-        <button
-          onClick={() => setFiltersOpen(true)}
-          className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-sm font-medium transition hover:border-brand"
-        >
-          <SlidersHorizontal size={15} /> Filtre
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/magaza"
+            aria-label="Hediye Mağazası"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-accent transition hover:border-accent/50"
+          >
+            <Gift size={17} />
+          </Link>
+          <button
+            onClick={() => setFiltersOpen(true)}
+            className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-sm font-medium transition hover:border-brand"
+          >
+            <SlidersHorizontal size={15} /> Filtre
+          </button>
+        </div>
       </header>
 
       {tab === "profiller" && (
