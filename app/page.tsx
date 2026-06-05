@@ -150,7 +150,7 @@ export default async function Home() {
                 className={`relative rounded-2xl border bg-bg p-6 ${tier.cls} ${tier.hot ? "shadow-soft" : ""}`}
               >
                 {tier.hot && (
-                  <span className="absolute right-4 top-4 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-[#0B1220]">
+                  <span className="absolute right-4 top-4 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-[#1c1407]">
                     Popüler
                   </span>
                 )}

@@ -63,7 +63,7 @@ export default function DailyQuestion() {
       {!answered && !open && (
         <button
           onClick={() => setOpen(true)}
-          className="mt-3 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-[#0B1220]"
+          className="mt-3 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-[#1c1407]"
         >
           Yanıtla
         </button>
@@ -81,7 +81,7 @@ export default function DailyQuestion() {
           <button
             onClick={gonder}
             disabled={busy || !answer.trim()}
-            className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-[#0B1220] disabled:opacity-50"
+            className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-[#1c1407] disabled:opacity-50"
           >
             {busy ? "…" : `Gönder · +${reward} jeton`}
           </button>

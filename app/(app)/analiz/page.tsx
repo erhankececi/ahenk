@@ -50,7 +50,7 @@ export default function Analiz() {
           <p className="mt-1 text-sm text-muted">
             Seni kim aradı, kim tekrar profiline baktı, haftalık performansın — hepsi Premium Plus’ta.
           </p>
-          <Link href="/premium" className="mt-5 inline-block rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-[#0B1220]">
+          <Link href="/premium" className="mt-5 inline-block rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-[#1c1407]">
             Premium Plus’a geç
           </Link>
         </div>
