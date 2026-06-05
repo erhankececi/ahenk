@@ -11,9 +11,9 @@ type Group = { user_id: string; name: string; tier?: string; mine?: boolean; ite
 
 const STORY_EMOJIS = ["❤️", "🔥", "😍", "👏", "😮", "😂"];
 
-// Mono ince pirinç halka — Instagram gradyan halkaları yok (VISION V1).
+// Hikaye halkası — mockup: ince renkli halka (sıcak pembe→altın).
 function ringClass(_tier?: string): string {
-  return "bg-accent/45";
+  return "bg-gradient-to-tr from-rose-500 via-accent to-amber-400";
 }
 
 export default function StoriesBar() {

@@ -48,6 +48,7 @@ export default function Kesfet() {
   const [filter, setFilter] = useState<DiscoveryFilter>(DEFAULT_FILTER);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<"kart" | "liste">("kart");
+  const [chip, setChip] = useState("tumu");
 
   async function yukle(f: DiscoveryFilter) {
     setLoading(true);
@@ -69,7 +70,22 @@ export default function Kesfet() {
     yukle(f);
   }
 
-  const current = cands[i];
+  // Üst hızlı çipler (mockup): Tümü / Yakınında / Online / Yeni / Popüler
+  const CHIPS = [
+    { id: "tumu", label: "Tümü", sort: "smart" as const },
+    { id: "yakin", label: "Yakınında", sort: "near" as const },
+    { id: "online", label: "Online", sort: null },
+    { id: "yeni", label: "Yeni", sort: "new" as const },
+    { id: "populer", label: "Popüler", sort: "active" as const },
+  ];
+  function selectChip(c: (typeof CHIPS)[number]) {
+    setChip(c.id);
+    setI(0);
+    if (c.sort) applyFilter({ ...filter, sort: c.sort });
+  }
+
+  const deck = chip === "online" ? cands.filter((c) => c.online) : cands;
+  const current = deck[i];
   // Günün profili: en yüksek ahenk uyumlu aday (geri dönüş için öne çıkar).
   const gunun = cands.length
     ? cands.reduce((best: any, c: any) => ((c.ortakYuzde ?? 0) > (best?.ortakYuzde ?? -1) ? c : best), cands[0])
@@ -147,17 +163,30 @@ export default function Kesfet() {
   return (
     <div className="px-4 pt-6">
       <WelcomeTour />
-      <header className="mb-5 flex items-center justify-between">
-        <h1 className="font-display text-[28px] font-semibold tracking-tight">Keşfet</h1>
-        <div className="flex items-center gap-4 text-muted">
-          <Link href="/magaza" aria-label="Hediye Mağazası" className="transition hover:text-text">
-            <Gift size={20} strokeWidth={1.6} />
-          </Link>
-          <button onClick={() => setFiltersOpen(true)} aria-label="Filtre" className="transition hover:text-text">
-            <SlidersHorizontal size={20} strokeWidth={1.6} />
-          </button>
-        </div>
+      <header className="mb-4 flex items-center justify-between">
+        <Link href="/magaza" aria-label="Hediye Mağazası" className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-2 to-brand font-display text-base font-bold text-[#1c1407] ring-1 ring-accent/30">
+          A
+        </Link>
+        <h1 className="font-display text-xl font-bold tracking-tight">Keşfet</h1>
+        <button onClick={() => setFiltersOpen(true)} aria-label="Filtre" className="text-muted transition hover:text-text">
+          <SlidersHorizontal size={20} strokeWidth={1.7} />
+        </button>
       </header>
+
+      {/* Hızlı çipler — mockup: Tümü / Yakınında / Online / Yeni / Popüler */}
+      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto">
+        {CHIPS.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => selectChip(c)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition ${
+              chip === c.id ? "bg-elevated text-text ring-1 ring-border" : "text-muted hover:text-text"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
 
       {loading && (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface">
@@ -266,7 +295,7 @@ export default function Kesfet() {
                     <h2 className="font-display text-[30px] font-semibold leading-none text-white drop-shadow-sm">
                       {current.name}<span className="font-normal text-white/80">{current.age ? `, ${current.age}` : ""}</span>
                     </h2>
-                    {current.is_verified && <BadgeCheck className="text-accent" size={19} strokeWidth={2} />}
+                    {current.is_verified && <BadgeCheck className="text-sky-400" size={20} />}
                   </Link>
                   <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/80">
                     {current.city && (
@@ -277,8 +306,8 @@ export default function Kesfet() {
                       </span>
                     )}
                     {current.online && (
-                      <span className="flex items-center gap-1.5 text-white/80">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Çevrim içi
+                      <span className="flex items-center gap-1.5 text-emerald-400">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> Online
                       </span>
                     )}
                   </div>
@@ -355,41 +384,41 @@ export default function Kesfet() {
             <p className="mt-4 rounded-2xl bg-accent/10 px-3 py-2 text-center text-xs text-accent">{superMsg}</p>
           )}
 
-          {/* Aksiyonlar — yalnız beğeni dolu (mercan), gerisi hatlı (Sessiz Lüks) */}
+          {/* Aksiyonlar — mockup birebir: altın geri · kırmızı geç · pembe beğen · mor süper */}
           <div className="mt-6 flex items-center justify-center gap-5">
             <button
               onClick={() => act("daha_fazla")}
-              aria-label="Daha fazla göster"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-muted transition hover:border-text/30 hover:text-text active:scale-90"
+              aria-label="Geri al"
+              className="flex h-13 w-13 items-center justify-center rounded-full bg-elevated text-amber-400 shadow-card transition hover:brightness-110 active:scale-90"
+              style={{ height: 52, width: 52 }}
             >
-              <RotateCcw size={19} strokeWidth={1.6} />
+              <RotateCcw size={22} strokeWidth={2} />
             </button>
             <button
               onClick={gec}
               aria-label="Geç"
-              className="flex h-14 w-14 items-center justify-center rounded-full border border-border text-text/70 transition hover:border-text/30 active:scale-90"
+              className="flex items-center justify-center rounded-full bg-elevated text-rose-500 shadow-card transition hover:brightness-110 active:scale-90"
+              style={{ height: 60, width: 60 }}
             >
-              <X size={24} strokeWidth={1.6} />
+              <X size={26} strokeWidth={2.4} />
             </button>
             <button
               onClick={() => act("tanis")}
               aria-label="Beğen"
-              className="flex h-[68px] w-[68px] items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(199,90,70,0.6)] transition hover:brightness-110 active:scale-90"
-              style={{ background: "linear-gradient(150deg,#D9694F,#C0533D)" }}
+              className="flex items-center justify-center rounded-full text-white shadow-[0_12px_30px_-8px_rgba(236,72,120,0.55)] transition hover:brightness-110 active:scale-90"
+              style={{ height: 68, width: 68, background: "linear-gradient(150deg,#FF5C8A,#E63973)" }}
             >
-              <Heart size={28} fill="currentColor" strokeWidth={0} />
+              <Heart size={30} fill="currentColor" strokeWidth={0} />
             </button>
             <button
               onClick={superBegen}
               aria-label="Süper beğen"
-              className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/45 text-accent transition hover:bg-accent/10 active:scale-90"
+              className="flex items-center justify-center rounded-full text-white shadow-[0_12px_30px_-8px_rgba(124,92,246,0.55)] transition hover:brightness-110 active:scale-90"
+              style={{ height: 60, width: 60, background: "linear-gradient(150deg,#7C5CF6,#5B43D6)" }}
             >
-              <Star size={22} strokeWidth={1.6} />
+              <Star size={26} fill="currentColor" strokeWidth={0} />
             </button>
           </div>
-          <p className="mt-3 text-center text-[11px] tracking-wide text-muted">
-            Geç · Beğen · Süper beğen <span className="text-text/40">— günde 1 ücretsiz</span>
-          </p>
 
           {/* İkincil ilgi sinyalleri */}
           <div className="mt-4 flex justify-center gap-2">
