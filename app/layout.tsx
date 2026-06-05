@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
-// Başlıklar için premium display font — gövdeden ayrı, güçlü hiyerarşi.
-const manrope = Manrope({
+// Editöryel serif display — "Sessiz Lüks": isimler, başlıklar, marka.
+// Lüks hissi renkten değil tipografiden gelir.
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -43,7 +45,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B1220",
+  themeColor: "#0E0D10",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,7 +54,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" className="dark">
-      <body className={`${inter.variable} ${manrope.variable}`}>
+      <body className={`${inter.variable} ${fraunces.variable}`}>
         <ThemeProvider>
           <div className="min-h-dvh bg-bg">{children}</div>
         </ThemeProvider>

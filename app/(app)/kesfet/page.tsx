@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles, Heart, Send, Search, BadgeCheck, MapPin, Briefcase, X, Zap,
-  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw, Gift,
+  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw, Gift, Lock,
 } from "lucide-react";
 import { Badge } from "@/components/ui";
 import StoriesBar from "@/components/StoriesBar";
@@ -147,114 +147,19 @@ export default function Kesfet() {
   return (
     <div className="px-4 pt-6">
       <WelcomeTour />
-      <header className="mb-3 flex items-center justify-between">
-        <h1 className="text-2xl font-bold brand-text">Keşfet</h1>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/magaza"
-            aria-label="Hediye Mağazası"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-accent transition hover:border-accent/50"
-          >
-            <Gift size={17} />
+      <header className="mb-5 flex items-center justify-between">
+        <h1 className="font-display text-[28px] font-semibold tracking-tight">Keşfet</h1>
+        <div className="flex items-center gap-4 text-muted">
+          <Link href="/magaza" aria-label="Hediye Mağazası" className="transition hover:text-text">
+            <Gift size={20} strokeWidth={1.6} />
           </Link>
-          <button
-            onClick={() => setFiltersOpen(true)}
-            className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-sm font-medium transition hover:border-brand"
-          >
-            <SlidersHorizontal size={15} /> Filtre
+          <button onClick={() => setFiltersOpen(true)} aria-label="Filtre" className="transition hover:text-text">
+            <SlidersHorizontal size={20} strokeWidth={1.6} />
           </button>
         </div>
       </header>
 
-      {tab === "profiller" && (
-        <div className="mb-3">
-          <DailyQuestion />
-        </div>
-      )}
-
-      {/* İstatistik + aktif filtre rozetleri */}
-      {tab === "profiller" && meta && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-elevated px-2.5 py-1 font-medium">
-            {meta.count} kişi
-          </span>
-          {meta.online > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 font-medium text-success">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" /> {meta.online} online
-            </span>
-          )}
-          <span className="flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 font-medium text-brand">
-            <MapPin size={12} /> {kmNum ? `0–${kmNum} km öncelik` : kmText}
-          </span>
-          {filter.cities.map((c) => (
-            <span key={c} className="rounded-full bg-brand/10 px-2.5 py-1 font-medium text-brand">
-              {c}
-            </span>
-          ))}
-          {meta.trendVibes[0] && (
-            <span className="flex items-center gap-1 rounded-full bg-elevated px-2.5 py-1 text-muted">
-              <Flame size={12} className="text-accent" /> {meta.trendVibes[0].label}
-            </span>
-          )}
-        </div>
-      )}
-
-      <StoriesBar />
-
-      <div className="mb-4 flex gap-2 rounded-2xl bg-elevated p-1">
-        {(["profiller", "anlar"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 rounded-xl py-2 text-sm font-medium transition ${
-              tab === t ? "brand-gradient text-white" : "text-muted"
-            }`}
-          >
-            {t === "profiller" ? "Profiller" : "Anlar"}
-          </button>
-        ))}
-      </div>
-
-      {tab === "anlar" && <MomentsFeed />}
-
-      {tab === "profiller" && !loading && cands.length > 0 && (
-        <div className="mb-4 flex justify-end">
-          <div className="flex gap-1 rounded-full border border-border bg-surface p-1">
-            <button
-              onClick={() => setView("kart")}
-              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                view === "kart" ? "bg-brand text-white" : "text-muted"
-              }`}
-            >
-              <LayoutGrid size={14} /> Kart
-            </button>
-            <button
-              onClick={() => setView("liste")}
-              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                view === "liste" ? "bg-brand text-white" : "text-muted"
-              }`}
-            >
-              <List size={14} /> Liste
-            </button>
-          </div>
-        </div>
-      )}
-
-      {tab === "profiller" && view === "liste" && !loading && cands.length > 0 && (
-        <DiscoveryList
-          cands={cands}
-          priorityKm={kmNum}
-          onAction={(id) => interactWith(id, "tanis")}
-          onOpen={(idx) => {
-            setI(idx);
-            setRevealMore(false);
-            setView("kart");
-            if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
-      )}
-
-      {tab === "profiller" && loading && (
+      {loading && (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface">
           <div className="shimmer h-56 w-full" />
           <div className="space-y-3 p-5">
@@ -270,44 +175,10 @@ export default function Kesfet() {
         </div>
       )}
 
-      {tab === "profiller" && view === "kart" && !loading && gunun && (
-        <div className="mb-4 rounded-3xl border border-brand/30 bg-gradient-to-br from-brand/10 to-accent/5 p-4">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-brand">
-            <Sparkles size={13} /> Senin için seçtik
-          </p>
-          <div className="flex items-center gap-3">
-            <Link href={`/u/${gunun.id}`} className={`rounded-2xl ${tierFrame(gunun.tier)}`}>
-              <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-elevated">
-                {gunun.photos?.[0] ? (
-                  <img src={gunun.photos[0]} className="h-full w-full scale-110 object-cover blur-lg" alt="" />
-                ) : (
-                  <div className="brand-gradient h-full w-full opacity-30" />
-                )}
-              </div>
-            </Link>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold">
-                {gunun.name}
-                {gunun.age ? `, ${gunun.age}` : ""}
-              </p>
-              <p className="text-xs text-muted">
-                %{gunun.ortakYuzde} ahenk uyumu{gunun.sameCity ? " · yakınında" : ""}
-              </p>
-            </div>
-            <button
-              onClick={() => interactWith(gunun.id, "tanis")}
-              className="brand-gradient shrink-0 rounded-full px-4 py-2 text-sm font-semibold text-white"
-            >
-              Tanış
-            </button>
-          </div>
-        </div>
-      )}
-
-      {tab === "profiller" && view === "kart" && !loading && !current && (
+      {!loading && !current && (
         <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
-          <Sparkles className="mb-4 text-brand" size={40} />
-          <h2 className="text-xl font-semibold">Şimdilik bu kadar</h2>
+          <Sparkles className="mb-4 text-brand" size={36} strokeWidth={1.5} />
+          <h2 className="font-display text-xl font-semibold">Şimdilik bu kadar</h2>
           <p className="mt-2 text-muted">
             {filter.cities.length || filter.verified || filter.minAge > 18 || filter.maxAge < 60
               ? "Şehir, yaş veya doğrulama filtreni gevşet — mesafe artık kimseyi gizlemiyor, sadece sıralıyor."
@@ -339,21 +210,13 @@ export default function Kesfet() {
         </div>
       )}
 
-      {tab === "profiller" && view === "kart" && current && (
+      {current && (
         <>
           {kmNum && (
-            <div
-              className={`mb-3 flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold ${
-                current.priority
-                  ? "border-brand/30 bg-brand/10 text-brand"
-                  : "border-border bg-elevated text-muted"
-              }`}
-            >
-              <MapPin size={13} />
-              {current.priority
-                ? `Öncelikli Alan · 0–${kmNum} km`
-                : `Daha uzaktakiler · ${kmNum} km üstü`}
-            </div>
+            <p className="mb-3 flex items-center gap-1.5 text-xs text-muted">
+              <MapPin size={13} strokeWidth={1.6} />
+              {current.priority ? `Öncelikli alan · 0–${kmNum} km` : `Daha uzaktakiler · ${kmNum} km üstü`}
+            </p>
           )}
           <AnimatePresence mode="wait">
             <motion.div
@@ -399,28 +262,30 @@ export default function Kesfet() {
 
                 {/* Alt overlay: isim · doğrulama · konum · online */}
                 <div className="absolute inset-x-0 bottom-0 p-4">
-                  <Link href={`/u/${current.id}`} className="flex items-center gap-1.5">
-                    <h2 className="text-[26px] font-bold leading-tight text-white drop-shadow">
-                      {current.name}{current.age ? `, ${current.age}` : ""}
+                  <Link href={`/u/${current.id}`} className="flex items-center gap-2">
+                    <h2 className="font-display text-[30px] font-semibold leading-none text-white drop-shadow-sm">
+                      {current.name}<span className="font-normal text-white/80">{current.age ? `, ${current.age}` : ""}</span>
                     </h2>
-                    {current.is_verified && <BadgeCheck className="text-sky-400" size={20} />}
+                    {current.is_verified && <BadgeCheck className="text-accent" size={19} strokeWidth={2} />}
                   </Link>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/80">
                     {current.city && (
-                      <span className="flex items-center gap-1">
-                        <MapPin size={14} /> {current.city}
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={14} strokeWidth={1.6} /> {current.city}
                         {current.mesafe != null &&
                           (current.sameCity || current.mesafe === 0 ? " · yakınında" : ` · ${current.mesafe} km`)}
                       </span>
                     )}
                     {current.online && (
-                      <span className="flex items-center gap-1 font-medium text-emerald-400">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> Online
+                      <span className="flex items-center gap-1.5 text-white/80">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Çevrim içi
                       </span>
                     )}
                   </div>
                   {!revealMore && (
-                    <p className="mt-1.5 text-[11px] text-white/55">🔒 Fotoğraf sohbet ilerledikçe netleşir</p>
+                    <p className="mt-2 flex items-center gap-1.5 text-[11px] text-white/50">
+                      <Lock size={11} strokeWidth={1.8} /> Fotoğraf sohbet ilerledikçe netleşir
+                    </p>
                   )}
                 </div>
               </div>
@@ -447,7 +312,7 @@ export default function Kesfet() {
                     {current.reasons.map((r: string) => (
                       <span
                         key={r}
-                        className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent"
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-text/80"
                       >
                         {r}
                       </span>
@@ -477,7 +342,7 @@ export default function Kesfet() {
                 {revealMore && (
                   <div className="space-y-3 animate-fade-up">
                     {current.music?.length > 0 && (
-                      <p className="text-sm text-muted">🎵 {current.music.join(", ")}</p>
+                      <p className="text-sm text-muted">Müzik · {current.music.join(", ")}</p>
                     )}
                     {current.zodiac && <Badge>{current.zodiac} burcu</Badge>}
                   </div>
@@ -490,43 +355,44 @@ export default function Kesfet() {
             <p className="mt-4 rounded-2xl bg-accent/10 px-3 py-2 text-center text-xs text-accent">{superMsg}</p>
           )}
 
-          {/* Premium yuvarlak aksiyon butonları */}
-          <div className="mt-5 flex items-center justify-center gap-5">
+          {/* Aksiyonlar — yalnız beğeni dolu (mercan), gerisi hatlı (Sessiz Lüks) */}
+          <div className="mt-6 flex items-center justify-center gap-5">
             <button
               onClick={() => act("daha_fazla")}
               aria-label="Daha fazla göster"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent/60 active:scale-90"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-muted transition hover:border-text/30 hover:text-text active:scale-90"
             >
-              <RotateCcw size={20} />
+              <RotateCcw size={19} strokeWidth={1.6} />
             </button>
             <button
               onClick={gec}
               aria-label="Geç"
-              className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-elevated text-white/85 transition hover:border-white/30 active:scale-90"
+              className="flex h-14 w-14 items-center justify-center rounded-full border border-border text-text/70 transition hover:border-text/30 active:scale-90"
             >
-              <X size={26} />
+              <X size={24} strokeWidth={1.6} />
             </button>
             <button
               onClick={() => act("tanis")}
               aria-label="Beğen"
-              className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-900/30 transition hover:brightness-110 active:scale-90"
+              className="flex h-[68px] w-[68px] items-center justify-center rounded-full text-white shadow-[0_10px_30px_-8px_rgba(199,90,70,0.6)] transition hover:brightness-110 active:scale-90"
+              style={{ background: "linear-gradient(150deg,#D9694F,#C0533D)" }}
             >
-              <Heart size={28} fill="currentColor" />
+              <Heart size={28} fill="currentColor" strokeWidth={0} />
             </button>
             <button
               onClick={superBegen}
               aria-label="Süper beğen"
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-violet-900/30 transition hover:brightness-110 active:scale-90"
+              className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/45 text-accent transition hover:bg-accent/10 active:scale-90"
             >
-              <Star size={24} fill="currentColor" />
+              <Star size={22} strokeWidth={1.6} />
             </button>
           </div>
-          <p className="mt-2.5 text-center text-[11px] text-muted">
-            Geç · Beğen · Süper beğen <span className="text-white/40">(günde 1 ücretsiz)</span>
+          <p className="mt-3 text-center text-[11px] tracking-wide text-muted">
+            Geç · Beğen · Süper beğen <span className="text-text/40">— günde 1 ücretsiz</span>
           </p>
 
           {/* İkincil ilgi sinyalleri */}
-          <div className="mt-3 flex justify-center gap-2">
+          <div className="mt-4 flex justify-center gap-2">
             <button onClick={() => act("ilginc")} className="rounded-full border border-border px-3.5 py-1.5 text-xs text-muted transition hover:border-accent/60">
               İlginç geldi
             </button>
@@ -535,17 +401,6 @@ export default function Kesfet() {
             </button>
           </div>
         </>
-      )}
-
-      {tab === "profiller" && view === "kart" && !loading && cands.length > 1 && (
-        <DiscoveryRails
-          cands={cands}
-          onPick={(idx) => {
-            setI(idx);
-            setRevealMore(false);
-            if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
       )}
 
       {/* Eşleşme popup */}
