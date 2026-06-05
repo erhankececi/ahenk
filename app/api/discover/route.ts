@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { yas, overlapPercent } from "@/lib/utils";
+import { yas } from "@/lib/utils";
+import { karakterUyumu, type Lifestyle } from "@/lib/matchScore";
 import { vibeAktif, vibeBilgisi } from "@/lib/vibes";
 import { previewUrl } from "@/lib/storage";
 
@@ -38,7 +39,7 @@ export async function GET(req: Request) {
   const admin = createAdminClient();
   const { data: me } = await admin
     .from("profiles")
-    .select("interests, hobbies, city, music, movies")
+    .select("interests, hobbies, city, music, movies, languages, smoking, drinking, pets, relationship_goal, wants_kids, exercise, diet")
     .eq("id", user.id)
     .single();
 
@@ -65,7 +66,7 @@ export async function GET(req: Request) {
   const [{ data: photos }, { data: affRows }, { data: createdRows }] = await Promise.all([
     admin.from("photos").select("user_id, preview_path, position").in("user_id", inIds).order("position"),
     admin.from("affinities").select("user_a, user_b, score").or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
-    admin.from("profiles").select("id, created_at").in("id", inIds),
+    admin.from("profiles").select("id, created_at, languages, smoking, drinking, pets, relationship_goal, wants_kids, exercise, diet").in("id", inIds),
   ]);
 
   const photoMap = new Map<string, string[]>();
@@ -82,24 +83,50 @@ export async function GET(req: Request) {
     affMap.set(o, (affMap.get(o) || 0) + (r.score || 0));
   });
   const createdMap = new Map<string, string>();
-  (createdRows || []).forEach((r) => createdMap.set(r.id, r.created_at));
+  const lifeMap = new Map<string, any>();
+  (createdRows || []).forEach((r) => {
+    createdMap.set(r.id, r.created_at);
+    lifeMap.set(r.id, r);
+  });
 
   const now = Date.now();
-  const meInt = [...(me?.interests || []), ...(me?.hobbies || [])];
-  const meMusic: string[] = me?.music || [];
-  const meMovies: string[] = me?.movies || [];
+  const meLife: Lifestyle = {
+    interests: me?.interests || [],
+    hobbies: me?.hobbies || [],
+    music: me?.music || [],
+    movies: me?.movies || [],
+    languages: me?.languages || [],
+    smoking: me?.smoking,
+    drinking: me?.drinking,
+    pets: me?.pets,
+    relationship_goal: me?.relationship_goal,
+    wants_kids: me?.wants_kids,
+    exercise: me?.exercise,
+    diet: me?.diet,
+  };
 
   const candidates = list.map((p) => {
-    const candInt = [...(p.interests || []), ...(p.hobbies || [])];
-    const overlap = overlapPercent(meInt, candInt);
-    // "Neden uyumlu?" — somut nedenler (en fazla 3)
-    const reasons: string[] = [];
-    const sharedI = meInt.filter((x: string) => candInt.includes(x));
-    if (sharedI.length) reasons.push(sharedI.length > 1 ? `${sharedI.length} ortak ilgi` : `Ortak ilgi: ${sharedI[0]}`);
-    if (meMusic.some((x) => (p.music || []).includes(x))) reasons.push("Benzer müzik zevki");
-    if (meMovies.some((x) => (p.movies || []).includes(x))) reasons.push("Ortak film/dizi");
-    if (p.same_city && p.city) reasons.push(`Aynı şehir`);
-    if (overlap >= 60) reasons.unshift("Yüksek karakter uyumu");
+    const life = lifeMap.get(p.id) || {};
+    const themLife: Lifestyle = {
+      interests: p.interests || [],
+      hobbies: p.hobbies || [],
+      music: p.music || [],
+      movies: p.movies || [],
+      languages: life.languages || [],
+      smoking: life.smoking,
+      drinking: life.drinking,
+      pets: life.pets,
+      relationship_goal: life.relationship_goal,
+      wants_kids: life.wants_kids,
+      exercise: life.exercise,
+      diet: life.diet,
+    };
+    // Karakter-temelli uyum + somut kırılım
+    const { score: karakter, kalemler } = karakterUyumu(meLife, themLife);
+    const reasons: string[] = kalemler.filter((k) => k.ok).map((k) => k.label);
+    if (p.same_city && p.city) reasons.push("Aynı şehir");
+    if (karakter >= 75) reasons.unshift("Çok yüksek uyum");
+    const overlap = karakter;
     const aktifVibe = vibeAktif(p.vibe, p.vibe_at) ? vibeBilgisi(p.vibe) : null;
     const lastMs = p.last_active ? new Date(p.last_active).getTime() : 0;
     const createdAt = createdMap.get(p.id);

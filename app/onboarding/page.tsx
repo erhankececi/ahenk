@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input, Chip } from "@/components/ui";
-import { INTERESTS, ZODIAC, LANGUAGES, CITY_NAMES, CITIES } from "@/lib/constants";
+import {
+  INTERESTS, ZODIAC, LANGUAGES, CITY_NAMES, CITIES,
+  SMOKING_OPTS, DRINKING_OPTS, PETS_OPTS, GOAL_OPTS, KIDS_OPTS, EXERCISE_OPTS,
+} from "@/lib/constants";
 import { profilOnerileri } from "@/lib/aiProfile";
 import { yas, adSoyadGecerli } from "@/lib/utils";
 import { ImagePlus, X, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
@@ -30,6 +33,10 @@ export default function Onboarding() {
     zodiac: "",
     smoking: "hayir",
     pets: "yok",
+    drinking: "sosyal",
+    relationship_goal: "ciddi",
+    wants_kids: "belki",
+    exercise: "bazen",
   });
   const [files, setFiles] = useState<File[]>([]);
 
@@ -59,6 +66,10 @@ export default function Onboarding() {
         zodiac: p.zodiac || "",
         smoking: p.smoking || f.smoking,
         pets: p.pets || f.pets,
+        drinking: p.drinking || f.drinking,
+        relationship_goal: p.relationship_goal || f.relationship_goal,
+        wants_kids: p.wants_kids || f.wants_kids,
+        exercise: p.exercise || f.exercise,
       }));
       // Zaten onboarded ise (düzenleme) → İLK EKSİK adıma götür
       if (p.onboarded) {
@@ -242,22 +253,57 @@ export default function Onboarding() {
               ))}
             </div>
           </div>
-          <div className="flex gap-6">
-            <div>
-              <p className="mb-2 text-sm text-muted">Sigara</p>
-              <div className="flex gap-2">
-                {[["hayir", "Hayır"], ["sosyal", "Sosyal"], ["evet", "Evet"]].map(([v, l]) => (
-                  <Chip key={v} active={form.smoking === v} onClick={() => set("smoking", v)}>{l}</Chip>
-                ))}
+          <div className="rounded-2xl border border-brand/30 bg-brand/5 p-3">
+            <p className="mb-3 text-sm font-medium brand-text">Karakter & yaşam tarzı — uyum eşleşmesi için</p>
+            <div className="space-y-4">
+              <div>
+                <p className="mb-2 text-sm text-muted">Ne arıyorsun?</p>
+                <div className="flex flex-wrap gap-2">
+                  {GOAL_OPTS.map(([v, l]) => (
+                    <Chip key={v} active={form.relationship_goal === v} onClick={() => set("relationship_goal", v)}>{l}</Chip>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-          <div>
-            <p className="mb-2 text-sm text-muted">Evcil hayvan</p>
-            <div className="flex flex-wrap gap-2">
-              {[["yok", "Yok"], ["kedi", "Kedi"], ["kopek", "Köpek"], ["seviyorum", "Seviyorum"]].map(([v, l]) => (
-                <Chip key={v} active={form.pets === v} onClick={() => set("pets", v)}>{l}</Chip>
-              ))}
+              <div>
+                <p className="mb-2 text-sm text-muted">Çocuk</p>
+                <div className="flex flex-wrap gap-2">
+                  {KIDS_OPTS.map(([v, l]) => (
+                    <Chip key={v} active={form.wants_kids === v} onClick={() => set("wants_kids", v)}>{l}</Chip>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm text-muted">Sigara</p>
+                <div className="flex flex-wrap gap-2">
+                  {SMOKING_OPTS.map(([v, l]) => (
+                    <Chip key={v} active={form.smoking === v} onClick={() => set("smoking", v)}>{l}</Chip>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm text-muted">Alkol</p>
+                <div className="flex flex-wrap gap-2">
+                  {DRINKING_OPTS.map(([v, l]) => (
+                    <Chip key={v} active={form.drinking === v} onClick={() => set("drinking", v)}>{l}</Chip>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm text-muted">Evcil hayvan</p>
+                <div className="flex flex-wrap gap-2">
+                  {PETS_OPTS.map(([v, l]) => (
+                    <Chip key={v} active={form.pets === v} onClick={() => set("pets", v)}>{l}</Chip>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm text-muted">Spor / tempo</p>
+                <div className="flex flex-wrap gap-2">
+                  {EXERCISE_OPTS.map(([v, l]) => (
+                    <Chip key={v} active={form.exercise === v} onClick={() => set("exercise", v)}>{l}</Chip>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Hash, Briefcase, MapPin, Sparkles, Languages, BadgeCheck, MessageCircle } from "lucide-react";
+import { Hash, Briefcase, MapPin, Sparkles, Languages, BadgeCheck, MessageCircle, Heart, Cigarette, Wine, PawPrint, Baby, Activity, Check, X } from "lucide-react";
 import { PremiumBadge, tierFrame, tierName, VipTag } from "@/components/PremiumBadge";
 import TrustBadge from "@/components/TrustBadge";
+import { karakterUyumu } from "@/lib/matchScore";
+import {
+  etiketBul, SMOKING_OPTS, DRINKING_OPTS, PETS_OPTS, GOAL_OPTS, KIDS_OPTS, EXERCISE_OPTS,
+} from "@/lib/constants";
 import { themeClass } from "@/lib/themes";
 import UserProfileActions from "@/components/UserProfileActions";
 import BackButton from "@/components/BackButton";
@@ -46,6 +50,15 @@ export default async function UserProfile({ params }: { params: { id: string } }
     .select("prompt_id, answer, prompt:prompts(text)")
     .eq("user_id", params.id);
 
+  // Görüntüleyen kullanıcının yaşam tarzı (uyum hesabı için)
+  const { data: meCard } = user
+    ? await supabase.from("profiles_card").select("interests, hobbies, music, movies, languages, smoking, drinking, pets, relationship_goal, wants_kids, exercise, diet").eq("id", user.id).single()
+    : { data: null };
+
+  const uyum = user && user.id !== params.id && meCard
+    ? karakterUyumu(meCard as any, p as any)
+    : null;
+
   const tier = (p.tier as string) || "free";
   const attrs = [
     { Icon: Hash, label: "Üye No", value: p.member_no ? String(p.member_no) : null },
@@ -53,6 +66,12 @@ export default async function UserProfile({ params }: { params: { id: string } }
     { Icon: MapPin, label: "Şehir", value: p.city },
     { Icon: Sparkles, label: "Burç", value: p.zodiac },
     { Icon: Languages, label: "Diller", value: p.languages?.length ? p.languages.join(", ") : null },
+    { Icon: Heart, label: "Arıyor", value: etiketBul(GOAL_OPTS, p.relationship_goal) },
+    { Icon: Baby, label: "Çocuk", value: etiketBul(KIDS_OPTS, p.wants_kids) },
+    { Icon: Cigarette, label: "Sigara", value: etiketBul(SMOKING_OPTS, p.smoking) },
+    { Icon: Wine, label: "Alkol", value: etiketBul(DRINKING_OPTS, p.drinking) },
+    { Icon: PawPrint, label: "Evcil hayvan", value: etiketBul(PETS_OPTS, p.pets) },
+    { Icon: Activity, label: "Tempo", value: etiketBul(EXERCISE_OPTS, p.exercise) },
   ].filter((a) => a.value);
 
   return (
@@ -101,6 +120,40 @@ export default async function UserProfile({ params }: { params: { id: string } }
 
       {p.voice_card_path && (
         <audio controls src={VOICE_URL(p.voice_card_path)} className="mt-6 w-full" preload="none" />
+      )}
+
+      {uyum && uyum.kalemler.length > 0 && (
+        <div className="mt-6 overflow-hidden rounded-3xl border border-accent/30 bg-gradient-to-br from-accent/10 to-transparent p-5">
+          <div className="flex items-center gap-4">
+            <div className="relative grid h-16 w-16 shrink-0 place-items-center">
+              <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
+                <circle cx="18" cy="18" r="15.5" fill="none" className="stroke-border" strokeWidth="3" />
+                <circle
+                  cx="18" cy="18" r="15.5" fill="none"
+                  className="stroke-accent" strokeWidth="3" strokeLinecap="round"
+                  strokeDasharray={`${(uyum.score / 100) * 97.4} 97.4`}
+                />
+              </svg>
+              <span className="absolute text-sm font-bold text-accent">%{uyum.score}</span>
+            </div>
+            <div>
+              <p className="font-display text-lg font-bold">Uyum</p>
+              <p className="text-xs text-muted">Karakter & yaşam tarzına göre</p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-1.5">
+            {uyum.kalemler.slice(0, 6).map((k, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                {k.ok ? (
+                  <Check size={15} className="shrink-0 text-emerald-400" />
+                ) : (
+                  <X size={15} className="shrink-0 text-muted" />
+                )}
+                <span className={k.ok ? "text-text/90" : "text-muted"}>{k.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {attrs.length > 0 && (

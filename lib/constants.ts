@@ -19,6 +19,20 @@ export const ZODIAC = [
 
 export const LANGUAGES = ["Türkçe", "İngilizce", "Almanca", "Fransızca", "Arapça", "İspanyolca", "Rusça"];
 
+// Yaşam tarzı / karakter alanları (akıllı eşleşme için). value -> etiket.
+export const SMOKING_OPTS: [string, string][] = [["hayir", "Hayır"], ["sosyal", "Sosyal"], ["evet", "Evet"]];
+export const DRINKING_OPTS: [string, string][] = [["hayir", "Hayır"], ["sosyal", "Sosyal"], ["evet", "Evet"]];
+export const PETS_OPTS: [string, string][] = [["yok", "Yok"], ["kedi", "Kedi"], ["kopek", "Köpek"], ["seviyorum", "Seviyorum"]];
+export const GOAL_OPTS: [string, string][] = [["ciddi", "Ciddi ilişki"], ["evlilik", "Evlilik"], ["arkadaslik", "Arkadaşlık"], ["belirsiz", "Henüz bilmiyorum"]];
+export const KIDS_OPTS: [string, string][] = [["istiyorum", "İstiyorum"], ["istemiyorum", "İstemiyorum"], ["belki", "Belki"], ["var", "Çocuğum var"]];
+export const EXERCISE_OPTS: [string, string][] = [["sik", "Sık sık"], ["bazen", "Bazen"], ["nadiren", "Nadiren"]];
+export const DIET_OPTS: [string, string][] = [["hepcil", "Her şey"], ["vejetaryen", "Vejetaryen"], ["vegan", "Vegan"], ["farketmez", "Fark etmez"]];
+
+export function etiketBul(opts: [string, string][], v?: string | null): string | null {
+  if (!v) return null;
+  return opts.find(([k]) => k === v)?.[1] ?? null;
+}
+
 // 81 il merkez koordinatları (yaklaşık)
 export const CITIES: Record<string, [number, number]> = {
   "Adana": [37.0, 35.32], "Adıyaman": [37.76, 38.28], "Afyonkarahisar": [38.76, 30.54],
