@@ -11,6 +11,7 @@ import { themeClass } from "@/lib/themes";
 import UserProfileActions from "@/components/UserProfileActions";
 import BackButton from "@/components/BackButton";
 import RecordVisit from "@/components/RecordVisit";
+import StoryHighlights from "@/components/StoryHighlights";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +118,8 @@ export default async function UserProfile({ params }: { params: { id: string } }
           </Link>
         )}
       </div>
+
+      <StoryHighlights userId={params.id} mine={user?.id === params.id} />
 
       {p.voice_card_path && (
         <audio controls src={VOICE_URL(p.voice_card_path)} className="mt-6 w-full" preload="none" />

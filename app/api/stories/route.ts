@@ -15,6 +15,7 @@ export async function GET() {
     .from("stories")
     .select("*")
     .gt("expires_at", new Date().toISOString())
+    .or("archived.is.null,archived.eq.false")
     .order("created_at", { ascending: false });
 
   const ids = Array.from(new Set((stories || []).map((s) => s.user_id)));

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Eye, Trash2, Send } from "lucide-react";
+import { Plus, X, Eye, Trash2, Send, ImagePlus, Type as TypeIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -24,6 +24,8 @@ export default function StoriesBar() {
   const [idx, setIdx] = useState(0);
   const [composing, setComposing] = useState(false);
   const [text, setText] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [reacted, setReacted] = useState<string | null>(null);
   const [viewers, setViewers] = useState<{ count: number; viewers: any[] } | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -85,16 +87,40 @@ export default function StoriesBar() {
     else if (j.ownerId) router.push(`/u/${j.ownerId}`);
   }
 
-  async function paylas() {
-    if (!text.trim()) return;
-    await fetch("/api/stories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "text", text }),
-    });
-    setText("");
+  function kapat() {
     setComposing(false);
-    load();
+    setText("");
+    setFile(null);
+  }
+
+  async function paylas() {
+    if (!file && !text.trim()) return;
+    setUploading(true);
+    try {
+      let media_path: string | null = null;
+      let type: "photo" | "video" | "text" = "text";
+      if (file) {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) { setUploading(false); return; }
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${data.user.id}/stories/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("media")
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) { alert("Yükleme başarısız: " + upErr.message); setUploading(false); return; }
+        media_path = path;
+        type = file.type.startsWith("video") ? "video" : "photo";
+      }
+      await fetch("/api/stories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, text: text.trim() || null, media_path }),
+      });
+      kapat();
+      load();
+    } finally {
+      setUploading(false);
+    }
   }
 
   const cur = active?.items[idx];
@@ -138,25 +164,60 @@ export default function StoriesBar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6"
-            onClick={() => setComposing(false)}
+            onClick={kapat}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-full rounded-3xl border border-border bg-surface p-5"
+              className="w-full max-w-md rounded-3xl border border-border bg-surface p-5"
             >
-              <h3 className="mb-3 font-semibold">Hikaye paylaş</h3>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Ne düşünüyorsun?"
-                rows={3}
-                className="w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand"
-              />
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="font-semibold">Hikaye paylaş</h3>
+                <button onClick={kapat} className="text-muted"><X size={18} /></button>
+              </div>
+
+              {/* Medya seçimi / önizleme */}
+              {file ? (
+                <div className="relative mb-3 overflow-hidden rounded-2xl bg-black">
+                  {file.type.startsWith("video") ? (
+                    <video src={URL.createObjectURL(file)} className="max-h-72 w-full object-contain" controls />
+                  ) : (
+                    <img src={URL.createObjectURL(file)} className="max-h-72 w-full object-contain" alt="" />
+                  )}
+                  <button onClick={() => setFile(null)} className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white">
+                    <X size={15} />
+                  </button>
+                </div>
+              ) : (
+                <label className="mb-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-elevated py-8 text-muted transition hover:border-brand">
+                  <ImagePlus size={26} />
+                  <span className="text-sm font-medium">Fotoğraf veya video seç</span>
+                  <span className="text-xs">veya aşağıya yazı yaz</span>
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); }}
+                  />
+                </label>
+              )}
+
+              <div className="flex items-start gap-2 rounded-2xl border border-border bg-elevated px-3 py-2">
+                <TypeIcon size={16} className="mt-2.5 text-muted" />
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={file ? "Yazı ekle (isteğe bağlı)…" : "Ne düşünüyorsun?"}
+                  rows={file ? 1 : 3}
+                  className="w-full resize-none bg-transparent py-2 outline-none"
+                />
+              </div>
+
               <button
                 onClick={paylas}
-                className="brand-gradient mt-3 w-full rounded-2xl py-3 font-semibold text-white"
+                disabled={uploading || (!file && !text.trim())}
+                className="brand-gradient mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-white disabled:opacity-50"
               >
-                Paylaş
+                {uploading ? <><Loader2 size={18} className="animate-spin" /> Yükleniyor…</> : "Paylaş"}
               </button>
             </div>
           </motion.div>
@@ -187,10 +248,19 @@ export default function StoriesBar() {
             >
               {cur.type === "text" ? (
                 <p className="text-center text-2xl font-semibold text-white">{cur.text}</p>
-              ) : cur.type === "video" ? (
-                <video src={cur.media || ""} autoPlay controls className="max-h-full rounded-2xl" />
               ) : (
-                <img src={cur.media || ""} className="max-h-full rounded-2xl" alt="" />
+                <div className="relative flex max-h-full items-center justify-center">
+                  {cur.type === "video" ? (
+                    <video src={cur.media || ""} autoPlay controls className="max-h-[80dvh] rounded-2xl" />
+                  ) : (
+                    <img src={cur.media || ""} className="max-h-[80dvh] rounded-2xl" alt="" />
+                  )}
+                  {cur.text && (
+                    <p className="absolute bottom-4 left-1/2 max-w-[90%] -translate-x-1/2 rounded-2xl bg-black/50 px-4 py-2 text-center text-base font-medium text-white backdrop-blur-sm">
+                      {cur.text}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex gap-1 px-4 pt-3">

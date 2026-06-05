@@ -21,6 +21,7 @@ import PhotoManager from "@/components/PhotoManager";
 import PromptEditor from "@/components/PromptEditor";
 import Achievements from "@/components/Achievements";
 import TrustBadge from "@/components/TrustBadge";
+import StoryHighlights from "@/components/StoryHighlights";
 
 export const dynamic = "force-dynamic";
 
@@ -168,6 +169,8 @@ export default async function Profil() {
       )}
 
       <PhotoManager userId={user!.id} initial={photos} />
+
+      <StoryHighlights userId={user!.id} mine />
 
       <PromptEditor userId={user!.id} />
 
