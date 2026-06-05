@@ -41,7 +41,7 @@ export default function RightRail() {
         </p>
         <Link
           href="/premium"
-          className="block rounded-xl bg-accent py-2 text-center text-sm font-semibold text-[#0B1220] transition hover:opacity-90"
+          className="block rounded-xl bg-gradient-to-r from-brand-2 to-brand py-2 text-center text-sm font-semibold text-[#1c1407] transition hover:brightness-110"
         >
           Premium'u keşfet
         </Link>

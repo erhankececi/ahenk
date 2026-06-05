@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 const primary = [
   { href: "/kesfet", icon: Compass, label: "Keşfet" },
-  { href: "/moments", icon: Sparkles, label: "Anlar" },
+  { href: "/moments", icon: Sparkles, label: "Moments" },
   { href: "/reels", icon: Film, label: "Reels" },
   { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar", badge: true },
   { href: "/etkinlikler", icon: CalendarHeart, label: "Etkinlikler" },
@@ -46,8 +46,8 @@ export default function SideNav() {
   return (
     <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-1 border-r border-border px-4 py-6 lg:flex">
       {/* Marka */}
-      <Link href="/kesfet" className="mb-5 flex items-center gap-2.5 px-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-brand text-base font-extrabold text-[#0B1220]">
+      <Link href="/kesfet" className="mb-6 flex items-center gap-2.5 px-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-2 to-brand text-base font-extrabold text-[#1c1407] ring-1 ring-accent/30">
           A
         </span>
         <span className="font-display text-xl font-extrabold tracking-tight">Ahenk</span>
@@ -63,14 +63,17 @@ export default function SideNav() {
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition",
-                active ? "bg-brand/10 text-brand" : "text-muted hover:bg-surface hover:text-text"
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] transition",
+                active
+                  ? "bg-accent/10 font-semibold text-accent"
+                  : "font-medium text-muted hover:bg-surface hover:text-text"
               )}
             >
+              {active && <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-accent" />}
               <Icon size={20} className="shrink-0" />
               {label}
               {showBadge && (
-                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-white">
+                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-error px-1.5 text-[11px] font-bold text-white">
                   {unread > 9 ? "9+" : unread}
                 </span>
               )}
