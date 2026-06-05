@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Heart, Sparkles, Bookmark, MessageCircle, Plus, X, ImagePlus, Gift as GiftIcon, MoreVertical, Archive, Trash2 } from "lucide-react";
+import { Heart, Sparkles, Bookmark, MessageCircle, Plus, X, ImagePlus, Gift as GiftIcon, MoreVertical, Archive, Trash2, BadgeCheck, Share2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { zamanFarki } from "@/lib/utils";
+import { tierFrame } from "@/components/PremiumBadge";
 import MomentComments from "@/components/MomentComments";
 import GiftStore from "@/components/GiftStore";
 import GiftAnimation from "@/components/GiftAnimation";
@@ -11,15 +13,10 @@ import { giftByKey, type Gift as GiftT } from "@/lib/gifts";
 type Media = { type: string; url: string };
 type Moment = {
   id: string; user_id: string; name: string; text: string | null;
+  city?: string | null; verified?: boolean; tier?: string; created_at?: string;
   album: Media[]; tags: string[]; highlighted: boolean;
   reactions: number; comments: number; comments_off: boolean; gifts_off: boolean; mine: boolean;
 };
-
-const REACTS = [
-  { type: "begen", label: "Beğen", icon: Heart },
-  { type: "ilginc", label: "İlginç", icon: Sparkles },
-  { type: "kaydet", label: "Kaydet", icon: Bookmark },
-];
 
 function Carousel({ album }: { album: Media[] }) {
   const [i, setI] = useState(0);
@@ -62,6 +59,8 @@ export default function MomentsFeed() {
   const [commentsFor, setCommentsFor] = useState<string | null>(null);
   const [giftFor, setGiftFor] = useState<Moment | null>(null);
   const [giftAnim, setGiftAnim] = useState<GiftT | null>(null);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
+  const [saved, setSaved] = useState<Set<string>>(new Set());
   const fileRef = useRef<HTMLInputElement>(null);
 
   function load() {
@@ -102,7 +101,23 @@ export default function MomentsFeed() {
 
   async function react(id: string, type: string) {
     await fetch("/api/moments/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ moment_id: id, type }) });
+  }
+  function begen(id: string) {
+    if (liked.has(id)) return;
+    setLiked((s) => new Set(s).add(id));
     setMoments((ms) => ms.map((m) => (m.id === id ? { ...m, reactions: m.reactions + 1 } : m)));
+    react(id, "begen");
+  }
+  function kaydet(id: string) {
+    setSaved((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    react(id, "kaydet");
+  }
+  async function paylasMoment(m: Moment) {
+    const url = `${location.origin}/u/${m.user_id}`;
+    try {
+      if (navigator.share) await navigator.share({ title: "Ahenk", text: `${m.name} · bir an`, url });
+      else { await navigator.clipboard.writeText(url); setWarn("Bağlantı kopyalandı."); setTimeout(() => setWarn(""), 2000); }
+    } catch {}
   }
 
   async function sil(id: string) {
@@ -171,10 +186,19 @@ export default function MomentsFeed() {
       {moments.map((m) => (
         <div key={m.id} className={`overflow-hidden rounded-3xl border bg-surface ${m.highlighted ? "border-brand/60" : "border-border"}`}>
           <div className="relative flex items-center justify-between p-3">
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 font-semibold">{m.name?.[0]?.toUpperCase() || "?"}</span>
-              <span className="font-medium">{m.name}</span>
-            </div>
+            <a href={`/u/${m.user_id}`} className="flex items-center gap-2.5">
+              <span className={`rounded-full ${tierFrame(m.tier || "free")}`}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-sm font-semibold">{m.name?.[0]?.toUpperCase() || "?"}</span>
+              </span>
+              <div className="leading-tight">
+                <p className="flex items-center gap-1 text-sm font-semibold">
+                  {m.name}{m.verified && <BadgeCheck size={14} className="text-sky-400" />}
+                </p>
+                <p className="text-xs text-muted">
+                  {m.created_at ? zamanFarki(m.created_at) : ""}{m.city ? ` · ${m.city}` : ""}
+                </p>
+              </div>
+            </a>
             {m.mine && (
               <button onClick={(e) => { e.stopPropagation(); setMenuFor(menuFor === m.id ? null : m.id); }} className="text-muted"><MoreVertical size={18} /></button>
             )}
@@ -189,23 +213,40 @@ export default function MomentsFeed() {
           </div>
 
           {m.album.length > 0 && <Carousel album={m.album} />}
-          {m.text && <p className="px-4 py-3 text-sm leading-relaxed">{m.text}</p>}
 
-          <div className="flex items-center justify-between border-t border-border px-4 py-2 text-muted">
-            <div className="flex gap-4">
-              {REACTS.map(({ type, label, icon: Icon }) => (
-                <button key={type} onClick={() => react(m.id, type)} className="flex items-center gap-1 text-sm transition hover:text-brand active:scale-95"><Icon size={18} /> {label}</button>
-              ))}
-            </div>
-            <div className="flex items-center gap-3">
-              {!m.comments_off && (
-                <button onClick={() => setCommentsFor(m.id)} className="flex items-center gap-1 text-sm hover:text-brand"><MessageCircle size={16} /> {m.comments}</button>
-              )}
+          {/* Aksiyon çubuğu — Instagram düzeni */}
+          <div className="flex items-center gap-4 px-4 pt-3">
+            <button onClick={() => begen(m.id)} className="flex items-center gap-1.5 active:scale-90">
+              <Heart size={23} className={liked.has(m.id) ? "fill-rose-500 text-rose-500" : "text-text"} />
+              <span className="text-sm font-medium">{m.reactions}</span>
+            </button>
+            {!m.comments_off && (
+              <button onClick={() => setCommentsFor(m.id)} className="flex items-center gap-1.5 active:scale-90">
+                <MessageCircle size={22} /> <span className="text-sm font-medium">{m.comments}</span>
+              </button>
+            )}
+            <button onClick={() => paylasMoment(m)} className="active:scale-90"><Share2 size={21} /></button>
+            <div className="ml-auto flex items-center gap-3.5">
               {!m.gifts_off && !m.mine && (
-                <button onClick={() => setGiftFor(m)} className="text-accent hover:opacity-80"><GiftIcon size={17} /></button>
+                <button onClick={() => setGiftFor(m)} className="text-accent active:scale-90"><GiftIcon size={22} /></button>
               )}
+              <button onClick={() => kaydet(m.id)} className="active:scale-90">
+                <Bookmark size={22} className={saved.has(m.id) ? "fill-accent text-accent" : "text-text"} />
+              </button>
             </div>
           </div>
+
+          {/* Açıklama */}
+          {m.text && (
+            <p className="px-4 pb-3 pt-2 text-sm leading-relaxed">
+              <span className="font-semibold">{m.name}</span> {m.text}
+            </p>
+          )}
+          {!m.comments_off && m.comments > 0 && (
+            <button onClick={() => setCommentsFor(m.id)} className="px-4 pb-3 text-left text-xs text-muted">
+              {m.comments} yorumun tümünü gör
+            </button>
+          )}
         </div>
       ))}
 

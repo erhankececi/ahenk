@@ -25,7 +25,7 @@ export async function GET() {
   const userIds = Array.from(new Set((moments || []).map((m) => m.user_id)));
   const { data: profiles } = await supabase
     .from("profiles_card")
-    .select("id, name, city")
+    .select("id, name, city, is_verified, tier")
     .in("id", userIds.length ? userIds : ["00000000-0000-0000-0000-000000000000"]);
   const pMap = new Map((profiles || []).map((p) => [p.id, p]));
 
@@ -66,6 +66,8 @@ export async function GET() {
       user_id: m.user_id,
       name: pMap.get(m.user_id)?.name || "Biri",
       city: pMap.get(m.user_id)?.city,
+      verified: !!pMap.get(m.user_id)?.is_verified,
+      tier: pMap.get(m.user_id)?.tier || "free",
       type: m.type,
       text: m.text,
       media: album[0]?.url || null,
