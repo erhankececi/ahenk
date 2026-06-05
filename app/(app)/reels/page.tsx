@@ -19,6 +19,7 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift }: {
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     const v = ref.current;
@@ -38,24 +39,35 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift }: {
 
   return (
     <div className="relative h-[100dvh] w-full shrink-0 snap-start snap-always bg-black">
-      <video ref={ref} src={reel.video} loop playsInline muted={muted} onClick={tap} className="h-full w-full object-contain" />
-      {paused && <div className="pointer-events-none absolute inset-0 flex items-center justify-center"><Play size={64} className="text-white/70" /></div>}
+      <video ref={ref} src={reel.video} loop playsInline muted={muted} onClick={tap} className="h-full w-full object-cover" />
+      {paused && <div className="pointer-events-none absolute inset-0 flex items-center justify-center"><Play size={60} className="text-white/60" fill="currentColor" strokeWidth={0} /></div>}
 
-      {/* sağ aksiyonlar */}
-      <div className="absolute bottom-28 right-3 flex flex-col items-center gap-5 text-white">
-        <button onClick={onLike} className="flex flex-col items-center"><Heart size={30} /><span className="text-xs">{reel.reactions}</span></button>
-        {!reel.comments_off && <button onClick={onComment} className="flex flex-col items-center"><MessageCircle size={28} /><span className="text-xs">{reel.comments}</span></button>}
-        {!reel.gifts_off && !reel.mine && <button onClick={onGift} className="flex flex-col items-center text-accent"><GiftIcon size={28} /><span className="text-xs">Hediye</span></button>}
-        <button onClick={onToggleMute}>{muted ? <VolumeX size={26} /> : <Volume2 size={26} />}</button>
+      {/* sağ aksiyonlar — ince, sessiz */}
+      <div className="absolute bottom-28 right-3.5 flex flex-col items-center gap-6 text-white">
+        <button onClick={() => { if (!liked) { setLiked(true); onLike(); } }} className="flex flex-col items-center gap-1">
+          <Heart size={29} strokeWidth={1.6} className={liked ? "fill-rose-500 text-rose-500" : ""} />
+          <span className="text-xs font-medium">{reel.reactions}</span>
+        </button>
+        {!reel.comments_off && (
+          <button onClick={onComment} className="flex flex-col items-center gap-1">
+            <MessageCircle size={28} strokeWidth={1.6} /><span className="text-xs font-medium">{reel.comments}</span>
+          </button>
+        )}
+        {!reel.gifts_off && !reel.mine && (
+          <button onClick={onGift} className="flex flex-col items-center gap-1 text-accent">
+            <GiftIcon size={27} strokeWidth={1.6} />
+          </button>
+        )}
+        <button onClick={onToggleMute}>{muted ? <VolumeX size={25} strokeWidth={1.6} /> : <Volume2 size={25} strokeWidth={1.6} />}</button>
       </div>
 
-      {/* alt bilgi */}
-      <div className="absolute inset-x-0 bottom-20 bg-gradient-to-t from-black/70 to-transparent p-4 pr-20 text-white">
-        <Link href={`/u/${reel.user_id}`} className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-accent text-sm font-bold">{reel.name[0]?.toUpperCase()}</span>
+      {/* alt bilgi — sessiz overlay */}
+      <div className="absolute inset-x-0 bottom-20 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 pr-20 pt-12 text-white">
+        <Link href={`/u/${reel.user_id}`} className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-sm font-semibold ring-1 ring-white/20">{reel.name[0]?.toUpperCase()}</span>
           <span className="font-semibold">{reel.name}</span>
         </Link>
-        {reel.text && <p className="mt-2 line-clamp-2 text-sm text-white/90">{reel.text}</p>}
+        {reel.text && <p className="mt-2.5 line-clamp-2 text-sm text-white/85">{reel.text}</p>}
       </div>
     </div>
   );
