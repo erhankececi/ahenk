@@ -246,6 +246,7 @@ function CallScreen({
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const localRef = useRef<HTMLVideoElement>(null);
+  const localFsRef = useRef<HTMLVideoElement>(null);
   const [mic, setMic] = useState(true);
   const [cam, setCam] = useState(true);
   const [seconds, setSeconds] = useState(0);
@@ -277,9 +278,11 @@ function CallScreen({
     const t = setInterval(() => {
       if (state.mgr.local) {
         setLocalStream((cur) => cur || state.mgr.local);
-        if (localRef.current && !localRef.current.srcObject) {
-          localRef.current.srcObject = state.mgr.local;
-          localRef.current.play?.().catch(() => {});
+        for (const el of [localRef.current, localFsRef.current]) {
+          if (el && !el.srcObject) {
+            el.srcObject = state.mgr.local;
+            el.play?.().catch(() => {});
+          }
         }
       }
     }, 300);
@@ -303,7 +306,7 @@ function CallScreen({
   function toggleCam() { const v = !cam; setCam(v); state.mgr.setCam(v); }
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-gradient-to-b from-[#0B1220] via-[#0a0f1c] to-[#05080f] text-white">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-gradient-to-b from-[#17151A] via-[#0E0D10] to-[#050505] text-white">
       {/* ÜST — durum */}
       <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center gap-1.5 px-6 pt-[max(2.5rem,env(safe-area-inset-top))]">
         {vip && (
@@ -320,9 +323,12 @@ function CallScreen({
       {/* ORTA */}
       {isVideo ? (
         <div className="relative flex-1">
-          <video ref={remoteVideoRef} autoPlay playsInline className="h-full w-full object-cover" />
-          {!remoteCam && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0B1220]">
+          {/* Bağlanana kadar KENDİ görüntün tam ekran (FaceTime mantığı) */}
+          <video ref={localFsRef} autoPlay playsInline muted className={`h-full w-full -scale-x-100 object-cover ${active ? "hidden" : "block"}`} />
+          {/* Aktifken karşı taraf tam ekran */}
+          <video ref={remoteVideoRef} autoPlay playsInline className={`h-full w-full object-cover ${active ? "block" : "hidden"}`} />
+          {active && !remoteCam && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0E0D10]">
               <Avatar name={state.other.name} size={120} />
             </div>
           )}
@@ -331,17 +337,19 @@ function CallScreen({
               <SpeakingBars level={remoteLevel} max={20} />
             </div>
           )}
-          {!remoteMic && (
+          {active && !remoteMic && (
             <div className="absolute left-4 top-[max(2.5rem,env(safe-area-inset-top))] flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-xs">
               <MicOff size={13} /> Sessizde
             </div>
           )}
-          {/* yerel önizleme */}
-          <div className="absolute right-4 top-[max(2.5rem,env(safe-area-inset-top))] h-40 w-28 overflow-hidden rounded-2xl border border-white/15 bg-[#0B1220] shadow-float">
-            <video ref={localRef} autoPlay playsInline muted className={`h-full w-full object-cover ${cam ? "" : "hidden"}`} />
-            {!cam && <div className="flex h-full w-full items-center justify-center"><Avatar name="S" size={52} /></div>}
-            {!mic && <div className="absolute bottom-1 left-1 rounded-full bg-black/60 p-1"><MicOff size={12} /></div>}
-          </div>
+          {/* yerel önizleme (PiP) — yalnız bağlandıktan sonra */}
+          {active && (
+            <div className="absolute right-4 top-[max(2.5rem,env(safe-area-inset-top))] h-40 w-28 overflow-hidden rounded-2xl border border-white/15 bg-[#0E0D10] shadow-float">
+              <video ref={localRef} autoPlay playsInline muted className={`h-full w-full -scale-x-100 object-cover ${cam ? "" : "hidden"}`} />
+              {!cam && <div className="flex h-full w-full items-center justify-center"><Avatar name="S" size={52} /></div>}
+              {!mic && <div className="absolute bottom-1 left-1 rounded-full bg-black/60 p-1"><MicOff size={12} /></div>}
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-6">
@@ -364,12 +372,12 @@ function CallScreen({
         </div>
       )}
 
-      {/* ALT — kontroller */}
-      <div className="relative z-10 flex items-center justify-center gap-4 px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-6">
+      {/* ALT — frosted kontrol çubuğu */}
+      <div className="relative z-10 mx-auto mb-[max(2rem,env(safe-area-inset-bottom))] mt-6 flex items-center justify-center gap-4 rounded-full border border-white/10 bg-white/[0.06] px-5 py-3 backdrop-blur-xl">
         <button
           onClick={toggleMic}
           aria-label={mic ? "Mikrofonu kapat" : "Mikrofonu aç"}
-          className={`${ctrl} relative ${mic ? "bg-white/12 text-white" : "bg-white text-[#0B1220]"}`}
+          className={`${ctrl} relative ${mic ? "bg-white/12 text-white" : "bg-white text-[#0E0D10]"}`}
         >
           {mic ? <Mic /> : <MicOff />}
           {mic && active && (
@@ -384,7 +392,7 @@ function CallScreen({
             <button
               onClick={toggleCam}
               aria-label={cam ? "Kamerayı kapat" : "Kamerayı aç"}
-              className={`${ctrl} ${cam ? "bg-white/12 text-white" : "bg-white text-[#0B1220]"}`}
+              className={`${ctrl} ${cam ? "bg-white/12 text-white" : "bg-white text-[#0E0D10]"}`}
             >
               {cam ? <Video /> : <VideoOff />}
             </button>
