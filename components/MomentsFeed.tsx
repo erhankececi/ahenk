@@ -68,6 +68,13 @@ export default function MomentsFeed() {
   }
   useEffect(load, []);
 
+  // Üst bardaki + butonu composer'ı açar
+  useEffect(() => {
+    const open = () => setComposing(true);
+    window.addEventListener("ahenk:moment-new", open);
+    return () => window.removeEventListener("ahenk:moment-new", open);
+  }, []);
+
   function dosyaSec(selected: File[]) {
     const ok = selected.filter((f) => (f.type.startsWith("video") ? f.size <= 50 * 1024 * 1024 : f.type.startsWith("image") ? f.size <= 10 * 1024 * 1024 : false));
     if (ok.length < selected.length) setWarn("Bazı dosyalar atlandı (foto ≤10MB, video ≤50MB).");
@@ -147,11 +154,7 @@ export default function MomentsFeed() {
     return <div className="space-y-4 pb-6">{[0, 1].map((i) => <div key={i} className="h-72 animate-pulse rounded-3xl bg-surface" />)}</div>;
 
   return (
-    <div className="space-y-4 pb-6" onClick={() => menuFor && setMenuFor(null)}>
-      <button onClick={() => setComposing(true)} className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-white">
-        <Plus size={18} /> Anını paylaş
-      </button>
-
+    <div className="space-y-5 pb-6" onClick={() => menuFor && setMenuFor(null)}>
       {composing && (
         <div className="rounded-3xl border border-border bg-surface p-4">
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="Bir şeyler yaz… (isteğe bağlı)" className="w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand" />

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bell, Search, Settings } from "lucide-react";
+import { Bell, Search, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export function TopBar({ title }: { title: string }) {
+export function TopBar({ title, create }: { title: string; create?: boolean }) {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
@@ -45,13 +45,15 @@ export function TopBar({ title }: { title: string }) {
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent ring-2 ring-bg" />
           )}
         </Link>
-        <Link
-          href="/profil"
-          aria-label="Ayarlar"
-          className="flex h-10 w-10 items-center justify-center rounded-2xl text-muted transition duration-200 hover:bg-elevated hover:text-text"
-        >
-          <Settings size={20} />
-        </Link>
+        {create && (
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("ahenk:moment-new"))}
+            aria-label="Paylaş"
+            className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-2 to-brand text-[#1c1407] transition hover:brightness-110"
+          >
+            <Plus size={20} strokeWidth={2.4} />
+          </button>
+        )}
       </div>
     </header>
   );

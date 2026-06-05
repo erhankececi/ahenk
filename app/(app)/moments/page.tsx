@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default function MomentsPage() {
   return (
     <div className="pb-6">
-      <TopBar title="Moments" />
+      <TopBar title="Moments" create />
       <div className="px-4">
         <StoriesBar />
         <MomentsFeed />
