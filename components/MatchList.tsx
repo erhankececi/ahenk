@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { zamanFarki } from "@/lib/utils";
 import { PremiumBadge, tierFrame } from "@/components/PremiumBadge";
-import { MoreVertical, Archive, Lock, Trash2, RotateCcw, ChevronDown } from "lucide-react";
+import { MoreVertical, Archive, Lock, Trash2, RotateCcw, Inbox } from "lucide-react";
 
 export type Row = {
   matchId: string;
@@ -18,11 +18,13 @@ export type Row = {
   state: string;
 };
 
+type Tab = "normal" | "archived" | "hidden";
+
 export default function MatchList({ meId, rows }: { meId: string; rows: Row[] }) {
   const supabase = createClient();
   const [override, setOverride] = useState<Record<string, string>>({});
   const [menuFor, setMenuFor] = useState<string | null>(null);
-  const [showArchive, setShowArchive] = useState(false);
+  const [tab, setTab] = useState<Tab>("normal");
   const [unlocked, setUnlocked] = useState(false);
 
   const stateOf = (r: Row) => override[r.matchId] ?? r.state ?? "normal";
@@ -46,11 +48,16 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
     const r = await fetch("/api/chat-folder/pin", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, pin }),
     }).then((r) => r.json());
-    if (r.ok) setUnlocked(true);
+    if (r.ok) { setUnlocked(true); setTab("hidden"); }
     else alert(st.hasPin ? "Yanlış PIN." : "PIN 4-8 haneli rakam olmalı.");
   }
 
-  function ChatRow({ r, mode }: { r: Row; mode: "normal" | "archived" | "hidden" }) {
+  function onTab(t: Tab) {
+    if (t === "hidden" && !unlocked) { gizliAc(); return; }
+    setTab(t);
+  }
+
+  function ChatRow({ r, mode }: { r: Row; mode: Tab }) {
     return (
       <div className="relative flex items-center gap-1 rounded-2xl border border-border bg-surface transition hover:border-brand/40">
         <Link href={`/sohbet/${r.matchId}`} className="flex min-w-0 flex-1 items-center gap-3 p-3">
@@ -75,20 +82,21 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
             <MoreVertical size={18} />
           </button>
         ) : (
-          <button onClick={() => setState(r.matchId, "normal")} className="shrink-0 px-3 text-xs text-brand" aria-label="Geri al">
+          <button onClick={() => setState(r.matchId, "normal")} className="shrink-0 px-3 text-xs text-brand" aria-label="Geri al" title="Aktif sohbetlere geri al">
             <RotateCcw size={16} />
           </button>
         )}
         {menuFor === r.matchId && (
-          <div className="absolute right-2 top-12 z-10 w-44 overflow-hidden rounded-2xl border border-border bg-elevated shadow-float">
+          <div className="absolute right-2 top-12 z-10 w-52 overflow-hidden rounded-2xl border border-border bg-elevated shadow-float">
             <button onClick={() => setState(r.matchId, "archived")} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface">
               <Archive size={15} /> Arşivle
             </button>
             <button onClick={() => setState(r.matchId, "hidden")} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface">
               <Lock size={15} /> Gizli klasöre taşı
             </button>
-            <button onClick={() => setState(r.matchId, "deleted")} className="flex w-full items-center gap-2 px-4 py-3 text-sm text-error hover:bg-surface">
-              <Trash2 size={15} /> Sil
+            <button onClick={() => setState(r.matchId, "deleted")} className="flex w-full flex-col items-start gap-0.5 px-4 py-3 text-sm text-error hover:bg-surface">
+              <span className="flex items-center gap-2"><Trash2 size={15} /> Benim için sil</span>
+              <span className="pl-6 text-[11px] font-normal text-muted">Mesajlar silinmez — tekrar yazışınca geri gelir</span>
             </button>
           </div>
         )}
@@ -96,37 +104,57 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
     );
   }
 
-  return (
-    <div className="space-y-2" onClick={(e) => { if (menuFor && !(e.target as HTMLElement).closest("[aria-label='Seçenekler']")) setMenuFor(null); }}>
-      {normal.map((r) => <ChatRow key={r.matchId} r={r} mode="normal" />)}
+  const TABS: { key: Tab; label: string; n: number }[] = [
+    { key: "normal", label: "Aktif", n: normal.length },
+    { key: "archived", label: "Arşiv", n: archived.length },
+    { key: "hidden", label: "Gizli", n: unlocked ? hidden.length : 0 },
+  ];
 
-      {/* Arşiv */}
-      {archived.length > 0 && (
-        <div className="pt-2">
-          <button onClick={() => setShowArchive((v) => !v)} className="flex w-full items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-medium">
-            <Archive size={16} className="text-muted" /> Arşiv ({archived.length})
-            <ChevronDown size={15} className={`ml-auto transition ${showArchive ? "rotate-180" : ""}`} />
+  const list = tab === "normal" ? normal : tab === "archived" ? archived : hidden;
+  const empty =
+    tab === "normal" ? "Henüz aktif sohbetin yok." :
+    tab === "archived" ? "Arşivde sohbet yok." :
+    "Gizli klasör boş.";
+
+  return (
+    <div onClick={(e) => { if (menuFor && !(e.target as HTMLElement).closest("[aria-label='Seçenekler']")) setMenuFor(null); }}>
+      {/* Sekmeler: Aktif / Arşiv / Gizli */}
+      <div className="mb-3 flex gap-1 rounded-2xl bg-elevated p-1">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => onTab(t.key)}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-medium transition ${
+              tab === t.key ? "brand-gradient text-white" : "text-muted"
+            }`}
+          >
+            {t.key === "hidden" && <Lock size={13} />}
+            {t.label}
+            {t.n > 0 && (
+              <span className={`rounded-full px-1.5 text-[11px] ${tab === t.key ? "bg-white/25" : "bg-surface"}`}>{t.n}</span>
+            )}
           </button>
-          {showArchive && <div className="mt-2 space-y-2">{archived.map((r) => <ChatRow key={r.matchId} r={r} mode="archived" />)}</div>}
+        ))}
+      </div>
+
+      {tab === "hidden" && !unlocked ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Lock size={28} className="text-accent" />
+          <p className="text-sm text-muted">Gizli klasör PIN ile korunuyor.</p>
+          <button onClick={gizliAc} className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-white">
+            Kilidi aç
+          </button>
+        </div>
+      ) : list.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-12 text-center text-muted">
+          <Inbox size={28} />
+          <p className="text-sm">{empty}</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {list.map((r) => <ChatRow key={r.matchId} r={r} mode={tab} />)}
         </div>
       )}
-
-      {/* Gizli Klasör */}
-      <div className="pt-2">
-        <button onClick={gizliAc} className="flex w-full items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-medium">
-          <Lock size={16} className="text-accent" /> Gizli Klasör{hidden.length > 0 ? ` (${hidden.length})` : ""}
-          {unlocked && <span className="ml-auto text-xs text-success">açık</span>}
-        </button>
-        {unlocked && (
-          <div className="mt-2 space-y-2">
-            {hidden.length === 0 ? (
-              <p className="px-1 text-xs text-muted">Gizli klasör boş.</p>
-            ) : (
-              hidden.map((r) => <ChatRow key={r.matchId} r={r} mode="hidden" />)
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
