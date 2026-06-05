@@ -2,8 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { GIFT_CATALOG, GIFT_CATEGORIES, RARITY, type GiftCategory } from "@/lib/gifts";
+import { GIFT_CATALOG, GIFT_CATEGORIES, RARITY, type GiftCategory, type Gift } from "@/lib/gifts";
 import { Coins, Gift as GiftIcon, X, Plus } from "lucide-react";
+
+// 3D görsel; yüklenemezse emoji'ye düşer.
+function GiftThumb({ g }: { g: Gift }) {
+  const [err, setErr] = useState(false);
+  if (err) return <span className="text-[2.5rem] leading-none">{g.emoji}</span>;
+  return (
+    <img
+      src={`/gifts/${g.key}.png`}
+      alt={g.name}
+      loading="lazy"
+      onError={() => setErr(true)}
+      className="relative h-14 w-14 object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.65)] transition group-hover:scale-110"
+    />
+  );
+}
 
 /** TikTok/Bigo seviyesi kategorili premium hediye mağazası. */
 export default function GiftStore({
@@ -94,12 +109,10 @@ export default function GiftStore({
                 <span className="absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide" style={{ color: r.text, background: "rgba(0,0,0,0.45)" }}>
                   {r.label}
                 </span>
-                {/* emoji */}
-                <span className="relative my-1.5 flex h-12 items-center justify-center">
-                  <span className="absolute h-10 w-10 rounded-full opacity-50 blur-xl" style={{ background: r.ring }} />
-                  <span className="relative text-[2.5rem] leading-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)] transition group-hover:scale-110">
-                    {g.emoji}
-                  </span>
+                {/* 3D görsel */}
+                <span className="relative my-1 flex h-14 items-center justify-center">
+                  <span className="absolute h-12 w-12 rounded-full opacity-45 blur-xl" style={{ background: r.ring }} />
+                  <GiftThumb g={g} />
                 </span>
                 <span className="w-full truncate text-center text-[11px] font-medium text-white/90">{g.name}</span>
                 <span className="mt-1 flex items-center gap-1 text-xs font-bold text-accent">
@@ -110,8 +123,19 @@ export default function GiftStore({
           })}
         </div>
 
-        {/* Gönder çubuğu */}
-        <div className="border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {/* Jeton satın al + Gönder çubuğu */}
+        <div className="space-y-2.5 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <a
+            href="/cuzdan"
+            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5 transition hover:border-accent/40"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-accent"><Coins size={18} /></span>
+            <span className="flex-1">
+              <span className="block text-sm font-semibold">Jeton satın al</span>
+              <span className="block text-xs text-muted">Avantajlı paketleri keşfet</span>
+            </span>
+            <Plus size={18} className="text-accent" />
+          </a>
           <button
             onClick={() => sel && onSend(sel)}
             disabled={!sel}
