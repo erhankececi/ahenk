@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const items = [
   { href: "/kesfet", icon: Compass, label: "Keşfet" },
   { href: "/moments", icon: Sparkles, label: "Moments" },
-  { href: "/reels", icon: Film, label: "Reels" },
+  { href: "/reels", icon: Film, label: "Klipler" },
   { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar" },
   { href: "/profil", icon: User, label: "Profil" },
 ];
@@ -61,19 +61,14 @@ export function BottomNav() {
               aria-current={active ? "page" : undefined}
               aria-label={badge ? `${label}, ${unread} okunmamış` : label}
               className={cn(
-                "flex flex-1 flex-col items-center gap-0.5 py-1 text-xs transition",
-                active ? "text-brand" : "text-muted"
+                "flex flex-1 flex-col items-center gap-1 py-1 text-[11px] transition",
+                active ? "text-accent" : "text-muted"
               )}
             >
-              <span
-                className={cn(
-                  "relative flex h-8 w-12 items-center justify-center rounded-full transition duration-200",
-                  active && "bg-brand/12"
-                )}
-              >
-                <Icon size={21} />
+              <span className="relative flex h-7 w-12 items-center justify-center">
+                <Icon size={22} strokeWidth={active ? 2 : 1.6} />
                 {badge && (
-                  <span className="absolute right-1.5 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold leading-none text-white">
+                  <span className="absolute right-2 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#C16A55] px-1 text-[10px] font-bold leading-none text-white">
                     {unread > 9 ? "9+" : unread}
                   </span>
                 )}

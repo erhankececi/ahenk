@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import SideNav from "@/components/desktop/SideNav";
-import RightRail from "@/components/desktop/RightRail";
 import CallProvider from "@/components/call/CallProvider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -23,13 +22,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <CallProvider>
-      {/* Responsive kabuk: mobil tek kolon + alt nav; desktop 3 kolon (sol nav / içerik / sağ panel) */}
-      <div className="mx-auto flex w-full max-w-[1280px] justify-center">
+      {/* Responsive kabuk: mobil tek kolon + alt nav; desktop ince ikon rayı + ortalı 720px içerik */}
+      <div className="flex w-full justify-center">
         <SideNav />
-        <main className="min-h-dvh w-full max-w-[620px] flex-1 pb-24 lg:border-x lg:border-border lg:pb-10">
+        <main className="mx-auto min-h-dvh w-full max-w-[720px] flex-1 pb-24 lg:border-x lg:border-border lg:pb-10">
           {children}
         </main>
-        <RightRail />
       </div>
       <BottomNav />
     </CallProvider>
