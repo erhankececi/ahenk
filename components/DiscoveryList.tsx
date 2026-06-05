@@ -1,23 +1,40 @@
 "use client";
 
-import { ChevronRight, Send } from "lucide-react";
+import { Fragment } from "react";
+import { ChevronRight, Send, MapPin } from "lucide-react";
 import { PremiumBadge, tierFrame } from "@/components/PremiumBadge";
 
 export default function DiscoveryList({
   cands,
   onOpen,
   onAction,
+  priorityKm = null,
 }: {
   cands: any[];
   onOpen: (i: number) => void;
   onAction: (id: string) => void;
+  priorityKm?: number | null;
 }) {
   if (!cands.length) return null;
   return (
     <div className="space-y-2">
-      {cands.map((c, i) => (
+      {cands.map((c, i) => {
+        const prev = cands[i - 1];
+        const showPri = priorityKm != null && c.priority && (i === 0 || !prev?.priority);
+        const showFar = priorityKm != null && !c.priority && (i === 0 || prev?.priority);
+        return (
+        <Fragment key={c.id}>
+          {showPri && (
+            <p className="flex items-center gap-1.5 px-1 pt-1 text-xs font-semibold uppercase tracking-wider text-brand">
+              <MapPin size={13} /> Öncelikli Alan · 0–{priorityKm} km
+            </p>
+          )}
+          {showFar && (
+            <p className="px-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">
+              Daha uzaktakiler
+            </p>
+          )}
         <div
-          key={c.id}
           className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 transition duration-200 hover:border-brand/40"
         >
           <button onClick={() => onOpen(i)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
@@ -63,7 +80,9 @@ export default function DiscoveryList({
           </button>
           <ChevronRight size={16} className="hidden shrink-0 text-muted sm:block" />
         </div>
-      ))}
+        </Fragment>
+        );
+      })}
     </div>
   );
 }

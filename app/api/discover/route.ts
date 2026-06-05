@@ -56,7 +56,8 @@ export async function GET(req: Request) {
       p_max_age: maxAge,
       p_verified: verified,
     }),
-    admin.rpc("discover_count", { p_user: user.id, p_max_km: maxKm, p_cities: cities }),
+    // km artık eleme yapmıyor → toplam sayı km'den bağımsız (şehir filtresi hariç)
+    admin.rpc("discover_count", { p_user: user.id, p_max_km: null, p_cities: cities }),
   ]);
 
   const list = (rows || []) as any[];
@@ -159,6 +160,8 @@ export async function GET(req: Request) {
       reasons: reasons.slice(0, 3),
       mesafe: p.distance_km,
       sameCity: p.same_city,
+      // öncelikli alan içinde mi (seçilen km ≥ mesafe). km yoksa hepsi öncelikli.
+      priority: maxKm == null ? true : p.distance_km != null && p.distance_km <= maxKm,
       tier,
       boosted: !!p.boost_until && new Date(p.boost_until).getTime() > now,
       online: lastMs > now - ONLINE_MS,

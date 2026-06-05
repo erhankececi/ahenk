@@ -142,6 +142,7 @@ export default function Kesfet() {
   const blur = revealMore ? "blur-md" : "blur-2xl";
   const photo = current?.photos?.[0];
   const kmText = kmLabel(filter.km);
+  const kmNum = filter.km !== "all" ? parseInt(filter.km, 10) : null;
 
   return (
     <div className="px-4 pt-6">
@@ -174,7 +175,7 @@ export default function Kesfet() {
             </span>
           )}
           <span className="flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 font-medium text-brand">
-            <MapPin size={12} /> {kmText}
+            <MapPin size={12} /> {kmNum ? `0–${kmNum} km öncelik` : kmText}
           </span>
           {filter.cities.map((c) => (
             <span key={c} className="rounded-full bg-brand/10 px-2.5 py-1 font-medium text-brand">
@@ -233,6 +234,7 @@ export default function Kesfet() {
       {tab === "profiller" && view === "liste" && !loading && cands.length > 0 && (
         <DiscoveryList
           cands={cands}
+          priorityKm={kmNum}
           onAction={(id) => interactWith(id, "tanis")}
           onOpen={(idx) => {
             setI(idx);
@@ -298,8 +300,8 @@ export default function Kesfet() {
           <Sparkles className="mb-4 text-brand" size={40} />
           <h2 className="text-xl font-semibold">Şimdilik bu kadar</h2>
           <p className="mt-2 text-muted">
-            {filter.km !== "all" || filter.cities.length
-              ? "Filtreni genişlet — mesafeyi artır veya şehir filtresini kaldır."
+            {filter.cities.length || filter.verified || filter.minAge > 18 || filter.maxAge < 60
+              ? "Şehir, yaş veya doğrulama filtreni gevşet — mesafe artık kimseyi gizlemiyor, sadece sıralıyor."
               : "Yeni profiller geldikçe burada görünecek. Profilini zenginleştir, daha çok kişiye öneril."}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
@@ -330,6 +332,20 @@ export default function Kesfet() {
 
       {tab === "profiller" && view === "kart" && current && (
         <>
+          {kmNum && (
+            <div
+              className={`mb-3 flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold ${
+                current.priority
+                  ? "border-brand/30 bg-brand/10 text-brand"
+                  : "border-border bg-elevated text-muted"
+              }`}
+            >
+              <MapPin size={13} />
+              {current.priority
+                ? `Öncelikli Alan · 0–${kmNum} km`
+                : `Daha uzaktakiler · ${kmNum} km üstü`}
+            </div>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={current.id}

@@ -77,7 +77,7 @@ export default function DiscoveryFilters({
             {/* Mesafe slider */}
             <div className="mb-6">
               <div className="mb-2 flex items-center justify-between">
-                <p className="font-medium">Mesafe</p>
+                <p className="font-medium">Öncelik mesafesi</p>
                 <span className="rounded-full bg-brand/15 px-3 py-1 text-sm font-semibold text-brand">
                   {km.label}
                 </span>
@@ -95,6 +95,10 @@ export default function DiscoveryFilters({
                 <span>5 km</span>
                 <span>Türkiye geneli</span>
               </div>
+              <p className="mt-2 text-xs text-muted">
+                Bu mesafeye kadar olanlara <span className="text-brand">öncelik</span> verilir. Üstündekiler
+                gizlenmez — listenin sonunda, yakından uzağa sıralı görünür.
+              </p>
             </div>
 
             {/* Yaş aralığı */}
