@@ -87,7 +87,7 @@ export default function Etkinlikler() {
   return (
     <div className="px-4 pb-8 pt-6">
       <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold brand-text">Etkinlikler</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">Etkinlikler</h1>
         <button
           onClick={() => setComposing((v) => !v)}
           className="brand-gradient flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-white"
@@ -109,13 +109,13 @@ export default function Etkinlikler() {
               <button
                 key={t.id}
                 onClick={() => setForm({ ...form, type: t.id })}
-                className={`rounded-full border px-3 py-1.5 text-sm ${
+                className={`rounded-full border px-3 py-1.5 text-sm transition ${
                   form.type === t.id
-                    ? "brand-gradient border-transparent text-white"
-                    : "border-border text-muted"
+                    ? "border-transparent bg-accent text-[#1c1407]"
+                    : "border-border text-muted hover:text-text"
                 }`}
               >
-                {t.emoji} {t.label}
+                {t.label}
               </button>
             ))}
           </div>
@@ -173,10 +173,8 @@ export default function Etkinlikler() {
             <div key={e.id} className="rounded-3xl border border-border bg-surface p-4 transition duration-200 hover:border-brand/30">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-lg font-semibold">
-                    {TYPE(e.type).emoji} {e.title}
-                  </p>
-                  <p className="text-sm text-muted">{e.host_name} düzenliyor</p>
+                  <p className="font-display text-lg font-semibold">{e.title}</p>
+                  <p className="text-sm text-muted">{TYPE(e.type).label} · {e.host_name}</p>
                 </div>
                 {e.mesafe != null && (
                   <span className="flex items-center gap-1 text-xs text-muted">
@@ -202,7 +200,7 @@ export default function Etkinlikler() {
                           key={r.key}
                           onClick={() => rsvpVer(e.id, r.key)}
                           className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition active:scale-95 ${
-                            on ? "border-transparent bg-brand text-white" : "border-border text-muted hover:text-text"
+                            on ? "border-transparent bg-accent text-[#1c1407]" : "border-border text-muted hover:text-text"
                           }`}
                         >
                           <r.Icon size={14} /> {r.label}
