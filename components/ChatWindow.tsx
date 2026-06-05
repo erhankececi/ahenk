@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { spamMi } from "@/lib/moderation";
 import {
-  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift, Lock,
+  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift, Lock, Languages,
 } from "lucide-react";
 
 // iOS Safari webm/opus SESİ ÇALAMAZ → kaydederken cihazın desteklediği formatı seç
@@ -135,6 +135,25 @@ export function ChatWindow({
   const [met, setMet] = useState({ mine: metByMe, both: metBoth });
   const [meet, setMeet] = useState(meetInit);
   const [meetOpen, setMeetOpen] = useState(false);
+  // Anlık çeviri (mesaj başına)
+  const [trans, setTrans] = useState<Record<string, { text: string; source?: string }>>({});
+  const [transShow, setTransShow] = useState<Record<string, boolean>>({});
+  function myLang(): string {
+    if (typeof document === "undefined") return "tr";
+    const m = document.cookie.match(/(?:^|; )lang=([^;]+)/);
+    return m ? decodeURIComponent(m[1]).slice(0, 2) : "tr";
+  }
+  async function cevir(m: Message) {
+    if (trans[m.id]) { setTransShow((s) => ({ ...s, [m.id]: !s[m.id] })); return; }
+    setTransShow((s) => ({ ...s, [m.id]: true }));
+    const r = await fetch("/api/translate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: m.body, target: myLang() }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (j.ok) setTrans((t) => ({ ...t, [m.id]: { text: j.text, source: j.source } }));
+    else setTransShow((s) => ({ ...s, [m.id]: false }));
+  }
 
   async function bulusmaOner(kind: string) {
     setMeetOpen(false);
@@ -702,6 +721,27 @@ export function ChatWindow({
                   </div>
                 )}
               </div>
+              {/* Anlık çeviri — yalnız gelen metin mesajları */}
+              {!mine && !isImg && !isVoice && m.body && (
+                <div className="mt-1 max-w-[78%] px-1">
+                  {transShow[m.id] && (
+                    <p className="rounded-xl border border-border bg-surface/60 px-3 py-1.5 text-sm text-text/90">
+                      {trans[m.id]?.text || "Çevriliyor…"}
+                    </p>
+                  )}
+                  <button
+                    onClick={() => cevir(m)}
+                    className="mt-1 flex items-center gap-1 text-[11px] font-medium text-muted transition hover:text-accent"
+                  >
+                    <Languages size={12} />
+                    {!transShow[m.id]
+                      ? "Çevir"
+                      : trans[m.id]
+                        ? `Orijinali göster${trans[m.id]?.source ? ` · ${trans[m.id]!.source!.toUpperCase()}` : ""}`
+                        : "Çevir"}
+                  </button>
+                </div>
+              )}
               <span className="mt-0.5 px-1 text-[10px] text-muted">{saat(m.created_at)}</span>
             </div>
           );
