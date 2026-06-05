@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 type Theme = "dark" | "light";
 const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({
@@ -8,23 +8,16 @@ const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({
   toggle: () => {},
 });
 
+// Ahenk premium kimliği yalnızca grafit-siyah (dark). Light tema kaldırıldı —
+// eski cihazlarda kayıtlı "light" tercihi de bu effect ile temizlenir.
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-
   useEffect(() => {
-    const saved = (localStorage.getItem("ahenk-theme") as Theme) || "dark";
-    setTheme(saved);
+    document.documentElement.classList.remove("light");
+    try { localStorage.setItem("ahenk-theme", "dark"); } catch {}
   }, []);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("light", theme === "light");
-    localStorage.setItem("ahenk-theme", theme);
-  }, [theme]);
-
   return (
-    <ThemeCtx.Provider
-      value={{ theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) }}
-    >
+    <ThemeCtx.Provider value={{ theme: "dark", toggle: () => {} }}>
       {children}
     </ThemeCtx.Provider>
   );

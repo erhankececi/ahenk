@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useTheme } from "@/components/theme-provider";
-import { Moon, Sun, LogOut, Trash2, AlertTriangle, CreditCard } from "lucide-react";
+import { LogOut, Trash2, AlertTriangle, CreditCard } from "lucide-react";
 
 export function ProfileActions() {
   const router = useRouter();
   const supabase = createClient();
-  const { theme, toggle } = useTheme();
   const [stage, setStage] = useState<0 | 1 | 2>(0); // 0 kapalı · 1 uyarı · 2 yaz-onayla
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,15 +52,6 @@ export function ProfileActions() {
 
   return (
     <div className="space-y-2">
-      <button
-        onClick={toggle}
-        className="flex w-full items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3"
-      >
-        <span className="flex items-center gap-2">
-          {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />} Tema
-        </span>
-        <span className="text-sm text-muted">{theme === "dark" ? "Koyu" : "Açık"}</span>
-      </button>
       <button
         onClick={cikis}
         className="flex w-full items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3 text-brand-2"
