@@ -587,7 +587,7 @@ export function ChatWindow({
           >
             {!callsUnlocked ? <Lock size={18} /> : <Video size={20} />}
             {callsUnlocked && !videoFree && (
-              <span className="absolute -right-1.5 -top-1.5 rounded-full bg-accent px-1 text-[8px] font-bold text-[#0B1220]">50</span>
+              <span className="absolute -right-1.5 -top-1.5 rounded-full bg-accent px-1 text-[8px] font-bold text-[#0E0D10]">50</span>
             )}
           </button>
         )}
@@ -673,7 +673,7 @@ export function ChatWindow({
                 className={`relative max-w-[78%] overflow-hidden whitespace-pre-wrap break-words rounded-2xl text-sm ${
                   isImg ? "p-1" : isVoice ? "p-1.5" : "px-4 py-2"
                 } ${
-                  mine ? "brand-gradient text-white" : `bg-surface border border-border ${tierBubble(otherTier)}`
+                  mine ? "brand-gradient text-[#1c1407]" : `bg-surface border border-border ${tierBubble(otherTier)}`
                 }`}
               >
                 {isImg ? (
