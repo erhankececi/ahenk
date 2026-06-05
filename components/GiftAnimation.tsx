@@ -10,6 +10,21 @@ const MODE: Record<Gift["rarity"], "mini" | "epic" | "cine"> = {
   common: "mini", rare: "mini", epic: "epic", legendary: "cine", mythic: "cine",
 };
 
+// 3D hediye görseli (sahne içinde animasyonla). Yüklenemezse emoji'ye düşer.
+function GiftSym({ k, emoji, cls, vmin, style }: { k: string; emoji: string; cls: string; vmin: number; style?: React.CSSProperties }) {
+  const [err, setErr] = useState(false);
+  if (err) return <span className={cls} style={{ ...style, fontSize: `${vmin}vmin`, lineHeight: 1 }}>{emoji}</span>;
+  return (
+    <img
+      src={`/gifts/${k}.png`}
+      alt=""
+      onError={() => setErr(true)}
+      className={cls}
+      style={{ ...style, width: `${vmin}vmin`, height: `${vmin}vmin`, objectFit: "contain" }}
+    />
+  );
+}
+
 // Sahne arka planı (derinlik) — epic/cine
 function Scene({ fx, ring }: { fx: Gift["fx"]; ring: string }) {
   switch (fx) {
@@ -73,9 +88,7 @@ export default function GiftAnimation({
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-0 top-1/3 z-[80] flex flex-col items-center justify-center">
         <span className="absolute h-40 w-40 rounded-full blur-3xl" style={{ background: r.ring, opacity: 0.5 }} />
-        <span className="gift-float text-[22vmin] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.55)]" style={{ ["--d" as any]: `${dur}ms` }}>
-          {gift.emoji}
-        </span>
+        <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-float drop-shadow-[0_10px_30px_rgba(0,0,0,0.55)]" vmin={22} style={{ ["--d" as any]: `${dur}ms` }} />
         <span className="-mt-2 rounded-full bg-black/60 px-3.5 py-1 text-sm font-semibold text-white">{gift.name}</span>
       </div>
     );
@@ -86,27 +99,27 @@ export default function GiftAnimation({
   const Hero = () => {
     switch (gift.fx) {
       case "fly":
-        return <div className="gift-fly absolute z-10 text-[20vmin] leading-none drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]">{gift.emoji}</div>;
+        return <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-fly absolute z-10 drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]" vmin={20} />;
       case "drive":
-        return <div className="gift-drive absolute z-10 text-[18vmin] leading-none drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]">{gift.emoji}</div>;
+        return <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-drive absolute z-10 drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]" vmin={18} />;
       case "spin":
-        return <span className="gift-spin relative z-10 block text-[26vmin] leading-none">{gift.emoji}</span>;
+        return <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-spin relative z-10 block" vmin={26} />;
       case "sea":
       case "ocean":
-        return <span className="gift-bob relative z-10 text-[24vmin] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]">{gift.emoji}</span>;
+        return <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-bob relative z-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]" vmin={24} />;
       case "burst":
         return (
           <div className="relative z-10 flex items-center justify-center">
             {[0, 1, 2].map((k) => (
               <span key={k} className="gift-burst absolute rounded-full border-2" style={{ width: "26vmin", height: "26vmin", borderColor: r.ring, animationDelay: `${k * 0.25}s` }} />
             ))}
-            <span className="gift-pop gift-sparkle relative text-[24vmin] leading-none">{gift.emoji}</span>
+            <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-pop gift-sparkle relative" vmin={24} />
           </div>
         );
       case "royal":
-        return <span className="gift-pop relative z-10 text-[26vmin] leading-none drop-shadow-[0_12px_44px_rgba(212,176,106,0.7)]">{gift.emoji}</span>;
+        return <GiftSym k={gift.key} emoji={gift.emoji} cls="gift-pop relative z-10 drop-shadow-[0_12px_44px_rgba(212,176,106,0.7)]" vmin={26} />;
       default:
-        return <span className={`gift-pop relative z-10 text-[24vmin] leading-none drop-shadow-[0_10px_36px_rgba(0,0,0,0.7)] ${gift.fx === "build" ? "gift-shake" : ""}`}>{gift.emoji}</span>;
+        return <GiftSym k={gift.key} emoji={gift.emoji} cls={`gift-pop relative z-10 drop-shadow-[0_10px_36px_rgba(0,0,0,0.7)] ${gift.fx === "build" ? "gift-shake" : ""}`} vmin={24} />;
     }
   };
 
