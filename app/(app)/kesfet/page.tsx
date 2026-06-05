@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles, Heart, Send, Search, BadgeCheck, MapPin, Briefcase, X, Zap,
-  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star,
+  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw,
 } from "lucide-react";
 import { Badge } from "@/components/ui";
 import StoriesBar from "@/components/StoriesBar";
@@ -357,79 +357,81 @@ export default function Kesfet() {
                 current.tier
               )} ${current.tier === "free" ? "border-border" : ""}`}
             >
-              <div className="relative h-56 w-full bg-elevated">
+              <div className="relative aspect-[4/5] w-full bg-elevated">
                 {photo ? (
                   <img src={photo} className={`h-full w-full object-cover ${blur} scale-110`} alt="" />
                 ) : (
                   <div className="brand-gradient h-full w-full opacity-30" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
-                <div className="absolute left-4 top-4 rounded-2xl glass px-3 py-2">
-                  <p className="text-xs text-muted">Ahenk uyumu</p>
-                  <p className="text-lg font-bold brand-text">%{current.ortakYuzde}</p>
-                </div>
-                <div className="absolute right-4 top-4 flex flex-col items-end gap-1.5">
-                  {current.vibe && (
-                    <div className="rounded-2xl glass px-3 py-2 text-sm">
-                      <span className="mr-1">{current.vibe.emoji}</span>
-                      <span className="text-xs text-text/90">{current.vibe.label}</span>
-                    </div>
-                  )}
-                  {current.online && (
-                    <span className="flex items-center gap-1 rounded-full bg-success/90 px-2 py-0.5 text-[11px] font-semibold text-white">
-                      <span className="h-1.5 w-1.5 rounded-full bg-white" /> Online
-                    </span>
-                  )}
-                  {current.isNew && !current.online && (
-                    <span className="rounded-full bg-brand/90 px-2 py-0.5 text-[11px] font-semibold text-white">
-                      Yeni
-                    </span>
-                  )}
-                </div>
-                {current.boosted && (
-                  <div className="absolute left-4 top-[4.5rem] flex items-center gap-1 rounded-full bg-amber-400/90 px-2.5 py-1 text-xs font-semibold text-black shadow">
-                    <Zap size={12} /> Öne çıkan
-                  </div>
-                )}
-                {!revealMore && (
-                  <p className="absolute bottom-3 right-4 text-xs text-white/80">
-                    🔒 Fotoğraf sohbet ilerledikçe netleşir
-                  </p>
-                )}
-              </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/15" />
 
-              <div className="space-y-4 p-5">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/u/${current.id}`}>
-                      <h2 className={`flex items-center gap-1 text-2xl font-bold ${tierName(current.tier)}`}>
-                        {current.name}
-                        {current.age ? `, ${current.age}` : ""}
-                      </h2>
-                    </Link>
-                    {current.is_verified && <BadgeCheck className="text-brand" size={20} />}
-                    <PremiumBadge tier={current.tier} />
-                    {(current.tier === "platinum" || current.tier === "legend") && (
-                      <VipTag tier={current.tier} />
-                    )}
-                  </div>
-                  <div className="mt-1 flex flex-wrap gap-3 text-sm text-muted">
+                {/* Uyum rozeti */}
+                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 backdrop-blur-md">
+                  <span className="text-[10px] uppercase tracking-wider text-white/70">Uyum</span>
+                  <span className="text-sm font-bold text-accent">%{current.ortakYuzde}</span>
+                </div>
+
+                {/* Sağ üst: yeni üye / vibe / öne çıkan */}
+                <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+                  {current.isNew && (
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-black">Yeni üye</span>
+                  )}
+                  {current.boosted && (
+                    <span className="flex items-center gap-1 rounded-full bg-accent/90 px-2.5 py-1 text-[11px] font-semibold text-black">
+                      <Zap size={11} /> Öne çıkan
+                    </span>
+                  )}
+                  {current.vibe && (
+                    <span className="rounded-full bg-black/45 px-2.5 py-1 text-xs text-white backdrop-blur-md">
+                      <span className="mr-1">{current.vibe.emoji}</span>{current.vibe.label}
+                    </span>
+                  )}
+                </div>
+
+                {/* Alt overlay: isim · doğrulama · konum · online */}
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <Link href={`/u/${current.id}`} className="flex items-center gap-1.5">
+                    <h2 className="text-[26px] font-bold leading-tight text-white drop-shadow">
+                      {current.name}{current.age ? `, ${current.age}` : ""}
+                    </h2>
+                    {current.is_verified && <BadgeCheck className="text-sky-400" size={20} />}
+                  </Link>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
                     {current.city && (
                       <span className="flex items-center gap-1">
                         <MapPin size={14} /> {current.city}
                         {current.mesafe != null &&
-                          (current.sameCity || current.mesafe === 0
-                            ? " · yakınında"
-                            : ` · ${current.mesafe} km`)}
+                          (current.sameCity || current.mesafe === 0 ? " · yakınında" : ` · ${current.mesafe} km`)}
                       </span>
                     )}
-                    {current.profession && (
-                      <span className="flex items-center gap-1">
-                        <Briefcase size={14} /> {current.profession}
+                    {current.online && (
+                      <span className="flex items-center gap-1 font-medium text-emerald-400">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> Online
                       </span>
                     )}
                   </div>
+                  {!revealMore && (
+                    <p className="mt-1.5 text-[11px] text-white/55">🔒 Fotoğraf sohbet ilerledikçe netleşir</p>
+                  )}
                 </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                {(current.profession || current.tier !== "free") && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {current.profession && (
+                      <span className="flex items-center gap-1.5 text-sm text-muted">
+                        <Briefcase size={14} /> {current.profession}
+                      </span>
+                    )}
+                    <span className="ml-auto flex items-center gap-2">
+                      <PremiumBadge tier={current.tier} />
+                      {(current.tier === "platinum" || current.tier === "legend") && (
+                        <VipTag tier={current.tier} />
+                      )}
+                    </span>
+                  </div>
+                )}
 
                 {current.reasons?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
@@ -478,30 +480,51 @@ export default function Kesfet() {
           {superMsg && (
             <p className="mt-4 rounded-2xl bg-accent/10 px-3 py-2 text-center text-xs text-accent">{superMsg}</p>
           )}
-          <button
-            onClick={superBegen}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent to-brand py-3 text-sm font-semibold text-white shadow-glow transition active:scale-95"
-          >
-            <Star size={18} fill="currentColor" /> Süper Beğen
-            <span className="text-xs font-normal text-white/80">· günde 1 ücretsiz</span>
-          </button>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {ACTIONS.map(({ type, label, icon: Icon }) => (
-              <button
-                key={type}
-                onClick={() => act(type)}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface py-3 text-sm font-medium transition duration-200 hover:-translate-y-0.5 hover:border-brand active:scale-95"
-              >
-                <Icon size={18} className="text-brand" /> {label}
-              </button>
-            ))}
+
+          {/* Premium yuvarlak aksiyon butonları */}
+          <div className="mt-5 flex items-center justify-center gap-5">
+            <button
+              onClick={() => act("daha_fazla")}
+              aria-label="Daha fazla göster"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-accent/60 active:scale-90"
+            >
+              <RotateCcw size={20} />
+            </button>
+            <button
+              onClick={gec}
+              aria-label="Geç"
+              className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-elevated text-white/85 transition hover:border-white/30 active:scale-90"
+            >
+              <X size={26} />
+            </button>
+            <button
+              onClick={() => act("tanis")}
+              aria-label="Beğen"
+              className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-900/30 transition hover:brightness-110 active:scale-90"
+            >
+              <Heart size={28} fill="currentColor" />
+            </button>
+            <button
+              onClick={superBegen}
+              aria-label="Süper beğen"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-violet-900/30 transition hover:brightness-110 active:scale-90"
+            >
+              <Star size={24} fill="currentColor" />
+            </button>
           </div>
-          <button
-            onClick={gec}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-2 text-sm text-muted"
-          >
-            <X size={16} /> Geç
-          </button>
+          <p className="mt-2.5 text-center text-[11px] text-muted">
+            Geç · Beğen · Süper beğen <span className="text-white/40">(günde 1 ücretsiz)</span>
+          </p>
+
+          {/* İkincil ilgi sinyalleri */}
+          <div className="mt-3 flex justify-center gap-2">
+            <button onClick={() => act("ilginc")} className="rounded-full border border-border px-3.5 py-1.5 text-xs text-muted transition hover:border-accent/60">
+              İlginç geldi
+            </button>
+            <button onClick={() => act("ortak")} className="rounded-full border border-border px-3.5 py-1.5 text-xs text-muted transition hover:border-accent/60">
+              Ortak yönler
+            </button>
+          </div>
         </>
       )}
 

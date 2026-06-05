@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, MessageCircle, User, CalendarHeart, Sparkles, Film } from "lucide-react";
+import { Compass, MessageCircle, User, Sparkles, Film } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/kesfet", icon: Compass, label: "Keşfet" },
-  { href: "/moments", icon: Sparkles, label: "Anlar" },
+  { href: "/moments", icon: Sparkles, label: "Moments" },
   { href: "/reels", icon: Film, label: "Reels" },
-  { href: "/eslesmeler", icon: MessageCircle, label: "Mesaj" },
-  { href: "/etkinlikler", icon: CalendarHeart, label: "Etkinlik" },
+  { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar" },
   { href: "/profil", icon: User, label: "Profil" },
 ];
 
@@ -74,7 +73,7 @@ export function BottomNav() {
               >
                 <Icon size={21} />
                 {badge && (
-                  <span className="absolute right-1.5 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-white">
+                  <span className="absolute right-1.5 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold leading-none text-white">
                     {unread > 9 ? "9+" : unread}
                   </span>
                 )}
