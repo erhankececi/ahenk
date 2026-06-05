@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MapPin, Plus, Check, Clock, X, CalendarHeart, Star, HelpCircle, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { MapPin, Plus, Check, Clock, X, CalendarHeart, Star, HelpCircle, Users, ImagePlus, Loader2 } from "lucide-react";
 import { EVENT_TYPES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 
 type Attendee = { user_id: string; name: string; status: string; rsvp: string | null };
 type Ev = {
@@ -13,6 +14,7 @@ type Ev = {
   city: string | null;
   starts_at: string | null;
   host_name: string;
+  cover: string | null;
   mesafe: number | null;
   my_status: string | null;
   my_rsvp: string | null;
@@ -37,6 +39,10 @@ export default function Etkinlikler() {
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
   const [form, setForm] = useState({ title: "", type: "kahve", description: "", starts_at: "" });
+  const [cover, setCover] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const supabase = createClient();
 
   function load() {
     fetch("/api/events")
@@ -49,15 +55,31 @@ export default function Etkinlikler() {
   useEffect(load, []);
 
   async function olustur() {
-    if (!form.title.trim()) return;
-    await fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setForm({ title: "", type: "kahve", description: "", starts_at: "" });
-    setComposing(false);
-    load();
+    if (!form.title.trim() || saving) return;
+    setSaving(true);
+    try {
+      let cover_path: string | null = null;
+      if (cover) {
+        const { data } = await supabase.auth.getUser();
+        if (data.user) {
+          const ext = (cover.name.split(".").pop() || "jpg").toLowerCase();
+          const path = `${data.user.id}/events/${crypto.randomUUID()}.${ext}`;
+          const { error } = await supabase.storage.from("media").upload(path, cover, { contentType: cover.type, upsert: false });
+          if (!error) cover_path = path;
+        }
+      }
+      await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, cover_path }),
+      });
+      setForm({ title: "", type: "kahve", description: "", starts_at: "" });
+      setCover(null);
+      setComposing(false);
+      load();
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function rsvpVer(id: string, rsvp: string) {
@@ -98,6 +120,19 @@ export default function Etkinlikler() {
 
       {composing && (
         <div className="mb-5 space-y-3 rounded-3xl border border-border bg-surface p-4">
+          {/* Kapak görseli */}
+          {cover ? (
+            <div className="relative overflow-hidden rounded-2xl">
+              <img src={URL.createObjectURL(cover)} alt="" className="h-40 w-full object-cover" />
+              <button onClick={() => setCover(null)} className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white"><X size={15} /></button>
+            </div>
+          ) : (
+            <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border text-muted transition hover:border-accent/50">
+              <ImagePlus size={24} strokeWidth={1.6} />
+              <span className="text-sm font-medium">Kapak görseli ekle</span>
+              <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setCover(f); }} />
+            </label>
+          )}
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -134,9 +169,10 @@ export default function Etkinlikler() {
           />
           <button
             onClick={olustur}
-            className="brand-gradient w-full rounded-2xl py-3 font-semibold text-white"
+            disabled={saving || !form.title.trim()}
+            className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold disabled:opacity-50"
           >
-            Yayınla
+            {saving ? <><Loader2 size={18} className="animate-spin" /> Yayınlanıyor…</> : "Yayınla"}
           </button>
         </div>
       )}
@@ -170,7 +206,14 @@ export default function Etkinlikler() {
       ) : (
         <div className="space-y-3">
           {events.map((e) => (
-            <div key={e.id} className="rounded-3xl border border-border bg-surface p-4 transition duration-200 hover:border-brand/30">
+            <div key={e.id} className="overflow-hidden rounded-3xl border border-border bg-surface transition duration-200 hover:border-brand/30">
+              {e.cover && (
+                <div className="relative h-44 w-full">
+                  <img src={e.cover} alt="" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
+                </div>
+              )}
+              <div className="p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-display text-lg font-semibold">{e.title}</p>
@@ -219,6 +262,7 @@ export default function Etkinlikler() {
                     )}
                   </div>
                 )}
+              </div>
               </div>
             </div>
           ))}

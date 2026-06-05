@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { distanceKm } from "@/lib/utils";
 
+const MEDIA_URL = (path: string) =>
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${path}`;
+
 export async function GET() {
   const supabase = createClient();
   const {
@@ -54,6 +57,7 @@ export async function GET() {
   const list = (events || [])
     .map((e) => ({
       ...e,
+      cover: e.cover_path ? MEDIA_URL(e.cover_path) : null,
       host_name: hMap.get(e.host_id) || "Biri",
       mesafe: distanceKm(me?.lat, me?.lon, e.lat, e.lon),
       my_status: reqMap.get(e.id)?.status || null,
@@ -73,7 +77,7 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "yetkisiz" }, { status: 401 });
 
-  const { title, type, description, starts_at } = await request.json();
+  const { title, type, description, starts_at, cover_path } = await request.json();
   if (!title) return NextResponse.json({ error: "başlık gerekli" }, { status: 400 });
 
   const { data: me } = await supabase
@@ -91,6 +95,7 @@ export async function POST(request: Request) {
     lat: me?.lat,
     lon: me?.lon,
     starts_at: starts_at || null,
+    cover_path: cover_path || null,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
