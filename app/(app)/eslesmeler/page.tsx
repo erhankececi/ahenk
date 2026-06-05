@@ -82,7 +82,7 @@ export default async function Eslesmeler() {
 
   return (
     <div className="px-4 pt-6">
-      <h1 className="mb-5 text-2xl font-bold">Eşleşmeler</h1>
+      <h1 className="mb-5 font-display text-2xl font-bold tracking-tight">Mesajlar</h1>
 
       {likes.count > 0 && (
         <Link

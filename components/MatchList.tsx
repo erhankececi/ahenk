@@ -59,7 +59,7 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
 
   function ChatRow({ r, mode }: { r: Row; mode: Tab }) {
     return (
-      <div className="relative flex items-center gap-1 rounded-2xl border border-border bg-surface transition hover:border-brand/40">
+      <div className="relative flex items-center gap-1 rounded-2xl transition hover:bg-surface">
         <Link href={`/sohbet/${r.matchId}`} className="flex min-w-0 flex-1 items-center gap-3 p-3">
           <div className="relative">
             <div className={`rounded-full ${tierFrame(r.tier)}`}>
