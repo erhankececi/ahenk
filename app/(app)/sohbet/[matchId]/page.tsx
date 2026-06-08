@@ -22,7 +22,7 @@ export default async function SohbetPage({ params }: { params: { matchId: string
   const otherId = match.user_a === user!.id ? match.user_b : match.user_a;
   const { data: other } = await supabase
     .from("profiles_card")
-    .select("name, is_verified, tier")
+    .select("name, is_verified, tier, lang")
     .eq("id", otherId)
     .single();
 
@@ -91,6 +91,7 @@ export default async function SohbetPage({ params }: { params: { matchId: string
       initial={messages || []}
       myTier={myTier}
       otherTier={(other?.tier as string) || "free"}
+      otherLang={(other?.lang as string) || "tr"}
       myTheme={(meProf?.theme as string) || "default"}
       initialChemistry={(match.chemistry_score as number) || 0}
       metByMe={metByMe}

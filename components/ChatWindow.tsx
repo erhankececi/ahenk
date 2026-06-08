@@ -64,6 +64,7 @@ export function ChatWindow({
   initial,
   myTier = "free",
   otherTier = "free",
+  otherLang = "tr",
   myTheme = "default",
   initialChemistry = 0,
   metByMe = false,
@@ -80,6 +81,7 @@ export function ChatWindow({
   initial: Message[];
   myTier?: string;
   otherTier?: string;
+  otherLang?: string;
   myTheme?: string;
   initialChemistry?: number;
   metByMe?: boolean;
@@ -138,6 +140,7 @@ export function ChatWindow({
   // Anlık çeviri (mesaj başına) + otomatik mod
   const [trans, setTrans] = useState<Record<string, { text: string; source?: string }>>({});
   const [transShow, setTransShow] = useState<Record<string, boolean>>({});
+  const [origShow, setOrigShow] = useState<Record<string, boolean>>({});
   const [autoTr, setAutoTr] = useState(false);
   const trReq = useRef<Set<string>>(new Set());
   function myLang(): string {
@@ -160,7 +163,16 @@ export function ChatWindow({
     if (res) setTrans((t) => ({ ...t, [m.id]: res }));
     else setTransShow((s) => ({ ...s, [m.id]: false }));
   }
-  useEffect(() => { setAutoTr(localStorage.getItem("ahenk_autotranslate") === "on"); }, []);
+  const [sendTr, setSendTr] = useState(false);
+  useEffect(() => {
+    setAutoTr(localStorage.getItem("ahenk_autotranslate") === "on");
+    setSendTr(localStorage.getItem("ahenk_sendtranslate") === "on");
+  }, []);
+  function toggleSendTr() {
+    const v = !sendTr;
+    setSendTr(v);
+    localStorage.setItem("ahenk_sendtranslate", v ? "on" : "off");
+  }
   // Otomatik çeviri: gelen yeni metin mesajlarını kendi diline çevir (aynı dilse gösterme)
   useEffect(() => {
     if (!autoTr) return;
@@ -338,11 +350,25 @@ export function ChatWindow({
     }
     setWarn("");
     setText("");
+    // Gönderirken çeviri: karşı tarafın dili benimkinden farklıysa onun diline çevir;
+    // body = çeviri (karşı taraf kendi dilinde okur), orig_body = orijinalim.
+    let body = t;
+    let orig_body: string | null = null;
+    if (sendTr && otherLang && otherLang.slice(0, 2) !== myLang()) {
+      try {
+        const r = await fetch("/api/translate", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: t, target: otherLang.slice(0, 2) }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (j.ok && j.text) { body = j.text; orig_body = t; }
+      } catch {}
+    }
     // Insert dönüşünü hemen ekle (realtime round-trip'ini bekleme); realtime
     // echo'su geldiğinde id ile dedup edilir → çift render yok, anında görünür.
     const { data: inserted, error } = await supabase
       .from("messages")
-      .insert({ match_id: matchId, sender_id: meId, type: "text", body: t })
+      .insert({ match_id: matchId, sender_id: meId, type: "text", body, orig_body })
       .select()
       .single();
     if (error) {
@@ -686,6 +712,10 @@ export function ChatWindow({
           const mine = m.sender_id === meId;
           const isImg = m.type === "image" && !!m.media_path;
           const isVoice = m.type === "voice" && !!m.media_path;
+          const hasSentTr = !!m.orig_body; // gönderirken çevrilmiş mesaj
+          const displayBody = mine
+            ? (m.orig_body || m.body) // kendi orijinal sözlerim
+            : (origShow[m.id] ? m.orig_body : m.body); // alıcı: çeviri ya da orijinal
 
           // Hediye mesajı → mesaj balonundan AYRI, nadirlik renkli özel kart
           if (m.type === "text" && m.body?.startsWith("🎁")) {
@@ -734,7 +764,7 @@ export function ChatWindow({
                     className="h-10 w-56 max-w-full"
                   />
                 ) : (
-                  m.body
+                  displayBody
                 )}
                 {reactingTo === m.id && (
                   <div className="absolute -top-9 left-0 flex gap-1 rounded-full border border-border bg-surface px-2 py-1">
@@ -744,8 +774,23 @@ export function ChatWindow({
                   </div>
                 )}
               </div>
-              {/* Anlık çeviri — yalnız gelen metin mesajları */}
-              {!mine && !isImg && !isVoice && m.body && (
+              {/* Gönderirken çevrilmiş mesaj: kendi tarafımda "çevrildi" notu; alıcıda orijinali göster */}
+              {!isImg && !isVoice && m.body && hasSentTr && (
+                mine ? (
+                  <span className="mt-1 flex items-center gap-1 px-1 text-[11px] text-muted">
+                    <Languages size={11} /> {(otherLang || "").toUpperCase()} diline çevrildi
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setOrigShow((s) => ({ ...s, [m.id]: !s[m.id] }))}
+                    className="mt-1 flex items-center gap-1 px-1 text-[11px] font-medium text-muted transition hover:text-accent"
+                  >
+                    <Languages size={11} /> {origShow[m.id] ? "Çeviriyi göster" : "Orijinali göster"}
+                  </button>
+                )
+              )}
+              {/* Anlık çeviri — pre-çevrilmemiş gelen metin mesajları */}
+              {!mine && !isImg && !isVoice && m.body && !hasSentTr && (
                 <div className="mt-1 max-w-[78%] px-1">
                   {transShow[m.id] && (
                     <p className="rounded-xl border border-border bg-surface/60 px-3 py-1.5 text-sm text-text/90">
@@ -828,6 +873,19 @@ export function ChatWindow({
 
       {uploading && <p className="px-4 pb-1 text-xs text-muted">Fotoğraf yükleniyor…</p>}
       {warn && <p className="px-4 pb-1 text-xs text-brand-2">{warn}</p>}
+
+      {/* Gönderirken çeviri (karşı taraf farklı dildeyse) */}
+      {otherLang && otherLang.slice(0, 2) !== myLang() && (
+        <button
+          onClick={toggleSendTr}
+          className={`mx-3 mb-1 flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-[11px] font-medium transition ${
+            sendTr ? "bg-accent/15 text-accent" : "border border-border text-muted hover:text-text"
+          }`}
+        >
+          <Languages size={12} />
+          {sendTr ? `Mesajların ${otherLang.toUpperCase()} diline çevriliyor` : `Gönderirken ${otherLang.toUpperCase()} diline çevir`}
+        </button>
+      )}
 
       {/* giriş */}
       <div className="relative flex items-center gap-2 border-t border-border bg-bg p-3">

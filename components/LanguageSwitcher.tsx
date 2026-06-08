@@ -3,12 +3,19 @@
 import { useState } from "react";
 import { Globe, Check, X } from "lucide-react";
 import { LANGS, type Lang } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LanguageSwitcher({ current }: { current: Lang }) {
   const [open, setOpen] = useState(false);
 
-  function pick(code: Lang) {
+  async function pick(code: Lang) {
     document.cookie = `lang=${code}; path=/; max-age=31536000`;
+    // Profile de kaydet (gönderirken çeviri için karşı taraf dilini bilsin)
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getUser();
+      if (data.user) await supabase.from("profiles").update({ lang: code }).eq("id", data.user.id);
+    } catch {}
     if (typeof window !== "undefined") window.location.reload();
   }
 

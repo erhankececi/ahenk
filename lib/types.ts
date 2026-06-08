@@ -50,6 +50,7 @@ export interface Message {
   media_path: string | null;
   created_at: string;
   read_at: string | null;
+  orig_body?: string | null;
 }
 
 export interface MatchRow {
