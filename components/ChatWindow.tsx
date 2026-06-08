@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { spamMi } from "@/lib/moderation";
 import {
-  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift, Lock, Languages,
+  ArrowLeft, Send, BadgeCheck, Mic, Image as ImageIcon, Phone, Video, Clock, Smile, Gift, Lock, Languages, FileText,
 } from "lucide-react";
 
 // iOS Safari webm/opus SESİ ÇALAMAZ → kaydederken cihazın desteklediği formatı seç
@@ -237,6 +237,9 @@ export function ChatWindow({
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef<string>("");
+  const [voiceTxt, setVoiceTxt] = useState<Record<string, boolean>>({});
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const mimeRef = useRef<string>("audio/webm");
@@ -481,7 +484,7 @@ export function ChatWindow({
     clearInterval(recTimerRef.current);
   }
 
-  async function sesYukle(blob: Blob) {
+  async function sesYukle(blob: Blob, transcript: string | null = null) {
     setUploading(true);
     try {
       const mime = blob.type || mimeRef.current || "audio/webm";
@@ -495,7 +498,7 @@ export function ChatWindow({
       }
       const { data: inserted, error: insErr } = await supabase
         .from("messages")
-        .insert({ match_id: matchId, sender_id: meId, type: "voice", media_path: path })
+        .insert({ match_id: matchId, sender_id: meId, type: "voice", media_path: path, body: transcript })
         .select()
         .single();
       if (insErr) {
@@ -521,16 +524,39 @@ export function ChatWindow({
       const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
       chunksRef.current = [];
       cancelRef.current = false;
+      transcriptRef.current = "";
+      // Ücretsiz canlı transkripsiyon (Web Speech API; Chrome/Edge/Android). Yoksa atlanır.
+      try {
+        const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (SR) {
+          const BCP: Record<string, string> = { tr: "tr-TR", en: "en-US", de: "de-DE", fr: "fr-FR", es: "es-ES", ru: "ru-RU", ar: "ar-SA", fa: "fa-IR", ku: "tr-TR" };
+          const rec = new SR();
+          rec.lang = BCP[myLang()] || "tr-TR";
+          rec.continuous = true;
+          rec.interimResults = false;
+          rec.onresult = (e: any) => {
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+              if (e.results[i].isFinal) transcriptRef.current += e.results[i][0].transcript + " ";
+            }
+          };
+          rec.onerror = () => {};
+          recognitionRef.current = rec;
+          rec.start();
+        }
+      } catch { /* tarayıcı desteklemiyor */ }
       mr.ondataavailable = (e) => {
         if (e.data.size) chunksRef.current.push(e.data);
       };
       mr.onstop = async () => {
         durdurStream();
+        try { recognitionRef.current?.stop(); } catch {}
+        recognitionRef.current = null;
         setRecording(false);
         setRecSec(0);
         if (cancelRef.current) return;
         const blob = new Blob(chunksRef.current, { type: mimeRef.current });
-        if (blob.size > 1200) await sesYukle(blob);
+        const txt = transcriptRef.current.trim().slice(0, 1000) || null;
+        if (blob.size > 1200) await sesYukle(blob, txt);
       };
       recorderRef.current = mr;
       mr.start();
@@ -808,6 +834,29 @@ export function ChatWindow({
                         ? `Orijinali göster${trans[m.id]?.source ? ` · ${trans[m.id]!.source!.toUpperCase()}` : ""}`
                         : "Çevir"}
                   </button>
+                </div>
+              )}
+              {/* Sesli mesaj transkripti → yazıya dök + çevir */}
+              {isVoice && m.body && (
+                <div className="mt-1 max-w-[78%] px-1">
+                  <button
+                    onClick={() => setVoiceTxt((s) => ({ ...s, [m.id]: !s[m.id] }))}
+                    className="flex items-center gap-1 text-[11px] font-medium text-muted transition hover:text-accent"
+                  >
+                    <FileText size={11} /> {voiceTxt[m.id] ? "Yazıyı gizle" : "Yazıya dök"}
+                  </button>
+                  {voiceTxt[m.id] && (
+                    <>
+                      <p className="mt-1 rounded-xl border border-border bg-surface/60 px-3 py-1.5 text-sm text-text/90">
+                        {transShow[m.id] && trans[m.id] ? trans[m.id]!.text : m.body}
+                      </p>
+                      {!mine && (
+                        <button onClick={() => cevir(m)} className="mt-1 flex items-center gap-1 text-[11px] text-muted transition hover:text-accent">
+                          <Languages size={11} /> {transShow[m.id] && trans[m.id] ? "Orijinali göster" : "Çevir"}
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
               <span className="mt-0.5 px-1 text-[10px] text-muted">{saat(m.created_at)}</span>
