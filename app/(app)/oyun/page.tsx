@@ -5,8 +5,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { TableVoice } from "@/lib/tableVoice";
 import { tierFrame } from "@/components/PremiumBadge";
+import GiftStore from "@/components/GiftStore";
+import GiftAnimation from "@/components/GiftAnimation";
+import { giftByKey, type Gift as GiftT } from "@/lib/gifts";
 import {
-  Plus, Lock, Crown, Mic, Video, Users, Zap, X, LogOut, Play, Gamepad2, Trophy,
+  Plus, Lock, Crown, Mic, Video, Users, Zap, X, LogOut, Play, Gamepad2, Trophy, Gift, User,
 } from "lucide-react";
 
 // Okey taşı (krem fayans + renkli sayı; fj = sahte okey/joker)
@@ -32,7 +35,18 @@ type GameView = {
   seats?: { seat: number; handCount: number; topDiscard: { code: string } | null; discardCount: number }[];
 };
 
-type Player = { seat: number; name: string; tier: string; me: boolean };
+type Player = { seat: number; uid: string; name: string; tier: string; me: boolean };
+
+// Taş sıralama: renk sonra sayı; okey/joker sona
+function sortHand(tiles: { id: string; code: string }[]) {
+  return [...tiles].sort((a, b) => {
+    const aj = a.code === "fj", bj = b.code === "fj";
+    if (aj !== bj) return aj ? 1 : -1;
+    const [ac, an] = a.code.split("-").map(Number);
+    const [bc, bn] = b.code.split("-").map(Number);
+    return ac - bc || an - bn;
+  });
+}
 type Table = {
   id: string; name: string; capacity: number; kind: string; voice: boolean; video: boolean;
   status: string; locked: boolean; host: string; players: Player[]; seated: number; mine: boolean;
@@ -54,6 +68,18 @@ export default function Oyun() {
   const [micOn, setMicOn] = useState(true);
   const [levels, setLevels] = useState<Record<number, number>>({});
   const tvRef = useRef<TableVoice | null>(null);
+  const [actionFor, setActionFor] = useState<{ uid: string; name: string } | null>(null);
+  const [giftFor, setGiftFor] = useState<{ uid: string; name: string } | null>(null);
+  const [giftAnim, setGiftAnim] = useState<GiftT | null>(null);
+  const [sorted, setSorted] = useState(true);
+
+  async function hediyeGonder(key: string) {
+    const target = giftFor; setGiftFor(null);
+    if (!target) return;
+    const r = await fetch("/api/gift", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to_user: target.uid, gift: key }) }).then((x) => x.json()).catch(() => ({}));
+    if (r.ok) { const g = giftByKey(key); if (g) setGiftAnim(g); }
+    else setWarn(r.error === "insufficient" ? "Yetersiz jeton." : "Hediye gönderilemedi.");
+  }
 
   const room = tables.find((t) => t.mine) || null;
   const roomId = room?.id || null;
@@ -185,8 +211,10 @@ export default function Oyun() {
               <div key={i} className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-black/20 p-4">
                 {p ? (
                   <>
-                    <span
-                      className={`rounded-full transition-transform duration-100 ${tierFrame(p.tier)}`}
+                    <button
+                      type="button"
+                      onClick={() => !p.me && setActionFor({ uid: p.uid, name: p.name })}
+                      className={`rounded-full transition-transform duration-100 ${tierFrame(p.tier)} ${p.me ? "" : "cursor-pointer"}`}
                       style={{
                         transform: `scale(${1 + (levels[i] || 0) * 0.14})`,
                         boxShadow: (levels[i] || 0) > 0.04 ? `0 0 ${8 + (levels[i] || 0) * 26}px ${(levels[i] || 0) * 5}px rgba(199,169,119,${0.2 + (levels[i] || 0) * 0.5})` : undefined,
@@ -195,7 +223,7 @@ export default function Oyun() {
                       <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-lg font-semibold">
                         {p.name[0]?.toUpperCase()}
                       </span>
-                    </span>
+                    </button>
                     <span className="text-sm font-medium">{p.name}{p.me ? " (sen)" : ""}</span>
                     {voiceOn && (levels[i] || 0) > 0.06 ? <Mic size={13} className="animate-pulse text-accent" /> : room.voice ? <Mic size={13} className="text-muted" /> : null}
                   </>
@@ -259,8 +287,13 @@ export default function Oyun() {
               Elin ({game.yourHand?.length || 0} taş)
               {game.turn === game.yourSeat && game.phase === "discard" ? (finishMode ? " — BİTİR: atılacak taşa dokun" : " — atmak için taşa dokun") : ""}
             </p>
+            <div className="mb-1 flex justify-end">
+              <button onClick={() => setSorted((v) => !v)} className="rounded-full border border-border px-3 py-1 text-[11px] text-muted transition hover:border-accent/50 hover:text-text">
+                {sorted ? "Sıralı ✓" : "Sırala"}
+              </button>
+            </div>
             <div className={`mb-3 flex flex-wrap gap-1.5 rounded-2xl border p-3 ${finishMode ? "border-accent bg-accent/5" : "border-border bg-surface"}`}>
-              {(game.yourHand || []).map((t) => (
+              {(sorted ? sortHand(game.yourHand || []) : (game.yourHand || [])).map((t) => (
                 <OkeyTile
                   key={t.id}
                   code={t.code}
@@ -317,6 +350,23 @@ export default function Oyun() {
           </>
         )}
         {warn && <p className="mt-2 text-center text-xs text-error">{warn}</p>}
+
+        {/* Oyuncu aksiyonları (avatara dokununca) */}
+        {actionFor && (
+          <div className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm" onClick={() => setActionFor(null)}>
+            <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-3xl border-t border-border bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+              <p className="mb-3 font-display font-bold">{actionFor.name}</p>
+              <button onClick={() => { setGiftFor(actionFor); setActionFor(null); }} className="brand-gradient mb-2 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold">
+                <Gift size={17} /> Hediye gönder
+              </button>
+              <Link href={`/u/${actionFor.uid}`} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3 font-semibold transition hover:border-accent/50">
+                <User size={17} /> Profili gör
+              </Link>
+            </div>
+          </div>
+        )}
+        {giftFor && <GiftStore otherName={giftFor.name} onSend={hediyeGonder} onClose={() => setGiftFor(null)} />}
+        {giftAnim && <GiftAnimation gift={giftAnim} fromMe onDone={() => setGiftAnim(null)} />}
       </div>
     );
   }

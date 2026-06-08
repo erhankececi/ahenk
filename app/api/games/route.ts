@@ -36,7 +36,7 @@ export async function GET() {
       id: t.id, name: t.name, capacity: t.capacity, kind: t.kind, voice: t.voice, video: t.video,
       status: t.status, locked: t.kind === "sifreli",
       host: (pMap.get(t.host_id) as any)?.name || "Biri",
-      players: ts.map((s) => ({ seat: s.seat_no, name: (pMap.get(s.user_id) as any)?.name || "?", tier: (pMap.get(s.user_id) as any)?.tier || "free", me: s.user_id === user.id })),
+      players: ts.map((s) => ({ seat: s.seat_no, uid: s.user_id, name: (pMap.get(s.user_id) as any)?.name || "?", tier: (pMap.get(s.user_id) as any)?.tier || "free", me: s.user_id === user.id })),
       seated: ts.length,
       mine: ts.some((s) => s.user_id === user.id),
     };
