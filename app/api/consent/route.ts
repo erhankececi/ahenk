@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export const CONSENT_VERSION = "2026-06-09";
+const CONSENT_VERSION = "2026-06-09";
 
 // Kayıt anında açık rıza kaydı (Koşullar+Gizlilik+KVKK+18). Zaman+IP ile saklanır.
 export async function POST(req: Request) {
