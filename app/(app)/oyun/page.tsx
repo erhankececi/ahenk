@@ -12,19 +12,56 @@ import {
   Plus, Lock, Crown, Mic, Video, Users, Zap, X, LogOut, Play, Gamepad2, Trophy, Gift, User,
 } from "lucide-react";
 
-// Okey taşı (krem fayans + renkli sayı; fj = sahte okey/joker)
-const TILE_COLORS = ["#C0533D", "#3B6EA5", "#2A2A2E", "#B8902F"]; // kırmızı/mavi/siyah/sarı
-function OkeyTile({ code, onClick, dim }: { code: string; onClick?: () => void; dim?: boolean }) {
+// Okey taşı (fildişi fayans + kabartma sayı; fj = sahte okey/joker)
+const TILE_COLORS = ["#C0392B", "#1F5FA8", "#1C1C20", "#1F8A50"]; // kırmızı/mavi/siyah/yeşil
+function OkeyTile({ code, onClick, dim, big }: { code: string; onClick?: () => void; dim?: boolean; big?: boolean }) {
   const joker = code === "fj";
   const [c, n] = joker ? [0, 0] : code.split("-").map(Number);
+  const sz = big ? "h-[58px] w-[42px] text-xl" : "h-12 w-9 text-base";
   return (
     <button
       onClick={onClick}
-      className={`flex h-12 w-9 shrink-0 items-center justify-center rounded-md border border-black/20 bg-[#F3EEE4] text-base font-bold shadow-sm transition ${onClick ? "hover:-translate-y-1" : ""} ${dim ? "opacity-50" : ""}`}
-      style={{ color: joker ? "#B8902F" : TILE_COLORS[c] }}
+      className={`relative flex ${sz} shrink-0 items-center justify-center rounded-[7px] font-extrabold transition ${onClick ? "hover:-translate-y-1.5 active:scale-95" : ""} ${dim ? "opacity-50" : ""}`}
+      style={{
+        background: "linear-gradient(160deg,#FBF7EE,#E6DECB)",
+        boxShadow: "inset 0 1px 0 #fff, inset 0 -2px 3px rgba(0,0,0,0.18), 0 3px 5px rgba(0,0,0,0.45)",
+        color: joker ? "#B8902F" : TILE_COLORS[c],
+      }}
     >
       {joker ? "★" : n}
+      <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full" style={{ background: joker ? "#B8902F" : TILE_COLORS[c], opacity: 0.5 }} />
     </button>
+  );
+}
+
+// Masa etrafındaki oyuncu kartı (avatar + sıra parıltısı + konuşma + el sayısı)
+function Seat({ p, level, active, voiceOn, onTap }: { p: Player | null; level: number; active: boolean; voiceOn: boolean; onTap?: () => void }) {
+  if (!p) return (
+    <div className="flex flex-col items-center gap-1 opacity-50">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-white/20 text-white/40"><Plus size={16} /></span>
+      <span className="text-[10px] text-white/40">Boş</span>
+    </div>
+  );
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <button
+        type="button"
+        onClick={onTap}
+        className={`relative rounded-full transition-transform duration-100 ${tierFrame(p.tier)}`}
+        style={{
+          transform: `scale(${1 + level * 0.14})`,
+          boxShadow: active
+            ? "0 0 0 3px rgba(199,169,119,0.9), 0 0 18px 3px rgba(199,169,119,0.55)"
+            : level > 0.04 ? `0 0 ${8 + level * 26}px ${level * 5}px rgba(199,169,119,${0.2 + level * 0.5})` : undefined,
+        }}
+      >
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-brand/50 to-accent/40 text-base font-bold text-white">
+          {p.name[0]?.toUpperCase()}
+        </span>
+        {voiceOn && level > 0.06 && <Mic size={11} className="absolute -bottom-0.5 -right-0.5 rounded-full bg-black/70 p-0.5 text-accent" />}
+      </button>
+      <span className="max-w-[72px] truncate text-[11px] font-medium text-white/90">{p.me ? "Sen" : p.name}</span>
+    </div>
   );
 }
 
@@ -190,143 +227,140 @@ export default function Oyun() {
 
   // ---- MASA ODASI ----
   if (room) {
-    const seats = Array.from({ length: room.capacity }, (_, i) => room.players.find((p) => p.seat === i) || null);
+    const opps = room.players.filter((p) => !p.me).sort((a, b) => a.seat - b.seat);
+    const meP = room.players.find((p) => p.me) || null;
+    const started = !!game?.started;
+    const myTurn = started && game!.turn === game!.yourSeat;
+    // rakip konumları (mobil felt üstünde)
+    const POS: Record<number, React.CSSProperties[]> = {
+      1: [{ top: 10, left: "50%", transform: "translateX(-50%)" }],
+      2: [{ top: 10, left: "16%" }, { top: 10, right: "16%" }],
+      3: [{ top: "42%", left: 8 }, { top: 10, left: "50%", transform: "translateX(-50%)" }, { top: "42%", right: 8 }],
+    };
+    const seatData = (seat: number) => (game?.seats || []).find((s) => s.seat === seat);
+
     return (
-      <div className="px-4 pb-24 pt-6">
-        <header className="mb-5 flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight">{room.name}</h1>
-            <p className="text-sm text-muted">101 · {room.seated}/{room.capacity} oyuncu · {room.kind === "vip" ? "VIP" : room.kind === "sifreli" ? "Şifreli" : "Açık"} masa</p>
+      <div className="min-h-dvh px-3 pb-28 pt-4">
+        <header className="mb-3 flex items-center justify-between px-1">
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-lg font-bold tracking-tight">{room.name}</h1>
+            <p className="text-xs text-muted">101 · {room.seated}/{room.capacity} · {room.kind === "vip" ? "VIP" : room.kind === "sifreli" ? "Şifreli" : "Açık"}</p>
           </div>
-          <button onClick={() => kalk(room)} className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm text-muted transition hover:border-error/50 hover:text-error">
-            <LogOut size={15} /> Kalk
-          </button>
+          <div className="flex items-center gap-2">
+            {room.voice && (voiceOn ? (
+              <button onClick={micToggle} className={`flex h-9 w-9 items-center justify-center rounded-full transition ${micOn ? "bg-accent/15 text-accent" : "border border-border text-muted"}`} aria-label="Mikrofon"><Mic size={16} /></button>
+            ) : (
+              <button onClick={seseKatil} className="flex h-9 w-9 items-center justify-center rounded-full border border-accent/40 text-accent" aria-label="Sese katıl"><Mic size={16} /></button>
+            ))}
+            <button onClick={() => kalk(room)} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-muted transition hover:border-error/50 hover:text-error">
+              <LogOut size={14} /> Kalk
+            </button>
+          </div>
         </header>
 
-        {/* Oyun tahtası placeholder + koltuklar */}
-        <div className="relative mb-5 overflow-hidden rounded-3xl border border-accent/20 bg-gradient-to-b from-[#14241d] to-[#0b1612] p-5">
-          <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(60% 60% at 50% 40%, rgba(199,169,119,0.15), transparent 70%)" }} />
-          <div className="relative grid grid-cols-2 gap-4">
-            {seats.map((p, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-black/20 p-4">
-                {p ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => !p.me && setActionFor({ uid: p.uid, name: p.name })}
-                      className={`rounded-full transition-transform duration-100 ${tierFrame(p.tier)} ${p.me ? "" : "cursor-pointer"}`}
-                      style={{
-                        transform: `scale(${1 + (levels[i] || 0) * 0.14})`,
-                        boxShadow: (levels[i] || 0) > 0.04 ? `0 0 ${8 + (levels[i] || 0) * 26}px ${(levels[i] || 0) * 5}px rgba(199,169,119,${0.2 + (levels[i] || 0) * 0.5})` : undefined,
-                      }}
-                    >
-                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-lg font-semibold">
-                        {p.name[0]?.toUpperCase()}
-                      </span>
-                    </button>
-                    <span className="text-sm font-medium">{p.name}{p.me ? " (sen)" : ""}</span>
-                    {voiceOn && (levels[i] || 0) > 0.06 ? <Mic size={13} className="animate-pulse text-accent" /> : room.voice ? <Mic size={13} className="text-muted" /> : null}
-                  </>
-                ) : (
-                  <>
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full border border-dashed border-white/15 text-muted"><Plus size={20} /></span>
-                    <span className="text-xs text-muted">Boş</span>
-                  </>
+        {/* ÇUHA MASA */}
+        <div
+          className="relative mb-4 h-[340px] overflow-hidden rounded-[44px] border-[6px] border-[#1a140c] shadow-float"
+          style={{ background: "radial-gradient(120% 90% at 50% 38%, #1f5a3e 0%, #15402c 55%, #0e2c1e 100%)" }}
+        >
+          <div className="pointer-events-none absolute inset-3 rounded-[36px] ring-1 ring-accent/20" />
+
+          {/* rakipler */}
+          {opps.map((p, i) => {
+            const sd = seatData(p.seat);
+            return (
+              <div key={p.seat} className="absolute flex flex-col items-center" style={(POS[opps.length] || POS[1])[i]}>
+                <Seat p={p} level={levels[p.seat] || 0} active={started && game!.turn === p.seat} voiceOn={voiceOn} onTap={() => setActionFor({ uid: p.uid, name: p.name })} />
+                {started && (
+                  <div className="mt-1 flex items-center gap-1">
+                    <span className="rounded-full bg-black/40 px-1.5 text-[10px] text-white/70">{sd?.handCount ?? "-"}</span>
+                    {sd?.topDiscard ? <OkeyTile code={sd.topDiscard.code} dim /> : null}
+                  </div>
                 )}
               </div>
-            ))}
-          </div>
-        </div>
+            );
+          })}
 
-        {/* Masa içi sesli sohbet */}
-        {room.voice && (
-          <div className="mb-4 flex items-center gap-2">
-            {!voiceOn ? (
-              <button onClick={seseKatil} className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-accent/40 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/10">
-                <Mic size={16} /> Sesli sohbete katıl
-              </button>
-            ) : (
+          {/* MERKEZ: gösterge + deste */}
+          <div className="absolute left-1/2 top-[46%] flex -translate-x-1/2 -translate-y-1/2 items-center gap-3">
+            {started ? (
               <>
-                <button onClick={micToggle} className={`flex flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold transition ${micOn ? "bg-accent/15 text-accent" : "border border-border text-muted"}`}>
-                  <Mic size={16} /> {micOn ? "Mikrofon açık" : "Mikrofon kapalı"}
-                </button>
-                <button onClick={sesBirak} className="rounded-2xl border border-border px-4 py-2.5 text-sm text-muted transition hover:border-error/50 hover:text-error">Sesten çık</button>
+                <div className="flex flex-col items-center">
+                  <span className="mb-1 text-[10px] uppercase tracking-wider text-white/60">Gösterge</span>
+                  {game!.gosterge && <OkeyTile code={game!.gosterge.code} big />}
+                </div>
+                <div className="flex flex-col items-center rounded-2xl bg-black/30 px-3 py-2">
+                  <span className="text-[10px] text-white/60">Deste</span>
+                  <span className="font-display text-xl font-bold text-white">{game!.deckCount}</span>
+                  <span className="text-[10px] text-accent">Okey: {game!.okey}</span>
+                </div>
               </>
+            ) : (
+              <div className="text-center">
+                <Gamepad2 size={28} className="mx-auto mb-1 text-accent/70" />
+                <p className="text-sm text-white/70">Masa hazırlanıyor</p>
+              </div>
             )}
           </div>
-        )}
 
-        {/* OYUN BAŞLADIYSA: tahta */}
-        {game?.started ? (
+          {/* SEN (altta) */}
+          {meP && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+              <Seat p={meP} level={levels[meP.seat] || 0} active={myTurn} voiceOn={voiceOn} />
+            </div>
+          )}
+
+          {/* sıra bandı */}
+          {started && (
+            <div className="absolute left-1/2 top-2.5 -translate-x-1/2 rounded-full bg-black/45 px-3 py-0.5 text-[11px] font-semibold text-accent backdrop-blur">
+              {myTurn ? (game!.phase === "draw" ? "Sıra sende — taş çek" : finishMode ? "Bitir: bir taşa dokun" : "Sıra sende — taş at") : "Rakipte…"}
+            </div>
+          )}
+        </div>
+
+        {/* OYUN BAŞLADIYSA: ıstaka */}
+        {started ? (
           <>
           <div>
-            <div className="mb-3 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-2.5">
-              <div className="flex items-center gap-3">
-                <div className="text-center">
-                  <p className="text-[10px] text-muted">Gösterge</p>
-                  {game.gosterge && <OkeyTile code={game.gosterge.code} />}
-                </div>
-                <div className="text-xs text-muted">
-                  <p>Deste: <b className="text-text">{game.deckCount}</b></p>
-                  <p>Sıra: <b className={game.turn === game.yourSeat ? "text-accent" : "text-text"}>{game.turn === game.yourSeat ? "SEN" : `${game.turn}. koltuk`}</b></p>
-                </div>
-              </div>
-              {/* diğer oyuncuların attığı son taş */}
-              <div className="flex gap-2">
-                {(game.seats || []).filter((s) => s.seat !== game.yourSeat).map((s) => (
-                  <div key={s.seat} className="text-center">
-                    <p className="text-[10px] text-muted">{s.handCount} taş</p>
-                    {s.topDiscard ? <OkeyTile code={s.topDiscard.code} dim /> : <span className="block h-12 w-9 rounded-md border border-dashed border-border" />}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* senin elin */}
-            <p className="mb-1.5 text-xs text-muted">
-              Elin ({game.yourHand?.length || 0} taş)
-              {game.turn === game.yourSeat && game.phase === "discard" ? (finishMode ? " — BİTİR: atılacak taşa dokun" : " — atmak için taşa dokun") : ""}
-            </p>
-            <div className="mb-1 flex justify-end">
+            <div className="mb-1.5 flex items-center justify-between px-1">
+              <span className="text-xs text-muted">Elin · {game!.yourHand?.length || 0} taş</span>
               <button onClick={() => setSorted((v) => !v)} className="rounded-full border border-border px-3 py-1 text-[11px] text-muted transition hover:border-accent/50 hover:text-text">
                 {sorted ? "Sıralı ✓" : "Sırala"}
               </button>
             </div>
-            <div className={`mb-3 flex flex-wrap gap-1.5 rounded-2xl border p-3 ${finishMode ? "border-accent bg-accent/5" : "border-border bg-surface"}`}>
-              {(sorted ? sortHand(game.yourHand || []) : (game.yourHand || [])).map((t) => (
-                <OkeyTile
-                  key={t.id}
-                  code={t.code}
-                  onClick={() => {
-                    if (game.turn !== game.yourSeat || game.phase !== "discard") return;
-                    oyunHamle(finishMode ? "finish" : "discard", { tileId: t.id });
-                  }}
+            {/* ıstaka (taş rafı) */}
+            <div
+              className={`mb-3 flex flex-wrap gap-1.5 rounded-2xl border-b-[5px] p-3 ${finishMode ? "border-accent" : "border-[#1a140c]"}`}
+              style={{ background: "linear-gradient(160deg,#2a2018,#16110b)" }}
+            >
+              {(sorted ? sortHand(game!.yourHand || []) : (game!.yourHand || [])).map((t) => (
+                <OkeyTile key={t.id} code={t.code} big
+                  onClick={() => { if (myTurn && game!.phase === "discard") oyunHamle(finishMode ? "finish" : "discard", { tileId: t.id }); }}
                 />
               ))}
             </div>
 
             {/* aksiyonlar */}
-            {game.turn === game.yourSeat && game.phase === "draw" && (
+            {myTurn && game!.phase === "draw" && (
               <div className="flex gap-2">
                 <button onClick={() => oyunHamle("draw", { source: "deck" })} className="brand-gradient flex-1 rounded-2xl py-3 text-sm font-semibold">Desteden çek</button>
-                <button onClick={() => oyunHamle("draw", { source: "discard" })} className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold transition hover:border-accent/50">Soldan al</button>
+                <button onClick={() => oyunHamle("draw", { source: "discard" })} className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold transition hover:border-accent/50">Yerden al</button>
               </div>
             )}
-            {game.turn === game.yourSeat && game.phase === "discard" && (
-              <button onClick={() => setFinishMode((v) => !v)} className={`mt-2 w-full rounded-2xl py-3 text-sm font-semibold transition ${finishMode ? "border border-accent text-accent" : "bg-gradient-to-r from-accent to-brand text-[#1c1407]"}`}>
+            {myTurn && game!.phase === "discard" && (
+              <button onClick={() => setFinishMode((v) => !v)} className={`w-full rounded-2xl py-3 text-sm font-semibold transition ${finishMode ? "border border-accent text-accent" : "bg-gradient-to-r from-accent to-brand text-[#1c1407]"}`}>
                 {finishMode ? "Bitirmeyi iptal et" : "Bitir (el aç)"}
               </button>
             )}
-            {game.turn !== game.yourSeat && <p className="text-center text-sm text-muted">Sıra rakipte… bekle</p>}
           </div>
 
           {/* Bitiş ekranı */}
-          {game.finishedBy != null && (
+          {game!.finishedBy != null && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-8">
               <div className="w-full max-w-sm rounded-3xl border border-accent/30 bg-surface p-6 text-center">
                 <Trophy size={40} className="mx-auto mb-3 text-accent" />
                 <h3 className="font-display text-xl font-bold">
-                  {game.finishedBy === game.yourSeat ? "Kazandın! 🎉" : `${room.players.find((p) => p.seat === game.finishedBy)?.name || "Rakip"} bitirdi`}
+                  {game!.finishedBy === game!.yourSeat ? "Kazandın! 🎉" : `${room.players.find((p) => p.seat === game!.finishedBy)?.name || "Rakip"} bitirdi`}
                 </h3>
                 <p className="mt-1 text-sm text-muted">El bitti. Puanlar liderliğe işlendi.</p>
                 <div className="mt-4 flex gap-2">
