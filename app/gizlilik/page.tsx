@@ -36,21 +36,31 @@ export default function Gizlilik() {
         </p>
       </Section>
 
-      <Section h="4. Paylaşım">
+      <Section h="4. Erişim ve işlem kayıtları (5651 sayılı Kanun)">
+        <p>
+          Mevzuat gereği (5651 sayılı Kanun ve ilgili yönetmelikler), hizmete erişim ve işlem kayıtları —
+          <span className="text-text"> IP adresi, erişim tarih/saati, oturum ve işlem bilgileri</span> — güvenlik ve
+          yasal yükümlülükler kapsamında tutulur. Bu kayıtlar pazarlama için kullanılmaz; yalnızca güvenlik,
+          dolandırıcılık önleme ve yetkili adli/idari mercilerin usulüne uygun talebi hâlinde kullanılır.
+          Kayıtlar mevzuatın öngördüğü süre boyunca saklanır ve süre sonunda silinir/anonimleştirilir.
+        </p>
+      </Section>
+
+      <Section h="5. Paylaşım">
         <p>
           Kişisel verilerini satmayız. Yalnızca hizmeti sağlamak için gerekli altyapı sağlayıcılarıyla (barındırma, e-posta,
           ödeme) ve yasal zorunluluk hâlinde yetkili mercilerle paylaşırız.
         </p>
       </Section>
 
-      <Section h="5. Haklarının">
+      <Section h="6. Haklarının">
         <p>
           Verilerine erişme, düzeltme, silme ve işlemeyi kısıtlama haklarına sahipsin. Hesabını uygulama içinden silebilir veya
           aşağıdaki adresten talepte bulunabilirsin.
         </p>
       </Section>
 
-      <Section h="6. İletişim">
+      <Section h="7. İletişim">
         <p>Sorular için: <span className="text-text">privacy@ahenk.app</span></p>
       </Section>
 

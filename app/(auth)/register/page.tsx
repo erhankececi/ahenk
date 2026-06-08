@@ -45,6 +45,8 @@ export default function RegisterPage() {
     });
     setLoading(false);
     if (error) return setErr(error.message);
+    // Yasal erişim logu (kayıt anı + IP — 5651/KVKK)
+    fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "auth:register" }) }).catch(() => {});
     if (data.session) {
       router.push("/onboarding");
       router.refresh();

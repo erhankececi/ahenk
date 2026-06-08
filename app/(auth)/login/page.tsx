@@ -43,6 +43,8 @@ export default function LoginPage() {
       }
       return;
     }
+    // Yasal erişim logu (giriş anı + IP — 5651/KVKK)
+    fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "auth:login" }) }).catch(() => {});
     router.push("/");
     router.refresh();
   }
