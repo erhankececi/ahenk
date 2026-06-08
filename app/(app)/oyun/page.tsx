@@ -8,6 +8,29 @@ import {
   Plus, Lock, Crown, Mic, Video, Users, Zap, X, LogOut, Play, Gamepad2, Trophy,
 } from "lucide-react";
 
+// Okey taşı (krem fayans + renkli sayı; fj = sahte okey/joker)
+const TILE_COLORS = ["#C0533D", "#3B6EA5", "#2A2A2E", "#B8902F"]; // kırmızı/mavi/siyah/sarı
+function OkeyTile({ code, onClick, dim }: { code: string; onClick?: () => void; dim?: boolean }) {
+  const joker = code === "fj";
+  const [c, n] = joker ? [0, 0] : code.split("-").map(Number);
+  return (
+    <button
+      onClick={onClick}
+      className={`flex h-12 w-9 shrink-0 items-center justify-center rounded-md border border-black/20 bg-[#F3EEE4] text-base font-bold shadow-sm transition ${onClick ? "hover:-translate-y-1" : ""} ${dim ? "opacity-50" : ""}`}
+      style={{ color: joker ? "#B8902F" : TILE_COLORS[c] }}
+    >
+      {joker ? "★" : n}
+    </button>
+  );
+}
+
+type GameView = {
+  started: boolean; turn?: number; phase?: string; deckCount?: number;
+  gosterge?: { code: string }; okey?: string; finishedBy?: number | null;
+  yourSeat?: number; yourHand?: { id: string; code: string }[];
+  seats?: { seat: number; handCount: number; topDiscard: { code: string } | null; discardCount: number }[];
+};
+
 type Player = { seat: number; name: string; tier: string; me: boolean };
 type Table = {
   id: string; name: string; capacity: number; kind: string; voice: boolean; video: boolean;
@@ -22,8 +45,42 @@ export default function Oyun() {
   const [form, setForm] = useState({ name: "", capacity: 4, kind: "acik", password: "", voice: true, video: false });
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState("");
+  const [game, setGame] = useState<GameView | null>(null);
+  const gameChan = useRef<any>(null);
 
   const room = tables.find((t) => t.mine) || null;
+  const roomId = room?.id || null;
+
+  // Masa odasındayken oyun durumu + canlı tik
+  useEffect(() => {
+    if (!roomId) { setGame(null); return; }
+    const fetchState = () => fetch(`/api/games/state?tableId=${roomId}`).then((r) => r.json()).then(setGame).catch(() => {});
+    fetchState();
+    const ch = supabase.channel(`game-${roomId}`).on("broadcast", { event: "tick" }, fetchState).subscribe();
+    gameChan.current = ch;
+    return () => { supabase.removeChannel(ch); gameChan.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  function tick() { gameChan.current?.send({ type: "broadcast", event: "tick", payload: {} }); }
+
+  async function oyunHamle(action: string, extra: any = {}) {
+    if (!roomId) return;
+    const r = await fetch("/api/games/move", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tableId: roomId, action, ...extra }),
+    }).then((x) => x.json()).catch(() => ({}));
+    if (r.ok && r.view) { setGame(r.view); tick(); }
+    else setWarn(
+      r.error === "sira_degil" ? "Sıra sende değil."
+      : r.error === "az_oyuncu" ? "En az 2 oyuncu gerekli."
+      : r.error === "yalniz_sahibi" ? "Yalnızca masa sahibi başlatır."
+      : r.error === "once_cek" ? "Önce taş çek."
+      : r.error === "once_at" ? "Önce taş at."
+      : r.error === "atilan_yok" ? "Soldaki oyuncu henüz taş atmadı."
+      : r.error === "deste_bitti" ? "Deste bitti."
+      : "Hamle yapılamadı.");
+  }
 
   function load() {
     fetch("/api/games").then((r) => r.json()).then((d) => { setTables(d.tables || []); setLoading(false); });
@@ -115,12 +172,61 @@ export default function Oyun() {
           </div>
         </div>
 
-        <button className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-semibold opacity-80" disabled>
-          <Play size={18} /> Oyunu başlat
-        </button>
-        <p className="mt-2 text-center text-xs text-muted">
-          101 oyun motoru ve masa içi sesli sohbet <b className="text-text">Faz 2-3</b>'te gelecek. Şu an masa kurma, oturma ve canlı koltuklar aktif.
-        </p>
+        {/* OYUN BAŞLADIYSA: tahta */}
+        {game?.started ? (
+          <div>
+            <div className="mb-3 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-2.5">
+              <div className="flex items-center gap-3">
+                <div className="text-center">
+                  <p className="text-[10px] text-muted">Gösterge</p>
+                  {game.gosterge && <OkeyTile code={game.gosterge.code} />}
+                </div>
+                <div className="text-xs text-muted">
+                  <p>Deste: <b className="text-text">{game.deckCount}</b></p>
+                  <p>Sıra: <b className={game.turn === game.yourSeat ? "text-accent" : "text-text"}>{game.turn === game.yourSeat ? "SEN" : `${game.turn}. koltuk`}</b></p>
+                </div>
+              </div>
+              {/* diğer oyuncuların attığı son taş */}
+              <div className="flex gap-2">
+                {(game.seats || []).filter((s) => s.seat !== game.yourSeat).map((s) => (
+                  <div key={s.seat} className="text-center">
+                    <p className="text-[10px] text-muted">{s.handCount} taş</p>
+                    {s.topDiscard ? <OkeyTile code={s.topDiscard.code} dim /> : <span className="block h-12 w-9 rounded-md border border-dashed border-border" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* senin elin */}
+            <p className="mb-1.5 text-xs text-muted">Elin ({game.yourHand?.length || 0} taş){game.turn === game.yourSeat && game.phase === "discard" ? " — atmak için taşa dokun" : ""}</p>
+            <div className="mb-3 flex flex-wrap gap-1.5 rounded-2xl border border-border bg-surface p-3">
+              {(game.yourHand || []).map((t) => (
+                <OkeyTile key={t.id} code={t.code} onClick={() => game.turn === game.yourSeat && game.phase === "discard" ? oyunHamle("discard", { tileId: t.id }) : undefined} />
+              ))}
+            </div>
+
+            {/* aksiyonlar */}
+            {game.turn === game.yourSeat && game.phase === "draw" && (
+              <div className="flex gap-2">
+                <button onClick={() => oyunHamle("draw", { source: "deck" })} className="brand-gradient flex-1 rounded-2xl py-3 text-sm font-semibold">Desteden çek</button>
+                <button onClick={() => oyunHamle("draw", { source: "discard" })} className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold transition hover:border-accent/50">Soldan al</button>
+              </div>
+            )}
+            {game.turn !== game.yourSeat && <p className="text-center text-sm text-muted">Sıra rakipte… bekle</p>}
+            <p className="mt-2 text-center text-[11px] text-muted">Çek-at çalışıyor. <b className="text-text">Bitirme + 101 puanlama</b> sıradaki faz.</p>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => oyunHamle("start")}
+              disabled={room.seated < 2}
+              className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-semibold disabled:opacity-50"
+            >
+              <Play size={18} /> Oyunu başlat
+            </button>
+            <p className="mt-2 text-center text-xs text-muted">En az 2 oyuncu oturunca <b className="text-text">masa sahibi</b> başlatır.</p>
+          </>
+        )}
         {warn && <p className="mt-2 text-center text-xs text-error">{warn}</p>}
       </div>
     );
