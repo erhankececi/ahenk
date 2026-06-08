@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { TableVoice } from "@/lib/tableVoice";
 import { tierFrame } from "@/components/PremiumBadge";
 import {
   Plus, Lock, Crown, Mic, Video, Users, Zap, X, LogOut, Play, Gamepad2, Trophy,
@@ -48,9 +49,38 @@ export default function Oyun() {
   const [game, setGame] = useState<GameView | null>(null);
   const [finishMode, setFinishMode] = useState(false);
   const gameChan = useRef<any>(null);
+  const [meId, setMeId] = useState("");
+  const [voiceOn, setVoiceOn] = useState(false);
+  const [micOn, setMicOn] = useState(true);
+  const [levels, setLevels] = useState<Record<number, number>>({});
+  const tvRef = useRef<TableVoice | null>(null);
 
   const room = tables.find((t) => t.mine) || null;
   const roomId = room?.id || null;
+  const mySeat = room?.players.find((p) => p.me)?.seat ?? 0;
+
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setMeId(data.user?.id || "")); }, []);
+
+  // Masadan ayrılınca/masaya değişince sesi kapat
+  useEffect(() => {
+    return () => { tvRef.current?.stop(); tvRef.current = null; };
+  }, []);
+  useEffect(() => {
+    if (!roomId && tvRef.current) { tvRef.current.stop(); tvRef.current = null; setVoiceOn(false); setLevels({}); }
+  }, [roomId]);
+
+  async function seseKatil() {
+    if (!roomId || !meId || tvRef.current) return;
+    try {
+      const tv = new TableVoice(supabase, roomId, meId, mySeat);
+      tv.onLevels = (l) => setLevels(l);
+      tvRef.current = tv;
+      await tv.start();
+      setVoiceOn(true); setMicOn(true);
+    } catch { setWarn("Mikrofona erişilemedi."); tvRef.current = null; }
+  }
+  function sesBirak() { tvRef.current?.stop(); tvRef.current = null; setVoiceOn(false); setLevels({}); }
+  function micToggle() { const v = !micOn; setMicOn(v); tvRef.current?.setMic(v); }
 
   // Masa odasındayken oyun durumu + canlı tik
   useEffect(() => {
@@ -155,13 +185,19 @@ export default function Oyun() {
               <div key={i} className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-black/20 p-4">
                 {p ? (
                   <>
-                    <span className={`rounded-full ${tierFrame(p.tier)} ${room.voice ? "ring-2 ring-accent/40" : ""}`}>
+                    <span
+                      className={`rounded-full transition-transform duration-100 ${tierFrame(p.tier)}`}
+                      style={{
+                        transform: `scale(${1 + (levels[i] || 0) * 0.14})`,
+                        boxShadow: (levels[i] || 0) > 0.04 ? `0 0 ${8 + (levels[i] || 0) * 26}px ${(levels[i] || 0) * 5}px rgba(199,169,119,${0.2 + (levels[i] || 0) * 0.5})` : undefined,
+                      }}
+                    >
                       <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-lg font-semibold">
                         {p.name[0]?.toUpperCase()}
                       </span>
                     </span>
                     <span className="text-sm font-medium">{p.name}{p.me ? " (sen)" : ""}</span>
-                    {room.voice && <Mic size={13} className="text-accent" />}
+                    {voiceOn && (levels[i] || 0) > 0.06 ? <Mic size={13} className="animate-pulse text-accent" /> : room.voice ? <Mic size={13} className="text-muted" /> : null}
                   </>
                 ) : (
                   <>
@@ -173,6 +209,24 @@ export default function Oyun() {
             ))}
           </div>
         </div>
+
+        {/* Masa içi sesli sohbet */}
+        {room.voice && (
+          <div className="mb-4 flex items-center gap-2">
+            {!voiceOn ? (
+              <button onClick={seseKatil} className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-accent/40 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/10">
+                <Mic size={16} /> Sesli sohbete katıl
+              </button>
+            ) : (
+              <>
+                <button onClick={micToggle} className={`flex flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold transition ${micOn ? "bg-accent/15 text-accent" : "border border-border text-muted"}`}>
+                  <Mic size={16} /> {micOn ? "Mikrofon açık" : "Mikrofon kapalı"}
+                </button>
+                <button onClick={sesBirak} className="rounded-2xl border border-border px-4 py-2.5 text-sm text-muted transition hover:border-error/50 hover:text-error">Sesten çık</button>
+              </>
+            )}
+          </div>
+        )}
 
         {/* OYUN BAŞLADIYSA: tahta */}
         {game?.started ? (
