@@ -46,6 +46,7 @@ export default function Oyun() {
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState("");
   const [game, setGame] = useState<GameView | null>(null);
+  const [finishMode, setFinishMode] = useState(false);
   const gameChan = useRef<any>(null);
 
   const room = tables.find((t) => t.mine) || null;
@@ -70,7 +71,7 @@ export default function Oyun() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tableId: roomId, action, ...extra }),
     }).then((x) => x.json()).catch(() => ({}));
-    if (r.ok && r.view) { setGame(r.view); tick(); }
+    if (r.ok && r.view) { setGame(r.view); setFinishMode(false); setWarn(""); tick(); }
     else setWarn(
       r.error === "sira_degil" ? "Sıra sende değil."
       : r.error === "az_oyuncu" ? "En az 2 oyuncu gerekli."
@@ -79,6 +80,7 @@ export default function Oyun() {
       : r.error === "once_at" ? "Önce taş at."
       : r.error === "atilan_yok" ? "Soldaki oyuncu henüz taş atmadı."
       : r.error === "deste_bitti" ? "Deste bitti."
+      : r.error === "gecersiz_el" ? "Bu taşı atınca el geçerli değil — başka taş dene."
       : "Hamle yapılamadı.");
   }
 
@@ -174,6 +176,7 @@ export default function Oyun() {
 
         {/* OYUN BAŞLADIYSA: tahta */}
         {game?.started ? (
+          <>
           <div>
             <div className="mb-3 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-2.5">
               <div className="flex items-center gap-3">
@@ -198,10 +201,20 @@ export default function Oyun() {
             </div>
 
             {/* senin elin */}
-            <p className="mb-1.5 text-xs text-muted">Elin ({game.yourHand?.length || 0} taş){game.turn === game.yourSeat && game.phase === "discard" ? " — atmak için taşa dokun" : ""}</p>
-            <div className="mb-3 flex flex-wrap gap-1.5 rounded-2xl border border-border bg-surface p-3">
+            <p className="mb-1.5 text-xs text-muted">
+              Elin ({game.yourHand?.length || 0} taş)
+              {game.turn === game.yourSeat && game.phase === "discard" ? (finishMode ? " — BİTİR: atılacak taşa dokun" : " — atmak için taşa dokun") : ""}
+            </p>
+            <div className={`mb-3 flex flex-wrap gap-1.5 rounded-2xl border p-3 ${finishMode ? "border-accent bg-accent/5" : "border-border bg-surface"}`}>
               {(game.yourHand || []).map((t) => (
-                <OkeyTile key={t.id} code={t.code} onClick={() => game.turn === game.yourSeat && game.phase === "discard" ? oyunHamle("discard", { tileId: t.id }) : undefined} />
+                <OkeyTile
+                  key={t.id}
+                  code={t.code}
+                  onClick={() => {
+                    if (game.turn !== game.yourSeat || game.phase !== "discard") return;
+                    oyunHamle(finishMode ? "finish" : "discard", { tileId: t.id });
+                  }}
+                />
               ))}
             </div>
 
@@ -212,9 +225,31 @@ export default function Oyun() {
                 <button onClick={() => oyunHamle("draw", { source: "discard" })} className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold transition hover:border-accent/50">Soldan al</button>
               </div>
             )}
+            {game.turn === game.yourSeat && game.phase === "discard" && (
+              <button onClick={() => setFinishMode((v) => !v)} className={`mt-2 w-full rounded-2xl py-3 text-sm font-semibold transition ${finishMode ? "border border-accent text-accent" : "bg-gradient-to-r from-accent to-brand text-[#1c1407]"}`}>
+                {finishMode ? "Bitirmeyi iptal et" : "Bitir (el aç)"}
+              </button>
+            )}
             {game.turn !== game.yourSeat && <p className="text-center text-sm text-muted">Sıra rakipte… bekle</p>}
-            <p className="mt-2 text-center text-[11px] text-muted">Çek-at çalışıyor. <b className="text-text">Bitirme + 101 puanlama</b> sıradaki faz.</p>
           </div>
+
+          {/* Bitiş ekranı */}
+          {game.finishedBy != null && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-8">
+              <div className="w-full max-w-sm rounded-3xl border border-accent/30 bg-surface p-6 text-center">
+                <Trophy size={40} className="mx-auto mb-3 text-accent" />
+                <h3 className="font-display text-xl font-bold">
+                  {game.finishedBy === game.yourSeat ? "Kazandın! 🎉" : `${room.players.find((p) => p.seat === game.finishedBy)?.name || "Rakip"} bitirdi`}
+                </h3>
+                <p className="mt-1 text-sm text-muted">El bitti. Puanlar liderliğe işlendi.</p>
+                <div className="mt-4 flex gap-2">
+                  <button onClick={() => oyunHamle("newhand")} className="brand-gradient flex-1 rounded-2xl py-3 text-sm font-semibold">Yeni el</button>
+                  <button onClick={() => kalk(room)} className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold">Masadan kalk</button>
+                </div>
+              </div>
+            </div>
+          )}
+          </>
         ) : (
           <>
             <button

@@ -113,6 +113,120 @@ export function discard(state: OkeyState, seat: number, tileId: string): { ok: b
   return { ok: true };
 }
 
+export function isWild(code: string, okey: string): boolean {
+  return code === "fj" || code === okey;
+}
+
+// 14 taş geçerli gruplara (per/seri, her grup >=3) tam ayrılıyor mu?
+// Okey ve sahte okey (fj) wild — eksik taşı tamamlar. Geri-izleme çözücü.
+export function canFinish(tiles: { code: string }[], okey: string): boolean {
+  if (tiles.length !== 14) return false;
+  // grid[c][n] = adet (1..13), wild ayrı
+  const grid: number[][] = Array.from({ length: 4 }, () => Array(14).fill(0));
+  let wild = 0;
+  for (const t of tiles) {
+    if (isWild(t.code, okey)) { wild++; continue; }
+    const [c, n] = t.code.split("-").map(Number);
+    grid[c][n]++;
+  }
+
+  function firstTile(): [number, number] | null {
+    for (let c = 0; c < 4; c++) for (let n = 1; n <= 13; n++) if (grid[c][n] > 0) return [c, n];
+    return null;
+  }
+
+  function solve(w: number): boolean {
+    const f = firstTile();
+    if (!f) return w === 0;          // tüm gerçek taşlar yerleşti → wild de bitmeli
+    const [c, n] = f;
+
+    // A) PER (aynı sayı, farklı renk) — bu taşı içeren 3 veya 4'lü
+    {
+      const colors = [0, 1, 2, 3].filter((cc) => grid[cc][n] > 0);
+      // c dahil, farklı renk alt kümeleri (boyut 3..4), eksikler wild
+      for (let size = 3; size <= 4; size++) {
+        // c kesin dahil; diğer renklerden seç
+        const others = colors.filter((cc) => cc !== c);
+        const need = size - 1; // c hariç
+        // kombinasyonlar: others'tan k taş (k<=need), kalan (need-k) wild
+        const combos = subsets(others, Math.min(need, others.length));
+        for (const pick of combos) {
+          const useWild = need - pick.length;
+          if (useWild < 0 || useWild > w) continue;
+          if (pick.length + 1 + useWild !== size) continue;
+          grid[c][n]--; pick.forEach((cc) => grid[cc][n]--);
+          if (solve(w - useWild)) { grid[c][n]++; pick.forEach((cc) => grid[cc][n]++); return true; }
+          grid[c][n]++; pick.forEach((cc) => grid[cc][n]++);
+        }
+      }
+    }
+
+    // B) SERİ (aynı renk, ardışık) — (c,n) en küçük taş; n'den başlayan koşu
+    {
+      for (let end = n + 2; end <= 13; end++) {
+        // n..end arası, her pozisyon gerçek taş ya da wild
+        let useWild = 0; let ok = true;
+        const used: number[] = [];
+        for (let p = n; p <= end; p++) {
+          if (grid[c][p] > 0) used.push(p);
+          else useWild++;
+        }
+        if (useWild > w) { ok = false; }
+        // (c,n) kesin gerçek (firstTile gerçek taş). pozisyon n gerçek olmalı:
+        if (grid[c][n] <= 0) ok = false;
+        if (!ok) continue;
+        used.forEach((p) => grid[c][p]--);
+        if (solve(w - useWild)) { used.forEach((p) => grid[c][p]++); return true; }
+        used.forEach((p) => grid[c][p]++);
+      }
+    }
+    return false;
+  }
+
+  return solve(wild);
+}
+
+function subsets<T>(arr: T[], maxSize: number): T[][] {
+  const res: T[][] = [[]];
+  for (let i = 0; i < arr.length; i++) {
+    const cur = res.slice();
+    for (const s of cur) if (s.length < maxSize) res.push([...s, arr[i]]);
+  }
+  return res;
+}
+
+// Bitirme: 15 taştan tileId atılınca kalan 14 geçerli mi?
+export function finish(state: OkeyState, seat: number, tileId: string): { ok: boolean; error?: string } {
+  if (!state.started || state.finishedBy != null) return { ok: false, error: "oyun_yok" };
+  if (state.turn !== seat) return { ok: false, error: "sira_degil" };
+  if (state.phase !== "discard") return { ok: false, error: "once_cek" };
+  const hand = state.hands[seat];
+  const tile = hand.find((t) => t.id === tileId);
+  if (!tile) return { ok: false, error: "tas_yok" };
+  const remaining = hand.filter((t) => t.id !== tileId);
+  if (!canFinish(remaining, state.okey)) return { ok: false, error: "gecersiz_el" };
+  // atılan taşı koy, eli kapat
+  state.hands[seat] = remaining;
+  state.discards[seat].push(tile);
+  state.finishedBy = seat;
+  return { ok: true };
+}
+
+// El sonu puanları: kazanan + kaybedenlerin elindeki taş değerleri.
+export function scores(state: OkeyState): Record<number, { win: boolean; penalty: number }> {
+  const out: Record<number, { win: boolean; penalty: number }> = {};
+  for (const s of state.seats) {
+    if (s === state.finishedBy) { out[s] = { win: true, penalty: 0 }; continue; }
+    let pen = 0;
+    for (const t of state.hands[s] || []) {
+      if (isWild(t.code, state.okey)) pen += 25;
+      else pen += Number(t.code.split("-")[1]);
+    }
+    out[s] = { win: false, penalty: pen };
+  }
+  return out;
+}
+
 // İstemciye gönderilecek redakte görünüm (yalnız kendi elin görünür).
 export function viewFor(state: OkeyState, seat: number) {
   return {
