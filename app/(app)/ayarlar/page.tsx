@@ -5,6 +5,7 @@ import PushOptIn from "@/components/PushOptIn";
 import SoundToggle from "@/components/SoundToggle";
 import IncognitoToggle from "@/components/IncognitoToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import TranslateToggle from "@/components/TranslateToggle";
 import { normalizeLang } from "@/lib/i18n";
 import { cookies } from "next/headers";
 import {
@@ -62,11 +63,12 @@ export default async function Ayarlar() {
         {row("/engellenenler", Ban, "Engellenenler")}
       </Group>
 
-      <Group title="Dil">
+      <Group title="Dil & Çeviri">
         <div className="flex items-center justify-between p-4">
           <span className="flex items-center gap-3 text-sm"><Languages size={18} className="text-muted" /> Uygulama dili</span>
           <LanguageSwitcher current={lang} />
         </div>
+        <TranslateToggle />
       </Group>
 
       <Group title="Premium">

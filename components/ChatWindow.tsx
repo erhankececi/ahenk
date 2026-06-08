@@ -135,25 +135,48 @@ export function ChatWindow({
   const [met, setMet] = useState({ mine: metByMe, both: metBoth });
   const [meet, setMeet] = useState(meetInit);
   const [meetOpen, setMeetOpen] = useState(false);
-  // Anlık çeviri (mesaj başına)
+  // Anlık çeviri (mesaj başına) + otomatik mod
   const [trans, setTrans] = useState<Record<string, { text: string; source?: string }>>({});
   const [transShow, setTransShow] = useState<Record<string, boolean>>({});
+  const [autoTr, setAutoTr] = useState(false);
+  const trReq = useRef<Set<string>>(new Set());
   function myLang(): string {
     if (typeof document === "undefined") return "tr";
     const m = document.cookie.match(/(?:^|; )lang=([^;]+)/);
     return m ? decodeURIComponent(m[1]).slice(0, 2) : "tr";
   }
-  async function cevir(m: Message) {
-    if (trans[m.id]) { setTransShow((s) => ({ ...s, [m.id]: !s[m.id] })); return; }
-    setTransShow((s) => ({ ...s, [m.id]: true }));
+  async function fetchTrans(m: Message) {
     const r = await fetch("/api/translate", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: m.body, target: myLang() }),
     });
     const j = await r.json().catch(() => ({}));
-    if (j.ok) setTrans((t) => ({ ...t, [m.id]: { text: j.text, source: j.source } }));
+    return j.ok ? ({ text: j.text as string, source: j.source as string | undefined }) : null;
+  }
+  async function cevir(m: Message) {
+    if (trans[m.id]) { setTransShow((s) => ({ ...s, [m.id]: !s[m.id] })); return; }
+    setTransShow((s) => ({ ...s, [m.id]: true }));
+    const res = await fetchTrans(m);
+    if (res) setTrans((t) => ({ ...t, [m.id]: res }));
     else setTransShow((s) => ({ ...s, [m.id]: false }));
   }
+  useEffect(() => { setAutoTr(localStorage.getItem("ahenk_autotranslate") === "on"); }, []);
+  // Otomatik çeviri: gelen yeni metin mesajlarını kendi diline çevir (aynı dilse gösterme)
+  useEffect(() => {
+    if (!autoTr) return;
+    const lang = myLang();
+    messages.forEach(async (m) => {
+      if (m.sender_id === meId || m.type !== "text" || !m.body) return;
+      if (trans[m.id] || trReq.current.has(m.id)) return;
+      trReq.current.add(m.id);
+      const res = await fetchTrans(m);
+      if (res) {
+        setTrans((t) => ({ ...t, [m.id]: res }));
+        if (res.source && res.source.slice(0, 2) !== lang) setTransShow((s) => ({ ...s, [m.id]: true }));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, autoTr]);
 
   async function bulusmaOner(kind: string) {
     setMeetOpen(false);
