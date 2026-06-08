@@ -114,6 +114,38 @@ export default async function Admin() {
     if (di.has(dk)) visitDaily[di.get(dk)!].n++;
   });
 
+  // --- YASAL KAYITLAR (KVKK/5651): e-posta + kayıt/giriş + IP ---
+  let authUsers: any[] = [];
+  try {
+    const { data: au } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    authUsers = au?.users || [];
+  } catch {}
+  const authIds = authUsers.map((u) => u.id);
+  const profMap = new Map<string, any>();
+  const ipMap = new Map<string, { ip: string; at: string }>();
+  if (authIds.length) {
+    const [{ data: profs }, { data: ips }] = await Promise.all([
+      admin.from("profiles").select("id,name,member_no,city,last_active,banned").in("id", authIds),
+      admin.from("site_visits").select("user_id,ip,created_at").in("user_id", authIds).not("ip", "is", null).order("created_at", { ascending: false }).limit(5000),
+    ]);
+    (profs || []).forEach((p: any) => profMap.set(p.id, p));
+    (ips || []).forEach((r: any) => { if (r.user_id && !ipMap.has(r.user_id)) ipMap.set(r.user_id, { ip: r.ip, at: r.created_at }); });
+  }
+  const legalRows = authUsers
+    .map((u) => {
+      const p = profMap.get(u.id) || {};
+      const ipr = ipMap.get(u.id);
+      return {
+        id: u.id, email: u.email as string | undefined, created: u.created_at as string,
+        lastSignIn: u.last_sign_in_at as string | undefined, name: p.name, memberNo: p.member_no,
+        city: p.city, banned: p.banned, ip: ipr?.ip,
+      };
+    })
+    .sort((a, b) => new Date(b.created || 0).getTime() - new Date(a.created || 0).getTime());
+
+  const { data: accessLog } = await admin
+    .from("site_visits").select("user_id,ip,path,created_at").order("created_at", { ascending: false }).limit(60);
+
   // Doğrulama selfie'leri private 'photos' kovasında → admin için imzalı URL.
   const pendingVerifs = await Promise.all(
     (verifs || []).map(async (v) => ({
@@ -239,6 +271,48 @@ export default async function Admin() {
           <div><p className="text-xl font-bold text-accent">{(referredCount ?? 0).toLocaleString("tr-TR")}</p><p className="text-xs text-muted">Davetle gelen</p></div>
           <div><p className="text-xl font-bold">%{users ? Math.round(((referredCount ?? 0) / users) * 100) : 0}</p><p className="text-xs text-muted">Davet oranı</p></div>
         </div>
+      </div>
+
+      {/* YASAL KAYITLAR (KVKK / 5651) */}
+      <h2 className="mb-1 flex items-center gap-2 font-semibold">
+        <ShieldAlert size={18} className="text-warning" /> Yasal kayıtlar — e-posta & IP ({legalRows.length})
+      </h2>
+      <p className="mb-2 text-xs text-muted">
+        KVKK/5651 — adli talep halinde kullanılır. Yalnız admin görür. Gizli tut.
+      </p>
+      <div className="mb-3 max-h-96 overflow-y-auto rounded-2xl border border-border bg-surface">
+        {legalRows.length === 0 && <p className="p-4 text-sm text-muted">Kayıt yok.</p>}
+        {legalRows.map((u) => (
+          <div key={u.id} className="border-b border-border/60 p-3 text-sm last:border-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate font-medium">
+                {u.name || "İsimsiz"}{u.memberNo ? <span className="text-muted"> · #{u.memberNo}</span> : null}
+                {u.banned && <span className="ml-1 text-xs text-error">(yasaklı)</span>}
+              </span>
+              <span className="shrink-0 text-[11px] text-muted">{u.city || "—"}</span>
+            </div>
+            <p className="select-all break-all font-mono text-xs text-accent">{u.email || "—"}</p>
+            <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted">
+              <span>Kayıt: {u.created ? new Date(u.created).toLocaleString("tr-TR") : "—"}</span>
+              <span>Son giriş: {u.lastSignIn ? new Date(u.lastSignIn).toLocaleString("tr-TR") : "—"}</span>
+              <span className="font-mono">IP: {u.ip || "—"}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-1 flex items-center gap-2 font-semibold">
+        <Globe size={18} className="text-warning" /> Son erişim logları (IP · zaman)
+      </h2>
+      <div className="mb-6 max-h-72 overflow-y-auto rounded-2xl border border-border bg-surface">
+        {(accessLog || []).length === 0 && <p className="p-4 text-sm text-muted">Henüz erişim kaydı yok.</p>}
+        {(accessLog || []).map((a: any, i: number) => (
+          <div key={i} className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs last:border-0">
+            <span className="font-mono text-muted">{a.ip || "—"}</span>
+            <span className="truncate text-muted">{a.user_id ? (profMap.get(a.user_id)?.name || "üye") : "anonim"} · {a.path}</span>
+            <span className="shrink-0 text-muted">{new Date(a.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+          </div>
+        ))}
       </div>
 
       <h2 className="mb-2 flex items-center gap-2 font-semibold">

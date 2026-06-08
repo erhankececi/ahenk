@@ -12,11 +12,15 @@ export async function POST(req: Request) {
       const { data } = await supabase.auth.getUser();
       userId = data.user?.id || null;
     } catch {}
+    // İstemci IP'si (Vercel: x-forwarded-for). 5651/KVKK trafik logu.
+    const fwd = req.headers.get("x-forwarded-for") || "";
+    const ip = fwd.split(",")[0].trim() || req.headers.get("x-real-ip") || null;
     const admin = createAdminClient();
     await admin.from("site_visits").insert({
       user_id: userId,
       path: (path || "/").toString().slice(0, 200),
       ref: (ref || "").toString().slice(0, 300) || null,
+      ip,
     });
     return NextResponse.json({ ok: true });
   } catch {
