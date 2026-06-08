@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { createClient } from "@/lib/supabase/client";
 import { CallManager } from "@/lib/webrtc";
 import { isActivePremium } from "@/lib/plans";
-import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff, SwitchCamera, Crown } from "lucide-react";
+import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff, SwitchCamera, Crown, Captions } from "lucide-react";
 import { useAudioLevel, SpeakingBars } from "@/components/call/AudioLevel";
 import { playSound } from "@/lib/sound";
 
@@ -254,6 +254,8 @@ function CallScreen({
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteMic, setRemoteMic] = useState(true);
   const [remoteCam, setRemoteCam] = useState(true);
+  const [cc, setCC] = useState(false);
+  const [caption, setCaption] = useState("");
   const active = state.phase === "active";
 
   // Canlı ses seviyeleri (konuşma animasyonu + "konuşuyor" göstergesi)
@@ -297,6 +299,61 @@ function CallScreen({
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+
+  // Canlı altyazı: kendi konuşmanı tanı → broadcast; gelen altyazıyı kendi diline çevir.
+  useEffect(() => {
+    if (!active || !cc) { setCaption(""); return; }
+    const capLang = () => {
+      const m = document.cookie.match(/(?:^|; )lang=([^;]+)/);
+      return m ? decodeURIComponent(m[1]).slice(0, 2) : "tr";
+    };
+    const supabase = createClient();
+    const ch = supabase.channel(`caption-${state.callId}`);
+    let clearT: any;
+    ch.on("broadcast", { event: "cap" }, async ({ payload }: any) => {
+      const text = (payload?.text || "").toString();
+      if (!text) return;
+      let shown = text;
+      try {
+        const r = await fetch("/api/translate", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, target: capLang() }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (j.ok && j.text) shown = j.text;
+      } catch {}
+      setCaption(shown);
+      clearTimeout(clearT);
+      clearT = setTimeout(() => setCaption(""), 6000);
+    }).subscribe();
+
+    let rec: any = null;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SR) {
+      const BCP: Record<string, string> = { tr: "tr-TR", en: "en-US", de: "de-DE", fr: "fr-FR", es: "es-ES", ru: "ru-RU", ar: "ar-SA", fa: "fa-IR", ku: "tr-TR" };
+      rec = new SR();
+      rec.lang = BCP[capLang()] || "tr-TR";
+      rec.continuous = true;
+      rec.interimResults = false;
+      rec.onresult = (e: any) => {
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) {
+            const text = e.results[i][0].transcript.trim();
+            if (text) ch.send({ type: "broadcast", event: "cap", payload: { text } });
+          }
+        }
+      };
+      rec.onerror = () => {};
+      rec.onend = () => { try { if (cc) rec.start(); } catch {} };
+      try { rec.start(); } catch {}
+    }
+    return () => {
+      clearTimeout(clearT);
+      try { if (rec) { rec.onend = null; rec.stop(); } } catch {}
+      supabase.removeChannel(ch);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, cc, state.callId]);
 
   const dk = String(Math.floor(seconds / 60)).padStart(2, "0");
   const sn = String(seconds % 60).padStart(2, "0");
@@ -372,6 +429,13 @@ function CallScreen({
         </div>
       )}
 
+      {/* Canlı altyazı */}
+      {cc && caption && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-28 z-20 flex justify-center px-6">
+          <p className="max-w-lg rounded-xl bg-black/65 px-4 py-2 text-center text-base text-white backdrop-blur-sm">{caption}</p>
+        </div>
+      )}
+
       {/* ALT — frosted kontrol çubuğu */}
       <div className="relative z-10 mx-auto mb-[max(2rem,env(safe-area-inset-bottom))] mt-6 flex items-center justify-center gap-4 rounded-full border border-white/10 bg-white/[0.06] px-5 py-3 backdrop-blur-xl">
         <button
@@ -401,6 +465,14 @@ function CallScreen({
             </button>
           </>
         )}
+
+        <button
+          onClick={() => setCC((v) => !v)}
+          aria-label={cc ? "Altyazıyı kapat" : "Canlı altyazı"}
+          className={`${ctrl} ${cc ? "bg-white text-[#0E0D10]" : "bg-white/12 text-white"}`}
+        >
+          <Captions />
+        </button>
 
         <button onClick={onEnd} aria-label="Görüşmeyi bitir" className={`${ctrl} bg-error text-white`}>
           <PhoneOff />
