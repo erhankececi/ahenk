@@ -7,6 +7,7 @@ import AdminVerifyReview from "@/components/admin/AdminVerifyReview";
 import AdminFeedbackResolve from "@/components/admin/AdminFeedbackResolve";
 import AdminWithdrawAction from "@/components/admin/AdminWithdrawAction";
 import AdminRestoreAction from "@/components/admin/AdminRestoreAction";
+import AdminMessageAudit from "@/components/admin/AdminMessageAudit";
 
 export const dynamic = "force-dynamic";
 
@@ -145,6 +146,10 @@ export default async function Admin() {
 
   const { data: accessLog } = await admin
     .from("site_visits").select("user_id,ip,path,created_at").order("created_at", { ascending: false }).limit(60);
+
+  // Admin denetim kaydı (kim hangi mesajları inceledi)
+  const { data: auditLog } = await admin
+    .from("admin_audit").select("admin_id,action,target_user,meta,created_at").order("created_at", { ascending: false }).limit(30);
 
   // Doğrulama selfie'leri private 'photos' kovasında → admin için imzalı URL.
   const pendingVerifs = await Promise.all(
@@ -314,6 +319,29 @@ export default async function Admin() {
           </div>
         ))}
       </div>
+
+      {/* Mesaj inceleme (denetimli) */}
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <ShieldAlert size={18} className="text-warning" /> Mesaj içerik denetimi
+      </h2>
+      <div className="mb-3">
+        <AdminMessageAudit />
+      </div>
+      {(auditLog || []).length > 0 && (
+        <div className="mb-6 rounded-2xl border border-border bg-surface p-3">
+          <p className="mb-2 text-xs font-medium text-muted">Denetim kaydı — son incelemeler</p>
+          <div className="max-h-56 space-y-1 overflow-y-auto">
+            {(auditLog || []).map((a: any, i: number) => (
+              <p key={i} className="text-[11px] text-muted">
+                <span className="text-text">{profMap.get(a.admin_id)?.name || "admin"}</span> →{" "}
+                {a.action === "view_messages" ? "mesaj inceledi" : a.action}:{" "}
+                <span className="text-text">{profMap.get(a.target_user)?.name || "?"}</span>
+                {a.meta ? ` · ${a.meta}` : ""} · {new Date(a.created_at).toLocaleString("tr-TR")}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
 
       <h2 className="mb-2 flex items-center gap-2 font-semibold">
         <BadgeCheck size={18} className="text-brand" /> Doğrulama istekleri
