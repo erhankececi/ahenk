@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PATHS = [
-  "/login", "/register", "/auth", "/_next", "/favicon", "/api/webhooks",
+  "/login", "/register", "/auth", "/_next", "/favicon", "/api/webhooks", "/api/track",
   // Şifre sıfırlama akışı (oturumsuz erişilebilir olmalı)
   "/sifremi-unuttum", "/sifre-yenile",
   // Herkese açık pazarlama + yasal + güvenlik sayfaları

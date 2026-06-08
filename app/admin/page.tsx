@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck, Lightbulb, Banknote, Trash2 } from "lucide-react";
+import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck, Lightbulb, Banknote, Trash2, UserPlus, Globe, BarChart3 } from "lucide-react";
 import AdminReportResolve from "@/components/admin/AdminReportResolve";
 import AdminUserActions from "@/components/admin/AdminUserActions";
 import AdminVerifyReview from "@/components/admin/AdminVerifyReview";
@@ -9,6 +9,20 @@ import AdminWithdrawAction from "@/components/admin/AdminWithdrawAction";
 import AdminRestoreAction from "@/components/admin/AdminRestoreAction";
 
 export const dynamic = "force-dynamic";
+
+// Basit CSS bar grafiği (server-render; etkileşim yok)
+function Bars({ data, color = "bg-accent" }: { data: { label: string; n: number }[]; color?: string }) {
+  const max = Math.max(1, ...data.map((d) => d.n));
+  return (
+    <div className="flex h-24 items-end gap-px">
+      {data.map((d, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center justify-end" title={`${d.label}: ${d.n}`}>
+          <div className={`w-full rounded-t ${color}`} style={{ height: `${(d.n / max) * 100}%`, minHeight: d.n ? 3 : 0 }} />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default async function Admin() {
   const supabase = createClient();
@@ -56,6 +70,49 @@ export default async function Admin() {
     admin.from("withdrawals").select("id,user_id,jeton,amount_try,iban,full_name,created_at").eq("status", "pending").order("created_at", { ascending: true }).limit(30),
     admin.from("profiles").select("id,name,city,deleted_at").not("deleted_at", "is", null).order("deleted_at", { ascending: false }).limit(50),
   ]);
+
+  // --- Üye & Trafik analitiği ---
+  const nowMs = Date.now();
+  const D = 24 * 3600 * 1000;
+  const isoT = (ms: number) => new Date(ms).toISOString();
+  const [
+    { count: newToday }, { count: new7d }, { count: new30d },
+    { count: wau }, { count: mau }, { count: referredCount },
+    { count: vToday }, { count: v7d }, { count: v30d }, { count: vTotal },
+    { data: signupRows }, { data: visitRows },
+  ] = await Promise.all([
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 7 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 30 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("last_active", isoT(nowMs - 7 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("last_active", isoT(nowMs - 30 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).not("referred_by", "is", null),
+    admin.from("site_visits").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - D)),
+    admin.from("site_visits").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 7 * D)),
+    admin.from("site_visits").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 30 * D)),
+    admin.from("site_visits").select("*", { count: "exact", head: true }),
+    admin.from("profiles").select("created_at").gt("created_at", isoT(nowMs - 30 * D)).limit(100000),
+    admin.from("site_visits").select("created_at").gt("created_at", isoT(nowMs - 30 * D)).limit(200000),
+  ]);
+
+  const dailyT = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(nowMs - (29 - i) * D);
+    return { key: d.toISOString().slice(0, 10), label: d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit" }), n: 0 };
+  });
+  const hourlyT = Array.from({ length: 24 }, (_, i) => ({ label: `${i}`, n: 0 }));
+  const di = new Map(dailyT.map((d, i) => [d.key, i]));
+  const signupDaily = dailyT.map((d) => ({ ...d }));
+  const signupHourly = hourlyT.map((h) => ({ ...h }));
+  const visitDaily = dailyT.map((d) => ({ ...d, n: 0 }));
+  (signupRows || []).forEach((r: any) => {
+    const dk = new Date(r.created_at).toISOString().slice(0, 10);
+    if (di.has(dk)) signupDaily[di.get(dk)!].n++;
+    if (new Date(r.created_at).getTime() > nowMs - D) signupHourly[new Date(r.created_at).getHours()].n++;
+  });
+  (visitRows || []).forEach((r: any) => {
+    const dk = new Date(r.created_at).toISOString().slice(0, 10);
+    if (di.has(dk)) visitDaily[di.get(dk)!].n++;
+  });
 
   // Doğrulama selfie'leri private 'photos' kovasında → admin için imzalı URL.
   const pendingVerifs = await Promise.all(
@@ -125,6 +182,63 @@ export default async function Admin() {
             <p className="text-xs text-muted">{a.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Üyeler & Trafik */}
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <BarChart3 size={18} className="text-accent" /> Üyeler & Trafik
+      </h2>
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { icon: UserPlus, label: "Bugün katılan", value: newToday ?? 0 },
+          { icon: UserPlus, label: "Bu hafta", value: new7d ?? 0 },
+          { icon: UserPlus, label: "Bu ay", value: new30d ?? 0 },
+          { icon: Users, label: "Toplam üye", value: users ?? 0 },
+          { icon: Globe, label: "Bugün siteye giren", value: vToday ?? 0 },
+          { icon: Globe, label: "Bu hafta ziyaret", value: v7d ?? 0 },
+          { icon: Globe, label: "Bu ay ziyaret", value: v30d ?? 0 },
+          { icon: Globe, label: "Toplam ziyaret", value: vTotal ?? 0 },
+        ].map((s) => (
+          <div key={s.label} className="rounded-2xl border border-border bg-surface p-3">
+            <s.icon className="mb-1.5 text-accent" size={17} />
+            <p className="text-xl font-bold">{(s.value as number).toLocaleString("tr-TR")}</p>
+            <p className="text-[11px] text-muted">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mb-3 grid grid-cols-3 gap-3">
+        {[
+          { label: "Aktif (24s)", value: dau ?? 0 },
+          { label: "Aktif (7g)", value: wau ?? 0 },
+          { label: "Aktif (30g)", value: mau ?? 0 },
+        ].map((a) => (
+          <div key={a.label} className="rounded-2xl border border-border bg-surface p-3 text-center">
+            <p className="text-lg font-bold">{(a.value as number).toLocaleString("tr-TR")}</p>
+            <p className="text-[11px] text-muted">{a.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mb-3 rounded-2xl border border-border bg-surface p-3">
+        <p className="mb-2 text-xs text-muted">Üye katılımı — son 30 gün</p>
+        <Bars data={signupDaily} color="bg-accent" />
+      </div>
+      <div className="mb-3 rounded-2xl border border-border bg-surface p-3">
+        <p className="mb-2 text-xs text-muted">Site ziyaretleri — son 30 gün</p>
+        <Bars data={visitDaily} color="bg-brand" />
+      </div>
+      <div className="mb-3 rounded-2xl border border-border bg-surface p-3">
+        <p className="mb-2 text-xs text-muted">Bugünkü katılım — saatlik (0–23)</p>
+        <Bars data={signupHourly} color="bg-accent" />
+      </div>
+      <div className="mb-6 rounded-2xl border border-border bg-surface p-4">
+        <p className="mb-2 text-xs text-muted">Üye kaynağı</p>
+        <div className="flex items-center justify-around text-center">
+          <div><p className="text-xl font-bold">{((users ?? 0) - (referredCount ?? 0)).toLocaleString("tr-TR")}</p><p className="text-xs text-muted">Organik</p></div>
+          <div><p className="text-xl font-bold text-accent">{(referredCount ?? 0).toLocaleString("tr-TR")}</p><p className="text-xs text-muted">Davetle gelen</p></div>
+          <div><p className="text-xl font-bold">%{users ? Math.round(((referredCount ?? 0) / users) * 100) : 0}</p><p className="text-xs text-muted">Davet oranı</p></div>
+        </div>
       </div>
 
       <h2 className="mb-2 flex items-center gap-2 font-semibold">
