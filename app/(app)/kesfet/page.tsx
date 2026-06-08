@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles, Heart, Send, Search, BadgeCheck, MapPin, Briefcase, X, Zap,
-  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw, Gift, Lock,
+  SlidersHorizontal, Flame, LayoutGrid, List, RefreshCw, Star, RotateCcw, Gift, Lock, Gamepad2,
 } from "lucide-react";
 import { Badge } from "@/components/ui";
 import StoriesBar from "@/components/StoriesBar";
@@ -168,9 +168,14 @@ export default function Kesfet() {
           A
         </Link>
         <h1 className="font-display text-xl font-bold tracking-tight">Keşfet</h1>
-        <button onClick={() => setFiltersOpen(true)} aria-label="Filtre" className="text-muted transition hover:text-text">
-          <SlidersHorizontal size={20} strokeWidth={1.7} />
-        </button>
+        <div className="flex items-center gap-4 text-muted">
+          <Link href="/oyun" aria-label="Oyun Salonu" className="transition hover:text-text">
+            <Gamepad2 size={20} strokeWidth={1.7} />
+          </Link>
+          <button onClick={() => setFiltersOpen(true)} aria-label="Filtre" className="transition hover:text-text">
+            <SlidersHorizontal size={20} strokeWidth={1.7} />
+          </button>
+        </div>
       </header>
 
       {/* Hızlı çipler — mockup: Tümü / Yakınında / Online / Yeni / Popüler */}

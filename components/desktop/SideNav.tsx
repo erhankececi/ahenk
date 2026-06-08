@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Compass, MessageCircle, User, CalendarHeart, Sparkles, Wallet, Crown, Film,
+  Compass, MessageCircle, User, CalendarHeart, Sparkles, Wallet, Crown, Film, Gamepad2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const primary = [
   { href: "/kesfet", icon: Compass, label: "Keşfet" },
   { href: "/moments", icon: Sparkles, label: "Moments" },
   { href: "/reels", icon: Film, label: "Klipler" },
+  { href: "/oyun", icon: Gamepad2, label: "Oyun Salonu" },
   { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar", badge: true },
   { href: "/etkinlikler", icon: CalendarHeart, label: "Etkinlikler" },
   { href: "/profil", icon: User, label: "Profil" },
