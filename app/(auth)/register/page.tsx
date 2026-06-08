@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [kabul, setKabul] = useState(false);
 
   async function kayitOl(e: React.FormEvent) {
     e.preventDefault();
@@ -33,6 +34,10 @@ export default function RegisterPage() {
       setErr("Şifreler eşleşmiyor. Lütfen aynı şifreyi iki kez gir.");
       return;
     }
+    if (!kabul) {
+      setErr("Devam etmek için 18+ olduğunu ve Koşullar/Gizlilik/KVKK metinlerini kabul etmelisin.");
+      return;
+    }
     setLoading(true);
     setErr("");
     const { data, error } = await supabase.auth.signUp({
@@ -45,8 +50,9 @@ export default function RegisterPage() {
     });
     setLoading(false);
     if (error) return setErr(error.message);
-    // Yasal erişim logu (kayıt anı + IP — 5651/KVKK)
+    // Yasal erişim logu + açık rıza kaydı (zaman + IP)
     fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "auth:register" }) }).catch(() => {});
+    fetch("/api/consent", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
     if (data.session) {
       router.push("/onboarding");
       router.refresh();
@@ -101,9 +107,23 @@ export default function RegisterPage() {
             🎁 Bir davetle geldin ({ref}) — hesabın 25 jeton hediyeyle başlayacak.
           </p>
         )}
+        <label className="flex items-start gap-2.5 rounded-2xl border border-border bg-surface px-3 py-2.5 text-xs text-muted">
+          <input
+            type="checkbox"
+            checked={kabul}
+            onChange={(e) => setKabul(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-[color:rgb(var(--accent))]"
+          />
+          <span>
+            <b className="text-text">18 yaşından büyüğüm</b> ve{" "}
+            <Link href="/kosullar" className="text-accent underline">Kullanım Koşulları</Link>,{" "}
+            <Link href="/gizlilik" className="text-accent underline">Gizlilik Politikası</Link> ve{" "}
+            <Link href="/kvkk" className="text-accent underline">KVKK Aydınlatma</Link> metinlerini okudum, kabul ediyorum.
+          </span>
+        </label>
         {err && <p className="text-sm text-error">{err}</p>}
         {msg && <p className="text-sm text-brand">{msg}</p>}
-        <Button full disabled={loading}>
+        <Button full disabled={loading || !kabul}>
           {loading ? "Oluşturuluyor..." : "Hesap oluştur"}
         </Button>
       </form>

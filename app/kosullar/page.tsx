@@ -36,16 +36,42 @@ export default function Kosullar() {
         </p>
       </Section>
 
-      <Section h="5. İçerik">
-        <p>Paylaştığın içerikten sen sorumlusun ve yalnızca sana ait içeriği paylaşmalısın. Hizmeti sağlamak için bu içeriğe sınırlı bir kullanım lisansı verirsin.</p>
+      <Section h="5. İçerik ve sorumluluk">
+        <p>
+          Paylaştığın tüm içerikten (mesaj, fotoğraf, video, ses, profil bilgileri) <b className="text-text">münhasıran sen sorumlusun</b> ve
+          yalnızca sana ait, hukuka uygun içeriği paylaşmalısın. Hizmeti sağlamak için bu içeriğe sınırlı, geri alınabilir bir kullanım lisansı verirsin.
+        </p>
       </Section>
 
-      <Section h="6. Sorumluluğun sınırı">
-        <p>Hizmet "olduğu gibi" sunulur. Yasaların izin verdiği ölçüde, dolaylı zararlardan sorumlu değiliz. Buluşmalarda kendi güvenliğinden sen sorumlusun.</p>
+      <Section h="6. Aracı hizmet sağlayıcı ve bildir–kaldır (5651)">
+        <p>
+          Ahenk, kullanıcılar tarafından üretilen içeriğe aracılık eden bir hizmettir ve içeriği <b className="text-text">önceden denetlemekle yükümlü değildir</b>.
+          Kullanıcı içeriği, onu üreten kullanıcının görüşüdür; Ahenk işletmecisini bağlamaz. Hukuka aykırı olduğunu düşündüğün içeriği
+          uygulama içindeki <b className="text-text">"Şikayet Et"</b> aracıyla veya aşağıdaki iletişim adresinden bildirebilirsin. Usulüne uygun bildirim üzerine
+          ilgili içerik <b className="text-text">gecikmeksizin kaldırılır</b> ve gerekirse hesap askıya alınır. Erişim/işlem kayıtları mevzuat gereği tutulur.
+        </p>
       </Section>
 
-      <Section h="7. Değişiklikler ve iletişim">
-        <p>Bu koşulları zaman zaman güncelleyebiliriz. Sorular için: <span className="text-text">destek@ahenk.app</span></p>
+      <Section h="7. Yasak kullanım">
+        <p>
+          18 yaş altı kişilerin kullanımı, sahte kimlik, taciz/tehdit, müstehcen/çıplaklık, çocuğun istismarı, terör/şiddet öven,
+          dolandırıcılık, telif ihlali ve her türlü yasa dışı içerik kesinlikle yasaktır. İhlal, ihbar ve yasal işlem sebebidir.
+        </p>
+      </Section>
+
+      <Section h="8. Tazminat (kullanıcının sorumluluğu)">
+        <p>
+          Bu koşulları veya yasaları ihlalinden doğan her türlü talep, zarar, ceza ve masraftan <b className="text-text">sen sorumlusun</b>;
+          bu nedenle Ahenk işletmecisine yöneltilen talepleri karşılamayı ve işletmeciyi bu taleplere karşı beri kılmayı kabul edersin.
+        </p>
+      </Section>
+
+      <Section h="9. Sorumluluğun sınırı">
+        <p>Hizmet "olduğu gibi" sunulur. Yasaların izin verdiği ölçüde, dolaylı zararlardan ve kullanıcıların davranışlarından sorumlu değiliz. Buluşmalarda kendi güvenliğinden sen sorumlusun.</p>
+      </Section>
+
+      <Section h="10. Değişiklikler ve iletişim">
+        <p>Bu koşulları zaman zaman güncelleyebiliriz. Yasa dışı içerik bildirimi ve sorular için: <span className="text-text">destek@ahenk.live</span></p>
       </Section>
 
       <p className="text-xs">Not: Bu metin bilgilendirme amaçlı bir taslaktır; yayına almadan önce hukuk danışmanınla son hâlini vermelisin.</p>
