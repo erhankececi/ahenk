@@ -66,6 +66,9 @@ export const GIFT_CATALOG: Gift[] = [
   { key: "villa", name: "Villa Tatili", emoji: "🏖️", category: "seyahat", cost: 7000, rarity: "epic", fx: "ocean" },
   { key: "jet", name: "Özel Jet", emoji: "✈️", category: "seyahat", cost: 9000, rarity: "legendary", fx: "fly" },
 
+  // ❤️ Romantik landmark
+  { key: "askkulesi", name: "Aşk Kulesi", emoji: "🗼", category: "kraliyet", cost: 50000, rarity: "legendary", fx: "build" },
+
   // 👑 Kraliyet
   { key: "tac", name: "Taç", emoji: "👑", category: "kraliyet", cost: 600, rarity: "rare", fx: "royal" },
   { key: "sato", name: "Şato", emoji: "🏰", category: "kraliyet", cost: 15000, rarity: "legendary", fx: "build" },
@@ -85,6 +88,16 @@ export const GIFT_CATALOG: Gift[] = [
   { key: "cicek", name: "Çiçek", emoji: "🌷", category: "ozel", cost: 35, rarity: "common", fx: "petals" },
   { key: "konfeti", name: "Konfeti", emoji: "🎉", category: "ozel", cost: 100, rarity: "rare", fx: "royal" },
 ];
+
+// Gönderim animasyon karakteri (overlay'de hediyeye özel his)
+export const GIFT_ANIM: Record<string, string> = {
+  superyat: "yacht", megayat: "yacht", yat: "yacht",
+  dunya: "orbit", ada: "island", kraliyet: "crown", tac: "crown",
+  uzay: "rocket", jet: "rocket", helikopter: "rocket",
+  superaraba: "car", ferrari: "car", elmas: "diamond", elmasyuzuk: "diamond", yuzuk: "diamond",
+  askkulesi: "romantic", gul: "romantic", kalp: "romantic", buket: "romantic",
+};
+export const animType = (key: string): string => GIFT_ANIM[key] || "default";
 
 export const giftByKey = (key: string) => GIFT_CATALOG.find((g) => g.key === key);
 // En uzun isim eşleşmesini seç (ör. "Elmas Yüzük" > "Yüzük" — aynı emoji çakışması).

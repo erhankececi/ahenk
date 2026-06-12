@@ -137,12 +137,20 @@ export default function GiftAnimation({
         const left = 4 + Math.random() * 92;
         const delay = Math.random() * (big ? 1.4 : 0.7);
         const d = 1.8 + Math.random() * (big ? 2.4 : 1.6);
-        const size = 12 + Math.random() * (big ? 30 : 20);
-        const sym = gift.fx === "petals" ? "🌸" : "✨";
+        const size = 2 + Math.random() * 4; // 2-5px mat pirinç ışık parçacığı (emoji YOK)
+        const blur = Math.random() > 0.6;
+        const rose = gift.fx === "petals";
         return (
-          <span key={i} className="gift-particle pointer-events-none absolute bottom-[-8%] z-20 select-none" style={{ left: `${left}%`, animationDelay: `${delay}s`, animationDuration: `${d}s`, fontSize: `${size}px` }}>
-            {sym}
-          </span>
+          <span
+            key={i}
+            className="gift-particle pointer-events-none absolute bottom-[-6%] z-20 rounded-full"
+            style={{
+              left: `${left}%`, width: size, height: size,
+              animationDelay: `${delay}s`, animationDuration: `${d}s`,
+              background: rose ? "rgba(176,107,124,0.8)" : "rgba(199,169,119,0.78)",
+              filter: blur ? "blur(1.5px)" : undefined,
+            }}
+          />
         );
       })}
 

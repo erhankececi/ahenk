@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { GIFT_CATALOG, type Gift } from "@/lib/gifts";
 import { Coins, Plus, ArrowLeft, ChevronRight, Gift as GiftIcon } from "lucide-react";
@@ -16,17 +17,26 @@ const TABS: { id: string; label: string; match: (g: Gift) => boolean }[] = [
   { id: "etkinlik", label: "Etkinlik", match: (g) => g.category === "seyahat" || g.category === "efsane" || g.category === "kraliyet" },
 ];
 
-function Thumb({ g }: { g: Gift }) {
+function Thumb({ g, delay }: { g: Gift; delay: number }) {
   const [err, setErr] = useState(false);
-  if (err) return <span className="text-[3rem] leading-none">{g.emoji}</span>;
+  const reduce = useReducedMotion();
+  // Asset yoksa koyu sinematik placeholder (emoji/ikon YOK)
+  if (err) return <span className="block h-[78%] w-[78%] rounded-xl" style={{ background: "radial-gradient(circle at 50% 40%, #1b1825, #0b0a0d)" }} />;
   return (
-    <img
-      src={`/gifts/${g.key}.png`}
-      alt={g.name}
-      loading="lazy"
-      onError={() => setErr(true)}
-      className="h-[80%] w-[80%] object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]"
-    />
+    <motion.div
+      className="relative h-[80%] w-[80%]"
+      animate={reduce ? undefined : { y: [0, -5, 0], scale: [1, 1.025, 1] }}
+      transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut", delay }}
+    >
+      <Image
+        src={`/gifts/${g.key}.png`}
+        alt={g.name}
+        fill
+        sizes="120px"
+        onError={() => setErr(true)}
+        className="object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]"
+      />
+    </motion.div>
   );
 }
 
@@ -115,15 +125,19 @@ export default function Magaza() {
             >
               {/* görsel vitrini */}
               <div className="relative flex aspect-[1/0.92] items-center justify-center">
-                <span className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(72% 62% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)" }} />
-                <Thumb g={g} />
+                <span className="pointer-events-none absolute inset-0 transition-opacity" style={{ background: "radial-gradient(72% 62% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)", opacity: active ? 1 : 0.55 }} />
+                <Thumb g={g} delay={(i % 6) * 0.5} />
               </div>
               {/* ad + fiyat */}
               <div className="px-2 pb-2.5 pt-0.5">
                 <p className="line-clamp-1 text-center text-[12px] font-medium" style={{ color: "#F5EFE4" }}>{g.name}</p>
-                <p className="mt-1 flex items-center justify-center gap-1 text-[13px] font-bold text-accent">
+                <motion.p
+                  className="mt-1 flex items-center justify-center gap-1 text-[13px] font-bold text-accent"
+                  animate={active ? { opacity: [1, 0.55, 1] } : { opacity: 1 }}
+                  transition={active ? { duration: 1.1, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
+                >
                   <Coins size={12} /> {g.cost.toLocaleString("tr-TR")}
-                </p>
+                </motion.p>
               </div>
             </motion.button>
           );
