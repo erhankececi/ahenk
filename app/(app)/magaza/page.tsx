@@ -7,27 +7,25 @@ import { GIFT_CATALOG, type Gift } from "@/lib/gifts";
 import { Coins, Plus, ArrowLeft, ChevronRight, Gift as GiftIcon } from "lucide-react";
 import Link from "next/link";
 
-// Kategori sekmeleri (referans + Ahenk kataloğu eşlemesi)
+// Kategori sekmeleri — referanstaki 5 sekme (tüm katalog kapsanır)
 const TABS: { id: string; label: string; match: (g: Gift) => boolean }[] = [
   { id: "tumu", label: "Tümü", match: () => true },
-  { id: "populer", label: "Popüler", match: (g) => g.rarity === "legendary" || g.rarity === "mythic" || g.rarity === "epic" },
-  { id: "luks", label: "Lüks", match: (g) => g.category === "luks" },
-  { id: "ozel", label: "Özel", match: (g) => g.category === "ozel" },
+  { id: "populer", label: "Popüler", match: (g) => g.rarity === "epic" || g.rarity === "legendary" || g.rarity === "mythic" },
+  { id: "luks", label: "Lüks", match: (g) => g.category === "luks" || g.category === "vip" },
+  { id: "ozel", label: "Özel", match: (g) => g.category === "ozel" || g.category === "romantik" },
   { id: "etkinlik", label: "Etkinlik", match: (g) => g.category === "seyahat" || g.category === "efsane" || g.category === "kraliyet" },
-  { id: "romantik", label: "Romantik", match: (g) => g.category === "romantik" },
-  { id: "vip", label: "VIP", match: (g) => g.category === "vip" },
 ];
 
 function Thumb({ g }: { g: Gift }) {
   const [err, setErr] = useState(false);
-  if (err) return <span className="text-[2.6rem] leading-none">{g.emoji}</span>;
+  if (err) return <span className="text-[3rem] leading-none">{g.emoji}</span>;
   return (
     <img
       src={`/gifts/${g.key}.png`}
       alt={g.name}
       loading="lazy"
       onError={() => setErr(true)}
-      className="h-[64%] w-[64%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
+      className="h-[80%] w-[80%] object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]"
     />
   );
 }
@@ -61,7 +59,7 @@ export default function Magaza() {
       style={{ background: "#0E0D10" }}
     >
       {/* Üst bar */}
-      <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-3.5" style={{ background: "rgba(14,13,16,0.85)", backdropFilter: "blur(12px)" }}>
+      <header className="sticky top-0 z-20 flex h-14 items-center justify-between px-5" style={{ background: "rgba(14,13,16,0.85)", backdropFilter: "blur(12px)" }}>
         <Link href="/cuzdan" className="text-text/70 transition hover:text-text" aria-label="Geri"><ArrowLeft size={22} strokeWidth={1.8} /></Link>
         <h1 className="font-display text-[17px] font-bold tracking-tight">Hediye Mağazası</h1>
         <Link
@@ -75,7 +73,7 @@ export default function Magaza() {
       </header>
 
       {/* Kategori sekmeleri */}
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-3">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 py-3">
         {TABS.map((t) => {
           const on = tab === t.id;
           return (
@@ -96,7 +94,7 @@ export default function Magaza() {
       </div>
 
       {/* 3 kolon lüks grid */}
-      <div className="grid grid-cols-3 gap-2.5 px-4 pt-1">
+      <div className="grid grid-cols-3 gap-3 px-5 pt-1">
         {items.map((g, i) => {
           const active = sel === g.key;
           return (
@@ -108,21 +106,21 @@ export default function Magaza() {
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setSel(active ? null : g.key)}
-              className="group relative flex flex-col overflow-hidden rounded-2xl text-left"
+              className="group relative flex flex-col overflow-hidden rounded-[16px] text-left"
               style={{
-                background: "linear-gradient(170deg,#18161B,#121013)",
-                border: active ? "1px solid rgba(199,169,119,0.7)" : "1px solid rgba(255,255,255,0.06)",
-                boxShadow: active ? "0 0 0 1px rgba(199,169,119,0.4), 0 0 22px -6px rgba(199,169,119,0.45), inset 0 1px 0 rgba(255,255,255,0.04)" : "inset 0 1px 0 rgba(255,255,255,0.03), 0 6px 16px -10px rgba(0,0,0,0.8)",
+                background: "linear-gradient(170deg,#18161B,#111014)",
+                border: active ? "1px solid rgba(199,169,119,0.55)" : "1px solid rgba(255,255,255,0.08)",
+                boxShadow: active ? "0 0 0 1px rgba(199,169,119,0.35), 0 0 22px -6px rgba(199,169,119,0.4), inset 0 1px 0 rgba(255,255,255,0.04)" : "inset 0 1px 0 rgba(255,255,255,0.03), 0 6px 16px -10px rgba(0,0,0,0.8)",
               }}
             >
               {/* görsel vitrini */}
-              <div className="relative flex aspect-square items-center justify-center">
-                <span className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(70% 60% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)" }} />
+              <div className="relative flex aspect-[1/0.92] items-center justify-center">
+                <span className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(72% 62% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)" }} />
                 <Thumb g={g} />
               </div>
               {/* ad + fiyat */}
               <div className="px-2 pb-2.5 pt-0.5">
-                <p className="truncate text-center text-[12px] font-medium text-text/90">{g.name}</p>
+                <p className="line-clamp-1 text-center text-[12px] font-medium" style={{ color: "#F5EFE4" }}>{g.name}</p>
                 <p className="mt-1 flex items-center justify-center gap-1 text-[13px] font-bold text-accent">
                   <Coins size={12} /> {g.cost.toLocaleString("tr-TR")}
                 </p>
@@ -133,7 +131,7 @@ export default function Magaza() {
       </div>
 
       {/* Jeton satın al kartı */}
-      <div className="px-4 pt-5">
+      <div className="px-5 pt-5">
         <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.99 }}>
           <Link
             href="/cuzdan"
