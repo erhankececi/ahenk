@@ -1,31 +1,33 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { GIFT_CATALOG, RARITY, type Gift } from "@/lib/gifts";
-import { Coins, Plus, ArrowLeft, Gift as GiftIcon } from "lucide-react";
+import { GIFT_CATALOG, type Gift } from "@/lib/gifts";
+import { Coins, Plus, ArrowLeft, ChevronRight, Gift as GiftIcon } from "lucide-react";
 import Link from "next/link";
 
-// Mockup'taki kategori çipleri
+// Kategori sekmeleri (referans + Ahenk kataloğu eşlemesi)
 const TABS: { id: string; label: string; match: (g: Gift) => boolean }[] = [
   { id: "tumu", label: "Tümü", match: () => true },
   { id: "populer", label: "Popüler", match: (g) => g.rarity === "legendary" || g.rarity === "mythic" || g.rarity === "epic" },
-  { id: "luks", label: "Lüks", match: (g) => g.category === "luks" || g.category === "vip" },
-  { id: "kraliyet", label: "Kraliyet", match: (g) => g.category === "kraliyet" },
-  { id: "efsane", label: "Efsane", match: (g) => g.category === "efsane" || g.category === "seyahat" },
-  { id: "romantik", label: "Özel", match: (g) => g.category === "romantik" || g.category === "ozel" },
+  { id: "luks", label: "Lüks", match: (g) => g.category === "luks" },
+  { id: "ozel", label: "Özel", match: (g) => g.category === "ozel" },
+  { id: "etkinlik", label: "Etkinlik", match: (g) => g.category === "seyahat" || g.category === "efsane" || g.category === "kraliyet" },
+  { id: "romantik", label: "Romantik", match: (g) => g.category === "romantik" },
+  { id: "vip", label: "VIP", match: (g) => g.category === "vip" },
 ];
 
 function Thumb({ g }: { g: Gift }) {
   const [err, setErr] = useState(false);
-  if (err) return <span className="text-[2.7rem] leading-none">{g.emoji}</span>;
+  if (err) return <span className="text-[2.6rem] leading-none">{g.emoji}</span>;
   return (
     <img
       src={`/gifts/${g.key}.png`}
       alt={g.name}
       loading="lazy"
       onError={() => setErr(true)}
-      className="relative h-16 w-16 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.65)] transition group-hover:scale-110"
+      className="h-[64%] w-[64%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
     />
   );
 }
@@ -34,6 +36,7 @@ export default function Magaza() {
   const supabase = createClient();
   const [balance, setBalance] = useState<number | null>(null);
   const [tab, setTab] = useState("tumu");
+  const [sel, setSel] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -50,79 +53,107 @@ export default function Magaza() {
   }, [tab]);
 
   return (
-    <div className="min-h-dvh pb-28 lg:pb-10">
-      {/* Üst başlık */}
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-bg/85 px-4 py-3 backdrop-blur-md">
-        <Link href="/cuzdan" className="text-muted" aria-label="Geri"><ArrowLeft size={22} /></Link>
-        <h1 className="font-display text-lg font-bold">Hediye Mağazası</h1>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="min-h-dvh pb-28 lg:pb-10"
+      style={{ background: "#0E0D10" }}
+    >
+      {/* Üst bar */}
+      <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-3.5" style={{ background: "rgba(14,13,16,0.85)", backdropFilter: "blur(12px)" }}>
+        <Link href="/cuzdan" className="text-text/70 transition hover:text-text" aria-label="Geri"><ArrowLeft size={22} strokeWidth={1.8} /></Link>
+        <h1 className="font-display text-[17px] font-bold tracking-tight">Hediye Mağazası</h1>
         <Link
           href="/cuzdan"
-          className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-sm font-bold text-accent"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold text-accent"
+          style={{ background: "#151318", border: "1px solid rgba(199,169,119,0.30)" }}
         >
           <Coins size={14} /> {(balance ?? 0).toLocaleString("tr-TR")}
           <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[#1c1407]"><Plus size={11} /></span>
         </Link>
       </header>
 
-      {/* Kategori çipleri */}
+      {/* Kategori sekmeleri */}
       <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-3">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
-              tab === t.id ? "bg-accent text-[#1c1407]" : "bg-surface text-muted hover:text-text"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* 3'lü 3D kart grid'i */}
-      <div className="grid grid-cols-3 gap-2.5 px-4 pt-1">
-        {items.map((g) => {
-          const r = RARITY[g.rarity];
+        {TABS.map((t) => {
+          const on = tab === t.id;
           return (
-            <div
-              key={g.key}
-              className="group relative flex flex-col items-center overflow-hidden rounded-2xl border bg-[#161619] p-3 transition duration-200 hover:-translate-y-0.5"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
+            <button
+              key={t.id}
+              onClick={() => { setTab(t.id); setSel(null); }}
+              className="shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium transition"
+              style={
+                on
+                  ? { background: "linear-gradient(160deg,#2a2418,#1a160e)", border: "1px solid rgba(199,169,119,0.55)", color: "#E8D9B8" }
+                  : { background: "#151318", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(243,238,228,0.55)" }
+              }
             >
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-16 opacity-40" style={{ background: `radial-gradient(60% 80% at 50% 0%, ${r.ring}, transparent 70%)` }} />
-              <span className="absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide" style={{ color: r.text, background: "rgba(0,0,0,0.45)" }}>
-                {r.label}
-              </span>
-              <span className="relative my-1 flex h-16 items-center justify-center">
-                <span className="absolute h-12 w-12 rounded-full opacity-45 blur-xl" style={{ background: r.ring }} />
-                <Thumb g={g} />
-              </span>
-              <span className="w-full truncate text-center text-xs font-medium text-white/90">{g.name}</span>
-              <span className="mt-1 flex items-center gap-1 text-sm font-bold text-accent">
-                <Coins size={12} /> {g.cost.toLocaleString("tr-TR")}
-              </span>
-            </div>
+              {t.label}
+            </button>
           );
         })}
       </div>
 
-      {/* Jeton satın al */}
-      <div className="px-4 pt-4">
-        <Link
-          href="/cuzdan"
-          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-accent/40"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/15 text-accent"><Coins size={20} /></span>
-          <span className="flex-1">
-            <span className="block text-sm font-semibold">Jeton satın al</span>
-            <span className="block text-xs text-muted">Avantajlı paketleri keşfet</span>
-          </span>
-          <Plus size={20} className="text-accent" />
-        </Link>
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
-          <GiftIcon size={13} /> Bir hediyeyi göndermek için sohbet veya profilde 🎁 simgesine dokun
+      {/* 3 kolon lüks grid */}
+      <div className="grid grid-cols-3 gap-2.5 px-4 pt-1">
+        {items.map((g, i) => {
+          const active = sel === g.key;
+          return (
+            <motion.button
+              key={g.key}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(i * 0.03, 0.4), duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setSel(active ? null : g.key)}
+              className="group relative flex flex-col overflow-hidden rounded-2xl text-left"
+              style={{
+                background: "linear-gradient(170deg,#18161B,#121013)",
+                border: active ? "1px solid rgba(199,169,119,0.7)" : "1px solid rgba(255,255,255,0.06)",
+                boxShadow: active ? "0 0 0 1px rgba(199,169,119,0.4), 0 0 22px -6px rgba(199,169,119,0.45), inset 0 1px 0 rgba(255,255,255,0.04)" : "inset 0 1px 0 rgba(255,255,255,0.03), 0 6px 16px -10px rgba(0,0,0,0.8)",
+              }}
+            >
+              {/* görsel vitrini */}
+              <div className="relative flex aspect-square items-center justify-center">
+                <span className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(70% 60% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)" }} />
+                <Thumb g={g} />
+              </div>
+              {/* ad + fiyat */}
+              <div className="px-2 pb-2.5 pt-0.5">
+                <p className="truncate text-center text-[12px] font-medium text-text/90">{g.name}</p>
+                <p className="mt-1 flex items-center justify-center gap-1 text-[13px] font-bold text-accent">
+                  <Coins size={12} /> {g.cost.toLocaleString("tr-TR")}
+                </p>
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Jeton satın al kartı */}
+      <div className="px-4 pt-5">
+        <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.99 }}>
+          <Link
+            href="/cuzdan"
+            className="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+            style={{ background: "#151318", border: "1px solid rgba(199,169,119,0.25)" }}
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full text-accent" style={{ background: "rgba(199,169,119,0.12)" }}>
+              <Coins size={20} />
+            </span>
+            <span className="flex-1">
+              <span className="block text-sm font-semibold text-text">Jeton satın al</span>
+              <span className="block text-xs text-text/55">Avantajlı paketleri keşfet</span>
+            </span>
+            <ChevronRight size={20} className="text-accent" />
+          </Link>
+        </motion.div>
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-text/45">
+          <GiftIcon size={13} /> Göndermek için bir sohbette veya profilde hediye simgesine dokun
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
