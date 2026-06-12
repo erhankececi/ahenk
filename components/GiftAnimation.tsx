@@ -163,9 +163,29 @@ export default function GiftAnimation({
       <div className="pointer-events-none absolute bottom-[15%] z-20 flex flex-col items-center gap-1 px-6 text-center">
         <p className="font-display text-3xl font-extrabold text-white sm:text-5xl" style={{ textShadow: `0 4px 34px ${r.ring}` }}>{gift.name}</p>
         <p className="text-sm" style={{ color: r.text }}>
-          {fromMe ? "Gönderdin 🎁" : senderName ? `${senderName} sana gönderdi 🎁` : "Sana geldi 🎁"}
+          {fromMe ? "Gönderdin" : senderName ? `${senderName} sana gönderdi` : "Sana geldi"}
         </p>
+      </div>
+
+      {/* TikTok tarzı "X gönderdi" pill'i (sol-alt, soldan kayar) */}
+      <div className="gift-pill-in pointer-events-none absolute bottom-6 left-4 z-30 flex items-center gap-2 rounded-full border border-white/15 bg-black/55 py-1.5 pl-1.5 pr-3.5 backdrop-blur-md">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand to-accent text-sm font-bold text-[#1c1407]">
+          {(fromMe ? "S" : senderName?.[0] || "?").toUpperCase()}
+        </span>
+        <span className="text-sm text-white">
+          <b>{fromMe ? "Sen" : senderName || "Biri"}</b>
+          <span className="text-white/65"> · {gift.name} gönderdi</span>
+        </span>
+        <span className="ml-0.5 grid h-8 w-8 place-items-center">
+          <PillThumb k={gift.key} emoji={gift.emoji} />
+        </span>
       </div>
     </div>
   );
+}
+
+function PillThumb({ k, emoji }: { k: string; emoji: string }) {
+  const [err, setErr] = useState(false);
+  if (err) return <span className="text-lg leading-none">{emoji}</span>;
+  return <img src={`/gifts/${k}.png`} alt="" onError={() => setErr(true)} className="h-7 w-7 object-contain" />;
 }
