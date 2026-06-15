@@ -53,28 +53,33 @@ export default async function Ziyaretciler() {
   }
 
   return (
-    <div className="px-4 pt-6">
-      <h1 className="mb-5 text-2xl font-bold">Seni ziyaret edenler</h1>
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk profil</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">Seni ziyaret edenler</h1>
+      </div>
 
       {!premium ? (
-        <div className="rounded-3xl border border-border bg-surface p-8 text-center">
-          <Lock className="mx-auto mb-3 text-brand" size={32} />
-          <p className="mb-1 font-semibold">{visitCount} kişi profiline baktı</p>
-          <p className="mb-5 text-sm text-muted">Kimler olduğunu görmek Premium ayrıcalığıdır.</p>
+        <div className="lp-panel rounded-[1.75rem] p-8 text-center">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent">
+            <Lock size={26} />
+          </span>
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text">{visitCount} kişi profiline baktı</p>
+          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted">Kimler olduğunu görmek Premium ayrıcalığıdır.</p>
           <Link
             href="/premium"
-            className="brand-gradient inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-semibold text-white"
+            className="lp-cta-gold inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold"
           >
             <Crown size={18} /> Premium ol
           </Link>
         </div>
       ) : visitors.length === 0 ? (
-        <div className="mt-20 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-elevated">
-            <Eye size={26} className="text-muted" />
-          </div>
-          <p className="font-medium">Henüz ziyaretçi yok</p>
-          <p className="mt-1 text-sm text-muted">Keşfette aktif oldukça profilin daha çok görüntülenir.</p>
+        <div className="mt-20 flex flex-col items-center text-center">
+          <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
+            A
+          </span>
+          <p className="mt-4 font-display text-lg font-semibold text-text">Henüz ziyaretçi yok</p>
+          <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">Keşfette aktif oldukça profilin daha çok görüntülenir.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -82,17 +87,15 @@ export default async function Ziyaretciler() {
             <Link
               key={i}
               href={`/u/${v.id}`}
-              className={`flex items-center gap-3 rounded-2xl border bg-surface p-3 transition hover:border-brand/40 ${
-                v.tier === "platinum" || v.tier === "legend" ? "border-brand/40" : "border-border"
-              }`}
+              className="lp-panel-hover flex items-center gap-3 p-3"
             >
               <div className={`rounded-full ${tierFrame(v.tier)}`}>
-                <div className="brand-gradient flex h-11 w-11 items-center justify-center rounded-full font-bold text-white">
+                <div className="lp-monogram flex h-11 w-11 items-center justify-center rounded-full font-bold">
                   {v.name[0]}
                 </div>
               </div>
               <div className="flex flex-1 flex-wrap items-center gap-2">
-                <p className="font-medium">{v.name}</p>
+                <p className="font-medium text-text">{v.name}</p>
                 <PremiumBadge tier={v.tier} />
               </div>
               <span className="text-xs text-muted">{zamanFarki(v.at)}</span>

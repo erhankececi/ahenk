@@ -39,17 +39,17 @@ export default async function Begenenler() {
       </div>
 
       {count === 0 ? (
-        <div className="mt-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-elevated">
-            <Heart size={26} className="text-muted" />
-          </div>
-          <p className="font-medium">Henüz kimse seni beğenmedi</p>
-          <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
+        <div className="mt-16 flex flex-col items-center text-center">
+          <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
+            A
+          </span>
+          <p className="mt-4 font-display text-lg font-semibold text-text">Henüz kimse seni beğenmedi</p>
+          <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-muted">
             Profilini zenginleştir ve keşfette aktif ol — ilgi çoğaldıkça burada görünecek.
           </p>
           <Link
             href="/kesfet"
-            className="brand-gradient mt-6 inline-flex rounded-full px-6 py-2.5 text-sm font-semibold text-white"
+            className="lp-cta-gold mt-6 inline-flex rounded-full px-6 py-2.5 text-sm font-semibold"
           >
             Keşfete git
           </Link>
@@ -57,10 +57,10 @@ export default async function Begenenler() {
       ) : premium ? (
         <div className="grid grid-cols-2 gap-3">
           {people.map((p) => (
-            <div key={p.id} className="rounded-3xl border border-border bg-surface p-4 text-center">
+            <div key={p.id} className="lp-panel rounded-3xl p-4 text-center">
               <Link href={`/u/${p.id}`} className="block">
                 <div className={`mx-auto w-fit rounded-full ${tierFrame(p.tier)}`}>
-                  <div className="brand-gradient flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold text-white">
+                  <div className="lp-monogram flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold">
                     {p.name?.[0]?.toUpperCase() || "?"}
                   </div>
                 </div>
@@ -70,7 +70,7 @@ export default async function Begenenler() {
                 </p>
                 <p className="truncate text-xs text-muted">{p.city || "—"}</p>
                 {p.super ? (
-                  <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-accent to-brand px-2 py-0.5 text-[11px] font-semibold text-white">
+                  <p className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-accent/35 bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">
                     <Star size={10} fill="currentColor" /> Süper beğeni
                   </p>
                 ) : (
@@ -115,17 +115,17 @@ function FreeGate({ count }: { count: number }) {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg" />
       </div>
 
-      <div className="mt-5 rounded-3xl border border-brand/30 bg-brand/5 p-6 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/15">
-          <Lock size={20} className="text-brand" />
+      <div className="lp-panel mt-5 rounded-3xl p-6 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
+          <Lock size={20} className="text-accent" />
         </div>
-        <h2 className="t-h4">{count} kişi seni beğendi</h2>
-        <p className="mx-auto mt-1.5 max-w-xs text-sm text-muted">
+        <h2 className="font-display text-lg font-semibold text-text">{count} kişi seni beğendi</h2>
+        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-muted">
           Kim olduklarını gör ve tek dokunuşla eşleş. Beğenenleri görmek Premium ayrıcalığıdır.
         </p>
         <Link
           href="/premium"
-          className="brand-gradient mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white"
+          className="lp-cta-gold mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
         >
           <Crown size={16} /> Premium ile gör
         </Link>
