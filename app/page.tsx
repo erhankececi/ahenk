@@ -6,61 +6,242 @@ import { createClient } from "@/lib/supabase/server";
 import MarketingShell from "@/components/marketing/MarketingShell";
 import { normalizeLang } from "@/lib/i18n";
 import {
-  ArrowRight, ShieldCheck, Sparkles, Crown, Gem, Eye, Radio, Gift,
-  Heart, MessageCircle, Image as ImageIcon, Coins, MapPin, Lock,
+  ArrowRight,
+  BadgeCheck,
+  Bell,
+  Clapperboard,
+  Crown,
+  Diamond,
+  Gift,
+  Heart,
+  Lock,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+  User,
+  Zap,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-// 5 premium özellik kartı
-const FEATURES = [
-  { icon: Gem, t: "Premium Tasarım Dili", d: "Onyx zemin, mat pirinç vurgu ve zarif tipografi. Her ekran sakin bir lüks hissi verir." },
-  { icon: Eye, t: "Güçlü İlk İzlenim", d: "Fotoğraf değil karakter önce gelir. Bulanık başlar, sohbet derinleştikçe açılır." },
-  { icon: Radio, t: "Canlı ve Etkileşimli", d: "Moments, sesli tanışma, canlı sosyal deneyim ve 101 masaları tek platformda." },
-  { icon: Gift, t: "Lüks Hediye Deneyimi", d: "Sinematik 3D hediyeler ve premium jeton ekonomisiyle anlamlı jestler." },
-  { icon: ShieldCheck, t: "Güven ve Kalite", d: "KVKK uyumu, 18+ doğrulama, profil onayı ve denetimli, güvenli bir topluluk." },
+const featureCards = [
+  {
+    icon: Diamond,
+    title: "Premium Tasarım Dili",
+    text: "Koyu tonlar, mat pirinç vurgu ve sakin tipografiyle pahalı, temiz ve güven veren bir deneyim.",
+  },
+  {
+    icon: Heart,
+    title: "Güçlü İlk İzlenim",
+    text: "Büyük profiller, doğrulama rozetleri ve online durumu ile güven veren bir keşif ekranı.",
+  },
+  {
+    icon: Zap,
+    title: "Canlı ve Etkileşimli",
+    text: "Moments, hikayeler, reels, sesli masalar ve sosyal etkileşim tek ürün içinde birleşir.",
+  },
+  {
+    icon: Gift,
+    title: "Lüks Hediye Deneyimi",
+    text: "Her hediye özel tasarım, sinematik animasyon ve ayrıcalık hissi verir.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Güven ve Kalite",
+    text: "Doğrulama, rozetler, KVKK/5651 kayıtları ve premium özellikler güvenli topluluk kurar.",
+  },
 ];
 
-// Ürün bölümleri
-const PRODUCTS = [
-  { id: "kesfet", icon: Heart, label: "Keşfet", title: "Karakterle eşleş, yüzeyle değil", desc: "Karakter uyumu, bulanık fotoğraf mantığı ve mesafe önceliği ile gerçek bağ kurmaya odaklı keşif. Önce kim olduğun konuşur." },
-  { id: "moments", icon: ImageIcon, label: "Moments & Reels", title: "Yaşadığın anları paylaş", desc: "Instagram tadında içerik akışı, hikayeler ve reels. Topluluğunla zarif, koyu bir arayüzde etkileşim kur." },
-  { id: "magaza", icon: Coins, label: "Hediye Mağazası", title: "Premium hediye ekonomisi", desc: "Süper yat, elmas, aşk kulesi… 35 sinematik 3D hediye. TikTok/Bigo kalitesinde gönderim animasyonları." },
-  { id: "guvenlik", icon: Lock, label: "Güvenlik", title: "Güvenli ve denetimli", desc: "KVKK & 5651 uyumu, doğrulanmış profiller, denetimli içerik ve fotoğraf gizliliği tamamen sende." },
+const giftTiles = [
+  ["Süper Yat", "100.000", "/gifts/superyat.png"],
+  ["Dünya Turu", "80.000", "/gifts/dunya.png"],
+  ["Mega Yat", "75.000", "/gifts/megayat.png"],
+  ["Özel Ada", "150.000", "/gifts/ada.png"],
+  ["Kraliyet Paketi", "200.000", "/gifts/kraliyet.png"],
+  ["Uzay Yolculuğu", "250.000", "/gifts/uzay.png"],
+  ["Lüks Araba", "60.000", "/gifts/superaraba.png"],
+  ["Aşk Kulesi", "50.000", "/gifts/askkulesi.png"],
+  ["Elmas Yağmuru", "40.000", "/gifts/elmas.png"],
 ];
 
-const TIERS = [
-  { name: "Plus", desc: "Sınırsız beğeni, seni beğenenleri gör, geri al." },
-  { name: "Premium", desc: "Öne çık, profil ziyaretçileri, gelişmiş filtreler.", hot: true },
-  { name: "Premium Plus", desc: "Lüks profil çerçevesi, özel rozetler, ayrıcalıklı görünüm." },
+const products = [
+  {
+    k: "Keşfet",
+    t: "Karakter önce, yüz sonra",
+    d: "Fotoğrafı değil karakteri öne alan keşif sistemi; sohbet ilerledikçe güvenli reveal akışı.",
+  },
+  {
+    k: "Moments",
+    t: "İçerik gücü ve sosyal enerji",
+    d: "Hikayeler, moments ve reels ile kullanıcı sadece kaydırmaz; kendini anlatır.",
+  },
+  {
+    k: "Canlı Deneyim",
+    t: "Ses, görüntü ve 101 masaları",
+    d: "WebRTC görüşmeler, sesli oyun masaları ve canlı sosyal alanlar premium hisle birleşir.",
+  },
+  {
+    k: "Güvenlik",
+    t: "KVKK uyumlu, kontrollü topluluk",
+    d: "Gizlilik, şikayet, engelleme, doğrulama ve denetimli mesaj inceleme akışları tek çizgide.",
+  },
 ];
 
-const STORIES = [
-  { q: "Fotoğrafa değil, sohbete bakarak tanıştık. İlk kez biri beni gerçekten dinledi gibi hissettim.", n: "Elif", c: "İstanbul" },
-  { q: "Sesli tanıtım kartı her şeyi değiştirdi — yazıdan değil, tonundan anladım uyumu.", n: "Mert", c: "İzmir" },
-  { q: "Etkinlik üzerinden tanışınca buz çoktan erimiş oluyor. Çok daha doğal.", n: "Zeynep", c: "Ankara" },
-];
+function PhoneFrame({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`vision-phone ${className}`}>
+      <div className="vision-phone-screen">
+        <div className="vision-status"><span>9:41</span><span className="tracking-[1px]">▮▮▮</span></div>
+        {children}
+      </div>
+    </div>
+  );
+}
 
-const FAQ = [
-  { q: "Ahenk nasıl çalışıyor?", a: "Önce karakterin, ilgi alanların ve yaşam tarzın eşleşir; fotoğraf sohbet ilerledikçe açılır. Yüzeysel değil, gerçek uyuma odaklanırız." },
-  { q: "Ücretsiz mi?", a: "Evet, temel kullanım tamamen ücretsiz. Daha fazla görünürlük ve ayrıcalık isteyenler için Premium planlar var." },
-  { q: "Güvenli mi?", a: "18+ doğrulama, profil onayı, şikayet/engelleme ve aktif moderasyon ile güvenli bir topluluk sağlıyoruz. Fotoğrafların gizliliği sende." },
-  { q: "Kimler kullanıyor?", a: "Yüzeysel değil gerçek bir bağ arayan yetişkinler. Ciddi tanışma ve nitelikli sohbet önceliğimiz." },
-];
+function DiscoverPhone() {
+  return (
+    <PhoneFrame className="vision-phone-left">
+      <div className="flex h-full flex-col px-5 pb-5 pt-10">
+        <div className="mb-5 flex items-center justify-between">
+          <span className="font-display text-3xl font-semibold text-accent">A</span>
+          <h3 className="font-display text-2xl font-bold tracking-tight">Keşfet</h3>
+          <SlidersHorizontal size={20} strokeWidth={1.6} className="text-text/80" />
+        </div>
+        <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto">
+          {[
+            "Tümü",
+            "Yakınında",
+            "Online",
+            "Yeni",
+            "Popüler",
+          ].map((x, i) => (
+            <span key={x} className={i === 0 ? "vision-chip-active" : "vision-chip"}>{x}</span>
+          ))}
+        </div>
+        <div className="relative flex-1 overflow-hidden rounded-[1.7rem] border border-accent/35 bg-[#120f13] shadow-[0_24px_70px_-38px_rgba(0,0,0,1)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_20%,rgba(199,169,119,.45),transparent_10rem),linear-gradient(160deg,#3a2b1e_0%,#121013_50%,#050506_100%)]" />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/62 to-transparent p-6 pt-28">
+            <span className="mb-3 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs text-text/90">Yeni üye</span>
+            <div className="flex items-center gap-2">
+              <h4 className="font-display text-2xl font-bold tracking-tight">Dilara, 24</h4>
+              <BadgeCheck size={19} className="text-accent" />
+            </div>
+            <p className="mt-1 text-sm text-text/70">İstanbul · 2 km</p>
+            <p className="mt-2 text-sm text-success">Online</p>
+            <div className="mt-5 flex items-center justify-between">
+              {[Star, Heart, MessageCircle].map((Icon, i) => (
+                <span key={i} className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-accent shadow-inner">
+                  <Icon size={23} strokeWidth={1.7} />
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </PhoneFrame>
+  );
+}
 
-const MOCK_GIFTS = ["superyat", "elmas", "kraliyet", "dunya", "askkulesi", "uzay"];
+function MomentsPhone() {
+  return (
+    <PhoneFrame className="vision-phone-center">
+      <div className="flex h-full flex-col px-5 pb-5 pt-10">
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="font-display text-2xl font-bold tracking-tight">Moments</h3>
+          <div className="flex items-center gap-3">
+            <Search size={21} strokeWidth={1.65} />
+            <Bell size={21} strokeWidth={1.65} />
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-[#1b1409]">+</span>
+          </div>
+        </div>
+        <div className="mb-4 flex gap-4 overflow-hidden">
+          {[
+            "Anın",
+            "Melisa",
+            "Ahmet",
+            "Seda",
+          ].map((x, i) => (
+            <div key={x} className="text-center">
+              <div className={`mx-auto mb-1.5 h-14 w-14 rounded-full ${i === 1 ? "ring-2 ring-accent" : "ring-1 ring-white/10"} bg-[radial-gradient(circle_at_35%_25%,rgba(199,169,119,.62),rgba(24,22,28,.9)_55%)]`} />
+              <span className="text-xs text-text/80">{x}</span>
+            </div>
+          ))}
+        </div>
+        <article className="overflow-hidden rounded-[1.55rem] border border-white/10 bg-[#151318] shadow-[0_24px_60px_-38px_rgba(0,0,0,1)]">
+          <div className="flex items-center gap-3 p-4">
+            <div className="h-10 w-10 rounded-full bg-[radial-gradient(circle_at_35%_20%,#c7a977,#2b2222_62%)]" />
+            <div>
+              <div className="flex items-center gap-1.5 font-semibold">Seda <BadgeCheck size={15} className="text-accent" /></div>
+              <p className="text-xs text-text/58">2 saat önce · İstanbul</p>
+            </div>
+          </div>
+          <div className="h-72 bg-[radial-gradient(circle_at_50%_20%,rgba(255,163,84,.9),transparent_8rem),linear-gradient(180deg,#e49d4c_0%,#37211b_52%,#090a0e_100%)]" />
+          <div className="p-4">
+            <p className="text-sm">Gün batımının huzuru</p>
+            <div className="mt-4 flex gap-5 text-sm text-text/70">
+              <span className="flex items-center gap-1.5"><Heart size={17} fill="currentColor" />128</span>
+              <span className="flex items-center gap-1.5"><MessageCircle size={17} />24</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </PhoneFrame>
+  );
+}
+
+function GiftPhone() {
+  return (
+    <PhoneFrame className="vision-phone-right">
+      <div className="flex h-full flex-col px-5 pb-5 pt-10">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-3"><span className="text-2xl leading-none">‹</span><h3 className="font-display text-xl font-bold tracking-tight">Hediye Mağazası</h3></div>
+          <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent">12.450 +</span>
+        </div>
+        <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto">
+          {["Tümü", "Popüler", "Lüks", "Özel", "Etkinlik"].map((x, i) => (
+            <span key={x} className={i === 0 ? "vision-chip-active" : "vision-chip"}>{x}</span>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {giftTiles.map(([name, price, img]) => (
+            <div key={name} className="overflow-hidden rounded-2xl border border-white/9 bg-[#131116] p-1.5">
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-[#0c0b0e]">
+                <Image src={img} alt={name} fill sizes="110px" className="object-cover" />
+              </div>
+              <p className="mt-2 truncate text-center text-[11px] font-semibold text-text">{name}</p>
+              <p className="mb-1 mt-0.5 text-center text-[11px] font-bold text-accent">● {price}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-auto flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-[#1b1409]">●</span>
+          <span className="flex-1"><b className="block text-sm">Jeton satın al</b><span className="text-xs text-text/58">Avantajlı paketleri keşfet</span></span>
+          <span className="text-accent">+</span>
+        </div>
+      </div>
+    </PhoneFrame>
+  );
+}
+
+function Showcase() {
+  return (
+    <div className="vision-showcase">
+      <DiscoverPhone />
+      <MomentsPhone />
+      <GiftPhone />
+    </div>
+  );
+}
 
 export default async function Home() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarded")
-      .eq("id", user.id)
-      .single();
+    const { data: profile } = await supabase.from("profiles").select("onboarded").eq("id", user.id).single();
     redirect(profile?.onboarded ? "/kesfet" : "/onboarding");
   }
 
@@ -68,295 +249,101 @@ export default async function Home() {
 
   return (
     <MarketingShell lang={lang}>
-      {/* ===================== HERO ===================== */}
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-[-12%] h-[420px] w-[680px] max-w-[94vw] -translate-x-1/2 rounded-full bg-accent/10 blur-[150px]" />
-        </div>
-        <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 py-20 lg:grid-cols-2 lg:py-28">
-          {/* Sol — metin */}
-          <div className="lp-rise text-center lg:text-left">
-            <span className="lp-chip mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium">
-              <Sparkles size={14} /> Premium sosyal keşif platformu
+      <section className="relative overflow-hidden px-4 pb-10 pt-10 sm:pt-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto mb-10 max-w-4xl text-center">
+            <span className="lp-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
+              <Sparkles size={15} /> Türkiye’nin premium sosyal keşif deneyimi
             </span>
-            <h1 className="font-display text-4xl font-extrabold leading-[1.04] tracking-tight sm:text-6xl">
+            <h1 className="mt-7 font-display text-5xl font-extrabold leading-[0.98] tracking-[-0.06em] sm:text-7xl lg:text-8xl">
               Karakter önce,
               <span className="block text-accent">yüz sonra.</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted lg:mx-0">
-              Ahenk; keşif, moments, canlı sosyal deneyim ve premium hediye ekonomisini
-              tek bir zarif platformda birleştirir.
+            <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-text/62 sm:text-xl">
+              Ahenk; keşif, moments, reels, canlı oyun masaları ve premium hediye ekonomisini tek bir sessiz lüks arayüzde birleştirir.
             </p>
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
-              <Link
-                href="/register"
-                className="lp-cta-gold flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold transition"
-              >
-                Hemen Başla <ArrowRight size={18} />
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/register" className="lp-cta-gold inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold">
+                Ahenk’e Katıl <ArrowRight size={18} />
               </Link>
-              <Link
-                href="/#nasil"
-                className="lp-cta-ghost rounded-full px-7 py-3.5 font-semibold transition"
-              >
-                Nasıl Çalışır?
+              <Link href="/#deneyim" className="lp-cta-ghost rounded-full px-7 py-3.5 font-semibold">
+                Deneyimi Gör
               </Link>
             </div>
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-muted lg:justify-start">
-              <span className="flex items-center gap-2"><ShieldCheck size={16} className="text-accent" /> 18+ doğrulamalı</span>
-              <span className="flex items-center gap-2"><Lock size={16} className="text-accent" /> Fotoğraf gizliliği sende</span>
-              <span className="flex items-center gap-2"><Crown size={16} className="text-accent" /> Premium deneyim</span>
-            </div>
           </div>
 
-          {/* Sağ — 3 telefon mockup */}
-          <div className="relative flex items-center justify-center gap-3 sm:gap-5">
-            {/* Keşfet */}
-            <div className="lp-float-1 hidden sm:block" style={{ marginTop: "2.5rem" }}>
-              <PhoneFrame>
-                <div className="flex h-full flex-col p-2.5">
-                  <div className="mb-2 flex items-center justify-between px-1">
-                    <span className="text-[10px] font-semibold text-accent">Keşfet</span>
-                    <MapPin size={11} className="text-muted" />
-                  </div>
-                  <div className="ahenk-photo-card relative flex-1 overflow-hidden rounded-2xl">
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(160deg,#241f17,#121013)", filter: "blur(2px)" }} />
-                    <div className="absolute inset-x-0 bottom-0 p-2.5">
-                      <div className="h-2 w-16 rounded-full bg-white/80" />
-                      <div className="mt-1.5 h-1.5 w-10 rounded-full bg-white/35" />
-                      <div className="mt-2 flex gap-1">
-                        <span className="rounded-full bg-accent/20 px-1.5 py-0.5 text-[7px] text-accent">Sanat</span>
-                        <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[7px] text-white/60">Seyahat</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2.5 flex items-center justify-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/12 text-muted">✕</span>
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full lp-cta-gold"><Heart size={15} /></span>
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/12 text-accent"><MessageCircle size={13} /></span>
-                  </div>
-                </div>
-              </PhoneFrame>
-            </div>
+          <Showcase />
 
-            {/* Moments (orta, öne çıkan) */}
-            <div className="lp-float-2 z-10">
-              <PhoneFrame featured>
-                <div className="flex h-full flex-col p-2.5">
-                  <div className="mb-2 flex items-center justify-between px-1">
-                    <span className="text-[10px] font-semibold text-accent">Moments</span>
-                    <Heart size={11} className="text-muted" />
-                  </div>
-                  <div className="flex-1 space-y-2 overflow-hidden">
-                    {[0, 1].map((k) => (
-                      <div key={k} className="lp-panel rounded-xl p-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="h-5 w-5 rounded-full bg-gradient-to-br from-accent/50 to-brand/40" />
-                          <div className="h-1.5 w-12 rounded-full bg-white/40" />
-                        </div>
-                        <div className="mt-1.5 h-14 rounded-lg" style={{ background: "linear-gradient(160deg,#201c15,#111014)" }} />
-                        <div className="mt-1.5 flex gap-2 text-muted">
-                          <Heart size={9} /><MessageCircle size={9} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </PhoneFrame>
-            </div>
-
-            {/* Hediye Mağazası */}
-            <div className="lp-float-3 hidden sm:block" style={{ marginTop: "2.5rem" }}>
-              <PhoneFrame>
-                <div className="flex h-full flex-col p-2.5">
-                  <div className="mb-2 flex items-center justify-between px-1">
-                    <span className="text-[10px] font-semibold text-accent">Hediye</span>
-                    <span className="flex items-center gap-1 text-[8px] text-accent"><Coins size={9} /> 12.4K</span>
-                  </div>
-                  <div className="grid flex-1 grid-cols-2 gap-1.5">
-                    {MOCK_GIFTS.map((g) => (
-                      <div key={g} className="lp-panel flex items-center justify-center rounded-xl p-1">
-                        <Image src={`/gifts/${g}.png`} alt="" width={48} height={48} className="h-auto w-full object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.6)]" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </PhoneFrame>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===================== ÖZELLİK KARTLARI ===================== */}
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <h2 className="mb-3 text-center font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Neden Ahenk?
-          </h2>
-          <p className="mx-auto mb-12 max-w-2xl text-center text-muted">
-            Premium bir sosyal keşif deneyimini ayakta tutan beş temel.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {FEATURES.map((f) => {
-              const Icon = f.icon;
-              return (
-                <div key={f.t} className="lp-panel lp-panel-hover rounded-2xl p-5">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: "rgba(199,169,119,0.10)" }}>
-                    <Icon size={20} className="text-accent" strokeWidth={1.8} />
-                  </div>
-                  <p className="font-display font-bold">{f.t}</p>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{f.d}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ===================== ÜRÜN BÖLÜMLERİ ===================== */}
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-6xl space-y-5 px-5 py-20">
-          {PRODUCTS.map((p, i) => {
-            const Icon = p.icon;
-            return (
-              <div
-                key={p.id}
-                id={p.id}
-                className={`lp-panel grid items-center gap-8 rounded-3xl p-8 sm:p-10 lg:grid-cols-2 ${i % 2 ? "lg:[direction:rtl]" : ""}`}
-              >
-                <div className="[direction:ltr]">
-                  <span className="lp-chip mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium">
-                    <Icon size={13} /> {p.label}
-                  </span>
-                  <h3 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{p.title}</h3>
-                  <p className="mt-3 max-w-md leading-relaxed text-muted">{p.desc}</p>
-                </div>
-                <div className="[direction:ltr]">
-                  <div
-                    className="relative h-44 overflow-hidden rounded-2xl border border-white/8 sm:h-52"
-                    style={{ background: "radial-gradient(circle at 30% 20%, rgba(199,169,119,0.12), transparent 60%), linear-gradient(160deg,#1a1812,#0e0d10)" }}
-                  >
-                    <Icon size={88} className="absolute right-6 top-1/2 -translate-y-1/2 text-accent/15" strokeWidth={1} />
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 space-y-2">
-                      <div className="h-2.5 w-28 rounded-full bg-white/25" />
-                      <div className="h-2 w-20 rounded-full bg-white/12" />
-                      <div className="h-2 w-24 rounded-full bg-accent/30" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ===================== PREMIUM ===================== */}
-      <section id="premium" className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <div className="mb-3 flex items-center justify-center gap-2 text-accent">
-            <Crown size={20} />
-            <span className="text-sm font-semibold uppercase tracking-wider">Premium</span>
-          </div>
-          <h2 className="mb-3 text-center font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Daha fazlasını isteyenlere
-          </h2>
-          <p className="mx-auto mb-12 max-w-2xl text-center text-muted">
-            Görünürlüğünü artır, seni beğenenleri gör, ayrıcalıklı bir profil deneyimi yaşa.
-          </p>
-          <div className="grid gap-5 sm:grid-cols-3">
-            {TIERS.map((tier) => (
-              <div
-                key={tier.name}
-                className={`lp-panel relative rounded-2xl p-6 ${tier.hot ? "border-accent/40" : ""}`}
-                style={tier.hot ? { borderColor: "rgba(199,169,119,0.45)" } : undefined}
-              >
-                {tier.hot && (
-                  <span className="lp-cta-gold absolute right-4 top-4 rounded-full px-2.5 py-0.5 text-[11px] font-semibold">
-                    Popüler
-                  </span>
-                )}
-                <p className="font-display text-lg font-bold">{tier.name}</p>
-                <p className="mt-2 text-sm text-muted">{tier.desc}</p>
+          <div className="vision-feature-strip mt-7 grid gap-0 overflow-hidden rounded-[1.8rem] lg:grid-cols-5">
+            {featureCards.map(({ icon: Icon, title, text }) => (
+              <div key={title} className="border-white/8 p-6 lg:border-r last:lg:border-r-0">
+                <Icon size={30} strokeWidth={1.65} className="mb-4 text-accent" />
+                <h3 className="font-display text-lg font-bold tracking-tight">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-text/62">{text}</p>
               </div>
             ))}
           </div>
-          <div className="mt-8 text-center">
-            <Link href="/register" className="inline-flex items-center gap-2 rounded-full border border-accent/40 px-6 py-3 font-semibold text-accent transition hover:bg-accent/10">
-              Planları gör <ArrowRight size={16} />
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* ===================== HİKAYELER ===================== */}
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <h2 className="mb-12 text-center font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Ahenk nasıl bir his?
-          </h2>
-          <div className="grid gap-5 sm:grid-cols-3">
-            {STORIES.map((s) => (
-              <figure key={s.n} className="lp-panel rounded-2xl p-6">
-                <Gem size={20} className="mb-3 text-accent/60" />
-                <blockquote className="text-[15px] leading-relaxed">{s.q}</blockquote>
-                <figcaption className="mt-4 flex items-center gap-2.5">
-                  <span className="lp-monogram flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
-                    {s.n[0]}
-                  </span>
-                  <span className="text-sm text-muted">{s.n} · {s.c}</span>
-                </figcaption>
-              </figure>
-            ))}
+      <section id="deneyim" className="mx-auto max-w-6xl px-5 py-16">
+        <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-accent">Ürün mimarisi</p>
+            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-5xl">Sıradan dating değil, canlı sosyal dünya.</h2>
           </div>
-        </div>
-      </section>
-
-      {/* ===================== SSS ===================== */}
-      <section id="nasil" className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-3xl px-5 py-20">
-          <h2 className="mb-10 text-center font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Sıkça sorulan sorular
-          </h2>
-          <div className="space-y-3">
-            {FAQ.map((item) => (
-              <details key={item.q} className="lp-panel group rounded-2xl p-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between font-semibold">
-                  {item.q}
-                  <span className="ml-3 text-accent transition group-open:rotate-45">+</span>
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{item.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===================== SON CTA ===================== */}
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-4xl px-5 py-24 text-center">
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-bold tracking-tight sm:text-5xl">
-            Gerçek bir bağ, bir sohbet uzağında.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
-            Bugün Ahenk’e katıl — karakter önce, yüz sonra.
+          <p className="max-w-md text-sm leading-relaxed text-text/62">
+            Her modül aynı tasarım sistemine bağlı: onyx yüzey, pirinç vurgu, net hiyerarşi ve premium boşluk.
           </p>
-          <Link
-            href="/register"
-            className="lp-cta-gold mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 font-semibold transition"
-          >
-            Ahenk’e Katıl <ArrowRight size={18} />
-          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {products.map((p) => (
+            <article key={p.k} className="lp-panel lp-panel-hover rounded-[1.6rem] p-6">
+              <span className="text-sm font-semibold text-accent">{p.k}</span>
+              <h3 className="mt-3 font-display text-2xl font-bold tracking-tight">{p.t}</h3>
+              <p className="mt-3 leading-relaxed text-text/62">{p.d}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pb-20">
+        <div className="overflow-hidden rounded-[2rem] border border-accent/25 bg-[radial-gradient(circle_at_20%_0%,rgba(199,169,119,.20),transparent_28rem),linear-gradient(135deg,#171217,#0e0d10)] p-8 shadow-[0_30px_80px_-45px_rgba(0,0,0,1)] sm:p-12">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
+            <div>
+              <Crown size={38} strokeWidth={1.5} className="text-accent" />
+              <h2 className="mt-5 font-display text-3xl font-extrabold tracking-tight sm:text-5xl">Premium hissi ilk ekrandan başlar.</h2>
+              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-text/62">
+                Girişten mağazaya, profilden mesaja kadar tüm akış aynı marka diliyle çalışır: az renk, güçlü kontrast, iyi boşluk ve zarif hareket.
+              </p>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link href="/register" className="lp-cta-gold inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 font-semibold">
+                  Hemen Başla <ArrowRight size={18} />
+                </Link>
+                <Link href="/guvenlik" className="lp-cta-ghost inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 font-semibold">
+                  Güvenlik standardı <Lock size={17} />
+                </Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                ["Doğrulama", BadgeCheck],
+                ["Premium", Crown],
+                ["Hediyeler", Gift],
+                ["Topluluk", User],
+                ["Reels", Clapperboard],
+                ["Gizlilik", Lock],
+              ].map(([label, Icon]: any) => (
+                <div key={label} className="rounded-2xl border border-white/9 bg-black/18 p-4">
+                  <Icon size={22} className="mb-3 text-accent" strokeWidth={1.6} />
+                  <p className="font-semibold">{label}</p>
+                  <p className="mt-1 text-xs text-text/48">Ahenk standardı</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </MarketingShell>
-  );
-}
-
-// Telefon çerçevesi — sunucu tarafında render edilir
-function PhoneFrame({ children, featured }: { children: React.ReactNode; featured?: boolean }) {
-  return (
-    <div className="lp-phone" style={featured ? { width: 234, borderColor: "rgba(199,169,119,0.4)" } : undefined}>
-      <div className="lp-phone-notch" />
-      <div className="lp-phone-screen">{children}</div>
-    </div>
   );
 }

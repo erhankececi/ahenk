@@ -1,17 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import VisitTracker from "@/components/VisitTracker";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
-// Temiz modern grotesk display (mockup birebir: serif değil, kalın sans başlıklar).
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["500", "600", "700", "800"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ahenk.live"),
@@ -53,7 +43,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" className="dark">
-      <body className={`${inter.variable} ${manrope.variable}`}>
+      <body>
         <ThemeProvider>
           <VisitTracker />
           <div className="min-h-dvh bg-bg">{children}</div>
