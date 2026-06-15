@@ -35,36 +35,37 @@ export default function Engellenenler() {
   }
 
   return (
-    <div className="min-h-dvh px-4 pb-24 pt-6">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
       <div className="mb-5 flex items-center gap-3">
         <BackButton fallback="/profil" />
-        <h1 className="t-h3">Engellenenler</h1>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">Engellenenler</h1>
+        </div>
       </div>
 
       {rows === null ? (
         <p className="text-sm text-muted">Yükleniyor…</p>
       ) : rows.length === 0 ? (
-        <div className="mt-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-elevated">
-            <Ban size={26} className="text-muted" />
-          </div>
-          <p className="font-medium">Kimseyi engellemedin</p>
-          <p className="mt-1 text-sm text-muted">
+        <div className="mt-16 flex flex-col items-center text-center">
+          <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">A</span>
+          <p className="mt-4 font-display text-lg font-semibold text-text">Kimseyi engellemedin</p>
+          <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">
             Engellediğin kişiler burada görünür; istediğinde engeli kaldırabilirsin.
           </p>
         </div>
       ) : (
         <div className="space-y-2">
           {rows.map((u) => (
-            <div key={u.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3">
-              <div className="brand-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold text-white">
+            <div key={u.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3">
+              <div className="lp-monogram flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold">
                 {u.name[0]?.toUpperCase() || "?"}
               </div>
-              <p className="flex-1 truncate font-medium">{u.name}</p>
+              <p className="flex-1 truncate font-medium text-text">{u.name}</p>
               <button
                 onClick={() => kaldir(u.id)}
                 disabled={busy === u.id}
-                className="shrink-0 rounded-full border border-border px-3 py-1.5 text-sm transition hover:border-brand disabled:opacity-50"
+                className="lp-cta-ghost shrink-0 rounded-full px-3 py-1.5 text-sm transition disabled:opacity-50"
               >
                 {busy === u.id ? "…" : "Engeli kaldır"}
               </button>
