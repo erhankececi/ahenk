@@ -75,7 +75,7 @@ export default function Cuzdan() {
       } else if (!r.ok || !j.ok) {
         setNotice({ ok: false, msg: "Satın alma başarısız, tekrar dene." });
       } else {
-        setNotice({ ok: true, msg: `+${j.jeton} jeton yüklendi! 🎉` });
+        setNotice({ ok: true, msg: `+${j.jeton} jeton yüklendi!` });
         await load();
       }
     } catch {
@@ -96,7 +96,7 @@ export default function Cuzdan() {
       });
       const j = await r.json();
       if (r.ok && j.ok) {
-        setNotice({ ok: true, msg: `${title} aktifleştirildi! 🎉` });
+        setNotice({ ok: true, msg: `${title} aktifleştirildi!` });
         await load();
       } else if (j?.error === "insufficient") {
         setNotice({ ok: false, msg: `Yetersiz bakiye — ${j.cost} jeton gerekli. Görev yap veya jeton al.` });
@@ -110,159 +110,263 @@ export default function Cuzdan() {
   }
 
   return (
-    <div className="px-4 pb-24 pt-6">
-      <div className="mb-4 flex items-center gap-2">
-        <Link href="/profil" className="text-muted" aria-label="Geri">
-          <ArrowLeft size={20} />
-        </Link>
-        <h1 className="text-2xl font-bold brand-text">Cüzdan</h1>
-      </div>
-
-      {/* Bakiye */}
-      <Card className="mb-4 p-5 text-center">
-        <p className="t-caption text-muted">Jeton bakiyen</p>
-        {balance == null ? (
-          <Skeleton className="mx-auto mt-2 h-9 w-24" />
-        ) : (
-          <p className="mt-1 flex items-center justify-center gap-2 text-4xl font-bold">
-            <Coins className="text-accent" size={30} /> {balance}
-          </p>
-        )}
-      </Card>
-
-      <Link
-        href="/para-cek"
-        className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/15">
-          <Banknote size={18} className="text-success" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-semibold">Para çek</p>
-          <p className="text-xs text-muted">Kazandığın jetonu nakde çevir (1 jeton = ₺0,10)</p>
-        </div>
-        <ArrowRight size={18} className="text-muted" />
-      </Link>
-
-      {notice && (
-        <p
-          className={`mb-4 rounded-2xl px-3 py-2 text-sm ${
-            notice.ok ? "bg-success/15 text-success" : "bg-error/10 text-error"
-          }`}
-        >
-          {notice.msg}
-        </p>
-      )}
-
-      {/* Jetonla aç (harcama) */}
-      <p className="mb-2 t-h4">Jetonla aç</p>
-      <div className="mb-6 space-y-2.5">
-        {SPEND.map((s) => {
-          const afford = balance == null || balance >= s.jeton;
-          return (
-            <div
-              key={s.item}
-              className={`flex items-center gap-3 rounded-2xl border p-4 ${
-                s.best ? "border-brand bg-brand/5" : "border-border bg-surface"
-              }`}
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-5">
+      <div className="mx-auto w-full max-w-3xl">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link
+              href="/profil"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-text shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition hover:border-[#C7A977]/45 hover:text-accent"
+              aria-label="Geri"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/15">
-                <s.Icon size={20} className="text-accent" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-center gap-2 font-semibold">
-                  {s.title}
-                  {s.best && (
-                    <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-white">
-                      En iyi değer
-                    </span>
-                  )}
-                </p>
-                <p className="text-xs text-muted">{s.desc}</p>
-              </div>
-              <button
-                onClick={() => kullan(s.item, s.title)}
-                disabled={using === s.item || !afford}
-                className="brand-gradient shrink-0 rounded-xl px-3 py-2 text-xs font-semibold text-white transition disabled:opacity-40"
-                aria-label={`${s.title} — ${s.jeton} jeton`}
-              >
-                {using === s.item ? (
-                  "…"
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Coins size={12} /> {s.jeton}
-                  </span>
-                )}
-              </button>
+              <ArrowLeft size={18} />
+            </Link>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk cüzdan</p>
+              <h1 className="mt-1 truncate text-2xl font-semibold tracking-[-0.04em] text-text">
+                Cüzdan & Jeton
+              </h1>
             </div>
-          );
-        })}
-      </div>
+          </div>
 
-      {/* Jeton satın al */}
-      <p className="mb-2 t-h4">Jeton satın al</p>
-      <div className="mb-3 grid grid-cols-2 gap-3">
-        {PACKAGES.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => satinAl(p.id)}
-            disabled={buying === p.id}
-            className={`relative rounded-2xl border p-4 text-left transition active:scale-95 ${
-              p.populer ? "border-brand bg-brand/5" : "border-border bg-surface"
+          <div className="hidden rounded-full border border-[#C7A977]/25 bg-[#C7A977]/10 px-3 py-1.5 text-xs font-medium text-accent sm:block">
+            1 jeton = ₺0,10
+          </div>
+        </div>
+
+        {/* Bakiye */}
+        <Card className="lp-panel mb-4 overflow-hidden p-0">
+          <div className="relative">
+            <div className="absolute inset-x-0 top-0 h-px bg-[#C7A977]/35" />
+            <div className="absolute right-[-80px] top-[-80px] h-48 w-48 rounded-full bg-[#C7A977]/10 blur-3xl" />
+            <div className="absolute bottom-[-90px] left-[-80px] h-48 w-48 rounded-full bg-white/[0.03] blur-3xl" />
+
+            <div className="relative p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Jeton bakiyen</p>
+                  {balance == null ? (
+                    <Skeleton className="mt-3 h-12 w-36 rounded-2xl" />
+                  ) : (
+                    <p className="mt-2 flex items-center gap-3 text-5xl font-semibold tracking-[-0.06em] text-text">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C7A977]/35 bg-[#C7A977]/12 text-accent shadow-[0_12px_40px_rgba(199,169,119,0.12)]">
+                        <Coins size={25} />
+                      </span>
+                      {balance.toLocaleString("tr-TR")}
+                    </p>
+                  )}
+                </div>
+
+                <div className="lp-monogram flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.4rem] border border-[#C7A977]/25 bg-[#0E0D10]/70 text-4xl shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
+                  A
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-3 gap-2">
+                <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/65 p-3">
+                  <p className="text-[11px] text-muted">Kullanım</p>
+                  <p className="mt-0.5 text-sm font-semibold text-text">Boost</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/65 p-3">
+                  <p className="text-[11px] text-muted">Ayrıcalık</p>
+                  <p className="mt-0.5 text-sm font-semibold text-text">Premium</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/65 p-3">
+                  <p className="text-[11px] text-muted">Kazanç</p>
+                  <p className="mt-0.5 text-sm font-semibold text-text">Nakit</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Link href="/para-cek" className="lp-panel-hover mb-4 flex items-center gap-3 px-4 py-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent">
+            <Banknote size={19} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-text">Para çek</p>
+            <p className="text-xs leading-5 text-muted">Kazandığın jetonu nakde çevir</p>
+          </div>
+          <ArrowRight size={18} className="shrink-0 text-muted" />
+        </Link>
+
+        {notice && (
+          <div
+            className={`mb-4 rounded-[1.4rem] border px-4 py-3 text-sm leading-6 shadow-[0_18px_70px_rgba(0,0,0,0.20)] ${
+              notice.ok
+                ? "border-[#C7A977]/30 bg-[#C7A977]/10 text-text"
+                : "border-red-400/20 bg-red-500/10 text-red-200"
             }`}
           >
-            {p.populer && (
-              <span className="absolute right-2 top-2 rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-white">
-                Popüler
-              </span>
-            )}
-            <p className="flex items-center gap-1 text-lg font-bold">
-              <Coins size={16} className="text-accent" /> {p.jeton}
-            </p>
-            <p className="mt-1 text-sm text-muted">₺{p.price}</p>
-            <span className="brand-gradient mt-2 inline-block rounded-xl px-3 py-1.5 text-xs font-semibold text-white">
-              {buying === p.id ? "..." : "Satın al"}
-            </span>
-          </button>
-        ))}
-      </div>
-      <p className="mb-6 t-caption text-muted">
-        Ödeme sağlayıcı (Stripe) bağlanınca jeton satın alma açılır. Bağlanana kadar canlıda kapalıdır
-        (geliştirmede <b>demo</b> anında yükler). Jetonu her zaman görev ve davetle kazanabilirsin.
-      </p>
+            {notice.msg}
+          </div>
+        )}
 
-      {/* Jeton geçmişi */}
-      <p className="mb-2 t-h4">Jeton geçmişi</p>
-      {history == null ? (
-        <Skeleton className="h-40 w-full" />
-      ) : history.length === 0 ? (
-        <p className="t-caption text-muted">Henüz hareket yok. Görevleri tamamla, jeton kazan.</p>
-      ) : (
-        <Card className="divide-y divide-border p-0">
-          {history.map((row, idx) => (
-            <div key={idx} className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm">{row.reason || "Hareket"}</p>
-                <p className="t-caption text-muted">
-                  {new Date(row.created_at).toLocaleString("tr-TR", {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-              <span
-                className={`flex shrink-0 items-center gap-0.5 text-sm font-semibold ${
-                  row.amount >= 0 ? "text-success" : "text-error"
+        {/* Jetonla aç (harcama) */}
+        <section className="lp-panel mb-5 p-0">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
+            <div>
+              <p className="text-sm font-semibold text-text">Jetonla aç</p>
+              <p className="mt-0.5 text-xs text-muted">Görünürlüğünü ve deneyimini yükselt</p>
+            </div>
+            <Zap size={17} className="text-accent" />
+          </div>
+
+          <div className="space-y-2 p-3">
+            {SPEND.map((s) => {
+              const afford = balance == null || balance >= s.jeton;
+              return (
+                <div
+                  key={s.item}
+                  className={`rounded-[1.35rem] border p-3.5 transition ${
+                    s.best
+                      ? "border-[#C7A977]/45 bg-[#C7A977]/10 shadow-[0_18px_70px_rgba(199,169,119,0.08)]"
+                      : "border-white/10 bg-[#0E0D10]/55"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#C7A977]/25 bg-[#C7A977]/10 text-accent">
+                      <s.Icon size={20} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-2 font-semibold text-text">
+                        {s.title}
+                        {s.best && (
+                          <span className="rounded-full border border-[#C7A977]/30 bg-[#C7A977]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+                            En iyi değer
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-0.5 text-xs leading-5 text-muted">{s.desc}</p>
+                    </div>
+
+                    <button
+                      onClick={() => kullan(s.item, s.title)}
+                      disabled={using === s.item || !afford}
+                      className="shrink-0 rounded-2xl border border-[#C7A977]/35 bg-[#C7A977]/12 px-3 py-2 text-xs font-semibold text-accent transition hover:bg-[#C7A977]/18 active:scale-95 disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-muted disabled:opacity-60"
+                      aria-label={`${s.title} — ${s.jeton} jeton`}
+                    >
+                      {using === s.item ? (
+                        "…"
+                      ) : (
+                        <span className="flex items-center gap-1">
+                          <Coins size={12} /> {s.jeton}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Jeton satın al */}
+        <section className="lp-panel mb-5 p-0">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
+            <div>
+              <p className="text-sm font-semibold text-text">Jeton satın al</p>
+              <p className="mt-0.5 text-xs text-muted">Avantajlı paketlerle bakiyeni güçlendir</p>
+            </div>
+            <Coins size={17} className="text-accent" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 p-3">
+            {PACKAGES.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => satinAl(p.id)}
+                disabled={buying === p.id}
+                className={`relative overflow-hidden rounded-[1.4rem] border p-4 text-left transition hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 ${
+                  p.populer
+                    ? "border-[#C7A977]/50 bg-[#C7A977]/10 shadow-[0_18px_70px_rgba(199,169,119,0.10)]"
+                    : "border-white/10 bg-[#0E0D10]/60 hover:border-[#C7A977]/35"
                 }`}
               >
-                {row.amount >= 0 ? <Plus size={13} /> : <Minus size={13} />} {Math.abs(row.amount)}
-              </span>
+                {p.populer && (
+                  <span className="absolute right-2.5 top-2.5 rounded-full border border-[#C7A977]/30 bg-[#C7A977]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.13em] text-accent">
+                    Popüler
+                  </span>
+                )}
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#C7A977]/25 bg-[#C7A977]/10 text-accent">
+                  <Coins size={18} />
+                </div>
+
+                <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-text">
+                  {p.jeton.toLocaleString("tr-TR")}
+                </p>
+                <p className="mt-0.5 text-sm text-muted">₺{p.price}</p>
+
+                <span className="mt-3 inline-flex rounded-xl border border-[#C7A977]/30 bg-[#C7A977]/12 px-3 py-1.5 text-xs font-semibold text-accent">
+                  {buying === p.id ? "..." : "Satın al"}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="border-t border-white/10 px-4 py-3">
+            <p className="text-xs leading-5 text-muted">
+              Ödeme sağlayıcı bağlanınca jeton satın alma açılır. Bağlanana kadar canlıda kapalıdır
+              (geliştirmede <b className="text-text">demo</b> anında yükler). Jetonu her zaman görev ve davetle kazanabilirsin.
+            </p>
+          </div>
+        </section>
+
+        {/* Jeton geçmişi */}
+        <section className="lp-panel p-0">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
+            <div>
+              <p className="text-sm font-semibold text-text">Jeton geçmişi</p>
+              <p className="mt-0.5 text-xs text-muted">Son bakiye hareketlerin</p>
             </div>
-          ))}
-        </Card>
-      )}
+            <Banknote size={17} className="text-accent" />
+          </div>
+
+          {history == null ? (
+            <div className="p-4">
+              <Skeleton className="h-40 w-full rounded-3xl" />
+            </div>
+          ) : history.length === 0 ? (
+            <div className="p-5 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl border border-white/10 bg-[#0E0D10] text-accent">
+                <Coins size={22} />
+              </div>
+              <p className="mt-3 text-sm font-medium text-text">Henüz hareket yok</p>
+              <p className="mt-1 text-xs leading-5 text-muted">Görevleri tamamla, jeton kazan.</p>
+            </div>
+          ) : (
+            <Card className="divide-y divide-white/10 border-0 bg-transparent p-0 shadow-none">
+              {history.map((row, idx) => (
+                <div key={idx} className="flex items-center justify-between gap-3 px-4 py-3.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-text">{row.reason || "Hareket"}</p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      {new Date(row.created_at).toLocaleString("tr-TR", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  <span
+                    className={`flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-sm font-semibold ${
+                      row.amount >= 0
+                        ? "border-[#C7A977]/30 bg-[#C7A977]/10 text-accent"
+                        : "border-red-400/20 bg-red-500/10 text-red-200"
+                    }`}
+                  >
+                    {row.amount >= 0 ? <Plus size={13} /> : <Minus size={13} />} {Math.abs(row.amount)}
+                  </span>
+                </div>
+              ))}
+            </Card>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
