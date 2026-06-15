@@ -14,10 +14,11 @@ export default async function Topluluk() {
 
   if (!city) {
     return (
-      <div className="px-4 pb-24 pt-6 text-center">
-        <h1 className="t-h3 mb-2">Şehir Topluluğu</h1>
-        <p className="text-sm text-muted">Topluluğunu görmek için profilinde şehrini seç.</p>
-        <Link href="/onboarding" className="mt-4 inline-block rounded-full border border-border px-5 py-2.5 text-sm font-medium">
+      <div className="lp-page flex min-h-dvh flex-col items-center px-4 pb-24 pt-24 text-center">
+        <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">A</span>
+        <h1 className="mt-4 font-display text-xl font-semibold text-text">Şehir Topluluğu</h1>
+        <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">Topluluğunu görmek için profilinde şehrini seç.</p>
+        <Link href="/onboarding" className="lp-cta-gold mt-6 inline-block rounded-full px-6 py-2.5 text-sm font-semibold">
           Şehrimi ekle
         </Link>
       </div>
@@ -45,30 +46,31 @@ export default async function Topluluk() {
   ]);
 
   return (
-    <div className="px-4 pb-24 pt-6">
-      <div className="mb-1 flex items-center gap-2">
-        <MapPin size={20} className="text-brand" />
-        <h1 className="font-display text-2xl font-bold">{city} Topluluğu</h1>
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk topluluk</p>
+      <div className="mt-1 flex items-center gap-2">
+        <MapPin size={20} className="text-accent" />
+        <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">{city} Topluluğu</h1>
       </div>
-      <p className="mb-5 flex items-center gap-1.5 text-sm text-muted">
+      <p className="mb-5 mt-1 flex items-center gap-1.5 text-sm text-muted">
         <Users size={14} /> {count ?? 0} üye
       </p>
 
       {/* Etkinlikler */}
       <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="t-h4 flex items-center gap-2">
-            <CalendarHeart size={17} className="text-brand" /> Şehrindeki etkinlikler
+        <div className="mb-2.5 flex items-center justify-between">
+          <p className="flex items-center gap-2 text-sm font-semibold text-text">
+            <CalendarHeart size={17} className="text-accent" /> Şehrindeki etkinlikler
           </p>
-          <Link href="/etkinlikler" className="text-xs text-muted">Tümü</Link>
+          <Link href="/etkinlikler" className="text-xs text-accent">Tümü</Link>
         </div>
         {(events || []).length === 0 ? (
           <p className="text-sm text-muted">Yakında etkinlik yok — ilkini sen başlat.</p>
         ) : (
           <div className="space-y-2">
             {(events || []).map((e) => (
-              <Link key={e.id} href="/etkinlikler" className="block rounded-2xl border border-border bg-surface p-3">
-                <p className="font-medium">{e.title}</p>
+              <Link key={e.id} href="/etkinlikler" className="lp-panel-hover block p-3">
+                <p className="font-medium text-text">{e.title}</p>
                 {e.starts_at && (
                   <p className="text-xs text-muted">
                     {new Date(e.starts_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
@@ -81,7 +83,7 @@ export default async function Topluluk() {
       </div>
 
       {/* Popüler üyeler */}
-      <p className="mb-2 t-h4 flex items-center gap-2">
+      <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
         <Crown size={17} className="text-accent" /> Şehrin popüler üyeleri
       </p>
       {(members || []).length === 0 ? (
@@ -89,13 +91,13 @@ export default async function Topluluk() {
       ) : (
         <div className="grid grid-cols-3 gap-2.5">
           {(members || []).map((m: any) => (
-            <Link key={m.id} href={`/u/${m.id}`} className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-surface p-3 text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-lg font-bold">
+            <Link key={m.id} href={`/u/${m.id}`} className="lp-panel-hover flex flex-col items-center gap-1.5 p-3 text-center">
+              <span className="lp-monogram flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold">
                 {m.name?.[0]?.toUpperCase() || "?"}
               </span>
-              <span className="flex items-center gap-1 truncate text-sm font-medium">
+              <span className="flex items-center gap-1 truncate text-sm font-medium text-text">
                 {m.name}
-                {m.is_verified && <BadgeCheck size={13} className="text-brand" />}
+                {m.is_verified && <BadgeCheck size={13} className="text-accent" />}
               </span>
             </Link>
           ))}
