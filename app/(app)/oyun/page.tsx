@@ -407,11 +407,14 @@ export default function Oyun() {
 
   // ---- LOBİ ----
   return (
-    <div className="px-4 pb-24 pt-6">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
       <header className="mb-4 flex items-center justify-between">
-        <h1 className="flex items-center gap-2 font-display text-2xl font-bold tracking-tight">
-          <Gamepad2 size={22} className="text-accent" /> Oyun Salonu
-        </h1>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk 101</p>
+          <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text">
+            <Gamepad2 size={22} className="text-accent" /> Oyun Salonu
+          </h1>
+        </div>
         <Link href="/liderlik" className="text-muted transition hover:text-text" aria-label="Liderlik"><Trophy size={20} strokeWidth={1.7} /></Link>
       </header>
 
@@ -426,18 +429,18 @@ export default function Oyun() {
       {warn && <p className="mb-2 text-center text-xs text-error">{warn}</p>}
 
       {loading ? (
-        <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-2xl bg-surface" />)}</div>
+        <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="shimmer h-20 rounded-2xl" />)}</div>
       ) : tables.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
-          <Gamepad2 size={36} className="mb-3 text-accent" strokeWidth={1.5} />
-          <p className="font-display text-lg font-semibold">Henüz açık masa yok</p>
-          <p className="mt-1 text-sm text-muted">İlk 101 masasını sen kur — arkadaşlarını davet et.</p>
+          <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent"><Gamepad2 size={26} strokeWidth={1.6} /></span>
+          <p className="font-display text-lg font-semibold text-text">Henüz açık masa yok</p>
+          <p className="mt-1.5 text-sm text-muted">İlk 101 masasını sen kur — arkadaşlarını davet et.</p>
         </div>
       ) : (
         <div className="space-y-2.5">
           {tables.map((t) => (
-            <div key={t.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-elevated">
+            <div key={t.id} className="lp-panel-hover flex items-center gap-3 rounded-2xl p-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-[#0E0D10]">
                 {t.kind === "vip" ? <Crown size={20} className="text-accent" /> : t.locked ? <Lock size={18} className="text-muted" /> : <Gamepad2 size={20} className="text-accent" />}
               </div>
               <div className="min-w-0 flex-1">
