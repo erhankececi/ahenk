@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input, PasswordInput } from "@/components/ui";
 import { adSoyadGecerli } from "@/lib/utils";
+import { ArrowLeft, Gift } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -69,14 +70,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col justify-center px-6">
-      <Link href="/" className="absolute left-5 top-5 text-sm text-muted transition hover:text-text">
-        ← Ahenk
+    <div className="relative flex min-h-dvh flex-col justify-center px-6 py-12">
+      <Link href="/" className="absolute left-5 top-5 flex items-center gap-1.5 text-sm text-muted transition hover:text-text">
+        <ArrowLeft size={16} /> Ahenk
       </Link>
-      <h1 className="mb-2 text-3xl font-bold">Aramıza katıl</h1>
-      <p className="mb-8 text-muted">Karakterinle tanış, yüzün sonra gelir.</p>
+      <div className="mb-8 text-center">
+        <div className="lp-monogram mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
+          A
+        </div>
+        <h1 className="font-display text-3xl font-bold tracking-tight">Ahenk’e katıl</h1>
+        <p className="mt-1.5 text-muted">Karakterinle tanış, yüzün sonra gelir.</p>
+      </div>
 
-      <form onSubmit={kayitOl} className="space-y-3">
+      <form onSubmit={kayitOl} className="lp-panel space-y-3 rounded-3xl p-6">
         <Input placeholder="Ad Soyad" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input
           type="email"
@@ -103,8 +109,8 @@ export default function RegisterPage() {
           <p className="text-sm text-warning">Şifreler henüz eşleşmiyor.</p>
         )}
         {ref && (
-          <p className="rounded-2xl bg-brand/10 px-3 py-2 text-sm text-brand">
-            🎁 Bir davetle geldin ({ref}) — hesabın 25 jeton hediyeyle başlayacak.
+          <p className="flex items-center gap-2 rounded-2xl border border-accent/25 bg-accent/[0.07] px-3 py-2 text-sm text-accent">
+            <Gift size={15} className="shrink-0" /> Bir davetle geldin ({ref}) — hesabın 25 jeton hediyeyle başlayacak.
           </p>
         )}
         <label className="flex items-start gap-2.5 rounded-2xl border border-border bg-surface px-3 py-2.5 text-xs text-muted">

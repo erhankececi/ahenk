@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
-import { Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -74,19 +74,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col justify-center px-6">
-      <Link href="/" className="absolute left-5 top-5 text-sm text-muted transition hover:text-text">
-        ← Ahenk
+    <div className="relative flex min-h-dvh flex-col justify-center px-6 py-12">
+      <Link href="/" className="absolute left-5 top-5 flex items-center gap-1.5 text-sm text-muted transition hover:text-text">
+        <ArrowLeft size={16} /> Ahenk
       </Link>
-      <div className="mb-10 text-center">
-        <div className="brand-gradient mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl">
-          <Sparkles className="text-white" />
+      <div className="mb-9 text-center">
+        <div className="lp-monogram mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
+          A
         </div>
-        <h1 className="text-3xl font-bold">Ahenk</h1>
-        <p className="mt-1 text-muted">Önce ruh, sonra yüz.</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">Tekrar hoş geldin</h1>
+        <p className="mt-1.5 text-muted">Karakter önce, yüz sonra.</p>
       </div>
 
-      <form onSubmit={girisYap} className="space-y-3">
+      <form onSubmit={girisYap} className="lp-panel space-y-3 rounded-3xl p-6">
         <Input
           type="email"
           placeholder="E-posta"
