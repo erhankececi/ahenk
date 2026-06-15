@@ -157,16 +157,25 @@ export default function Onboarding() {
   const canAdvance = step === 0 ? step0Valid : true;
 
   return (
-    <div className="min-h-dvh px-6 pb-28 pt-10">
-      <div className="mb-6 flex gap-1">
+    <div className="min-h-dvh px-6 pb-28 pt-9">
+      <div className="mb-7 flex items-center gap-2.5">
+        <span className="lp-monogram flex h-10 w-10 items-center justify-center rounded-xl font-display text-lg font-extrabold">
+          A
+        </span>
+        <div>
+          <p className="font-display text-sm font-bold leading-tight tracking-tight">Profilini oluştur</p>
+          <p className="text-xs text-muted">Adım {step + 1} / {steps.length}</p>
+        </div>
+      </div>
+      <div className="mb-6 flex gap-1.5">
         {steps.map((_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full ${i <= step ? "brand-gradient" : "bg-border"}`}
+            className={`h-1.5 flex-1 rounded-full transition ${i <= step ? "lp-cta-gold" : "bg-white/10"}`}
           />
         ))}
       </div>
-      <h2 className="mb-6 text-2xl font-bold">{steps[step]}</h2>
+      <h2 className="mb-6 font-display text-2xl font-bold tracking-tight">{steps[step]}</h2>
 
       {step === 0 && (
         <div className="space-y-4 animate-fade-up">
@@ -253,8 +262,8 @@ export default function Onboarding() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-brand/30 bg-brand/5 p-3">
-            <p className="mb-3 text-sm font-medium brand-text">Karakter & yaşam tarzı — uyum eşleşmesi için</p>
+          <div className="lp-panel rounded-2xl p-4">
+            <p className="mb-3 text-sm font-semibold text-accent">Karakter & yaşam tarzı — uyum eşleşmesi için</p>
             <div className="space-y-4">
               <div>
                 <p className="mb-2 text-sm text-muted">Ne arıyorsun?</p>
@@ -311,8 +320,8 @@ export default function Onboarding() {
 
       {step === 3 && (
         <div className="animate-fade-up">
-          <div className="mb-4 rounded-2xl border border-brand/40 bg-brand/5 p-4">
-            <p className="mb-2 flex items-center gap-2 text-sm font-medium brand-text">
+          <div className="lp-panel mb-4 rounded-2xl p-4">
+            <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-accent">
               <Sparkles size={16} /> AI profil önerileri
             </p>
             <ul className="space-y-1.5">
@@ -362,12 +371,12 @@ export default function Onboarding() {
         </div>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md border-t border-border bg-bg/90 p-4 backdrop-blur">
+      <div className="lp-header fixed inset-x-0 bottom-0 mx-auto max-w-md p-4">
         <div className="flex items-center gap-2">
           {step > 0 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="flex items-center gap-1 rounded-2xl border border-border px-4 py-3 font-semibold text-text transition hover:border-brand"
+              className="lp-cta-ghost flex items-center gap-1 rounded-2xl px-4 py-3 font-semibold transition"
               aria-label="Önceki adım"
             >
               <ChevronLeft size={18} /> Geri
