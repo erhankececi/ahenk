@@ -10,11 +10,11 @@ export const dynamic = "force-dynamic";
 
 const META: Record<string, { icon: any; href?: string; label: (p: any) => string }> = {
   match: { icon: Heart, href: "/eslesmeler", label: () => "Yeni bir ahenk yakaladın!" },
-  super: { icon: Heart, href: "/begenenler", label: () => "Biri seni ÇOK beğendi 💫 — kim olduğunu gör" },
+  super: { icon: Heart, href: "/begenenler", label: () => "Biri seni çok beğendi — kim olduğunu gör" },
   like: { icon: Heart, href: "/begenenler", label: () => "Biri seni beğendi — kim olduğunu gör" },
   message: { icon: MessageCircle, href: "/eslesmeler", label: () => "Yeni mesajın var" },
   visit: { icon: Eye, href: "/ziyaretciler", label: () => "Profilini biri ziyaret etti" },
-  gift: { icon: Gift, href: "/eslesmeler", label: (p) => `Sana ${p?.label || "bir hediye"} geldi${p?.earned ? ` — +${p.earned} jeton kazandın 🎁` : ""}` },
+  gift: { icon: Gift, href: "/eslesmeler", label: (p) => `Sana ${p?.label || "bir hediye"} geldi${p?.earned ? ` — +${p.earned} jeton kazandın` : ""}` },
   system: { icon: Bell, label: (p) => p?.text || "Bildirim" },
 };
 
@@ -52,22 +52,22 @@ export default async function Bildirimler() {
             {(notifs || []).map((n) => {
               const m = META[n.type] || META.system;
               const Icon = m.icon;
-              const cls = `flex items-center gap-3 rounded-2xl border border-border p-3 ${
-                n.is_read ? "bg-surface" : "bg-brand/5"
+              const cls = `flex items-center gap-3 rounded-2xl p-3 ${
+                n.is_read ? "lp-panel" : "border border-accent/30 bg-accent/[0.06]"
               }`;
               const inner = (
                 <>
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent/25 bg-accent/10 text-accent">
                     <Icon size={18} />
                   </span>
                   <div className="flex-1">
-                    <p className="text-sm">{m.label(n.payload)}</p>
+                    <p className="text-sm text-text">{m.label(n.payload)}</p>
                     <p className="t-caption text-muted">{zamanFarki(n.created_at)}</p>
                   </div>
                 </>
               );
               return m.href ? (
-                <Link key={n.id} href={m.href} className={`${cls} transition hover:border-brand/40`}>
+                <Link key={n.id} href={m.href} className={`${cls} transition hover:border-accent/45`}>
                   {inner}
                 </Link>
               ) : (
