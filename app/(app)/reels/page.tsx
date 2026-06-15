@@ -64,7 +64,7 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift }: {
       {/* alt bilgi — sessiz overlay */}
       <div className="absolute inset-x-0 bottom-20 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 pr-20 pt-12 text-white">
         <Link href={`/u/${reel.user_id}`} className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-sm font-semibold ring-1 ring-white/20">{reel.name[0]?.toUpperCase()}</span>
+          <span className="lp-monogram flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ring-1 ring-white/20">{reel.name[0]?.toUpperCase()}</span>
           <span className="font-semibold">{reel.name}</span>
         </Link>
         {reel.text && <p className="mt-2.5 line-clamp-2 text-sm text-white/85">{reel.text}</p>}
@@ -96,11 +96,11 @@ export default function Reels() {
   if (!reels) return <div className="flex h-[100dvh] items-center justify-center bg-black text-white/60">Yükleniyor…</div>;
   if (reels.length === 0)
     return (
-      <div className="flex h-[80dvh] flex-col items-center justify-center gap-3 text-center text-muted">
-        <Film size={36} className="text-brand" />
-        <p className="font-semibold text-text">Henüz reels yok</p>
-        <p className="text-sm">Moments'tan bir <b>video</b> paylaş — burada görünür.</p>
-        <Link href="/moments" className="brand-gradient mt-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white">Video paylaş</Link>
+      <div className="lp-page flex h-[80dvh] flex-col items-center justify-center gap-3 text-center text-muted">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent"><Film size={26} /></span>
+        <p className="mt-1 font-display text-lg font-semibold text-text">Henüz reels yok</p>
+        <p className="text-sm">Moments'tan bir <b className="text-text">video</b> paylaş — burada görünür.</p>
+        <Link href="/moments" className="lp-cta-gold mt-2 rounded-full px-5 py-2.5 text-sm font-semibold">Video paylaş</Link>
       </div>
     );
 
