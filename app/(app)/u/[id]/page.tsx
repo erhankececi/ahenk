@@ -24,9 +24,10 @@ export default async function UserProfile({ params }: { params: { id: string } }
 
   if (!p) {
     return (
-      <div className="px-4 py-24 text-center">
-        <p className="text-muted">Profil bulunamadı.</p>
-        <Link href="/eslesmeler" className="mt-4 inline-block text-sm text-brand">
+      <div className="lp-page flex min-h-dvh flex-col items-center px-4 pt-24 text-center">
+        <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">A</span>
+        <p className="mt-4 text-muted">Profil bulunamadı.</p>
+        <Link href="/eslesmeler" className="mt-4 inline-block text-sm font-medium text-accent">
           Geri dön
         </Link>
       </div>
@@ -76,7 +77,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
   ].filter((a) => a.value);
 
   return (
-    <div className={`min-h-dvh px-4 pb-24 pt-6 ${themeClass(p.theme)}`}>
+    <div className={`lp-page min-h-dvh px-4 pb-28 pt-6 ${themeClass(p.theme)}`}>
       <div className="mb-2 flex items-center justify-between">
         <BackButton fallback="/kesfet" />
         {user && <UserProfileActions targetId={params.id} meId={user.id} />}
@@ -85,7 +86,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
 
       <div className="flex flex-col items-center text-center">
         <div className={`rounded-3xl ${tierFrame(tier)}`}>
-          <div className="brand-gradient flex h-24 w-24 items-center justify-center rounded-3xl text-3xl font-bold text-white">
+          <div className="lp-monogram flex h-24 w-24 items-center justify-center rounded-3xl text-3xl font-bold">
             {p.name?.[0]?.toUpperCase() || "?"}
           </div>
         </div>
@@ -94,7 +95,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
             {p.name}
             {p.age ? `, ${p.age}` : ""}
           </h1>
-          {p.is_verified && <BadgeCheck size={20} className="text-brand" />}
+          {p.is_verified && <BadgeCheck size={20} className="text-accent" />}
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           <PremiumBadge tier={tier} />
@@ -112,7 +113,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
         {match && (
           <Link
             href={`/sohbet/${match.id}`}
-            className="brand-gradient mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white"
+            className="lp-cta-gold mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
           >
             <MessageCircle size={16} /> Mesaj gönder
           </Link>
@@ -160,15 +161,15 @@ export default async function UserProfile({ params }: { params: { id: string } }
       )}
 
       {attrs.length > 0 && (
-        <div className="mt-6 overflow-hidden rounded-3xl border border-border bg-surface">
+        <div className="lp-panel mt-6 overflow-hidden rounded-3xl">
           {attrs.map((a, i) => (
             <div
               key={a.label}
-              className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-border/60" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-white/[0.06]" : ""}`}
             >
-              <a.Icon size={17} className="shrink-0 text-muted" />
+              <a.Icon size={17} className="shrink-0 text-accent" />
               <span className="text-sm text-muted">{a.label}</span>
-              <span className="ml-auto text-sm font-medium">{a.value}</span>
+              <span className="ml-auto text-sm font-medium text-text">{a.value}</span>
             </div>
           ))}
         </div>
@@ -179,9 +180,9 @@ export default async function UserProfile({ params }: { params: { id: string } }
       {Array.isArray(promptAnswers) && promptAnswers.length > 0 && (
         <div className="mt-6 space-y-2">
           {promptAnswers.map((pa: any) => (
-            <div key={pa.prompt_id} className="rounded-2xl border border-border bg-surface p-4">
-              <p className="text-xs font-medium text-brand">{pa.prompt?.text}</p>
-              <p className="mt-1 text-sm leading-relaxed">{pa.answer}</p>
+            <div key={pa.prompt_id} className="lp-panel rounded-2xl p-4">
+              <p className="text-xs font-medium text-accent">{pa.prompt?.text}</p>
+              <p className="mt-1 text-sm leading-relaxed text-text">{pa.answer}</p>
             </div>
           ))}
         </div>
@@ -190,7 +191,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
       {p.interests?.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
           {p.interests.map((it: string) => (
-            <span key={it} className="rounded-full bg-elevated px-3 py-1 text-sm">
+            <span key={it} className="lp-chip rounded-full px-3 py-1 text-sm">
               {it}
             </span>
           ))}
