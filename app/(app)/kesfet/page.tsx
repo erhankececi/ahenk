@@ -161,13 +161,13 @@ export default function Kesfet() {
   const kmNum = filter.km !== "all" ? parseInt(filter.km, 10) : null;
 
   return (
-    <div className="px-4 pt-6">
+    <div className="px-5 pt-[calc(env(safe-area-inset-top)+18px)]">
       <WelcomeTour />
       <header className="mb-4 flex items-center justify-between">
-        <Link href="/magaza" aria-label="Hediye Mağazası" className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-2 to-brand font-display text-base font-bold text-[#1c1407] ring-1 ring-accent/30">
+        <Link href="/magaza" aria-label="Hediye Mağazası" className="flex h-11 w-11 items-center justify-center rounded-full border border-accent/25 bg-[#151318] font-display text-[26px] font-semibold text-accent shadow-[0_12px_30px_-18px_rgba(0,0,0,0.9)]">
           A
         </Link>
-        <h1 className="font-display text-xl font-bold tracking-tight">Keşfet</h1>
+        <h1 className="font-display text-[25px] font-bold tracking-[-0.03em]">Keşfet</h1>
         <div className="flex items-center gap-4 text-muted">
           <Link href="/oyun" aria-label="Oyun Salonu" className="transition hover:text-text">
             <Gamepad2 size={20} strokeWidth={1.7} />
@@ -179,13 +179,13 @@ export default function Kesfet() {
       </header>
 
       {/* Hızlı çipler — mockup: Tümü / Yakınında / Online / Yeni / Popüler */}
-      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto">
+      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto pb-1">
         {CHIPS.map((c) => (
           <button
             key={c.id}
             onClick={() => selectChip(c)}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition ${
-              chip === c.id ? "bg-elevated text-text ring-1 ring-border" : "text-muted hover:text-text"
+            className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-medium transition ${
+              chip === c.id ? "ahenk-chip-active" : "ahenk-chip hover:text-text"
             }`}
           >
             {c.label}
@@ -222,21 +222,21 @@ export default function Kesfet() {
             {filter.km !== "all" || filter.cities.length > 0 ? (
               <button
                 onClick={() => applyFilter(DEFAULT_FILTER)}
-                className="rounded-2xl border border-border px-4 py-2 text-sm font-medium transition hover:border-brand"
+                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium transition hover:border-brand/50"
               >
                 Filtreyi sıfırla
               </button>
             ) : (
               <Link
                 href="/onboarding"
-                className="rounded-2xl border border-border px-4 py-2 text-sm font-medium transition hover:border-brand"
+                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium transition hover:border-brand/50"
               >
                 Profilini zenginleştir
               </Link>
             )}
             <button
               onClick={() => yukle(filter)}
-              className="brand-gradient inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-semibold text-white"
+              className="brand-gradient inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-semibold"
             >
               <RefreshCw size={15} /> Yenile
             </button>
@@ -259,9 +259,9 @@ export default function Kesfet() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -24, scale: 0.98 }}
               transition={{ duration: 0.28 }}
-              className={`overflow-hidden rounded-3xl border bg-surface ${tierCard(current.tier)} ${tierGlow(
+              className={`overflow-hidden rounded-[28px] ahenk-photo-card ${tierCard(current.tier)} ${tierGlow(
                 current.tier
-              )} ${current.tier === "free" ? "border-border" : ""}`}
+              )}`}
             >
               <div className="relative aspect-[4/5] w-full bg-elevated">
                 {photo ? (
@@ -269,7 +269,7 @@ export default function Kesfet() {
                 ) : (
                   <div className="brand-gradient h-full w-full opacity-30" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/15" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/10 to-black/20" />
 
                 {/* Uyum rozeti */}
                 <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 backdrop-blur-md">
@@ -289,7 +289,7 @@ export default function Kesfet() {
                   )}
                   {current.vibe && (
                     <span className="rounded-full bg-black/45 px-2.5 py-1 text-xs text-white backdrop-blur-md">
-                      <span className="mr-1">{current.vibe.emoji}</span>{current.vibe.label}
+                      {current.vibe.label}
                     </span>
                   )}
                 </div>
@@ -367,7 +367,7 @@ export default function Kesfet() {
                     <p className="mb-2 text-xs font-medium text-muted">İlgi alanları</p>
                     <div className="flex flex-wrap gap-2">
                       {current.interests.map((it: string) => (
-                        <span key={it} className="rounded-full bg-elevated px-3 py-1 text-sm">{it}</span>
+                        <span key={it} className="rounded-full border border-white/8 bg-white/[0.04] px-3 py-1 text-sm text-text/80">{it}</span>
                       ))}
                     </div>
                   </div>
@@ -483,7 +483,7 @@ export default function Kesfet() {
 
               <button
                 onClick={() => router.push(`/sohbet/${matchPop.matchId}`)}
-                className="brand-gradient mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-white"
+                className="brand-gradient mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold"
               >
                 <Send size={16} /> Sohbete başla
               </button>

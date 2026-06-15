@@ -151,13 +151,13 @@ export default function MomentsFeed() {
   }
 
   if (loading)
-    return <div className="space-y-4 pb-6">{[0, 1].map((i) => <div key={i} className="h-72 animate-pulse rounded-3xl bg-surface" />)}</div>;
+    return <div className="space-y-4 pb-6">{[0, 1].map((i) => <div key={i} className="h-72 animate-pulse rounded-[26px] ahenk-panel" />)}</div>;
 
   return (
     <div className="space-y-5 pb-6" onClick={() => menuFor && setMenuFor(null)}>
       {composing && (
-        <div className="rounded-3xl border border-border bg-surface p-4">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="Bir şeyler yaz… (isteğe bağlı)" className="w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand" />
+        <div className="rounded-[26px] ahenk-panel p-4">
+          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="Bir şeyler yaz… (isteğe bağlı)" className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 outline-none placeholder:text-text/35 focus:border-brand/60" />
           {files.length > 0 && (
             <div className="mt-2 grid grid-cols-4 gap-2">
               {files.map((f, i) => (
@@ -172,7 +172,7 @@ export default function MomentsFeed() {
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={(e) => { dosyaSec(Array.from(e.target.files || [])); if (fileRef.current) fileRef.current.value = ""; }} />
           <div className="mt-3 flex items-center gap-2">
             <button onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-2xl border border-border px-3 py-2.5 text-sm font-medium text-muted"><ImagePlus size={16} /> Foto/Video</button>
-            <button onClick={paylas} disabled={uploading || (!files.length && !text.trim())} className="brand-gradient flex-1 rounded-2xl py-2.5 text-sm font-semibold text-white disabled:opacity-50">{uploading ? "Paylaşılıyor…" : "Paylaş"}</button>
+            <button onClick={paylas} disabled={uploading || (!files.length && !text.trim())} className="brand-gradient flex-1 rounded-2xl py-2.5 text-sm font-semibold disabled:opacity-50">{uploading ? "Paylaşılıyor…" : "Paylaş"}</button>
             <button onClick={() => { setComposing(false); setFiles([]); }} className="rounded-2xl px-4 text-muted"><X size={18} /></button>
           </div>
         </div>
@@ -187,11 +187,11 @@ export default function MomentsFeed() {
       )}
 
       {moments.map((m) => (
-        <div key={m.id} className={`overflow-hidden rounded-3xl border bg-surface ${m.highlighted ? "border-brand/60" : "border-border"}`}>
+        <div key={m.id} className={`overflow-hidden rounded-[26px] ahenk-card-border ${m.highlighted ? "!border-brand/60" : ""}`}>
           <div className="relative flex items-center justify-between p-3">
             <a href={`/u/${m.user_id}`} className="flex items-center gap-2.5">
               <span className={`rounded-full ${tierFrame(m.tier || "free")}`}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-sm font-semibold">{m.name?.[0]?.toUpperCase() || "?"}</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-sm font-semibold text-accent ring-1 ring-accent/20">{m.name?.[0]?.toUpperCase() || "?"}</span>
               </span>
               <div className="leading-tight">
                 <p className="flex items-center gap-1 text-sm font-semibold">
@@ -206,7 +206,7 @@ export default function MomentsFeed() {
               <button onClick={(e) => { e.stopPropagation(); setMenuFor(menuFor === m.id ? null : m.id); }} className="text-muted"><MoreVertical size={18} /></button>
             )}
             {menuFor === m.id && (
-              <div className="absolute right-3 top-12 z-10 w-44 overflow-hidden rounded-2xl border border-border bg-elevated shadow-float">
+              <div className="absolute right-3 top-12 z-10 w-44 overflow-hidden rounded-2xl border border-white/10 bg-[#17151A] shadow-[0_20px_50px_-30px_rgba(0,0,0,0.95)]">
                 <button onClick={() => patch(m.id, { archived: true })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><Archive size={15} /> Arşivle</button>
                 <button onClick={() => patch(m.id, { comments_off: !m.comments_off })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><MessageCircle size={15} /> {m.comments_off ? "Yorumu aç" : "Yorumu kapat"}</button>
                 <button onClick={() => patch(m.id, { gifts_off: !m.gifts_off })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><GiftIcon size={15} /> {m.gifts_off ? "Hediyeyi aç" : "Hediyeyi kapat"}</button>
@@ -218,7 +218,7 @@ export default function MomentsFeed() {
           {m.album.length > 0 && <Carousel album={m.album} />}
 
           {/* Aksiyon çubuğu — Instagram düzeni */}
-          <div className="flex items-center gap-4 px-4 pt-3">
+          <div className="flex items-center gap-4 px-4 pt-3 text-text/88">
             <button onClick={() => begen(m.id)} className="flex items-center gap-1.5 active:scale-90">
               <Heart size={23} className={liked.has(m.id) ? "fill-rose-500 text-rose-500" : "text-text"} />
               <span className="text-sm font-medium">{m.reactions}</span>

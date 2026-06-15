@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, MessageCircle, User, Sparkles, Film } from "lucide-react";
+import { Home, MessageCircle, User, Sparkles, Clapperboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { href: "/kesfet", icon: Compass, label: "Keşfet" },
+  { href: "/kesfet", icon: Home, label: "Keşfet" },
   { href: "/moments", icon: Sparkles, label: "Moments" },
-  { href: "/reels", icon: Film, label: "Reels" },
+  { href: "/reels", icon: Clapperboard, label: "Reels" },
   { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar" },
   { href: "/profil", icon: User, label: "Profil" },
 ];
@@ -22,7 +22,6 @@ export function BottomNav() {
   const supabase = createClient();
   const [unread, setUnread] = useState(0);
 
-  // Okunmamış mesaj sayısı (RLS-kapsamlı; migration yok). Gezinmede tazelenir.
   useEffect(() => {
     let active = true;
     (async () => {
@@ -49,8 +48,8 @@ export function BottomNav() {
   }, [path]);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-border glass lg:hidden">
-      <div className="flex items-center justify-around px-2 py-2">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[460px] px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] lg:hidden">
+      <div className="ahenk-bottom-nav flex items-center justify-around px-2 py-2.5">
         {items.map(({ href, icon: Icon, label }) => {
           const active = path.startsWith(href);
           const badge = href === "/eslesmeler" && unread > 0;
@@ -61,14 +60,19 @@ export function BottomNav() {
               aria-current={active ? "page" : undefined}
               aria-label={badge ? `${label}, ${unread} okunmamış` : label}
               className={cn(
-                "flex flex-1 flex-col items-center gap-1 py-1 text-[11px] transition",
-                active ? "text-accent" : "text-muted"
+                "group relative flex flex-1 flex-col items-center gap-1.5 rounded-2xl px-1 py-1.5 text-[10.5px] font-medium transition duration-300",
+                active ? "text-accent" : "text-text/55 hover:text-text/80"
               )}
             >
-              <span className="relative flex h-7 w-12 items-center justify-center">
-                <Icon size={22} strokeWidth={active ? 2 : 1.6} />
+              <span
+                className={cn(
+                  "relative flex h-8 w-11 items-center justify-center rounded-2xl transition duration-300",
+                  active ? "bg-accent/13 ring-1 ring-accent/20" : "group-hover:bg-white/[0.03]"
+                )}
+              >
+                <Icon size={21} strokeWidth={active ? 2.15 : 1.65} fill={active ? "currentColor" : "none"} />
                 {badge && (
-                  <span className="absolute right-2 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#C16A55] px-1 text-[10px] font-bold leading-none text-white">
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#D84F4F] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[#151217]">
                     {unread > 9 ? "9+" : unread}
                   </span>
                 )}

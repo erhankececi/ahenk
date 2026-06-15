@@ -395,3 +395,104 @@ a.brand-gradient svg {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* =====================================================================
+   AHENK VISION V1 — Referans görsele yakın tam uygulama cilası
+   Koyu onyx + mat pirinç + cam panel + mobil-first premium shell.
+   ===================================================================== */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 50% -12%, rgba(199,169,119,0.12), transparent 34rem),
+    radial-gradient(circle at 8% 16%, rgba(255,255,255,0.045), transparent 18rem),
+    linear-gradient(180deg, #0B0C10 0%, #0E0D10 48%, #09090B 100%);
+}
+
+.ahenk-app-shell {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 50% -4%, rgba(199,169,119,0.10), transparent 24rem),
+    radial-gradient(circle at 95% 18%, rgba(255,255,255,0.035), transparent 22rem),
+    #0E0D10;
+}
+
+.ahenk-app-main {
+  position: relative;
+  max-width: 460px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.018), transparent 16rem),
+    #0E0D10;
+}
+
+@media (min-width: 1024px) {
+  .ahenk-app-main {
+    margin-block: 16px;
+    min-height: calc(100dvh - 32px);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 34px;
+    box-shadow:
+      0 0 0 1px rgba(199,169,119,0.06),
+      0 30px 90px -42px rgba(0,0,0,0.90),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+}
+
+.ahenk-bottom-nav {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(25,23,28,0.94), rgba(16,14,18,0.94));
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-radius: 24px;
+  box-shadow:
+    0 20px 48px -18px rgba(0,0,0,0.90),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.ahenk-panel {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(24,22,28,0.92), rgba(15,14,18,0.94));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 44px -28px rgba(0,0,0,0.95);
+}
+
+.ahenk-gold-panel {
+  border: 1px solid rgba(199,169,119,0.28);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(199,169,119,0.14), transparent 22rem),
+    linear-gradient(180deg, rgba(30,26,18,0.94), rgba(15,14,18,0.94));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 44px -28px rgba(0,0,0,0.95);
+}
+
+.ahenk-chip-active {
+  border: 1px solid rgba(199,169,119,0.52);
+  background: linear-gradient(180deg, rgba(199,169,119,0.20), rgba(199,169,119,0.10));
+  color: #F5EFE4;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.ahenk-chip {
+  border: 1px solid rgba(255,255,255,0.075);
+  background: rgba(21,19,24,0.74);
+  color: rgba(245,239,228,0.58);
+}
+
+.ahenk-card-border {
+  border: 1px solid rgba(255,255,255,0.09);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(199,169,119,0.08), transparent 18rem),
+    linear-gradient(180deg, rgba(25,23,29,0.96), rgba(15,14,18,0.98));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 50px -36px rgba(0,0,0,1);
+}
+
+.ahenk-photo-card {
+  border: 1px solid rgba(199,169,119,0.30);
+  background: #111014;
+  box-shadow:
+    0 24px 60px -34px rgba(0,0,0,0.95),
+    inset 0 1px 0 rgba(255,255,255,0.045);
+}
+
+.ahenk-soft-divider { border-color: rgba(255,255,255,0.075); }

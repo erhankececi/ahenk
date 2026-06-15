@@ -13,7 +13,7 @@ const STORY_EMOJIS = ["❤️", "🔥", "😍", "👏", "😮", "😂"];
 
 // Hikaye halkası — mockup: ince renkli halka (sıcak pembe→altın).
 function ringClass(_tier?: string): string {
-  return "bg-gradient-to-tr from-rose-500 via-accent to-amber-400";
+  return "ring-[2px] ring-accent/70 bg-[#151318]";
 }
 
 export default function StoriesBar() {
@@ -130,7 +130,7 @@ export default function StoriesBar() {
           onClick={() => setComposing(true)}
           className="flex shrink-0 flex-col items-center gap-1"
         >
-          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-border text-muted transition hover:border-accent/50 hover:text-text">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-accent/35 bg-white/[0.03] text-accent transition hover:border-accent/60 hover:text-text">
             <Plus size={22} strokeWidth={1.6} />
           </span>
           <span className="text-xs text-muted">Ekle</span>
@@ -145,7 +145,7 @@ export default function StoriesBar() {
             className="flex shrink-0 flex-col items-center gap-1"
           >
             <span className={`rounded-full p-[2px] ${ringClass(g.tier)}`}>
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-surface text-lg font-semibold">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#151318] text-lg font-semibold text-text ring-2 ring-bg">
                 {g.name?.[0]?.toUpperCase() || "?"}
               </span>
             </span>
@@ -166,7 +166,7 @@ export default function StoriesBar() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-3xl border border-border bg-surface p-5"
+              className="w-full max-w-md rounded-[26px] ahenk-panel p-5"
             >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-semibold">Hikaye paylaş</h3>
@@ -186,7 +186,7 @@ export default function StoriesBar() {
                   </button>
                 </div>
               ) : (
-                <label className="mb-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-elevated py-8 text-muted transition hover:border-brand">
+                <label className="mb-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-accent/25 bg-white/[0.03] py-8 text-muted transition hover:border-brand/60">
                   <ImagePlus size={26} />
                   <span className="text-sm font-medium">Fotoğraf veya video seç</span>
                   <span className="text-xs">veya aşağıya yazı yaz</span>
@@ -199,7 +199,7 @@ export default function StoriesBar() {
                 </label>
               )}
 
-              <div className="flex items-start gap-2 rounded-2xl border border-border bg-elevated px-3 py-2">
+              <div className="flex items-start gap-2 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2">
                 <TypeIcon size={16} className="mt-2.5 text-muted" />
                 <textarea
                   value={text}
@@ -213,7 +213,7 @@ export default function StoriesBar() {
               <button
                 onClick={paylas}
                 disabled={uploading || (!file && !text.trim())}
-                className="brand-gradient mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-white disabled:opacity-50"
+                className="brand-gradient mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold disabled:opacity-50"
               >
                 {uploading ? <><Loader2 size={18} className="animate-spin" /> Yükleniyor…</> : "Paylaş"}
               </button>
@@ -309,7 +309,7 @@ export default function StoriesBar() {
             {/* İzleyenler listesi */}
             {viewers && (
               <div className="absolute inset-0 z-10 flex items-end bg-black/70" onClick={() => setViewers(null)}>
-                <div onClick={(e) => e.stopPropagation()} className="max-h-[60dvh] w-full overflow-y-auto rounded-t-3xl bg-surface p-5">
+                <div onClick={(e) => e.stopPropagation()} className="max-h-[60dvh] w-full overflow-y-auto rounded-t-[28px] bg-[#151318] p-5">
                   <p className="mb-3 flex items-center gap-2 t-h4">
                     <Eye size={18} /> {viewers.count} görüntüleme
                   </p>
@@ -318,8 +318,8 @@ export default function StoriesBar() {
                   ) : (
                     <div className="space-y-1.5">
                       {viewers.viewers.map((v) => (
-                        <div key={v.id} className="flex items-center gap-3 rounded-xl border border-border bg-elevated px-3 py-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand/40 to-accent/40 text-sm font-bold">
+                        <div key={v.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 text-sm font-bold text-accent">
                             {v.name?.[0]?.toUpperCase() || "?"}
                           </span>
                           <span className="flex-1 truncate text-sm font-medium">{v.name}</span>

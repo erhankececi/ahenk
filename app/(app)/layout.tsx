@@ -22,10 +22,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <CallProvider>
-      {/* Responsive kabuk: mobil tek kolon + alt nav; desktop ince ikon rayı + ortalı 720px içerik */}
-      <div className="flex w-full justify-center">
+      <div className="ahenk-app-shell flex w-full justify-center">
         <SideNav />
-        <main className="mx-auto min-h-dvh w-full max-w-[720px] flex-1 pb-24 lg:border-x lg:border-border lg:pb-10">
+        <main className="ahenk-app-main mx-auto min-h-dvh w-full flex-1 pb-24 lg:pb-8">
           {children}
         </main>
       </div>
