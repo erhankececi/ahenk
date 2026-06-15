@@ -59,15 +59,15 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
 
   function ChatRow({ r, mode }: { r: Row; mode: Tab }) {
     return (
-      <div className="relative flex items-center gap-1 rounded-2xl transition hover:bg-surface">
+      <div className="relative flex items-center gap-1 rounded-2xl border border-transparent transition hover:border-white/10 hover:bg-white/[0.025]">
         <Link href={`/sohbet/${r.matchId}`} className="flex min-w-0 flex-1 items-center gap-3 p-3">
           <div className="relative">
             <div className={`rounded-full ${tierFrame(r.tier)}`}>
-              <div className="brand-gradient flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
+              <div className="lp-monogram flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold">
                 {r.name[0]}
               </div>
             </div>
-            {r.online && <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-success" />}
+            {r.online && <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#0E0D10] bg-success" />}
           </div>
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 font-semibold">{r.name} <PremiumBadge tier={r.tier} /></p>

@@ -81,19 +81,22 @@ export default async function Eslesmeler() {
     .filter((r) => r.state !== "deleted");
 
   return (
-    <div className="px-4 pt-6">
-      <h1 className="mb-5 font-display text-2xl font-bold tracking-tight">Mesajlar</h1>
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk sohbet</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">Mesajlar</h1>
+      </div>
 
       {likes.count > 0 && (
         <Link
           href="/begenenler"
-          className="mb-4 flex items-center gap-3 rounded-2xl border border-brand/30 bg-brand/5 p-3.5 transition hover:border-brand/50"
+          className="lp-panel-hover mb-4 flex items-center gap-3 p-3.5"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
             <Heart size={18} className="text-accent" fill="currentColor" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold">Seni beğenenler</p>
+            <p className="font-semibold text-text">Seni beğenenler</p>
             <p className="text-xs text-muted">
               {premium
                 ? `${likes.count} kişi seninle tanışmak istiyor`
@@ -106,13 +109,15 @@ export default async function Eslesmeler() {
       )}
 
       {rows.length === 0 ? (
-        <div className="mt-24 text-center">
-          <p className="text-muted">Henüz eşleşme yok.</p>
-          <p className="mt-1 text-sm text-muted">Keşfet'ten ahengini bulan biriyle karşılıklı ilgi kur.</p>
-          <Link
-            href="/kesfet"
-            className="brand-gradient mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white"
-          >
+        <div className="mt-20 flex flex-col items-center text-center">
+          <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
+            A
+          </span>
+          <p className="mt-4 font-display text-lg font-semibold text-text">Henüz sohbet yok</p>
+          <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">
+            Keşfet'ten ahengini bulan biriyle karşılıklı ilgi kur — ilk sohbetin burada açılır.
+          </p>
+          <Link href="/kesfet" className="lp-cta-gold mt-6 inline-flex rounded-full px-6 py-3 text-sm font-semibold">
             Keşfet'e git
           </Link>
         </div>
