@@ -271,10 +271,19 @@ export default function Kesfet() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/10 to-black/20" />
 
-                {/* Uyum rozeti */}
-                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 backdrop-blur-md">
-                  <span className="text-[10px] uppercase tracking-wider text-white/70">Uyum</span>
-                  <span className="text-sm font-bold text-accent">%{current.ortakYuzde}</span>
+                {/* Uyum skoru — altın progress halkası (premium) */}
+                <div className="absolute left-3 top-3 flex h-[58px] w-[58px] items-center justify-center rounded-full bg-black/45 backdrop-blur-md">
+                  <svg className="absolute inset-0 -rotate-90" viewBox="0 0 36 36" aria-hidden>
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2.5" />
+                    <circle
+                      cx="18" cy="18" r="15.5" fill="none" stroke="#C7A977" strokeWidth="2.5" strokeLinecap="round"
+                      strokeDasharray={`${Math.max(0, Math.min(100, current.ortakYuzde ?? 0)) * 0.974} 97.4`}
+                    />
+                  </svg>
+                  <div className="text-center leading-none">
+                    <span className="block text-[13px] font-bold text-accent">%{current.ortakYuzde}</span>
+                    <span className="block text-[7px] uppercase tracking-[0.12em] text-white/55">uyum</span>
+                  </div>
                 </div>
 
                 {/* Sağ üst: yeni üye / vibe / öne çıkan */}
@@ -346,7 +355,7 @@ export default function Kesfet() {
                     {current.reasons.map((r: string) => (
                       <span
                         key={r}
-                        className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-text/80"
+                        className="rounded-full border border-accent/25 bg-accent/[0.07] px-2.5 py-1 text-xs font-medium text-accent"
                       >
                         {r}
                       </span>
@@ -394,32 +403,32 @@ export default function Kesfet() {
             <button
               onClick={() => act("daha_fazla")}
               aria-label="Geri al"
-              className="flex h-13 w-13 items-center justify-center rounded-full bg-elevated text-amber-400 shadow-card transition hover:brightness-110 active:scale-90"
+              className="flex items-center justify-center rounded-full border border-white/10 bg-[#151318] text-accent shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)] transition hover:border-accent/40 active:scale-90"
               style={{ height: 52, width: 52 }}
             >
-              <RotateCcw size={22} strokeWidth={2} />
+              <RotateCcw size={22} strokeWidth={1.9} />
             </button>
             <button
               onClick={gec}
               aria-label="Geç"
-              className="flex items-center justify-center rounded-full bg-elevated text-rose-500 shadow-card transition hover:brightness-110 active:scale-90"
+              className="flex items-center justify-center rounded-full border border-white/10 bg-[#151318] text-text/70 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)] transition hover:border-white/25 hover:text-text active:scale-90"
               style={{ height: 60, width: 60 }}
             >
-              <X size={26} strokeWidth={2.4} />
+              <X size={26} strokeWidth={2.2} />
             </button>
             <button
               onClick={() => act("tanis")}
               aria-label="Beğen"
-              className="flex items-center justify-center rounded-full text-white shadow-[0_12px_30px_-8px_rgba(236,72,120,0.55)] transition hover:brightness-110 active:scale-90"
-              style={{ height: 68, width: 68, background: "linear-gradient(150deg,#FF5C8A,#E63973)" }}
+              className="flex items-center justify-center rounded-full text-[#1c1407] shadow-[0_14px_36px_-10px_rgba(199,169,119,0.5)] transition hover:brightness-105 active:scale-90"
+              style={{ height: 68, width: 68, background: "linear-gradient(150deg,#DBBF8E,#C7A977 55%,#b2945f)" }}
             >
               <Heart size={30} fill="currentColor" strokeWidth={0} />
             </button>
             <button
               onClick={superBegen}
               aria-label="Süper beğen"
-              className="flex items-center justify-center rounded-full text-white shadow-[0_12px_30px_-8px_rgba(124,92,246,0.55)] transition hover:brightness-110 active:scale-90"
-              style={{ height: 60, width: 60, background: "linear-gradient(150deg,#7C5CF6,#5B43D6)" }}
+              className="flex items-center justify-center rounded-full border border-accent/35 bg-accent/[0.12] text-accent shadow-[0_10px_30px_-12px_rgba(199,169,119,0.35)] transition hover:bg-accent/20 active:scale-90"
+              style={{ height: 60, width: 60 }}
             >
               <Star size={26} fill="currentColor" strokeWidth={0} />
             </button>
