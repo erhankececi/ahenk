@@ -109,19 +109,22 @@ export default function Etkinlikler() {
   }
 
   return (
-    <div className="px-4 pb-8 pt-6">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
       <header className="mb-4 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold tracking-tight">Etkinlikler</h1>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">Etkinlikler</h1>
+        </div>
         <button
           onClick={() => setComposing((v) => !v)}
-          className="brand-gradient flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-white"
+          className="lp-cta-gold flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-semibold"
         >
           <Plus size={16} /> Oluştur
         </button>
       </header>
 
       {composing && (
-        <div className="mb-5 space-y-3 rounded-3xl border border-border bg-surface p-4">
+        <div className="lp-panel mb-5 space-y-3 rounded-3xl p-4">
           {/* Kapak görseli */}
           {cover ? (
             <div className="relative overflow-hidden rounded-2xl">
@@ -182,7 +185,7 @@ export default function Etkinlikler() {
       {loading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="rounded-3xl border border-border bg-surface p-4">
+            <div key={i} className="lp-panel rounded-3xl p-4">
               <div className="shimmer h-6 w-2/3 rounded-lg" />
               <div className="shimmer mt-2 h-4 w-1/3 rounded" />
               <div className="shimmer mt-3 h-9 w-36 rounded-full" />
@@ -191,16 +194,16 @@ export default function Etkinlikler() {
         </div>
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10">
-            <CalendarHeart size={26} className="text-brand" />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
+            <CalendarHeart size={26} className="text-accent" />
           </div>
-          <h2 className="text-lg font-semibold">Yakında etkinlik yok</h2>
-          <p className="mt-1 max-w-xs text-sm text-muted">
+          <h2 className="font-display text-lg font-semibold text-text">Yakında etkinlik yok</h2>
+          <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">
             Bir kahve, yürüyüş ya da film gecesi — ilk etkinliği sen başlat.
           </p>
           <button
             onClick={() => setComposing(true)}
-            className="brand-gradient mt-5 rounded-full px-6 py-3 text-sm font-semibold text-white"
+            className="lp-cta-gold mt-5 rounded-full px-6 py-3 text-sm font-semibold"
           >
             Etkinlik oluştur
           </button>
@@ -208,11 +211,11 @@ export default function Etkinlikler() {
       ) : (
         <div className="space-y-3">
           {events.map((e) => (
-            <div key={e.id} className="overflow-hidden rounded-3xl border border-border bg-surface transition duration-200 hover:border-brand/30">
+            <div key={e.id} className="lp-panel-hover overflow-hidden rounded-3xl">
               {e.cover && (
                 <div className="relative h-44 w-full">
                   <img src={e.cover} alt="" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#151318] to-transparent" />
                 </div>
               )}
               <div className="p-4">
@@ -298,7 +301,7 @@ function OwnerPanel({
 
   return (
     <div>
-      <p className="mb-2 flex items-center gap-2 text-sm font-medium text-brand">
+      <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
         <Users size={14} /> Senin etkinliğin
       </p>
       {att.length === 0 ? (
