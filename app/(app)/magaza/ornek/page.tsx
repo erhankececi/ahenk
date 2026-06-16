@@ -14,8 +14,8 @@ export default function GiftOrnek() {
 
       <DiamondGift size={300} />
 
-      <div className="mt-5 rounded-2xl border border-border bg-surface p-4">
-        <p className="mb-1 font-display font-semibold">Bu tamamen kod (SVG + Framer Motion)</p>
+      <div className="lp-panel mt-5 rounded-2xl p-4">
+        <p className="mb-1 font-display font-semibold text-text">Bu tamamen kod (SVG + Framer Motion)</p>
         <p className="text-sm text-muted">
           Asset dosyası değil — fasetli elmas, içinden kayan ışık ve etrafındaki parıltılar kodla animasyonlu.
           Aynı yöntemle her hediyeyi (yat süzülür, dünya döner, roket kalkar) PNG yerine canlı animasyon yapabiliriz.
