@@ -771,7 +771,7 @@ export function ChatWindow({
                 className={`relative max-w-[78%] overflow-hidden whitespace-pre-wrap break-words rounded-2xl text-sm ${
                   isImg ? "p-1" : isVoice ? "p-1.5" : "px-4 py-2"
                 } ${
-                  mine ? "brand-gradient text-[#1c1407]" : `bg-surface border border-border ${tierBubble(otherTier)}`
+                  mine ? "brand-gradient text-[#1c1407]" : `border border-white/10 bg-[#151318] ${tierBubble(otherTier)}`
                 }`}
               >
                 {isImg ? (
@@ -1010,7 +1010,7 @@ export function ChatWindow({
               placeholder="Bir mesaj yaz…"
               enterKeyHint="send"
               aria-label="Mesaj"
-              className="flex-1 rounded-full border border-border bg-surface px-4 py-2.5 outline-none focus:border-brand"
+              className="flex-1 rounded-full border border-white/10 bg-[#151318] px-4 py-2.5 text-text outline-none transition placeholder:text-muted focus:border-accent/50"
             />
             <button
               onClick={gonder}
