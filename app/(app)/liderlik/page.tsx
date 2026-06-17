@@ -1,12 +1,15 @@
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import BackButton from "@/components/BackButton";
 import { Trophy, Gift, Users } from "lucide-react";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function Liderlik() {
   const supabase = createClient();
   await supabase.auth.getUser();
+  const tl = getAppDict(normalizeLang(cookies().get("lang")?.value)).liderlik;
   const admin = createAdminClient();
   const [{ data: gifts }, { data: inviters }] = await Promise.all([
     admin.rpc("top_gift_earners", { p_limit: 10 }),
@@ -34,24 +37,24 @@ export default async function Liderlik() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
           <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text">
-            <Trophy size={20} className="text-accent" /> Liderlik
+            <Trophy size={20} className="text-accent" /> {tl.title}
           </h1>
         </div>
       </div>
 
       <section className="mb-6">
         <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
-          <Gift size={17} className="text-accent" /> En çok hediye kazananlar
+          <Gift size={17} className="text-accent" /> {tl.topGifters}
         </p>
         {!gifts || (gifts as any[]).length === 0 ? (
-          <p className="text-sm text-muted">Henüz hediye kazanan yok — ilk sen ol!</p>
+          <p className="text-sm text-muted">{tl.noGifters}</p>
         ) : (
           <div className="space-y-1.5">
             {(gifts as any[]).map((g, i) => (
               <div key={g.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3">
                 <Rank i={i} />
-                <p className="flex-1 truncate font-medium text-text">{g.name || "Biri"}</p>
-                <span className="text-sm font-semibold text-accent">{g.total} jeton</span>
+                <p className="flex-1 truncate font-medium text-text">{g.name || tl.someone}</p>
+                <span className="text-sm font-semibold text-accent">{g.total} {tl.jetonSuffix}</span>
               </div>
             ))}
           </div>
@@ -60,17 +63,17 @@ export default async function Liderlik() {
 
       <section>
         <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
-          <Users size={17} className="text-accent" /> En çok davet edenler
+          <Users size={17} className="text-accent" /> {tl.topInviters}
         </p>
         {!inviters || (inviters as any[]).length === 0 ? (
-          <p className="text-sm text-muted">Henüz davet yok — arkadaşlarını çağır!</p>
+          <p className="text-sm text-muted">{tl.noInviters}</p>
         ) : (
           <div className="space-y-1.5">
             {(inviters as any[]).map((u, i) => (
               <div key={u.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3">
                 <Rank i={i} />
-                <p className="flex-1 truncate font-medium text-text">{u.name || "Biri"}</p>
-                <span className="text-sm font-semibold text-accent">{u.davet} davet</span>
+                <p className="flex-1 truncate font-medium text-text">{u.name || tl.someone}</p>
+                <span className="text-sm font-semibold text-accent">{u.davet} {tl.davetSuffix}</span>
               </div>
             ))}
           </div>

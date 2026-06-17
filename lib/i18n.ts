@@ -362,6 +362,10 @@ export type AppDict = {
     match: string; superLike: string; like: string; message: string; visit: string;
     giftMsg: string; giftEarned: string; giftFallback: string; dailyFallback: string; systemFallback: string;
   };
+  liderlik: {
+    title: string; topGifters: string; noGifters: string; jetonSuffix: string;
+    topInviters: string; noInviters: string; davetSuffix: string; someone: string;
+  };
   common: { back: string };
 };
 
@@ -651,6 +655,10 @@ const appTr: AppDict = {
     message: "Yeni mesajın var", visit: "Profilini biri ziyaret etti",
     giftMsg: "Sana {gift} geldi", giftEarned: " — +{n} jeton kazandın", giftFallback: "bir hediye",
     dailyFallback: "Günün sorusu hazır — gün serini koru", systemFallback: "Bildirim",
+  },
+  liderlik: {
+    title: "Liderlik", topGifters: "En çok hediye kazananlar", noGifters: "Henüz hediye kazanan yok — ilk sen ol!", jetonSuffix: "jeton",
+    topInviters: "En çok davet edenler", noInviters: "Henüz davet yok — arkadaşlarını çağır!", davetSuffix: "davet", someone: "Biri",
   },
   common: { back: "Geri" },
 };
@@ -942,6 +950,10 @@ const appEn: AppDict = {
     giftMsg: "You received {gift}", giftEarned: " — you earned +{n} tokens", giftFallback: "a gift",
     dailyFallback: "The daily question is ready — keep your streak", systemFallback: "Notification",
   },
+  liderlik: {
+    title: "Leaderboard", topGifters: "Top gift earners", noGifters: "No gift earners yet — be the first!", jetonSuffix: "tokens",
+    topInviters: "Top inviters", noInviters: "No invites yet — call your friends!", davetSuffix: "invites", someone: "Someone",
+  },
   common: { back: "Back" },
 };
 
@@ -1231,6 +1243,10 @@ const appKu: AppDict = {
     message: "Peyama te ya nû heye", visit: "Yekî serdana profîla te kir",
     giftMsg: "{gift} ji te re hat", giftEarned: " — te +{n} jeton qezenc kir", giftFallback: "diyariyek",
     dailyFallback: "Pirsa rojê amade ye — rêza xwe biparêze", systemFallback: "Agahdarî",
+  },
+  liderlik: {
+    title: "Serketin", topGifters: "Yên herî zêde diyarî qezenc kirin", noGifters: "Hîna kesî diyarî qezenc nekiriye — bibe yê yekem!", jetonSuffix: "jeton",
+    topInviters: "Yên herî zêde vexwendin", noInviters: "Hîna vexwendin tune — hevalên xwe gazî bike!", davetSuffix: "vexwendin", someone: "Kesek",
   },
   common: { back: "Vegere" },
 };
