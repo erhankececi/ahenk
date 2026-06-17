@@ -82,7 +82,7 @@ export async function GET() {
       "premium_cta_clicked",
     ];
     const counts = await Promise.all(
-      names.map((n) => cnt(admin.from("events").select("id", { count: "exact", head: true }).eq("event_name", n).gte("created_at", monthAgo)))
+      names.map((n) => cnt(admin.from("analytics_events").select("id", { count: "exact", head: true }).eq("event_name", n).gte("created_at", monthAgo)))
     );
     names.forEach((n, i) => (eventler[n] = counts[i]));
   } catch {}

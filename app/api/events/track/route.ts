@@ -41,6 +41,6 @@ export async function POST(req: Request) {
   }
 
   // RLS: user_id = auth.uid() şartı politika tarafından zorlanır.
-  await supabase.from("events").insert({ user_id: user.id, event_name: event, metadata: sanitize(metadata) });
+  await supabase.from("analytics_events").insert({ user_id: user.id, event_name: event, metadata: sanitize(metadata) });
   return NextResponse.json({ ok: true });
 }
