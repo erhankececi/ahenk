@@ -11,10 +11,13 @@ import {
 import { profilOnerileri } from "@/lib/aiProfile";
 import { yas, adSoyadGecerli } from "@/lib/utils";
 import { ImagePlus, X, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 export default function Onboarding() {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLang();
+  const to = t.onboarding;
   const [step, setStep] = useState(0);
   const [uid, setUid] = useState<string>("");
   const [saving, setSaving] = useState(false);
@@ -143,7 +146,7 @@ export default function Onboarding() {
     router.refresh();
   }
 
-  const steps = ["Sen kimsin?", "Nerede, ne yaparsın?", "İlgi & yaşam tarzı", "Fotoğraflar"];
+  const steps = to.steps;
 
   // İlk adım doğrulaması: isim + geçerli doğum tarihi (18+) + en az bir tercih.
   const age = form.birthdate ? yas(form.birthdate) : null;
@@ -163,8 +166,8 @@ export default function Onboarding() {
           A
         </span>
         <div>
-          <p className="font-display text-sm font-bold leading-tight tracking-tight">Profilini oluştur</p>
-          <p className="text-xs text-muted">Adım {step + 1} / {steps.length}</p>
+          <p className="font-display text-sm font-bold leading-tight tracking-tight">{to.headerTitle}</p>
+          <p className="text-xs text-muted">{to.stepCounter.replace("{n}", String(step + 1)).replace("{t}", String(steps.length))}</p>
         </div>
       </div>
       <div className="mb-6 flex gap-1.5">
@@ -179,31 +182,31 @@ export default function Onboarding() {
 
       {step === 0 && (
         <div className="space-y-4 animate-fade-up">
-          <Input placeholder="Ad Soyad" value={form.name} onChange={(e) => set("name", e.target.value)} />
+          <Input placeholder={to.namePlaceholder} value={form.name} onChange={(e) => set("name", e.target.value)} />
           {form.name.trim() && !adSoyadGecerli(form.name) && (
-            <p className="-mt-2 text-xs text-muted">Ad ve soyadını yaz (örn. Ahmet Yılmaz).</p>
+            <p className="-mt-2 text-xs text-muted">{to.nameError}</p>
           )}
           <div>
-            <label className="mb-1 block text-sm text-muted">Doğum tarihin</label>
+            <label className="mb-1 block text-sm text-muted">{to.birthdate}</label>
             <Input type="date" value={form.birthdate} onChange={(e) => set("birthdate", e.target.value)} />
             {tooYoung ? (
-              <p className="mt-1 text-xs text-error">Ahenk yalnızca 18 yaş ve üzeri içindir.</p>
+              <p className="mt-1 text-xs text-error">{to.tooYoung}</p>
             ) : age !== null ? (
-              <p className="mt-1 text-xs text-muted">{age} yaşındasın</p>
+              <p className="mt-1 text-xs text-muted">{to.ageYears.replace("{n}", String(age))}</p>
             ) : null}
           </div>
           <div>
-            <p className="mb-2 text-sm text-muted">Cinsiyetin</p>
+            <p className="mb-2 text-sm text-muted">{to.gender}</p>
             <div className="flex gap-2">
-              {[["kadin", "Kadın"], ["erkek", "Erkek"], ["diger", "Diğer"]].map(([v, l]) => (
+              {([["kadin", to.gFemale], ["erkek", to.gMale], ["diger", to.gOther]] as const).map(([v, l]) => (
                 <Chip key={v} active={form.gender === v} onClick={() => set("gender", v)}>{l}</Chip>
               ))}
             </div>
           </div>
           <div>
-            <p className="mb-2 text-sm text-muted">Kiminle tanışmak istersin?</p>
+            <p className="mb-2 text-sm text-muted">{to.lookingFor}</p>
             <div className="flex gap-2">
-              {[["kadin", "Kadın"], ["erkek", "Erkek"], ["diger", "Diğer"]].map(([v, l]) => (
+              {([["kadin", to.gFemale], ["erkek", to.gMale], ["diger", to.gOther]] as const).map(([v, l]) => (
                 <Chip key={v} active={form.looking_for.includes(v)} onClick={() => toggle("looking_for", v)}>{l}</Chip>
               ))}
             </div>
@@ -214,7 +217,7 @@ export default function Onboarding() {
       {step === 1 && (
         <div className="space-y-4 animate-fade-up">
           <div>
-            <label className="mb-1 block text-sm text-muted">Şehir</label>
+            <label className="mb-1 block text-sm text-muted">{to.city}</label>
             <select
               value={form.city}
               onChange={(e) => set("city", e.target.value)}
@@ -225,9 +228,9 @@ export default function Onboarding() {
               ))}
             </select>
           </div>
-          <Input placeholder="Mesleğin" value={form.profession} onChange={(e) => set("profession", e.target.value)} />
+          <Input placeholder={to.profession} value={form.profession} onChange={(e) => set("profession", e.target.value)} />
           <textarea
-            placeholder="Hakkımda — seni anlatan birkaç cümle"
+            placeholder={to.bio}
             value={form.bio}
             onChange={(e) => set("bio", e.target.value)}
             rows={4}
@@ -239,7 +242,7 @@ export default function Onboarding() {
       {step === 2 && (
         <div className="space-y-5 animate-fade-up">
           <div>
-            <p className="mb-2 text-sm text-muted">İlgi alanların</p>
+            <p className="mb-2 text-sm text-muted">{to.interests}</p>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((i) => (
                 <Chip key={i} active={form.interests.includes(i)} onClick={() => toggle("interests", i)}>{i}</Chip>
@@ -247,7 +250,7 @@ export default function Onboarding() {
             </div>
           </div>
           <div>
-            <p className="mb-2 text-sm text-muted">Konuştuğun diller</p>
+            <p className="mb-2 text-sm text-muted">{to.languages}</p>
             <div className="flex flex-wrap gap-2">
               {LANGUAGES.map((l) => (
                 <Chip key={l} active={form.languages.includes(l)} onClick={() => toggle("languages", l)}>{l}</Chip>
@@ -255,7 +258,7 @@ export default function Onboarding() {
             </div>
           </div>
           <div>
-            <p className="mb-2 text-sm text-muted">Burç (isteğe bağlı)</p>
+            <p className="mb-2 text-sm text-muted">{to.zodiac}</p>
             <div className="flex flex-wrap gap-2">
               {ZODIAC.map((z) => (
                 <Chip key={z} active={form.zodiac === z} onClick={() => set("zodiac", z)}>{z}</Chip>
@@ -263,53 +266,53 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="lp-panel rounded-2xl p-4">
-            <p className="mb-3 text-sm font-semibold text-accent">Karakter & yaşam tarzı — uyum eşleşmesi için</p>
+            <p className="mb-3 text-sm font-semibold text-accent">{to.lifestyleTitle}</p>
             <div className="space-y-4">
               <div>
-                <p className="mb-2 text-sm text-muted">Ne arıyorsun?</p>
+                <p className="mb-2 text-sm text-muted">{to.goal}</p>
                 <div className="flex flex-wrap gap-2">
                   {GOAL_OPTS.map(([v, l]) => (
-                    <Chip key={v} active={form.relationship_goal === v} onClick={() => set("relationship_goal", v)}>{l}</Chip>
+                    <Chip key={v} active={form.relationship_goal === v} onClick={() => set("relationship_goal", v)}>{to.goalOpts[v] ?? l}</Chip>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-sm text-muted">Çocuk</p>
+                <p className="mb-2 text-sm text-muted">{to.kids}</p>
                 <div className="flex flex-wrap gap-2">
                   {KIDS_OPTS.map(([v, l]) => (
-                    <Chip key={v} active={form.wants_kids === v} onClick={() => set("wants_kids", v)}>{l}</Chip>
+                    <Chip key={v} active={form.wants_kids === v} onClick={() => set("wants_kids", v)}>{to.kidsOpts[v] ?? l}</Chip>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-sm text-muted">Sigara</p>
+                <p className="mb-2 text-sm text-muted">{to.smoking}</p>
                 <div className="flex flex-wrap gap-2">
                   {SMOKING_OPTS.map(([v, l]) => (
-                    <Chip key={v} active={form.smoking === v} onClick={() => set("smoking", v)}>{l}</Chip>
+                    <Chip key={v} active={form.smoking === v} onClick={() => set("smoking", v)}>{to.smokingOpts[v] ?? l}</Chip>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-sm text-muted">Alkol</p>
+                <p className="mb-2 text-sm text-muted">{to.drinking}</p>
                 <div className="flex flex-wrap gap-2">
                   {DRINKING_OPTS.map(([v, l]) => (
-                    <Chip key={v} active={form.drinking === v} onClick={() => set("drinking", v)}>{l}</Chip>
+                    <Chip key={v} active={form.drinking === v} onClick={() => set("drinking", v)}>{to.drinkingOpts[v] ?? l}</Chip>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-sm text-muted">Evcil hayvan</p>
+                <p className="mb-2 text-sm text-muted">{to.pets}</p>
                 <div className="flex flex-wrap gap-2">
                   {PETS_OPTS.map(([v, l]) => (
-                    <Chip key={v} active={form.pets === v} onClick={() => set("pets", v)}>{l}</Chip>
+                    <Chip key={v} active={form.pets === v} onClick={() => set("pets", v)}>{to.petsOpts[v] ?? l}</Chip>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-sm text-muted">Spor / tempo</p>
+                <p className="mb-2 text-sm text-muted">{to.exercise}</p>
                 <div className="flex flex-wrap gap-2">
                   {EXERCISE_OPTS.map(([v, l]) => (
-                    <Chip key={v} active={form.exercise === v} onClick={() => set("exercise", v)}>{l}</Chip>
+                    <Chip key={v} active={form.exercise === v} onClick={() => set("exercise", v)}>{to.exerciseOpts[v] ?? l}</Chip>
                   ))}
                 </div>
               </div>
@@ -322,7 +325,7 @@ export default function Onboarding() {
         <div className="animate-fade-up">
           <div className="lp-panel mb-4 rounded-2xl p-4">
             <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-accent">
-              <Sparkles size={16} /> AI profil önerileri
+              <Sparkles size={16} /> {to.aiTitle}
             </p>
             <ul className="space-y-1.5">
               {profilOnerileri({
@@ -338,8 +341,7 @@ export default function Onboarding() {
             </ul>
           </div>
           <p className="mb-4 text-sm text-muted">
-            En fazla 6 fotoğraf. Merak etme — fotoğrafların karşı tarafta önce bulanık görünür,
-            sohbet ilerledikçe netleşir.
+            {to.photoNote}
           </p>
           <div className="grid grid-cols-3 gap-3">
             {files.map((f, i) => (
@@ -377,19 +379,19 @@ export default function Onboarding() {
             <button
               onClick={() => setStep(step - 1)}
               className="lp-cta-ghost flex items-center gap-1 rounded-2xl px-4 py-3 font-semibold transition"
-              aria-label="Önceki adım"
+              aria-label={to.prevStep}
             >
-              <ChevronLeft size={18} /> Geri
+              <ChevronLeft size={18} /> {to.back}
             </button>
           )}
           <div className="flex-1">
             {step < 3 ? (
               <Button full onClick={() => setStep(step + 1)} disabled={!canAdvance}>
-                Devam <ChevronRight size={18} />
+                {to.next} <ChevronRight size={18} />
               </Button>
             ) : (
               <Button full onClick={kaydet} disabled={saving}>
-                {saving ? "Kaydediliyor..." : "Profili tamamla"}
+                {saving ? to.saving : to.complete}
               </Button>
             )}
           </div>

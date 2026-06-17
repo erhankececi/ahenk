@@ -277,6 +277,17 @@ export type AppDict = {
     report: string; block: string; blockTitle: string; blockDesc: string;
     cancel: string; blocking: string; reportReason: string; detailPlaceholder: string; sending: string;
   };
+  onboarding: {
+    headerTitle: string; stepCounter: string; steps: string[];
+    namePlaceholder: string; nameError: string; birthdate: string; tooYoung: string; ageYears: string;
+    gender: string; gFemale: string; gMale: string; gOther: string; lookingFor: string;
+    city: string; profession: string; bio: string;
+    interests: string; languages: string; zodiac: string; lifestyleTitle: string;
+    goal: string; kids: string; smoking: string; drinking: string; pets: string; exercise: string;
+    aiTitle: string; photoNote: string; back: string; next: string; saving: string; complete: string; prevStep: string;
+    goalOpts: Record<string, string>; kidsOpts: Record<string, string>; smokingOpts: Record<string, string>;
+    drinkingOpts: Record<string, string>; petsOpts: Record<string, string>; exerciseOpts: Record<string, string>;
+  };
   premium: {
     eyebrow: string; title: string; jetonChip: string;
     club: string; memberLabel: string; memberFallback: string;
@@ -416,6 +427,26 @@ const appTr: AppDict = {
     report: "Şikayet et", block: "Engelle", blockTitle: "Engellensin mi?",
     blockDesc: "Bu kişi seni göremeyecek, sana yazamayacak ve arayamayacak. Varsa eşleşmeniz kaldırılır.",
     cancel: "Vazgeç", blocking: "Engelleniyor…", reportReason: "Şikayet nedeni", detailPlaceholder: "Detay ekle (isteğe bağlı)", sending: "Gönderiliyor…",
+  },
+  onboarding: {
+    headerTitle: "Profilini oluştur", stepCounter: "Adım {n} / {t}",
+    steps: ["Sen kimsin?", "Nerede, ne yaparsın?", "İlgi & yaşam tarzı", "Fotoğraflar"],
+    namePlaceholder: "Ad Soyad", nameError: "Ad ve soyadını yaz (örn. Ahmet Yılmaz).",
+    birthdate: "Doğum tarihin", tooYoung: "Ahenk yalnızca 18 yaş ve üzeri içindir.", ageYears: "{n} yaşındasın",
+    gender: "Cinsiyetin", gFemale: "Kadın", gMale: "Erkek", gOther: "Diğer", lookingFor: "Kiminle tanışmak istersin?",
+    city: "Şehir", profession: "Mesleğin", bio: "Hakkımda — seni anlatan birkaç cümle",
+    interests: "İlgi alanların", languages: "Konuştuğun diller", zodiac: "Burç (isteğe bağlı)",
+    lifestyleTitle: "Karakter & yaşam tarzı — uyum eşleşmesi için",
+    goal: "Ne arıyorsun?", kids: "Çocuk", smoking: "Sigara", drinking: "Alkol", pets: "Evcil hayvan", exercise: "Spor / tempo",
+    aiTitle: "AI profil önerileri",
+    photoNote: "En fazla 6 fotoğraf. Merak etme — fotoğrafların karşı tarafta önce bulanık görünür, sohbet ilerledikçe netleşir.",
+    back: "Geri", next: "Devam", saving: "Kaydediliyor...", complete: "Profili tamamla", prevStep: "Önceki adım",
+    goalOpts: { ciddi: "Ciddi ilişki", evlilik: "Evlilik", arkadaslik: "Arkadaşlık", belirsiz: "Henüz bilmiyorum" },
+    kidsOpts: { istiyorum: "İstiyorum", istemiyorum: "İstemiyorum", belki: "Belki", var: "Çocuğum var" },
+    smokingOpts: { hayir: "Hayır", sosyal: "Sosyal", evet: "Evet" },
+    drinkingOpts: { hayir: "Hayır", sosyal: "Sosyal", evet: "Evet" },
+    petsOpts: { yok: "Yok", kedi: "Kedi", kopek: "Köpek", seviyorum: "Seviyorum" },
+    exerciseOpts: { sik: "Sık sık", bazen: "Bazen", nadiren: "Nadiren" },
   },
   premium: {
     eyebrow: "Ahenk üyelik", title: "Premium", jetonChip: "Jeton",
@@ -582,6 +613,26 @@ const appEn: AppDict = {
     blockDesc: "They won't be able to see you, message you or call you. Any match between you is removed.",
     cancel: "Cancel", blocking: "Blocking…", reportReason: "Report reason", detailPlaceholder: "Add details (optional)", sending: "Sending…",
   },
+  onboarding: {
+    headerTitle: "Build your profile", stepCounter: "Step {n} / {t}",
+    steps: ["Who are you?", "Where, what do you do?", "Interests & lifestyle", "Photos"],
+    namePlaceholder: "Full name", nameError: "Write your first and last name (e.g. John Smith).",
+    birthdate: "Your birthdate", tooYoung: "Ahenk is for 18 and over only.", ageYears: "You're {n}",
+    gender: "Your gender", gFemale: "Woman", gMale: "Man", gOther: "Other", lookingFor: "Who do you want to meet?",
+    city: "City", profession: "Your profession", bio: "About me — a few lines that describe you",
+    interests: "Your interests", languages: "Languages you speak", zodiac: "Zodiac (optional)",
+    lifestyleTitle: "Character & lifestyle — for compatibility matching",
+    goal: "What are you looking for?", kids: "Kids", smoking: "Smoking", drinking: "Drinking", pets: "Pets", exercise: "Exercise / pace",
+    aiTitle: "AI profile tips",
+    photoNote: "Up to 6 photos. Don't worry — your photos appear blurred to others at first and clear up as the conversation deepens.",
+    back: "Back", next: "Continue", saving: "Saving...", complete: "Complete profile", prevStep: "Previous step",
+    goalOpts: { ciddi: "Serious relationship", evlilik: "Marriage", arkadaslik: "Friendship", belirsiz: "Not sure yet" },
+    kidsOpts: { istiyorum: "Want them", istemiyorum: "Don't want", belki: "Maybe", var: "I have kids" },
+    smokingOpts: { hayir: "No", sosyal: "Socially", evet: "Yes" },
+    drinkingOpts: { hayir: "No", sosyal: "Socially", evet: "Yes" },
+    petsOpts: { yok: "None", kedi: "Cat", kopek: "Dog", seviyorum: "I love them" },
+    exerciseOpts: { sik: "Often", bazen: "Sometimes", nadiren: "Rarely" },
+  },
   premium: {
     eyebrow: "Ahenk membership", title: "Premium", jetonChip: "Tokens",
     club: "Quiet Luxury Club", memberLabel: "Member", memberFallback: "Ahenk Member",
@@ -746,6 +797,26 @@ const appKu: AppDict = {
     report: "Gilî bike", block: "Asteng bike", blockTitle: "Were astengkirin?",
     blockDesc: "Ev kes nikare te bibîne, ji te re binivîse an bang li te bike. Eger hebe lihevhatina we tê rakirin.",
     cancel: "Dev jê berde", blocking: "Tê astengkirin…", reportReason: "Sedema gilî", detailPlaceholder: "Hûragahî zêde bike (bijarî)", sending: "Tê şandin…",
+  },
+  onboarding: {
+    headerTitle: "Profîla xwe ava bike", stepCounter: "Gav {n} / {t}",
+    steps: ["Tu kî yî?", "Li ku, çi dikî?", "Berjewendî & awayê jiyanê", "Wêne"],
+    namePlaceholder: "Nav û paşnav", nameError: "Nav û paşnavê xwe binivîse (mînak: Ahmet Yılmaz).",
+    birthdate: "Roja zayîna te", tooYoung: "Ahenk tenê ji bo 18 salî û jor e.", ageYears: "Tu {n} salî yî",
+    gender: "Zayenda te", gFemale: "Jin", gMale: "Mêr", gOther: "Yên din", lookingFor: "Tu dixwazî bi kê re nas bibî?",
+    city: "Bajar", profession: "Pîşeya te", bio: "Derbarê min — çend rêz ku te diyar dikin",
+    interests: "Berjewendiyên te", languages: "Zimanên ku tu diaxivî", zodiac: "Burc (bijarî)",
+    lifestyleTitle: "Karakter & awayê jiyanê — ji bo lihevhatinê",
+    goal: "Tu li çi digerî?", kids: "Zarok", smoking: "Cixare", drinking: "Alkol", pets: "Heywanê malê", exercise: "Werziş / tempo",
+    aiTitle: "Pêşniyarên profîlê yên AI",
+    photoNote: "Herî zêde 6 wêne. Netirse — wêneyên te di destpêkê de li aliyê din tarî xuya dibin, gava axaftin kûr dibe zelal dibin.",
+    back: "Vegere", next: "Berdewam", saving: "Tê tomarkirin...", complete: "Profîlê temam bike", prevStep: "Gava berê",
+    goalOpts: { ciddi: "Têkiliya cidî", evlilik: "Zewac", arkadaslik: "Hevaltî", belirsiz: "Hîna nizanim" },
+    kidsOpts: { istiyorum: "Dixwazim", istemiyorum: "Naxwazim", belki: "Belkî", var: "Zarokên min hene" },
+    smokingOpts: { hayir: "Na", sosyal: "Civakî", evet: "Erê" },
+    drinkingOpts: { hayir: "Na", sosyal: "Civakî", evet: "Erê" },
+    petsOpts: { yok: "Tune", kedi: "Pisîk", kopek: "Kûçik", seviyorum: "Hez dikim" },
+    exerciseOpts: { sik: "Pir caran", bazen: "Carinan", nadiren: "Kêm caran" },
   },
   premium: {
     eyebrow: "Endametiya Ahenk", title: "Premium", jetonChip: "Jeton",
