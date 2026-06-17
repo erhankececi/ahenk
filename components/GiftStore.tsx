@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/track";
 import { createClient } from "@/lib/supabase/client";
 import { GIFT_CATALOG, GIFT_CATEGORIES, RARITY, type GiftCategory, type Gift } from "@/lib/gifts";
 import { Coins, Gift as GiftIcon, X, Plus } from "lucide-react";
@@ -36,6 +37,7 @@ export default function GiftStore({
   const [sel, setSel] = useState<string | null>(null);
 
   useEffect(() => {
+    trackEvent("gift_store_opened");
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const { data: p } = await supabase.from("profiles").select("jeton").eq("id", data.user.id).single();
@@ -94,7 +96,7 @@ export default function GiftStore({
             return (
               <button
                 key={g.key}
-                onClick={() => setSel(g.key)}
+                onClick={() => { setSel(g.key); trackEvent("gift_selected", { key: g.key }); }}
                 className={`group relative flex flex-col items-center overflow-hidden rounded-2xl border bg-[#161619] p-3 transition duration-200 ${
                   active ? "-translate-y-1" : "hover:-translate-y-0.5"
                 } ${afford ? "" : "opacity-45"}`}
@@ -137,7 +139,7 @@ export default function GiftStore({
             <Plus size={18} className="text-accent" />
           </a>
           <button
-            onClick={() => sel && onSend(sel)}
+            onClick={() => { if (sel) { trackEvent("gift_send_clicked", { key: sel }); onSend(sel); } }}
             disabled={!sel}
             className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-semibold transition active:scale-[0.98] disabled:opacity-40"
           >

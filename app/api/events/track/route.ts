@@ -5,15 +5,24 @@ import { createClient } from "@/lib/supabase/server";
 const VALID = new Set([
   "referral_link_copied",
   "referral_link_shared",
-  "coin_purchase_clicked",
   "premium_paywall_viewed",
   "premium_cta_clicked",
-  "gift_store_opened",
   "journey_step_clicked",
+  // Jeton ekonomisi
+  "coin_wallet_opened",
+  "coin_package_clicked",
+  "coin_purchase_clicked",
+  "coin_checkout_started",
+  "coin_demo_checkout_clicked",
+  // Hediye ekonomisi
+  "gift_store_opened",
+  "gift_selected",
+  "gift_send_clicked",
+  "gift_sent",
 ]);
 
 // Yalnız güvenli, hassas olmayan anahtarlar; değerler kısa string/number.
-const SAFE_KEYS = new Set(["plan", "source", "key", "pkg", "value"]);
+const SAFE_KEYS = new Set(["plan", "source", "key", "pkg", "value", "amount", "price"]);
 
 function sanitize(meta: any): Record<string, string | number> {
   const out: Record<string, string | number> = {};

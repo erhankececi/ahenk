@@ -25,7 +25,11 @@ const EVENT_LABEL: Record<string, string> = {
   referral_link_shared: "Davet paylaşıldı",
   premium_paywall_viewed: "Premium görüntülendi",
   premium_cta_clicked: "Premium CTA tıklandı",
+  coin_wallet_opened: "Cüzdan açıldı",
   coin_purchase_clicked: "Jeton al tıklandı",
+  coin_checkout_started: "Jeton ödemesi başladı",
+  gift_store_opened: "Hediye mağazası açıldı",
+  gift_send_clicked: "Hediye gönder tıklandı",
 };
 
 export default function AdminGrowth() {

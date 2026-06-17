@@ -52,6 +52,7 @@ export default function Cuzdan() {
 
   useEffect(() => {
     load();
+    trackEvent("coin_wallet_opened");
     const satin = new URLSearchParams(window.location.search).get("satin");
     if (satin === "ok") setNotice({ ok: true, msg: "Ödeme alındı! Jetonların birazdan yüklenecek." });
     else if (satin === "iptal") setNotice({ ok: false, msg: "Ödeme iptal edildi." });
@@ -70,10 +71,12 @@ export default function Cuzdan() {
       });
       const j = await r.json();
       if (j.url) {
+        trackEvent("coin_checkout_started", { pkg });
         window.location.href = j.url; // Stripe Checkout'a yönlen
         return;
       }
       if (j?.error === "odeme_yapilandirilmamis") {
+        trackEvent("coin_demo_checkout_clicked", { pkg });
         setNotice({ ok: false, msg: "Jeton satın alma şu an kapalı — yakında. Jetonu görev ve davetle kazanabilirsin." });
       } else if (!r.ok || !j.ok) {
         setNotice({ ok: false, msg: "Satın alma başarısız, tekrar dene." });

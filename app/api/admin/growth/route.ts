@@ -77,9 +77,13 @@ export async function GET() {
     const names = [
       "referral_link_copied",
       "referral_link_shared",
-      "coin_purchase_clicked",
       "premium_paywall_viewed",
       "premium_cta_clicked",
+      "coin_wallet_opened",
+      "coin_purchase_clicked",
+      "coin_checkout_started",
+      "gift_store_opened",
+      "gift_send_clicked",
     ];
     const counts = await Promise.all(
       names.map((n) => cnt(admin.from("analytics_events").select("id", { count: "exact", head: true }).eq("event_name", n).gte("created_at", monthAgo)))
