@@ -1,13 +1,13 @@
 {
-  "name": "Ahenk — Önce ruh, sonra yüz",
+  "name": "Ahenk — Karakter Önce",
   "short_name": "Ahenk",
-  "description": "Karaktere, ilgi alanlarına ve yaşam tarzına göre tanışma uygulaması.",
+  "description": "Karakter önce, yüz sonra. Premium sosyal keşif platformu.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0B1220",
-  "theme_color": "#0B1220",
+  "background_color": "#0E0D10",
+  "theme_color": "#0E0D10",
   "categories": ["social", "lifestyle"],
   "lang": "tr",
   "icons": [

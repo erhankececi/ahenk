@@ -1,22 +1,24 @@
 <svg width="1242" height="2688" viewBox="0 0 1242 2688" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ahenk splash">
   <defs>
     <linearGradient id="sp-bg" x1="0" y1="0" x2="1242" y2="2688" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0F1117"/>
-      <stop offset="1" stop-color="#171923"/>
+      <stop stop-color="#0B0C10"/>
+      <stop offset="0.5" stop-color="#0E0D10"/>
+      <stop offset="1" stop-color="#09090B"/>
     </linearGradient>
     <linearGradient id="sp-mark" x1="471" y1="1144" x2="771" y2="1444" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6C63FF"/>
-      <stop offset="1" stop-color="#8B85FF"/>
+      <stop stop-color="#DBBF8E"/>
+      <stop offset="0.55" stop-color="#C7A977"/>
+      <stop offset="1" stop-color="#9C8052"/>
     </linearGradient>
   </defs>
   <rect width="1242" height="2688" fill="url(#sp-bg)"/>
   <g transform="translate(471 1144)">
-    <rect width="300" height="300" rx="72" fill="url(#sp-mark)"/>
-    <path d="M150 72 L88 222" stroke="#fff" stroke-width="25" stroke-linecap="round"/>
-    <path d="M150 72 L212 222" stroke="#fff" stroke-width="25" stroke-linecap="round"/>
-    <path d="M117 174 H183" stroke="#fff" stroke-width="21" stroke-linecap="round"/>
-    <circle cx="150" cy="72" r="17" fill="#FF7D6B"/>
+    <rect width="300" height="300" rx="72" fill="#151318" stroke="#C7A977" stroke-opacity="0.3" stroke-width="2"/>
+    <path d="M150 72 L88 222" stroke="url(#sp-mark)" stroke-width="25" stroke-linecap="round"/>
+    <path d="M150 72 L212 222" stroke="url(#sp-mark)" stroke-width="25" stroke-linecap="round"/>
+    <path d="M117 174 H183" stroke="url(#sp-mark)" stroke-width="21" stroke-linecap="round"/>
+    <circle cx="150" cy="72" r="17" fill="#DBBF8E"/>
   </g>
-  <text x="621" y="1560" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="92" font-weight="800" letter-spacing="-3" fill="#FFFFFF">ahenk</text>
-  <text x="621" y="1632" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="40" font-weight="500" fill="#B6BCC8">önce ruh, sonra yüz</text>
+  <text x="621" y="1560" text-anchor="middle" font-family="Manrope, Inter, system-ui, sans-serif" font-size="92" font-weight="800" letter-spacing="-3" fill="#F3EEE4">Ahenk</text>
+  <text x="621" y="1632" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="40" font-weight="500" fill="#A39E95">karakter önce, yüz sonra</text>
 </svg>
