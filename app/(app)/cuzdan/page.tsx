@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Card, Skeleton } from "@/components/ui";
-import { Coins, Plus, Minus, ArrowLeft, Crown, Zap, Banknote, ArrowRight } from "lucide-react";
+import { Coins, Plus, Minus, ArrowLeft, Crown, Zap, Banknote, ArrowRight, Gift, History } from "lucide-react";
 import DavetKart from "@/components/DavetKart";
 import { trackEvent } from "@/lib/track";
 
@@ -31,6 +31,7 @@ export default function Cuzdan() {
   const [buying, setBuying] = useState<string | null>(null);
   const [using, setUsing] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [tab, setTab] = useState<"jeton" | "davet" | "gecmis">("jeton");
 
   async function load() {
     const {
@@ -173,36 +174,12 @@ export default function Cuzdan() {
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/65 p-3">
-                  <p className="text-[11px] text-muted">Kullanım</p>
-                  <p className="mt-0.5 text-sm font-semibold text-text">Boost</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/65 p-3">
-                  <p className="text-[11px] text-muted">Ayrıcalık</p>
-                  <p className="mt-0.5 text-sm font-semibold text-text">Premium</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/65 p-3">
-                  <p className="text-[11px] text-muted">Kazanç</p>
-                  <p className="mt-0.5 text-sm font-semibold text-text">Nakit</p>
-                </div>
-              </div>
+              <p className="mt-4 text-xs leading-5 text-muted">
+                Jetonu Boost, Premium gün/hafta açmak veya nakde çevirmek için kullan.
+              </p>
             </div>
           </div>
         </Card>
-
-        <Link href="/para-cek" className="lp-panel-hover mb-4 flex items-center gap-3 px-4 py-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent">
-            <Banknote size={19} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-text">Para çek</p>
-            <p className="text-xs leading-5 text-muted">Kazandığın jetonu nakde çevir</p>
-          </div>
-          <ArrowRight size={18} className="shrink-0 text-muted" />
-        </Link>
-
-        <DavetKart />
 
         {notice && (
           <div
@@ -215,6 +192,50 @@ export default function Cuzdan() {
             {notice.msg}
           </div>
         )}
+
+        {/* Sekmeler: Jetonlar · Davet · Geçmiş */}
+        <div className="mb-5 grid grid-cols-3 gap-1.5 rounded-2xl border border-white/10 bg-[#151318]/70 p-1.5">
+          {([
+            { id: "jeton", label: "Jetonlar", Icon: Coins },
+            { id: "davet", label: "Davet", Icon: Gift },
+            { id: "gecmis", label: "Geçmiş", Icon: History },
+          ] as const).map((tb) => {
+            const active = tab === tb.id;
+            return (
+              <button
+                key={tb.id}
+                onClick={() => setTab(tb.id)}
+                aria-pressed={active}
+                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                  active
+                    ? "border border-[#C7A977]/40 bg-[#C7A977]/12 text-accent shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+                    : "border border-transparent text-muted hover:text-text"
+                }`}
+              >
+                <tb.Icon size={16} />
+                <span>{tb.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ——— DAVET ——— */}
+        <div className={tab === "davet" ? "block" : "hidden"}>
+          <DavetKart />
+        </div>
+
+        {/* ——— JETONLAR ——— */}
+        <div className={tab === "jeton" ? "block" : "hidden"}>
+        <Link href="/para-cek" className="lp-panel-hover mb-5 flex items-center gap-3 px-4 py-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent">
+            <Banknote size={19} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-text">Para çek</p>
+            <p className="text-xs leading-5 text-muted">Kazandığın jetonu nakde çevir</p>
+          </div>
+          <ArrowRight size={18} className="shrink-0 text-muted" />
+        </Link>
 
         {/* Jetonla aç (harcama) */}
         <section className="lp-panel mb-5 p-0">
@@ -327,7 +348,10 @@ export default function Cuzdan() {
             </p>
           </div>
         </section>
+        </div>
 
+        {/* ——— GEÇMİŞ ——— */}
+        <div className={tab === "gecmis" ? "block" : "hidden"}>
         {/* Jeton geçmişi */}
         <section className="lp-panel p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
@@ -379,6 +403,7 @@ export default function Cuzdan() {
             </Card>
           )}
         </section>
+        </div>
       </div>
     </div>
   );
