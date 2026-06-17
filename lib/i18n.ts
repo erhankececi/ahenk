@@ -371,6 +371,13 @@ export type AppDict = {
     cityTitle: string; memberCount: string; cityEvents: string; all: string; noEvents: string;
     popularMembers: string; noMembers: string;
   };
+  etkinlikler: {
+    title: string; create: string; addCover: string; titlePlaceholder: string; descPlaceholder: string; publishing: string; publish: string;
+    emptyTitle: string; emptyDesc: string; createEvent: string; eventChat: string; ownerApproved: string; ownerRejected: string;
+    rsvpGo: string; rsvpMaybe: string; rsvpInterested: string; rsvpCant: string;
+    lblGo: string; lblMaybe: string; lblInterested: string; lblCant: string;
+    yourEvent: string; noResponses: string; approvedSuffix: string; rejectedSuffix: string; approve: string; reject: string;
+  };
   common: { back: string };
 };
 
@@ -669,6 +676,15 @@ const appTr: AppDict = {
     noCityTitle: "Şehir Topluluğu", noCityDesc: "Topluluğunu görmek için profilinde şehrini seç.", addCity: "Şehrimi ekle", eyebrow: "Ahenk topluluk",
     cityTitle: "{city} Topluluğu", memberCount: "{n} üye", cityEvents: "Şehrindeki etkinlikler", all: "Tümü", noEvents: "Yakında etkinlik yok — ilkini sen başlat.",
     popularMembers: "Şehrin popüler üyeleri", noMembers: "Henüz üye yok.",
+  },
+  etkinlikler: {
+    title: "Etkinlikler", create: "Oluştur", addCover: "Kapak görseli ekle", titlePlaceholder: "Etkinlik başlığı",
+    descPlaceholder: "Açıklama (isteğe bağlı)", publishing: "Yayınlanıyor…", publish: "Yayınla",
+    emptyTitle: "Yakında etkinlik yok", emptyDesc: "Bir kahve, yürüyüş ya da film gecesi — ilk etkinliği sen başlat.", createEvent: "Etkinlik oluştur",
+    eventChat: "Etkinlik sohbeti", ownerApproved: "Sahibi onayladı", ownerRejected: "Sahibi reddetti",
+    rsvpGo: "Katılacağım", rsvpMaybe: "Belki", rsvpInterested: "İlgileniyorum", rsvpCant: "Katılamam",
+    lblGo: "Katılacak", lblMaybe: "Belki", lblInterested: "İlgileniyor", lblCant: "Gelemez",
+    yourEvent: "Senin etkinliğin", noResponses: "Henüz yanıt veren yok.", approvedSuffix: " · onaylı", rejectedSuffix: " · reddedildi", approve: "Onayla", reject: "Reddet",
   },
   common: { back: "Geri" },
 };
@@ -969,6 +985,15 @@ const appEn: AppDict = {
     cityTitle: "{city} Community", memberCount: "{n} members", cityEvents: "Events in your city", all: "All", noEvents: "No events soon — start the first one.",
     popularMembers: "Popular members in your city", noMembers: "No members yet.",
   },
+  etkinlikler: {
+    title: "Events", create: "Create", addCover: "Add a cover image", titlePlaceholder: "Event title",
+    descPlaceholder: "Description (optional)", publishing: "Publishing…", publish: "Publish",
+    emptyTitle: "No events soon", emptyDesc: "A coffee, a walk or a movie night — start the first event.", createEvent: "Create event",
+    eventChat: "Event chat", ownerApproved: "Host approved", ownerRejected: "Host declined",
+    rsvpGo: "I'll attend", rsvpMaybe: "Maybe", rsvpInterested: "Interested", rsvpCant: "Can't attend",
+    lblGo: "Attending", lblMaybe: "Maybe", lblInterested: "Interested", lblCant: "Can't",
+    yourEvent: "Your event", noResponses: "No responses yet.", approvedSuffix: " · approved", rejectedSuffix: " · declined", approve: "Approve", reject: "Decline",
+  },
   common: { back: "Back" },
 };
 
@@ -1267,6 +1292,15 @@ const appKu: AppDict = {
     noCityTitle: "Civata Bajêr", noCityDesc: "Ji bo dîtina civata xwe, li profîla xwe bajarê xwe hilbijêre.", addCity: "Bajarê min lê zêde bike", eyebrow: "Civata Ahenk",
     cityTitle: "Civata {city}", memberCount: "{n} endam", cityEvents: "Çalakiyên li bajarê te", all: "Hemû", noEvents: "Di nêzîk de çalakî tune — ya yekem tu dest pê bike.",
     popularMembers: "Endamên populer ên bajarê te", noMembers: "Hîna endam tune.",
+  },
+  etkinlikler: {
+    title: "Çalakî", create: "Çêke", addCover: "Wêneyê bergê lê zêde bike", titlePlaceholder: "Sernavê çalakiyê",
+    descPlaceholder: "Daxuyanî (bijarî)", publishing: "Tê weşandin…", publish: "Biweşîne",
+    emptyTitle: "Di nêzîk de çalakî tune", emptyDesc: "Qehweyek, meşek an şevek fîlman — çalakiya yekem tu dest pê bike.", createEvent: "Çalakiyê çêke",
+    eventChat: "Axaftina çalakiyê", ownerApproved: "Xwedî pejirand", ownerRejected: "Xwedî red kir",
+    rsvpGo: "Ez ê beşdar bibim", rsvpMaybe: "Belkî", rsvpInterested: "Eleqedar im", rsvpCant: "Nikarim beşdar bibim",
+    lblGo: "Beşdar dibe", lblMaybe: "Belkî", lblInterested: "Eleqedar", lblCant: "Nayê",
+    yourEvent: "Çalakiya te", noResponses: "Hîna bersivder tune.", approvedSuffix: " · pejirandî", rejectedSuffix: " · red kirî", approve: "Bipejirîne", reject: "Red bike",
   },
   common: { back: "Vegere" },
 };

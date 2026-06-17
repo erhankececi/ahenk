@@ -5,6 +5,7 @@ import { MapPin, Plus, Check, Clock, X, CalendarHeart, Star, HelpCircle, Users, 
 import { EVENT_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import EventChat from "@/components/EventChat";
+import { useLang } from "@/components/LangProvider";
 
 type Attendee = { user_id: string; name: string; status: string; rsvp: string | null };
 type Ev = {
@@ -24,18 +25,18 @@ type Ev = {
 };
 
 const RSVPS = [
-  { key: "gidecek", label: "Katılacağım", Icon: Check },
-  { key: "belki", label: "Belki", Icon: HelpCircle },
-  { key: "ilgileniyor", label: "İlgileniyorum", Icon: Star },
-  { key: "gelemem", label: "Katılamam", Icon: X },
+  { key: "gidecek", Icon: Check },
+  { key: "belki", Icon: HelpCircle },
+  { key: "ilgileniyor", Icon: Star },
+  { key: "gelemem", Icon: X },
 ];
-const RSVP_LABEL: Record<string, string> = {
-  gidecek: "Katılacak", belki: "Belki", ilgileniyor: "İlgileniyor", gelemem: "Gelemez",
-};
 
 const TYPE = (id: string) => EVENT_TYPES.find((t) => t.id === id) || EVENT_TYPES[4];
 
 export default function Etkinlikler() {
+  const { t } = useLang();
+  const te = t.etkinlikler;
+  const rsvpLabel: Record<string, string> = { gidecek: te.rsvpGo, belki: te.rsvpMaybe, ilgileniyor: te.rsvpInterested, gelemem: te.rsvpCant };
   const [events, setEvents] = useState<Ev[]>([]);
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
@@ -113,13 +114,13 @@ export default function Etkinlikler() {
       <header className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">Etkinlikler</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">{te.title}</h1>
         </div>
         <button
           onClick={() => setComposing((v) => !v)}
           className="lp-cta-gold flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-semibold"
         >
-          <Plus size={16} /> Oluştur
+          <Plus size={16} /> {te.create}
         </button>
       </header>
 
@@ -134,14 +135,14 @@ export default function Etkinlikler() {
           ) : (
             <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border text-muted transition hover:border-accent/50">
               <ImagePlus size={24} strokeWidth={1.6} />
-              <span className="text-sm font-medium">Kapak görseli ekle</span>
+              <span className="text-sm font-medium">{te.addCover}</span>
               <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setCover(f); }} />
             </label>
           )}
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="Etkinlik başlığı"
+            placeholder={te.titlePlaceholder}
             className="w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand"
           />
           <div className="flex flex-wrap gap-2">
@@ -162,7 +163,7 @@ export default function Etkinlikler() {
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="Açıklama (isteğe bağlı)"
+            placeholder={te.descPlaceholder}
             rows={2}
             className="w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand"
           />
@@ -177,7 +178,7 @@ export default function Etkinlikler() {
             disabled={saving || !form.title.trim()}
             className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold disabled:opacity-50"
           >
-            {saving ? <><Loader2 size={18} className="animate-spin" /> Yayınlanıyor…</> : "Yayınla"}
+            {saving ? <><Loader2 size={18} className="animate-spin" /> {te.publishing}</> : te.publish}
           </button>
         </div>
       )}
@@ -197,15 +198,15 @@ export default function Etkinlikler() {
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
             <CalendarHeart size={26} className="text-accent" />
           </div>
-          <h2 className="font-display text-lg font-semibold text-text">Yakında etkinlik yok</h2>
+          <h2 className="font-display text-lg font-semibold text-text">{te.emptyTitle}</h2>
           <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">
-            Bir kahve, yürüyüş ya da film gecesi — ilk etkinliği sen başlat.
+            {te.emptyDesc}
           </p>
           <button
             onClick={() => setComposing(true)}
             className="lp-cta-gold mt-5 rounded-full px-6 py-3 text-sm font-semibold"
           >
-            Etkinlik oluştur
+            {te.createEvent}
           </button>
         </div>
       ) : (
@@ -241,12 +242,12 @@ export default function Etkinlikler() {
                   onClick={() => setChatFor(e)}
                   className="mt-3 flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm text-muted transition hover:border-accent/50 hover:text-text"
                 >
-                  <MessageCircle size={14} /> Etkinlik sohbeti
+                  <MessageCircle size={14} /> {te.eventChat}
                 </button>
               )}
               <div className="mt-3">
                 {e.mine ? (
-                  <OwnerPanel e={e} onManage={yonet} />
+                  <OwnerPanel e={e} onManage={yonet} te={te} />
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {RSVPS.map((r) => {
@@ -259,18 +260,18 @@ export default function Etkinlikler() {
                             on ? "border-transparent bg-accent text-[#1c1407]" : "border-border text-muted hover:text-text"
                           }`}
                         >
-                          <r.Icon size={14} /> {r.label}
+                          <r.Icon size={14} /> {rsvpLabel[r.key]}
                         </button>
                       );
                     })}
                     {e.my_status === "kabul" && (
                       <span className="flex items-center gap-1 px-1 text-xs text-success">
-                        <Check size={13} /> Sahibi onayladı
+                        <Check size={13} /> {te.ownerApproved}
                       </span>
                     )}
                     {e.my_status === "red" && (
                       <span className="flex items-center gap-1 px-1 text-xs text-error">
-                        <X size={13} /> Sahibi reddetti
+                        <X size={13} /> {te.ownerRejected}
                       </span>
                     )}
                   </div>
@@ -290,10 +291,13 @@ export default function Etkinlikler() {
 function OwnerPanel({
   e,
   onManage,
+  te,
 }: {
   e: Ev;
   onManage: (eventId: string, userId: string, status: string) => void;
+  te: import("@/lib/i18n").AppDict["etkinlikler"];
 }) {
+  const RSVP_LABEL: Record<string, string> = { gidecek: te.lblGo, belki: te.lblMaybe, ilgileniyor: te.lblInterested, gelemem: te.lblCant };
   const att = e.attendees || [];
   const counts: Record<string, number> = {};
   att.forEach((a) => { if (a.rsvp) counts[a.rsvp] = (counts[a.rsvp] || 0) + 1; });
@@ -302,10 +306,10 @@ function OwnerPanel({
   return (
     <div>
       <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
-        <Users size={14} /> Senin etkinliğin
+        <Users size={14} /> {te.yourEvent}
       </p>
       {att.length === 0 ? (
-        <p className="text-xs text-muted">Henüz yanıt veren yok.</p>
+        <p className="text-xs text-muted">{te.noResponses}</p>
       ) : (
         <>
           <div className="mb-2 flex flex-wrap gap-1.5 text-xs">
@@ -324,16 +328,16 @@ function OwnerPanel({
                   <p className="truncate text-sm font-medium">{a.name}</p>
                   <p className="text-[11px] text-muted">
                     {a.rsvp ? RSVP_LABEL[a.rsvp] : "—"}
-                    {a.status === "kabul" ? " · onaylı" : a.status === "red" ? " · reddedildi" : ""}
+                    {a.status === "kabul" ? te.approvedSuffix : a.status === "red" ? te.rejectedSuffix : ""}
                   </p>
                 </div>
                 {a.status !== "kabul" && (
-                  <button onClick={() => onManage(e.id, a.user_id, "kabul")} aria-label="Onayla" className="rounded-full bg-success/15 p-1.5 text-success">
+                  <button onClick={() => onManage(e.id, a.user_id, "kabul")} aria-label={te.approve} className="rounded-full bg-success/15 p-1.5 text-success">
                     <Check size={15} />
                   </button>
                 )}
                 {a.status !== "red" && (
-                  <button onClick={() => onManage(e.id, a.user_id, "red")} aria-label="Reddet" className="rounded-full bg-error/15 p-1.5 text-error">
+                  <button onClick={() => onManage(e.id, a.user_id, "red")} aria-label={te.reject} className="rounded-full bg-error/15 p-1.5 text-error">
                     <X size={15} />
                   </button>
                 )}
