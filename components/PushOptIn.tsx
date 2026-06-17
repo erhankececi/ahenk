@@ -15,7 +15,7 @@ function urlBase64ToUint8Array(base64String: string) {
   return arr;
 }
 
-export default function PushOptIn() {
+export default function PushOptIn({ compact = false }: { compact?: boolean }) {
   const supabase = createClient();
   const [state, setState] = useState<"idle" | "off" | "granted" | "denied" | "busy">("off");
 
@@ -74,24 +74,43 @@ export default function PushOptIn() {
   // Anahtar yoksa / desteklenmiyorsa / zaten açıksa gösterme.
   if (state === "off" || state === "granted") return null;
 
+  const desc =
+    state === "denied"
+      ? "Tarayıcı izni kapalı — site ayarlarından açabilirsin."
+      : state === "busy"
+        ? "Ayarlanıyor…"
+        : "Gün serini ve yeni etkileşimleri kaçırma. Günde en fazla birkaç önemli bildirim; istediğin zaman kapatabilirsin.";
+
+  if (compact) {
+    return (
+      <button
+        onClick={etkinlestir}
+        disabled={state === "busy" || state === "denied"}
+        className="mt-3 flex w-full items-center gap-2.5 rounded-xl border border-accent/30 bg-accent/[0.08] px-3 py-2.5 text-left transition hover:border-accent/50 disabled:opacity-60"
+      >
+        <Bell size={15} className="shrink-0 text-accent" />
+        <span className="min-w-0 flex-1 text-xs leading-4 text-text/85">
+          {state === "denied" ? desc : "Bildirimleri aç — gün serini ve etkileşimleri kaçırma."}
+        </span>
+        <span className="shrink-0 rounded-lg border border-accent/35 bg-accent/12 px-2 py-1 text-[11px] font-semibold text-accent">
+          {state === "busy" ? "…" : "Aç"}
+        </span>
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={etkinlestir}
       disabled={state === "busy" || state === "denied"}
-      className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-brand/30 bg-brand/5 p-3.5 text-left transition hover:border-brand/50 disabled:opacity-60"
+      className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-accent/30 bg-accent/[0.07] p-3.5 text-left transition hover:border-accent/50 disabled:opacity-60"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-        <Bell size={18} className="text-brand" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent/25 bg-accent/10">
+        <Bell size={18} className="text-accent" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold">Bildirimleri aç</p>
-        <p className="text-xs text-muted">
-          {state === "denied"
-            ? "Tarayıcı izni kapalı — site ayarlarından açabilirsin."
-            : state === "busy"
-              ? "Ayarlanıyor…"
-              : "Yeni beğeni ve eşleşmeleri kaçırma."}
-        </p>
+        <p className="font-semibold text-text">Bildirimleri aç</p>
+        <p className="text-xs leading-4 text-muted">{desc}</p>
       </div>
     </button>
   );

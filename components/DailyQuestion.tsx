@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles, Check, Coins, Flame } from "lucide-react";
+import PushOptIn from "@/components/PushOptIn";
 
 export default function DailyQuestion() {
   const [q, setQ] = useState<string | null>(null);
@@ -134,6 +135,9 @@ export default function DailyQuestion() {
           </p>
         )}
       </div>
+
+      {/* Değer anı: soruyu yanıtladıktan sonra izinli push iste (granted ise gizlenir) */}
+      {answered && <PushOptIn compact />}
     </div>
   );
 }
