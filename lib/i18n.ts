@@ -353,6 +353,10 @@ export type AppDict = {
     emptyTitle: string; emptyDesc: string; goDiscover: string; superLike: string;
     gateTitle: string; gateDesc: string; unlockPremium: string; gatePerks: string;
   };
+  analiz: {
+    back: string; title: string; lockedTitle: string; lockedDesc: string; unlock: string; tipsTitle: string;
+    sViews: string; sRepeat: string; sLikes: string; sMatches: string; sCalled: string; sTotal: string;
+  };
   common: { back: string };
 };
 
@@ -628,6 +632,13 @@ const appTr: AppDict = {
     goDiscover: "Keşfete git", superLike: "Süper beğeni",
     gateTitle: "Seni beğenenleri aç", gateDesc: "{n} kişi seni beğendi. Kim olduklarını gör, tek dokunuşla eşleş — Premium ile aç.",
     unlockPremium: "Premium ile aç", gatePerks: "Sınırsız keşif, görüşme ve dahası",
+  },
+  analiz: {
+    back: "Geri", title: "Analiz", lockedTitle: "Profil etkini analiz et",
+    lockedDesc: "Seni kim aradı, kim tekrar profiline baktı, haftalık performansın — hepsi Premium Plus’ta.",
+    unlock: "Analizi aç", tipsTitle: "Profil önerileri",
+    sViews: "Bu hafta görüntülenme", sRepeat: "Tekrar bakanlar", sLikes: "Bu hafta beğeni",
+    sMatches: "Bu hafta eşleşme", sCalled: "Seni arayanlar", sTotal: "Toplam ziyaretçi",
   },
   common: { back: "Geri" },
 };
@@ -905,6 +916,13 @@ const appEn: AppDict = {
     gateTitle: "Unlock who likes you", gateDesc: "{n} people liked you. See who they are and match in one tap — unlock with Premium.",
     unlockPremium: "Unlock with Premium", gatePerks: "Unlimited discovery, calls and more",
   },
+  analiz: {
+    back: "Back", title: "Analytics", lockedTitle: "Analyze your profile impact",
+    lockedDesc: "Who called you, who viewed your profile again, your weekly performance — all in Premium Plus.",
+    unlock: "Unlock analytics", tipsTitle: "Profile tips",
+    sViews: "Views this week", sRepeat: "Repeat viewers", sLikes: "Likes this week",
+    sMatches: "Matches this week", sCalled: "Who called you", sTotal: "Total visitors",
+  },
   common: { back: "Back" },
 };
 
@@ -1180,6 +1198,13 @@ const appKu: AppDict = {
     goDiscover: "Here Keşfê", superLike: "Super ecibandin",
     gateTitle: "Yên ku ji te hez dikin veke", gateDesc: "{n} kesan ji te hez kir. Bibîne ew kî ne û bi yek tikandinê li hev were — bi Premium veke.",
     unlockPremium: "Bi Premium veke", gatePerks: "Keşfa bêsînor, bang û bêtir",
+  },
+  analiz: {
+    back: "Vegere", title: "Analîz", lockedTitle: "Bandora profîla xwe analîz bike",
+    lockedDesc: "Kê bang li te kir, kê dîsa li profîla te nêrî, performansa te ya heftane — hemû di Premium Plus de.",
+    unlock: "Analîzê veke", tipsTitle: "Pêşniyarên profîlê",
+    sViews: "Vê hefteyê dîtin", sRepeat: "Yên dubare nêrî", sLikes: "Vê hefteyê ecibandin",
+    sMatches: "Vê hefteyê lihevhatin", sCalled: "Yên bang li te kirin", sTotal: "Tevahiya serdankeran",
   },
   common: { back: "Vegere" },
 };
