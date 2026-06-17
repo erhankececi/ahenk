@@ -344,6 +344,10 @@ export type AppDict = {
     errVerifyExpired: string; errNotConfirmed: string; errBadCreds: string; errEmailFirst: string; errResendFail: string;
     errNameInvalid: string; errPwShort: string; errPwMismatch: string; errConsent: string; regCheckEmail: string;
   };
+  ziyaretciler: {
+    eyebrow: string; title: string; seeAdmirers: string; lockedCount: string; seePremium: string;
+    emptyTitle: string; emptyDesc: string; someone: string;
+  };
   common: { back: string };
 };
 
@@ -607,6 +611,11 @@ const appTr: AppDict = {
     errPwMismatch: "Şifreler eşleşmiyor. Lütfen aynı şifreyi iki kez gir.",
     errConsent: "Devam etmek için 18+ olduğunu ve Koşullar/Gizlilik/KVKK metinlerini kabul etmelisin.",
     regCheckEmail: "E-postana doğrulama bağlantısı gönderdik. Onayla, sonra giriş yap.",
+  },
+  ziyaretciler: {
+    eyebrow: "Ahenk profil", title: "Seni ziyaret edenler", seeAdmirers: "Seni fark edenleri gör",
+    lockedCount: "{n} kişi profiline baktı — kimler olduğunu Premium ile gör.", seePremium: "Premium ile gör",
+    emptyTitle: "Henüz ziyaretçi yok", emptyDesc: "Keşfette aktif oldukça profilin daha çok görüntülenir.", someone: "Biri",
   },
   common: { back: "Geri" },
 };
@@ -872,6 +881,11 @@ const appEn: AppDict = {
     errConsent: "To continue, you must accept that you're 18+ and the Terms/Privacy/KVKK texts.",
     regCheckEmail: "We've sent a verification link to your email. Confirm it, then log in.",
   },
+  ziyaretciler: {
+    eyebrow: "Ahenk profile", title: "Who visited you", seeAdmirers: "See who noticed you",
+    lockedCount: "{n} people viewed your profile — see who they are with Premium.", seePremium: "See with Premium",
+    emptyTitle: "No visitors yet", emptyDesc: "The more active you are in Discover, the more your profile is viewed.", someone: "Someone",
+  },
   common: { back: "Back" },
 };
 
@@ -1135,6 +1149,11 @@ const appKu: AppDict = {
     errPwMismatch: "Şîfre li hev nayên. Ji kerema xwe heman şîfreyê du caran binivîse.",
     errConsent: "Ji bo domandinê divê tu qebûl bikî ku 18+ yî û nivîsên Merc/Nepenîtî/KVKK.",
     regCheckEmail: "Me lînka pejirandinê ji e-nameya te re şand. Bipejirîne, paşê têkeve.",
+  },
+  ziyaretciler: {
+    eyebrow: "Profîla Ahenk", title: "Kê serdana te kir", seeAdmirers: "Bibîne kê tu ferq kirî",
+    lockedCount: "{n} kesan li profîla te nêrî — bi Premium bibîne ew kî ne.", seePremium: "Bi Premium bibîne",
+    emptyTitle: "Hîna serdanker tune", emptyDesc: "Çiqas tu li Keşfê çalak bî, ewqas profîla te bêtir tê dîtin.", someone: "Kesek",
   },
   common: { back: "Vegere" },
 };

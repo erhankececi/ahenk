@@ -4,6 +4,8 @@ import { zamanFarki } from "@/lib/utils";
 import { isActivePremium } from "@/lib/plans";
 import { Lock, Crown, Eye } from "lucide-react";
 import { PremiumBadge, tierFrame } from "@/components/PremiumBadge";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,7 @@ export default async function Ziyaretciler() {
     .eq("id", user!.id)
     .single();
   const premium = isActivePremium(me);
+  const tz = getAppDict(normalizeLang(cookies().get("lang")?.value)).ziyaretciler;
 
   const { data: visits } = await supabase
     .from("profile_visits")
@@ -45,7 +48,7 @@ export default async function Ziyaretciler() {
       const p: any = pMap.get(v.visitor_id);
       return {
         id: v.visitor_id as string,
-        name: p?.name || "Biri",
+        name: p?.name || tz.someone,
         tier: (p?.tier as string) || "free",
         at: v.visited_at as string,
       };
@@ -55,8 +58,8 @@ export default async function Ziyaretciler() {
   return (
     <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
       <div className="mb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk profil</p>
-        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">Seni ziyaret edenler</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tz.eyebrow}</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">{tz.title}</h1>
       </div>
 
       {!premium ? (
@@ -64,13 +67,13 @@ export default async function Ziyaretciler() {
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent">
             <Lock size={26} />
           </span>
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text">Seni fark edenleri gör</p>
-          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted">{visitCount} kişi profiline baktı — kimler olduğunu Premium ile gör.</p>
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text">{tz.seeAdmirers}</p>
+          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted">{tz.lockedCount.replace("{n}", String(visitCount))}</p>
           <Link
             href="/premium?source=visitors_locked"
             className="lp-cta-gold inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold"
           >
-            <Crown size={18} /> Premium ile gör
+            <Crown size={18} /> {tz.seePremium}
           </Link>
         </div>
       ) : visitors.length === 0 ? (
@@ -78,8 +81,8 @@ export default async function Ziyaretciler() {
           <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
             A
           </span>
-          <p className="mt-4 font-display text-lg font-semibold text-text">Henüz ziyaretçi yok</p>
-          <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">Keşfette aktif oldukça profilin daha çok görüntülenir.</p>
+          <p className="mt-4 font-display text-lg font-semibold text-text">{tz.emptyTitle}</p>
+          <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">{tz.emptyDesc}</p>
         </div>
       ) : (
         <div className="space-y-2">
