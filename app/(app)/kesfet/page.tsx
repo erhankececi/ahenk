@@ -193,6 +193,10 @@ export default function Kesfet() {
         ))}
       </div>
 
+      <div className="mb-4">
+        <DailyQuestion />
+      </div>
+
       {loading && (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface">
           <div className="shimmer h-56 w-full" />
