@@ -29,7 +29,7 @@ export default function MarketingShell({
             <Link href="/#kesfet" className="transition hover:text-text">Keşfet</Link>
             <Link href="/#moments" className="transition hover:text-text">Moments</Link>
             <Link href="/#premium" className="transition hover:text-text">Premium</Link>
-            <Link href="/guvenlik" className="transition hover:text-text">Güvenlik</Link>
+            <Link href="/guvenlik" className="transition hover:text-text">{t.nav.safety}</Link>
           </nav>
 
           <div className="flex items-center gap-2.5">
@@ -81,7 +81,7 @@ export default function MarketingShell({
           </div>
 
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Ürün</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">{t.footer.product}</p>
             <div className="space-y-2 text-sm">
               <Link href="/#kesfet" className="block text-muted transition hover:text-text">Keşfet</Link>
               <Link href="/#moments" className="block text-muted transition hover:text-text">Moments</Link>
@@ -91,15 +91,15 @@ export default function MarketingShell({
           </div>
 
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Şirket</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">{t.footer.company}</p>
             <div className="space-y-2 text-sm">
               <Link href="/hakkinda" className="block text-muted transition hover:text-text">{t.nav.about}</Link>
-              <Link href="/guvenlik" className="block text-muted transition hover:text-text">Güvenlik</Link>
+              <Link href="/guvenlik" className="block text-muted transition hover:text-text">{t.nav.safety}</Link>
             </div>
           </div>
 
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Yasal</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">{t.footer.legal}</p>
             <div className="space-y-2 text-sm">
               <Link href="/gizlilik" className="block text-muted transition hover:text-text">{t.footer.privacy}</Link>
               <Link href="/kosullar" className="block text-muted transition hover:text-text">{t.footer.terms}</Link>
