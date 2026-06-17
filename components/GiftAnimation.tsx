@@ -10,17 +10,34 @@ const MODE: Record<Gift["rarity"], "mini" | "epic" | "cine"> = {
   common: "mini", rare: "mini", epic: "epic", legendary: "cine", mythic: "cine",
 };
 
-// 3D hediye görseli (sahne içinde animasyonla). Yüklenemezse emoji'ye düşer.
+// 3D hediye görseli. WebM-ready: önce /gifts/animations/<key>.webm dener (varsa hareketli),
+// yoksa /gifts/<key>.png'ye, o da yoksa emoji'ye düşer.
 function GiftSym({ k, emoji, cls, vmin, style }: { k: string; emoji: string; cls: string; vmin: number; style?: React.CSSProperties }) {
-  const [err, setErr] = useState(false);
-  if (err) return <span className={cls} style={{ ...style, fontSize: `${vmin}vmin`, lineHeight: 1 }}>{emoji}</span>;
+  const [vidErr, setVidErr] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
+  const box: React.CSSProperties = { ...style, width: `${vmin}vmin`, height: `${vmin}vmin`, objectFit: "contain" };
+  if (!vidErr) {
+    return (
+      <video
+        src={`/gifts/animations/${k}.webm`}
+        autoPlay
+        loop
+        muted
+        playsInline
+        onError={() => setVidErr(true)}
+        className={cls}
+        style={box}
+      />
+    );
+  }
+  if (imgErr) return <span className={cls} style={{ ...style, fontSize: `${vmin}vmin`, lineHeight: 1 }}>{emoji}</span>;
   return (
     <img
       src={`/gifts/${k}.png`}
       alt=""
-      onError={() => setErr(true)}
+      onError={() => setImgErr(true)}
       className={cls}
-      style={{ ...style, width: `${vmin}vmin`, height: `${vmin}vmin`, objectFit: "contain" }}
+      style={box}
     />
   );
 }
