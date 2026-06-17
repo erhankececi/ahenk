@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, MapPin, Check } from "lucide-react";
 import { KM_OPTIONS, SORT_OPTIONS, type DiscoveryFilter, type SortValue } from "@/lib/discoveryFilters";
 import { CITY_NAMES } from "@/lib/constants";
+import { useLang } from "@/components/LangProvider";
 
 export default function DiscoveryFilters({
   open,
@@ -19,6 +20,11 @@ export default function DiscoveryFilters({
   onClose: () => void;
   onApply: (f: DiscoveryFilter) => void;
 }) {
+  const { t } = useLang();
+  const tf = t.filters;
+  const sortLabel: Record<SortValue, string> = {
+    smart: tf.sortSmart, near: tf.sortNear, active: tf.sortActive, new: tf.sortNew, uyum: tf.sortUyum,
+  };
   const [kmIdx, setKmIdx] = useState(() =>
     Math.max(0, KM_OPTIONS.findIndex((o) => o.value === initial.km))
   );
@@ -68,8 +74,8 @@ export default function DiscoveryFilters({
             className="max-h-[85dvh] w-full overflow-y-auto rounded-t-3xl border-t border-border bg-surface p-5"
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold">Filtreler</h2>
-              <button onClick={onClose} aria-label="Kapat">
+              <h2 className="text-lg font-bold">{tf.title}</h2>
+              <button onClick={onClose} aria-label={tf.close}>
                 <X />
               </button>
             </div>
@@ -77,9 +83,9 @@ export default function DiscoveryFilters({
             {/* Mesafe slider */}
             <div className="mb-6">
               <div className="mb-2 flex items-center justify-between">
-                <p className="font-medium">Öncelik mesafesi</p>
+                <p className="font-medium">{tf.priorityDistance}</p>
                 <span className="rounded-full bg-brand/15 px-3 py-1 text-sm font-semibold text-brand">
-                  {km.label}
+                  {km.value === "all" ? tf.allTurkey : km.label}
                 </span>
               </div>
               <input
@@ -93,18 +99,17 @@ export default function DiscoveryFilters({
               />
               <div className="mt-1 flex justify-between text-[10px] text-muted">
                 <span>5 km</span>
-                <span>Türkiye geneli</span>
+                <span>{tf.allTurkey}</span>
               </div>
               <p className="mt-2 text-xs text-muted">
-                Bu mesafeye kadar olanlara <span className="text-brand">öncelik</span> verilir. Üstündekiler
-                gizlenmez — listenin sonunda, yakından uzağa sıralı görünür.
+                {tf.priorityHint}
               </p>
             </div>
 
             {/* Yaş aralığı */}
             <div className="mb-6">
               <div className="mb-2 flex items-center justify-between">
-                <p className="font-medium">Yaş</p>
+                <p className="font-medium">{tf.age}</p>
                 <span className="rounded-full bg-brand/15 px-3 py-1 text-sm font-semibold text-brand">{minAge}–{maxAge}</span>
               </div>
               <div className="flex items-center gap-3">
@@ -115,7 +120,7 @@ export default function DiscoveryFilters({
 
             {/* Doğrulanmış */}
             <button onClick={() => setVerified((v) => !v)} className="mb-6 flex w-full items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3">
-              <span className="text-sm font-medium">Yalnız doğrulanmış profiller</span>
+              <span className="text-sm font-medium">{tf.verifiedOnly}</span>
               <span className={`relative h-6 w-11 rounded-full transition ${verified ? "bg-brand" : "bg-border"}`}>
                 <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${verified ? "left-[22px]" : "left-0.5"}`} />
               </span>
@@ -123,7 +128,7 @@ export default function DiscoveryFilters({
 
             {/* Sıralama */}
             <div className="mb-6">
-              <p className="mb-2 font-medium">Sıralama</p>
+              <p className="mb-2 font-medium">{tf.sort}</p>
               <div className="flex flex-wrap gap-2">
                 {SORT_OPTIONS.map((s) => (
                   <button
@@ -133,7 +138,7 @@ export default function DiscoveryFilters({
                       sort === s.value ? "border-brand bg-brand/10 text-brand" : "border-border text-muted"
                     }`}
                   >
-                    {s.label}
+                    {sortLabel[s.value]}
                   </button>
                 ))}
               </div>
@@ -141,9 +146,9 @@ export default function DiscoveryFilters({
 
             {/* Şehir */}
             <div className="mb-6">
-              <p className="mb-2 font-medium">Şehir</p>
+              <p className="mb-2 font-medium">{tf.city}</p>
               <div className="mb-3 grid grid-cols-3 gap-2">
-                {([["all", "Tüm Türkiye"], ["mine", "Şehrim"], ["select", "Şehir seç"]] as const).map(
+                {([["all", tf.allCities], ["mine", tf.myCity], ["select", tf.selectCity]] as const).map(
                   ([m, l]) => (
                     <button
                       key={m}
@@ -166,7 +171,7 @@ export default function DiscoveryFilters({
                     <input
                       value={q}
                       onChange={(e) => setQ(e.target.value)}
-                      placeholder="Şehir ara…"
+                      placeholder={tf.searchCity}
                       className="w-full bg-transparent py-2.5 text-sm outline-none"
                     />
                   </div>
@@ -205,7 +210,7 @@ export default function DiscoveryFilters({
               onClick={uygula}
               className="brand-gradient w-full rounded-2xl py-3 font-semibold text-white"
             >
-              Uygula
+              {tf.apply}
             </button>
           </motion.div>
         </motion.div>

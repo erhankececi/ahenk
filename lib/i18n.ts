@@ -218,6 +218,12 @@ export type AppDict = {
     streak3: string; streak7: string; next3: string; next7: string; keepStreak: string;
     streakLabel: string; bonusEarned: string;
   };
+  filters: {
+    title: string; close: string; priorityDistance: string; allTurkey: string; priorityHint: string;
+    age: string; verifiedOnly: string; sort: string;
+    sortSmart: string; sortNear: string; sortActive: string; sortNew: string; sortUyum: string;
+    city: string; allCities: string; myCity: string; selectCity: string; searchCity: string; apply: string;
+  };
   common: { back: string };
 };
 
@@ -262,6 +268,13 @@ const appTr: AppDict = {
     next3: "Yarın 3. gün: +50 jeton bonus", next7: "Yarın 7. gün: +150 jeton bonus",
     keepStreak: "Serini koru, yarın tekrar 20 jeton",
     streakLabel: "Gün serin", bonusEarned: "+{n} seri bonusu kazandın!",
+  },
+  filters: {
+    title: "Filtreler", close: "Kapat", priorityDistance: "Öncelik mesafesi", allTurkey: "Türkiye geneli",
+    priorityHint: "Bu mesafeye kadar olanlara öncelik verilir. Üstündekiler gizlenmez — listenin sonunda, yakından uzağa sıralı görünür.",
+    age: "Yaş", verifiedOnly: "Yalnız doğrulanmış profiller", sort: "Sıralama",
+    sortSmart: "Akıllı", sortNear: "En yakın", sortActive: "En aktif", sortNew: "En yeni", sortUyum: "En uyumlu",
+    city: "Şehir", allCities: "Tüm Türkiye", myCity: "Şehrim", selectCity: "Şehir seç", searchCity: "Şehir ara…", apply: "Uygula",
   },
   common: { back: "Geri" },
 };
@@ -308,6 +321,13 @@ const appEn: AppDict = {
     keepStreak: "Keep your streak, 20 tokens again tomorrow",
     streakLabel: "Your streak", bonusEarned: "+{n} streak bonus earned!",
   },
+  filters: {
+    title: "Filters", close: "Close", priorityDistance: "Priority distance", allTurkey: "All of Türkiye",
+    priorityHint: "People within this distance get priority. Those beyond aren't hidden — they appear at the end, sorted nearest to farthest.",
+    age: "Age", verifiedOnly: "Verified profiles only", sort: "Sort",
+    sortSmart: "Smart", sortNear: "Nearest", sortActive: "Most active", sortNew: "Newest", sortUyum: "Best match",
+    city: "City", allCities: "All Türkiye", myCity: "My city", selectCity: "Select city", searchCity: "Search city…", apply: "Apply",
+  },
   common: { back: "Back" },
 };
 
@@ -352,6 +372,13 @@ const appKu: AppDict = {
     next3: "Sibê roja 3.: +50 jeton bonus", next7: "Sibê roja 7.: +150 jeton bonus",
     keepStreak: "Rêza xwe biparêze, sibê dîsa 20 jeton",
     streakLabel: "Rêza te", bonusEarned: "+{n} bonusa rêzê qezenc kir!",
+  },
+  filters: {
+    title: "Parzûn", close: "Bigire", priorityDistance: "Dûrahiya pêşîn", allTurkey: "Li tevahiya Tirkiyeyê",
+    priorityHint: "Yên di vê dûrahiyê de pêşîn têne dayîn. Yên jê wêdetir venaşêrin — li dawiya lîsteyê, ji nêzîk ber bi dûr ve rêzkirî xuya dibin.",
+    age: "Temen", verifiedOnly: "Tenê profîlên pejirandî", sort: "Rêzkirin",
+    sortSmart: "Aqilmend", sortNear: "Herî nêzîk", sortActive: "Herî çalak", sortNew: "Herî nû", sortUyum: "Herî lihev",
+    city: "Bajar", allCities: "Tevahiya Tirkiyeyê", myCity: "Bajarê min", selectCity: "Bajar hilbijêre", searchCity: "Li bajar bigere…", apply: "Bicîh bîne",
   },
   common: { back: "Vegere" },
 };
