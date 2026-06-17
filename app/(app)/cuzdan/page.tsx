@@ -7,6 +7,7 @@ import { Card, Skeleton } from "@/components/ui";
 import { Coins, Plus, Minus, ArrowLeft, Crown, Zap, Banknote, ArrowRight, Gift, History } from "lucide-react";
 import DavetKart from "@/components/DavetKart";
 import { trackEvent } from "@/lib/track";
+import { useLang } from "@/components/LangProvider";
 
 const PACKAGES = [
   { id: "p100", jeton: 100, price: 29, label: "100 Jeton" },
@@ -26,6 +27,13 @@ type Row = { amount: number; reason: string | null; created_at: string };
 
 export default function Cuzdan() {
   const supabase = createClient();
+  const { t } = useLang();
+  const tc = t.cuzdan;
+  const spendText: Record<string, { title: string; desc: string }> = {
+    boost: { title: tc.boostTitle, desc: tc.boostDesc },
+    premium_day: { title: tc.dayTitle, desc: tc.dayDesc },
+    premium_week: { title: tc.weekTitle, desc: tc.weekDesc },
+  };
   const [balance, setBalance] = useState<number | null>(null);
   const [history, setHistory] = useState<Row[] | null>(null);
   const [buying, setBuying] = useState<string | null>(null);
@@ -56,10 +64,10 @@ export default function Cuzdan() {
     trackEvent("coin_wallet_opened");
     const satin = new URLSearchParams(window.location.search).get("satin");
     if (satin === "ok") {
-      setNotice({ ok: true, msg: "Ödeme alındı! Jetonların birazdan yüklenecek." });
+      setNotice({ ok: true, msg: tc.paid });
       trackEvent("coin_purchase_success");
     } else if (satin === "iptal") {
-      setNotice({ ok: false, msg: "Ödeme iptal edildi." });
+      setNotice({ ok: false, msg: tc.canceled });
       trackEvent("checkout_canceled", { source: "coin" });
     }
   }, []);
@@ -83,15 +91,15 @@ export default function Cuzdan() {
       }
       if (j?.error === "odeme_yapilandirilmamis") {
         trackEvent("coin_demo_checkout_clicked", { pkg });
-        setNotice({ ok: false, msg: "Jeton satın alma şu an kapalı — yakında. Jetonu görev ve davetle kazanabilirsin." });
+        setNotice({ ok: false, msg: tc.buyClosed });
       } else if (!r.ok || !j.ok) {
-        setNotice({ ok: false, msg: "Satın alma başarısız, tekrar dene." });
+        setNotice({ ok: false, msg: tc.buyFailed });
       } else {
-        setNotice({ ok: true, msg: `+${j.jeton} jeton yüklendi!` });
+        setNotice({ ok: true, msg: tc.loaded.replace("{n}", String(j.jeton)) });
         await load();
       }
     } catch {
-      setNotice({ ok: false, msg: "Bağlantı hatası." });
+      setNotice({ ok: false, msg: tc.connError });
     }
     setBuying(null);
   }
@@ -108,15 +116,15 @@ export default function Cuzdan() {
       });
       const j = await r.json();
       if (r.ok && j.ok) {
-        setNotice({ ok: true, msg: `${title} aktifleştirildi!` });
+        setNotice({ ok: true, msg: tc.activated.replace("{title}", title) });
         await load();
       } else if (j?.error === "insufficient") {
-        setNotice({ ok: false, msg: `Yetersiz bakiye — ${j.cost} jeton gerekli. Görev yap veya jeton al.` });
+        setNotice({ ok: false, msg: tc.insufficient.replace("{n}", String(j.cost)) });
       } else {
-        setNotice({ ok: false, msg: "İşlem başarısız, tekrar dene." });
+        setNotice({ ok: false, msg: tc.opFailed });
       }
     } catch {
-      setNotice({ ok: false, msg: "Bağlantı hatası." });
+      setNotice({ ok: false, msg: tc.connError });
     }
     setUsing(null);
   }
@@ -129,20 +137,20 @@ export default function Cuzdan() {
             <Link
               href="/profil"
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-text shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition hover:border-[#C7A977]/45 hover:text-accent"
-              aria-label="Geri"
+              aria-label={tc.back}
             >
               <ArrowLeft size={18} />
             </Link>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk cüzdan</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tc.eyebrow}</p>
               <h1 className="mt-1 truncate text-2xl font-semibold tracking-[-0.04em] text-text">
-                Cüzdan & Jeton
+                {tc.title}
               </h1>
             </div>
           </div>
 
           <div className="hidden rounded-full border border-[#C7A977]/25 bg-[#C7A977]/10 px-3 py-1.5 text-xs font-medium text-accent sm:block">
-            1 jeton = ₺0,10
+            {tc.rate}
           </div>
         </div>
 
@@ -156,7 +164,7 @@ export default function Cuzdan() {
             <div className="relative p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Jeton bakiyen</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{tc.balanceLabel}</p>
                   {balance == null ? (
                     <Skeleton className="mt-3 h-12 w-36 rounded-2xl" />
                   ) : (
@@ -175,7 +183,7 @@ export default function Cuzdan() {
               </div>
 
               <p className="mt-4 text-xs leading-5 text-muted">
-                Jetonu Boost, Premium gün/hafta açmak veya nakde çevirmek için kullan.
+                {tc.balanceHint}
               </p>
             </div>
           </div>
@@ -196,9 +204,9 @@ export default function Cuzdan() {
         {/* Sekmeler: Jetonlar · Davet · Geçmiş */}
         <div className="mb-5 grid grid-cols-3 gap-1.5 rounded-2xl border border-white/10 bg-[#151318]/70 p-1.5">
           {([
-            { id: "jeton", label: "Jetonlar", Icon: Coins },
-            { id: "davet", label: "Davet", Icon: Gift },
-            { id: "gecmis", label: "Geçmiş", Icon: History },
+            { id: "jeton", label: tc.tabJeton, Icon: Coins },
+            { id: "davet", label: tc.tabDavet, Icon: Gift },
+            { id: "gecmis", label: tc.tabGecmis, Icon: History },
           ] as const).map((tb) => {
             const active = tab === tb.id;
             return (
@@ -231,8 +239,8 @@ export default function Cuzdan() {
             <Banknote size={19} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-text">Para çek</p>
-            <p className="text-xs leading-5 text-muted">Kazandığın jetonu nakde çevir</p>
+            <p className="font-semibold text-text">{tc.withdraw}</p>
+            <p className="text-xs leading-5 text-muted">{tc.withdrawDesc}</p>
           </div>
           <ArrowRight size={18} className="shrink-0 text-muted" />
         </Link>
@@ -241,8 +249,8 @@ export default function Cuzdan() {
         <section className="lp-panel mb-5 p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
             <div>
-              <p className="text-sm font-semibold text-text">Jetonla aç</p>
-              <p className="mt-0.5 text-xs text-muted">Görünürlüğünü ve deneyimini yükselt</p>
+              <p className="text-sm font-semibold text-text">{tc.spendTitle}</p>
+              <p className="mt-0.5 text-xs text-muted">{tc.spendDesc}</p>
             </div>
             <Zap size={17} className="text-accent" />
           </div>
@@ -266,21 +274,21 @@ export default function Cuzdan() {
 
                     <div className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2 font-semibold text-text">
-                        {s.title}
+                        {spendText[s.item]?.title ?? s.title}
                         {s.best && (
                           <span className="rounded-full border border-[#C7A977]/30 bg-[#C7A977]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
-                            En iyi değer
+                            {tc.bestValue}
                           </span>
                         )}
                       </p>
-                      <p className="mt-0.5 text-xs leading-5 text-muted">{s.desc}</p>
+                      <p className="mt-0.5 text-xs leading-5 text-muted">{spendText[s.item]?.desc ?? s.desc}</p>
                     </div>
 
                     <button
-                      onClick={() => kullan(s.item, s.title)}
+                      onClick={() => kullan(s.item, spendText[s.item]?.title ?? s.title)}
                       disabled={using === s.item || !afford}
                       className="shrink-0 rounded-2xl border border-[#C7A977]/35 bg-[#C7A977]/12 px-3 py-2 text-xs font-semibold text-accent transition hover:bg-[#C7A977]/18 active:scale-95 disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-muted disabled:opacity-60"
-                      aria-label={`${s.title} — ${s.jeton} jeton`}
+                      aria-label={`${spendText[s.item]?.title ?? s.title} — ${s.jeton}`}
                     >
                       {using === s.item ? (
                         "…"
@@ -301,8 +309,8 @@ export default function Cuzdan() {
         <section className="lp-panel mb-5 p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
             <div>
-              <p className="text-sm font-semibold text-text">Jeton satın al</p>
-              <p className="mt-0.5 text-xs text-muted">Avantajlı paketlerle bakiyeni güçlendir</p>
+              <p className="text-sm font-semibold text-text">{tc.buyTitle}</p>
+              <p className="mt-0.5 text-xs text-muted">{tc.buyDesc}</p>
             </div>
             <Coins size={17} className="text-accent" />
           </div>
@@ -321,7 +329,7 @@ export default function Cuzdan() {
               >
                 {p.populer && (
                   <span className="absolute right-2.5 top-2.5 rounded-full border border-[#C7A977]/30 bg-[#C7A977]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.13em] text-accent">
-                    Popüler
+                    {tc.popular}
                   </span>
                 )}
 
@@ -335,7 +343,7 @@ export default function Cuzdan() {
                 <p className="mt-0.5 text-sm text-muted">₺{p.price}</p>
 
                 <span className="mt-3 inline-flex rounded-xl border border-[#C7A977]/30 bg-[#C7A977]/12 px-3 py-1.5 text-xs font-semibold text-accent">
-                  {buying === p.id ? "..." : "Satın al"}
+                  {buying === p.id ? "..." : tc.buy}
                 </span>
               </button>
             ))}
@@ -343,8 +351,7 @@ export default function Cuzdan() {
 
           <div className="border-t border-white/10 px-4 py-3">
             <p className="text-xs leading-5 text-muted">
-              Ödeme sağlayıcı bağlanınca jeton satın alma açılır. Bağlanana kadar canlıda kapalıdır
-              (geliştirmede <b className="text-text">demo</b> anında yükler). Jetonu her zaman görev ve davetle kazanabilirsin.
+              {tc.paymentNote}
             </p>
           </div>
         </section>
@@ -356,8 +363,8 @@ export default function Cuzdan() {
         <section className="lp-panel p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
             <div>
-              <p className="text-sm font-semibold text-text">Jeton geçmişi</p>
-              <p className="mt-0.5 text-xs text-muted">Son bakiye hareketlerin</p>
+              <p className="text-sm font-semibold text-text">{tc.historyTitle}</p>
+              <p className="mt-0.5 text-xs text-muted">{tc.historyDesc}</p>
             </div>
             <Banknote size={17} className="text-accent" />
           </div>
@@ -371,15 +378,15 @@ export default function Cuzdan() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl border border-white/10 bg-[#0E0D10] text-accent">
                 <Coins size={22} />
               </div>
-              <p className="mt-3 text-sm font-medium text-text">Henüz hareket yok</p>
-              <p className="mt-1 text-xs leading-5 text-muted">Görevleri tamamla, jeton kazan.</p>
+              <p className="mt-3 text-sm font-medium text-text">{tc.noHistory}</p>
+              <p className="mt-1 text-xs leading-5 text-muted">{tc.noHistoryDesc}</p>
             </div>
           ) : (
             <Card className="divide-y divide-white/10 border-0 bg-transparent p-0 shadow-none">
               {history.map((row, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-3 px-4 py-3.5">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text">{row.reason || "Hareket"}</p>
+                    <p className="truncate text-sm font-medium text-text">{row.reason || tc.movement}</p>
                     <p className="mt-0.5 text-xs text-muted">
                       {new Date(row.created_at).toLocaleString("tr-TR", {
                         day: "2-digit",

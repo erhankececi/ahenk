@@ -224,6 +224,18 @@ export type AppDict = {
     sortSmart: string; sortNear: string; sortActive: string; sortNew: string; sortUyum: string;
     city: string; allCities: string; myCity: string; selectCity: string; searchCity: string; apply: string;
   };
+  cuzdan: {
+    back: string; eyebrow: string; title: string; rate: string;
+    balanceLabel: string; balanceHint: string;
+    tabJeton: string; tabDavet: string; tabGecmis: string;
+    withdraw: string; withdrawDesc: string;
+    spendTitle: string; spendDesc: string;
+    boostTitle: string; boostDesc: string; dayTitle: string; dayDesc: string; weekTitle: string; weekDesc: string; bestValue: string;
+    buyTitle: string; buyDesc: string; popular: string; buy: string; paymentNote: string;
+    historyTitle: string; historyDesc: string; noHistory: string; noHistoryDesc: string; movement: string;
+    paid: string; canceled: string; buyClosed: string; buyFailed: string; loaded: string; connError: string;
+    activated: string; insufficient: string; opFailed: string;
+  };
   common: { back: string };
 };
 
@@ -275,6 +287,23 @@ const appTr: AppDict = {
     age: "Yaş", verifiedOnly: "Yalnız doğrulanmış profiller", sort: "Sıralama",
     sortSmart: "Akıllı", sortNear: "En yakın", sortActive: "En aktif", sortNew: "En yeni", sortUyum: "En uyumlu",
     city: "Şehir", allCities: "Tüm Türkiye", myCity: "Şehrim", selectCity: "Şehir seç", searchCity: "Şehir ara…", apply: "Uygula",
+  },
+  cuzdan: {
+    back: "Geri", eyebrow: "Ahenk cüzdan", title: "Cüzdan & Jeton", rate: "1 jeton = ₺0,10",
+    balanceLabel: "Jeton bakiyen", balanceHint: "Jetonu Boost, Premium gün/hafta açmak veya nakde çevirmek için kullan.",
+    tabJeton: "Jetonlar", tabDavet: "Davet", tabGecmis: "Geçmiş",
+    withdraw: "Para çek", withdrawDesc: "Kazandığın jetonu nakde çevir",
+    spendTitle: "Jetonla aç", spendDesc: "Görünürlüğünü ve deneyimini yükselt",
+    boostTitle: "Profil Boost", boostDesc: "24 saat keşfette en üstte",
+    dayTitle: "1 Gün Premium", dayDesc: "Tüm Premium ayrıcalıkları",
+    weekTitle: "1 Hafta Premium", weekDesc: "7 gün — en iyi değer", bestValue: "En iyi değer",
+    buyTitle: "Jeton satın al", buyDesc: "Avantajlı paketlerle bakiyeni güçlendir", popular: "Popüler", buy: "Satın al",
+    paymentNote: "Ödeme sağlayıcı bağlanınca jeton satın alma açılır. Bağlanana kadar canlıda kapalıdır. Jetonu her zaman görev ve davetle kazanabilirsin.",
+    historyTitle: "Jeton geçmişi", historyDesc: "Son bakiye hareketlerin", noHistory: "Henüz hareket yok", noHistoryDesc: "Görevleri tamamla, jeton kazan.", movement: "Hareket",
+    paid: "Ödeme alındı! Jetonların birazdan yüklenecek.", canceled: "Ödeme iptal edildi.",
+    buyClosed: "Jeton satın alma şu an kapalı — yakında. Jetonu görev ve davetle kazanabilirsin.",
+    buyFailed: "Satın alma başarısız, tekrar dene.", loaded: "+{n} jeton yüklendi!", connError: "Bağlantı hatası.",
+    activated: "{title} aktifleştirildi!", insufficient: "Yetersiz bakiye — {n} jeton gerekli. Görev yap veya jeton al.", opFailed: "İşlem başarısız, tekrar dene.",
   },
   common: { back: "Geri" },
 };
@@ -328,6 +357,23 @@ const appEn: AppDict = {
     sortSmart: "Smart", sortNear: "Nearest", sortActive: "Most active", sortNew: "Newest", sortUyum: "Best match",
     city: "City", allCities: "All Türkiye", myCity: "My city", selectCity: "Select city", searchCity: "Search city…", apply: "Apply",
   },
+  cuzdan: {
+    back: "Back", eyebrow: "Ahenk wallet", title: "Wallet & Tokens", rate: "1 token = ₺0.10",
+    balanceLabel: "Your token balance", balanceHint: "Use tokens for Boost, Premium day/week, or cash out.",
+    tabJeton: "Tokens", tabDavet: "Invite", tabGecmis: "History",
+    withdraw: "Cash out", withdrawDesc: "Turn earned tokens into cash",
+    spendTitle: "Unlock with tokens", spendDesc: "Boost your visibility and experience",
+    boostTitle: "Profile Boost", boostDesc: "Top of Discover for 24 hours",
+    dayTitle: "1 Day Premium", dayDesc: "All Premium perks",
+    weekTitle: "1 Week Premium", weekDesc: "7 days — best value", bestValue: "Best value",
+    buyTitle: "Buy tokens", buyDesc: "Top up your balance with great-value packs", popular: "Popular", buy: "Buy",
+    paymentNote: "Token purchase opens once a payment provider is connected. Until then it's off in production. You can always earn tokens through quests and invites.",
+    historyTitle: "Token history", historyDesc: "Your recent balance activity", noHistory: "No activity yet", noHistoryDesc: "Complete quests, earn tokens.", movement: "Activity",
+    paid: "Payment received! Your tokens will load shortly.", canceled: "Payment canceled.",
+    buyClosed: "Token purchase is currently off — soon. You can earn tokens via quests and invites.",
+    buyFailed: "Purchase failed, try again.", loaded: "+{n} tokens loaded!", connError: "Connection error.",
+    activated: "{title} activated!", insufficient: "Insufficient balance — {n} tokens needed. Do a quest or buy tokens.", opFailed: "Operation failed, try again.",
+  },
   common: { back: "Back" },
 };
 
@@ -379,6 +425,23 @@ const appKu: AppDict = {
     age: "Temen", verifiedOnly: "Tenê profîlên pejirandî", sort: "Rêzkirin",
     sortSmart: "Aqilmend", sortNear: "Herî nêzîk", sortActive: "Herî çalak", sortNew: "Herî nû", sortUyum: "Herî lihev",
     city: "Bajar", allCities: "Tevahiya Tirkiyeyê", myCity: "Bajarê min", selectCity: "Bajar hilbijêre", searchCity: "Li bajar bigere…", apply: "Bicîh bîne",
+  },
+  cuzdan: {
+    back: "Vegere", eyebrow: "Berîka Ahenk", title: "Berîk & Jeton", rate: "1 jeton = ₺0,10",
+    balanceLabel: "Bakiya jetonê te", balanceHint: "Jetonan ji bo Boost, Premium roj/hefte an veguhastina pere bi kar bîne.",
+    tabJeton: "Jeton", tabDavet: "Vexwendin", tabGecmis: "Dîrok",
+    withdraw: "Pere bikişîne", withdrawDesc: "Jetonên qezenckirî bike pere",
+    spendTitle: "Bi jetonan veke", spendDesc: "Xuyabûn û ezmûna xwe bilind bike",
+    boostTitle: "Boosta Profîlê", boostDesc: "24 saetan li serê Keşfê",
+    dayTitle: "1 Roj Premium", dayDesc: "Hemû îmtiyazên Premium",
+    weekTitle: "1 Hefte Premium", weekDesc: "7 roj — nirxa herî baş", bestValue: "Nirxa herî baş",
+    buyTitle: "Jeton bikire", buyDesc: "Bi pakêtên biavantaj bakiya xwe xurt bike", popular: "Populer", buy: "Bikire",
+    paymentNote: "Gava dahênerê pereyan ve girêdayî be jeton-kirîn vedibe. Heta hingê di hilberînê de girtî ye. Tu her dem dikarî bi peywir û vexwendinê jeton qezenc bikî.",
+    historyTitle: "Dîroka jetonê", historyDesc: "Tevgerên dawî yên bakiyê", noHistory: "Hîna tevger tune", noHistoryDesc: "Peywiran temam bike, jeton qezenc bike.", movement: "Tevger",
+    paid: "Pere hat girtin! Jetonên te di demeke kurt de werin barkirin.", canceled: "Pere hat betalkirin.",
+    buyClosed: "Jeton-kirîn niha girtî ye — di nêzîk de. Tu dikarî bi peywir û vexwendinê jeton qezenc bikî.",
+    buyFailed: "Kirîn bi ser neket, dîsa biceribîne.", loaded: "+{n} jeton hat barkirin!", connError: "Çewtiya girêdanê.",
+    activated: "{title} hat çalakkirin!", insufficient: "Bakiya nebes — {n} jeton hewce ne. Peywirekê bike an jeton bikire.", opFailed: "Kar bi ser neket, dîsa biceribîne.",
   },
   common: { back: "Vegere" },
 };
