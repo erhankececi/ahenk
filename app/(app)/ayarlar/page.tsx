@@ -5,13 +5,15 @@ import PushOptIn from "@/components/PushOptIn";
 import SoundToggle from "@/components/SoundToggle";
 import BildirimTercihleri from "@/components/BildirimTercihleri";
 import IncognitoToggle from "@/components/IncognitoToggle";
+import ThemePicker from "@/components/ThemePicker";
+import VerifyRequest from "@/components/VerifyRequest";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import TranslateToggle from "@/components/TranslateToggle";
 import { normalizeLang } from "@/lib/i18n";
 import { cookies } from "next/headers";
 import {
   ArrowLeft, Bell, EyeOff, Shield, Ban, Languages, Crown, TrendingUp, Eye,
-  MessageSquare, Trash2, ChevronRight,
+  MessageSquare, Trash2, ChevronRight, Palette,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +23,7 @@ export default async function Ayarlar() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data: p } = await supabase
     .from("profiles")
-    .select("incognito, premium_plan, premium_until")
+    .select("incognito, premium_plan, premium_until, theme, verification_status, is_verified")
     .eq("id", user!.id)
     .single();
   const premium = isActivePremium(p);
@@ -62,12 +64,35 @@ export default async function Ayarlar() {
         <BildirimTercihleri />
       </div>
 
+      <div className="mb-5">
+        <p className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Görünüm</p>
+        <div className="ahenk-panel overflow-hidden rounded-2xl p-4">
+          <div className="mb-3 flex items-center gap-3">
+            <Palette size={18} className="text-accent" />
+            <div>
+              <p className="text-sm font-medium text-text">Tema</p>
+              <p className="text-xs text-muted">Premium görünüm tercihlerin</p>
+            </div>
+          </div>
+          <ThemePicker userId={user!.id} initial={p?.theme || "default"} locked={!premium} />
+        </div>
+      </div>
+
       <Group title="Gizlilik">
         <div className="p-4"><IncognitoToggle userId={user!.id} initial={!!p?.incognito} premium={premium} /></div>
         {row("/gizlilik", EyeOff, "Gizlilik Politikası")}
       </Group>
 
       <Group title="Güvenlik">
+        {!p?.is_verified && (
+          <div className="p-4">
+            <VerifyRequest
+              userId={user!.id}
+              status={p?.verification_status || "none"}
+              isVerified={!!p?.is_verified}
+            />
+          </div>
+        )}
         {row("/guvenlik", Shield, "Güvenlik & Topluluk")}
         {row("/engellenenler", Ban, "Engellenenler")}
       </Group>
