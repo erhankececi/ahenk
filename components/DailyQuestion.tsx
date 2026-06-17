@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Check, Coins } from "lucide-react";
+import { Sparkles, Check, Coins, Flame } from "lucide-react";
 
 export default function DailyQuestion() {
   const [q, setQ] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
   const [answer, setAnswer] = useState("");
   const [reward, setReward] = useState(20);
+  const [streak, setStreak] = useState(0);
+  const [bonus, setBonus] = useState(0);
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -20,6 +22,7 @@ export default function DailyQuestion() {
           setAnswered(!!d.answered);
           if (d.answer) setAnswer(d.answer);
           if (d.reward) setReward(d.reward);
+          if (typeof d.streak === "number") setStreak(d.streak);
         }
       })
       .catch(() => {});
@@ -33,14 +36,34 @@ export default function DailyQuestion() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answer }),
     });
+    const j = await r.json().catch(() => ({}));
     setBusy(false);
-    if (r.ok) {
+    if (r.ok && j.ok) {
       setAnswered(true);
       setOpen(false);
+      if (typeof j.streak === "number") setStreak(j.streak);
+      if (j.bonus) setBonus(j.bonus);
     }
   }
 
   if (!q) return null;
+
+  // Gün serisi göstergesi: 7'lik döngü; tamamlanmış günler pirinç dolu.
+  const dolu = answered ? streak : streak; // mevcut seri
+  const dotCount = 7;
+  const ringIndex = ((dolu - 1) % dotCount + dotCount) % dotCount; // bugünün noktası (0-tabanlı)
+  const filled = dolu === 0 ? 0 : ringIndex + 1;
+  const nextHint = !answered
+    ? `Bugün yanıtla, +${reward} jeton kazan`
+    : filled === 3
+      ? "Süper — 3 günlük seri! Yarın da gel."
+      : filled >= 7
+        ? "7 günlük seri tamam — efsane!"
+        : filled === 2
+          ? "Yarın 3. gün: +50 jeton bonus"
+          : filled === 6
+            ? "Yarın 7. gün: +150 jeton bonus"
+            : "Serini koru, yarın tekrar 20 jeton";
 
   return (
     <div className="rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
@@ -88,6 +111,29 @@ export default function DailyQuestion() {
         </div>
       )}
       {answered && answer && <p className="mt-2 text-sm text-muted">“{answer}”</p>}
+
+      {/* Gün serisi (streak) */}
+      <div className="mt-3 border-t border-white/10 pt-3">
+        <div className="flex items-center justify-between">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-accent">
+            <Flame size={13} /> Gün serin{streak > 0 ? ` · ${streak}` : ""}
+          </p>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: dotCount }).map((_, i) => (
+              <span
+                key={i}
+                className={`h-2 w-2 rounded-full ${i < filled ? "bg-accent" : "bg-white/15"}`}
+              />
+            ))}
+          </div>
+        </div>
+        <p className="mt-1.5 text-[11px] leading-4 text-muted">{nextHint}</p>
+        {bonus > 0 && (
+          <p className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-accent">
+            <Coins size={11} /> +{bonus} seri bonusu kazandın!
+          </p>
+        )}
+      </div>
     </div>
   );
 }
