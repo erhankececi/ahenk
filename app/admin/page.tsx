@@ -8,6 +8,7 @@ import AdminFeedbackResolve from "@/components/admin/AdminFeedbackResolve";
 import AdminWithdrawAction from "@/components/admin/AdminWithdrawAction";
 import AdminRestoreAction from "@/components/admin/AdminRestoreAction";
 import AdminMessageAudit from "@/components/admin/AdminMessageAudit";
+import AdminGrowth from "@/components/admin/AdminGrowth";
 
 export const dynamic = "force-dynamic";
 
@@ -199,6 +200,8 @@ export default async function Admin() {
   return (
     <div className="px-4 pb-10 pt-6">
       <h1 className="mb-5 text-2xl font-bold brand-text">Admin Paneli</h1>
+
+      <AdminGrowth />
 
       <div className="mb-6 grid grid-cols-2 gap-3">
         {stats.map((s) => (
