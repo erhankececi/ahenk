@@ -23,12 +23,12 @@ function mimeExt(mime: string): string {
 }
 
 // Kimya seviyesi (0-100 → etiket)
-function bondLevel(s: number) {
-  if (s >= 80) return { label: "Özel Bağ", emoji: "💞" };
-  if (s >= 60) return { label: "Güçlü Bağ", emoji: "💗" };
-  if (s >= 40) return { label: "Uyumlu", emoji: "💓" };
-  if (s >= 20) return { label: "Isınıyor", emoji: "💛" };
-  return { label: "Yeni Tanışıyor", emoji: "🤍" };
+function bondLevel(s: number): { key: "special" | "strong" | "harmonious" | "warming" | "new"; emoji: string } {
+  if (s >= 80) return { key: "special", emoji: "💞" };
+  if (s >= 60) return { key: "strong", emoji: "💗" };
+  if (s >= 40) return { key: "harmonious", emoji: "💓" };
+  if (s >= 20) return { key: "warming", emoji: "💛" };
+  return { key: "new", emoji: "🤍" };
 }
 import { zamanFarki, saat } from "@/lib/utils";
 import { playSound } from "@/lib/sound";
@@ -41,6 +41,7 @@ import { CalendarDays } from "lucide-react";
 import { useCall } from "@/components/call/CallProvider";
 import SafetyMenu from "@/components/SafetyMenu";
 import EmojiGifPicker from "@/components/EmojiGifPicker";
+import { useLang } from "@/components/LangProvider";
 import { PremiumBadge, tierFrame, tierName, tierBubble, VipTag } from "@/components/PremiumBadge";
 import type { Message } from "@/lib/types";
 
@@ -90,6 +91,11 @@ export function ChatWindow({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLang();
+  const tc = t.chat;
+  const bondLabel: Record<string, string> = {
+    special: tc.bondSpecial, strong: tc.bondStrong, harmonious: tc.bondHarmonious, warming: tc.bondWarming, new: tc.bondNew,
+  };
   const { start, busy } = useCall();
   const canVoice = true; // eşleşen herkes sesli arayabilir (v45 ile gating kaldırıldı)
   const canVideo = true; // herkes deneyebilir; kimya<100 ise ücretli (50 jeton), >=100 ücretsiz
@@ -201,16 +207,16 @@ export function ChatWindow({
   }
   const videoFree = chemistry >= 100 || myTier === "platinum" || myTier === "legend";
   async function videoBaslat() {
-    if (!callsUnlocked) { setWarn("Arama biraz sohbet edince açılır 🔓"); return; }
+    if (!callsUnlocked) { setWarn(tc.callSoon); return; }
     if (videoFree) {
       start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto });
       return;
     }
-    if (!confirm("Görüntülü görüşme 50 jeton (kimya %100 olunca ücretsiz). Devam edilsin mi?")) return;
+    if (!confirm(tc.videoConfirm)) return;
     const r = await fetch("/api/call/pay-video", { method: "POST" });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.ok) start(matchId, "video", { id: otherId, name: otherName, photo: otherPhoto });
-    else setWarn(j.error === "insufficient" ? "Yetersiz jeton — 50 jeton gerekli (Cüzdandan al)." : "Görüşme başlatılamadı.");
+    else setWarn(j.error === "insufficient" ? tc.insufficientCall : tc.callFailed);
   }
   async function bulusmaYanit(action: "accept" | "reject") {
     setMeet((m) => (m ? { ...m, status: action === "accept" ? "kabul" : "red" } : m));
@@ -231,7 +237,7 @@ export function ChatWindow({
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.ok) {
       setMet({ mine: true, both: !!j.both });
-      setWarn(j.both ? "Görüşüldü olarak işaretlendi ✓" : "Onayın alındı — karşı taraf da onaylayınca rozet açılır.");
+      setWarn(j.both ? tc.metMarked : tc.metAck);
     }
   }
   const endRef = useRef<HTMLDivElement>(null);
@@ -376,7 +382,7 @@ export function ChatWindow({
       .single();
     if (error) {
       setText(t); // mesajı kaybetme
-      setWarn("Mesaj gönderilemedi — çok hızlı olabilirsin, biraz bekle.");
+      setWarn(tc.msgTooFast);
       return;
     }
     if (inserted) {
@@ -402,11 +408,11 @@ export function ChatWindow({
 
   async function fotoGonder(file: File) {
     if (!file.type.startsWith("image/")) {
-      setWarn("Yalnız fotoğraf gönderebilirsin.");
+      setWarn(tc.onlyPhoto);
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      setWarn("Fotoğraf 8MB'den küçük olmalı.");
+      setWarn(tc.photoMax);
       return;
     }
     setWarn("");
@@ -418,7 +424,7 @@ export function ChatWindow({
         .from("media")
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) {
-        setWarn("Yükleme başarısız, tekrar dene.");
+        setWarn(tc.uploadFailed);
         return;
       }
       const { data: inserted, error: insErr } = await supabase
@@ -427,7 +433,7 @@ export function ChatWindow({
         .select()
         .single();
       if (insErr) {
-        setWarn("Gönderilemedi — biraz yavaşla ve tekrar dene.");
+        setWarn(tc.sendSlow);
         return;
       }
       if (inserted) {
@@ -451,7 +457,7 @@ export function ChatWindow({
       setWarn(
         data?.error === "insufficient"
           ? `Yetersiz jeton — bu hediye ${data.cost} jeton. Cüzdandan jeton alabilirsin.`
-          : "Hediye gönderilemedi, tekrar dene."
+          : tc.giftFailed
       );
       return;
     }
@@ -469,7 +475,7 @@ export function ChatWindow({
       .select()
       .single();
     if (error) {
-      setWarn("Gönderilemedi, tekrar dene.");
+      setWarn(tc.sendFailed);
       return;
     }
     if (inserted) {
@@ -493,7 +499,7 @@ export function ChatWindow({
         .from("media")
         .upload(path, blob, { contentType: mime, upsert: false });
       if (error) {
-        setWarn("Ses gönderilemedi, tekrar dene.");
+        setWarn(tc.voiceFailed);
         return;
       }
       const { data: inserted, error: insErr } = await supabase
@@ -502,7 +508,7 @@ export function ChatWindow({
         .select()
         .single();
       if (insErr) {
-        setWarn("Ses gönderilemedi — biraz yavaşla ve tekrar dene.");
+        setWarn(tc.voiceSlow);
         return;
       }
       if (inserted) {
@@ -564,7 +570,7 @@ export function ChatWindow({
       setRecSec(0);
       recTimerRef.current = setInterval(() => setRecSec((s) => s + 1), 1000);
     } catch {
-      setWarn("Mikrofona erişilemedi. Tarayıcı iznini kontrol et.");
+      setWarn(tc.micError);
     }
   }
 
@@ -611,14 +617,14 @@ export function ChatWindow({
     <div className={`flex h-dvh flex-col overflow-x-hidden bg-bg ${shake ? "gift-shake" : ""}`}>
       {/* başlık */}
       <header className="flex items-center gap-3 border-b border-border glass px-3 py-3">
-        <button onClick={() => router.push("/eslesmeler")} aria-label="Eşleşmelere dön">
+        <button onClick={() => router.push("/eslesmeler")} aria-label={tc.backToMatches}>
           <ArrowLeft />
         </button>
         <button
           type="button"
           onClick={() => otherPhoto && revealLevel >= 100 && setLightbox({ images: [otherPhoto], index: 0 })}
           className={`rounded-full ${tierFrame(otherTier)}`}
-          aria-label="Profil fotoğrafı"
+          aria-label={tc.profilePhoto}
         >
           <div className="relative h-10 w-10 overflow-hidden rounded-full bg-elevated">
             {otherPhoto ? (
@@ -636,7 +642,7 @@ export function ChatWindow({
             {otherVerified && <BadgeCheck size={16} className="text-brand" />}
             {met.both && (
               <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
-                Görüşüldü ✓
+                {tc.metBadge}
               </span>
             )}
             <PremiumBadge tier={otherTier} />
@@ -644,15 +650,15 @@ export function ChatWindow({
           </p>
           <p className="text-xs text-muted">
             {otherTyping ? (
-              <span className="text-success">yazıyor…</span>
+              <span className="text-success">{tc.typing}</span>
             ) : otherOnline ? (
               <span className="flex items-center gap-1 text-success">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" /> Çevrimiçi
+                <span className="h-1.5 w-1.5 rounded-full bg-success" /> {tc.online}
               </span>
             ) : revealLevel >= 100 ? (
-              "Fotoğraf açık"
+              tc.photoOpen
             ) : (
-              `Netlik %${revealLevel} — yazdıkça açılır`
+              tc.clarity.replace("{n}", String(revealLevel))
             )}
           </p>
         </div>
@@ -661,12 +667,12 @@ export function ChatWindow({
             onClick={() =>
               callsUnlocked
                 ? start(matchId, "voice", { id: otherId, name: otherName, photo: otherPhoto })
-                : setWarn("Arama biraz sohbet edince açılır 🔓")
+                : setWarn(tc.callSoon)
             }
             disabled={busy}
             className="text-muted transition hover:text-brand disabled:opacity-40"
-            aria-label={callsUnlocked ? "Sesli ara" : "Arama kilitli"}
-            title={callsUnlocked ? "Sesli ara" : "Biraz sohbet edince açılır"}
+            aria-label={callsUnlocked ? tc.voiceCall : tc.callLocked}
+            title={callsUnlocked ? tc.voiceCall : tc.callSoonTitle}
           >
             {callsUnlocked ? <Phone size={20} /> : <Lock size={18} />}
           </button>
@@ -676,8 +682,8 @@ export function ChatWindow({
             onClick={videoBaslat}
             disabled={busy}
             className="relative text-muted transition hover:text-brand disabled:opacity-40"
-            aria-label={callsUnlocked ? "Görüntülü ara" : "Arama kilitli"}
-            title={!callsUnlocked ? "Biraz sohbet edince açılır" : videoFree ? "Görüntülü ara (ücretsiz)" : "Görüntülü ara (50 jeton · %100 kimyada ücretsiz)"}
+            aria-label={callsUnlocked ? tc.videoCall : tc.callLocked}
+            title={!callsUnlocked ? tc.callSoonTitle : videoFree ? tc.videoCallFree : tc.videoCallPaid}
           >
             {!callsUnlocked ? <Lock size={18} /> : <Video size={20} />}
             {callsUnlocked && !videoFree && (
@@ -687,14 +693,14 @@ export function ChatWindow({
         )}
         <button
           onClick={() => setMeetOpen(true)}
-          aria-label="Buluşma öner"
+          aria-label={tc.suggestMeet}
           className="text-muted transition hover:text-brand"
         >
           <CalendarDays size={20} />
         </button>
         <button
           onClick={() => setGiftOpen(true)}
-          aria-label="Hediye gönder"
+          aria-label={tc.sendGift}
           className="text-muted transition hover:text-accent"
         >
           <Gift size={20} />
@@ -704,9 +710,9 @@ export function ChatWindow({
           targetId={otherId}
           onBlocked={() => router.push("/eslesmeler")}
           extra={[
-            { label: "Arama geçmişi", onClick: aramaGecmisi },
+            { label: tc.callHistory, onClick: aramaGecmisi },
             {
-              label: met.mine ? "Görüşmeyi onayladın ✓" : "Yüz yüze görüştük",
+              label: met.mine ? tc.metConfirmed : tc.metFaceToFace,
               onClick: gorustukOnayla,
             },
           ]}
@@ -717,9 +723,9 @@ export function ChatWindow({
       <div className="border-b border-border bg-surface/40 px-4 py-2">
         <div className="mb-1 flex items-center justify-between text-xs">
           <span className="flex items-center gap-1 font-medium">
-            {bondLevel(chemistry).emoji} {bondLevel(chemistry).label}
+            {bondLevel(chemistry).emoji} {bondLabel[bondLevel(chemistry).key]}
           </span>
-          <span className="text-muted">%{chemistry} uyum</span>
+          <span className="text-muted">{tc.chemMatch.replace("{n}", String(chemistry))}</span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-elevated">
           <div
@@ -755,7 +761,7 @@ export function ChatWindow({
                 >
                   <span className="text-2xl leading-none">{g?.emoji || "🎁"}</span>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-white">{mine ? "Gönderdin" : `${otherName}`}: {g?.name || "Hediye"}</p>
+                    <p className="text-sm font-semibold text-white">{mine ? tc.youSent : `${otherName}`}: {g?.name || tc.giftWord}</p>
                     {rr && <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: rr.text }}>{rr.label}</p>}
                   </div>
                 </div>
@@ -777,7 +783,7 @@ export function ChatWindow({
                 {isImg ? (
                   <img
                     src={MEDIA_URL(m.media_path!)}
-                    alt="Fotoğraf"
+                    alt={tc.photoAlt}
                     loading="lazy"
                     onClick={(e) => { e.stopPropagation(); fotoAc(m); }}
                     className="max-h-72 w-full cursor-pointer rounded-xl object-cover"
@@ -804,14 +810,14 @@ export function ChatWindow({
               {!isImg && !isVoice && m.body && hasSentTr && (
                 mine ? (
                   <span className="mt-1 flex items-center gap-1 px-1 text-[11px] text-muted">
-                    <Languages size={11} /> {(otherLang || "").toUpperCase()} diline çevrildi
+                    <Languages size={11} /> {tc.translatedTo.replace("{lang}", (otherLang || "").toUpperCase())}
                   </span>
                 ) : (
                   <button
                     onClick={() => setOrigShow((s) => ({ ...s, [m.id]: !s[m.id] }))}
                     className="mt-1 flex items-center gap-1 px-1 text-[11px] font-medium text-muted transition hover:text-accent"
                   >
-                    <Languages size={11} /> {origShow[m.id] ? "Çeviriyi göster" : "Orijinali göster"}
+                    <Languages size={11} /> {origShow[m.id] ? tc.showTranslation : tc.showOriginal}
                   </button>
                 )
               )}
@@ -820,7 +826,7 @@ export function ChatWindow({
                 <div className="mt-1 max-w-[78%] px-1">
                   {transShow[m.id] && (
                     <p className="rounded-xl border border-border bg-surface/60 px-3 py-1.5 text-sm text-text/90">
-                      {trans[m.id]?.text || "Çevriliyor…"}
+                      {trans[m.id]?.text || tc.translating}
                     </p>
                   )}
                   <button
@@ -829,10 +835,10 @@ export function ChatWindow({
                   >
                     <Languages size={12} />
                     {!transShow[m.id]
-                      ? "Çevir"
+                      ? tc.translate
                       : trans[m.id]
-                        ? `Orijinali göster${trans[m.id]?.source ? ` · ${trans[m.id]!.source!.toUpperCase()}` : ""}`
-                        : "Çevir"}
+                        ? `${tc.showOriginal}${trans[m.id]?.source ? ` · ${trans[m.id]!.source!.toUpperCase()}` : ""}`
+                        : tc.translate}
                   </button>
                 </div>
               )}
@@ -843,7 +849,7 @@ export function ChatWindow({
                     onClick={() => setVoiceTxt((s) => ({ ...s, [m.id]: !s[m.id] }))}
                     className="flex items-center gap-1 text-[11px] font-medium text-muted transition hover:text-accent"
                   >
-                    <FileText size={11} /> {voiceTxt[m.id] ? "Yazıyı gizle" : "Yazıya dök"}
+                    <FileText size={11} /> {voiceTxt[m.id] ? tc.hideText : tc.toText}
                   </button>
                   {voiceTxt[m.id] && (
                     <>
@@ -852,7 +858,7 @@ export function ChatWindow({
                       </p>
                       {!mine && (
                         <button onClick={() => cevir(m)} className="mt-1 flex items-center gap-1 text-[11px] text-muted transition hover:text-accent">
-                          <Languages size={11} /> {transShow[m.id] && trans[m.id] ? "Orijinali göster" : "Çevir"}
+                          <Languages size={11} /> {transShow[m.id] && trans[m.id] ? tc.showOriginal : tc.translate}
                         </button>
                       )}
                     </>
@@ -864,7 +870,7 @@ export function ChatWindow({
           );
         })}
         {myLast?.read_at && (
-          <p className="pr-1 text-right text-[11px] text-muted">okundu</p>
+          <p className="pr-1 text-right text-[11px] text-muted">{tc.read}</p>
         )}
         {otherTyping && (
           <div className="flex justify-start">
@@ -880,7 +886,7 @@ export function ChatWindow({
 
       {messages.length === 0 && icebreakers.length > 0 && (
         <div className="px-4 pb-2">
-          <p className="mb-2 text-xs font-medium text-muted">✨ Buz kırıcı sorular</p>
+          <p className="mb-2 text-xs font-medium text-muted">{tc.icebreakers}</p>
           <div className="flex flex-col gap-2">
             {icebreakers.map((q) => (
               <button
@@ -900,27 +906,27 @@ export function ChatWindow({
         <div className="mx-4 mb-1 rounded-2xl border border-brand/30 bg-brand/5 px-3 py-2 text-sm">
           {meet.status === "kabul" ? (
             <span className="flex items-center gap-2 font-medium text-success">
-              <CalendarDays size={15} /> Buluşma planlandı: {meetByKey(meet.kind)?.emoji} {meetByKey(meet.kind)?.label} 🎉
+              <CalendarDays size={15} /> {tc.meetPlanned} {meetByKey(meet.kind)?.emoji} {meetByKey(meet.kind)?.label} 🎉
             </span>
           ) : meet.fromMe ? (
             <span className="flex items-center gap-2 text-muted">
-              <CalendarDays size={15} /> {meetByKey(meet.kind)?.label} önerin yanıt bekliyor…
+              <CalendarDays size={15} /> {tc.meetWaiting.replace("{label}", meetByKey(meet.kind)?.label || "")}
             </span>
           ) : (
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-2 font-medium">
-                <CalendarDays size={15} className="text-brand" /> {meetByKey(meet.kind)?.emoji} {meetByKey(meet.kind)?.label} buluşması önerildi
+                <CalendarDays size={15} className="text-brand" /> {meetByKey(meet.kind)?.emoji} {tc.meetSuggested.replace("{label}", meetByKey(meet.kind)?.label || "")}
               </span>
               <span className="flex shrink-0 gap-1.5">
-                <button onClick={() => bulusmaYanit("accept")} className="rounded-full bg-success px-3 py-1 text-xs font-semibold text-white">Kabul</button>
-                <button onClick={() => bulusmaYanit("reject")} className="rounded-full border border-border px-3 py-1 text-xs">Reddet</button>
+                <button onClick={() => bulusmaYanit("accept")} className="rounded-full bg-success px-3 py-1 text-xs font-semibold text-white">{tc.accept}</button>
+                <button onClick={() => bulusmaYanit("reject")} className="rounded-full border border-border px-3 py-1 text-xs">{tc.reject}</button>
               </span>
             </div>
           )}
         </div>
       )}
 
-      {uploading && <p className="px-4 pb-1 text-xs text-muted">Fotoğraf yükleniyor…</p>}
+      {uploading && <p className="px-4 pb-1 text-xs text-muted">{tc.uploadingPhoto}</p>}
       {warn && <p className="px-4 pb-1 text-xs text-brand-2">{warn}</p>}
 
       {/* Gönderirken çeviri (karşı taraf farklı dildeyse) */}
@@ -932,7 +938,7 @@ export function ChatWindow({
           }`}
         >
           <Languages size={12} />
-          {sendTr ? `Mesajların ${otherLang.toUpperCase()} diline çevriliyor` : `Gönderirken ${otherLang.toUpperCase()} diline çevir`}
+          {sendTr ? tc.sendTrOn.replace("{lang}", otherLang.toUpperCase()) : tc.sendTrOff.replace("{lang}", otherLang.toUpperCase())}
         </button>
       )}
 
@@ -945,20 +951,20 @@ export function ChatWindow({
           <>
             <span className="flex flex-1 items-center gap-2 text-sm">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-error" />
-              Kaydediliyor… {Math.floor(recSec / 60)}:{String(recSec % 60).padStart(2, "0")}
+              {tc.recording} {Math.floor(recSec / 60)}:{String(recSec % 60).padStart(2, "0")}
             </span>
             <button
               onClick={sesIptal}
               className="rounded-full border border-border px-3 py-2 text-sm font-medium"
             >
-              İptal
+              {tc.cancel}
             </button>
             <button
               onClick={sesGonder}
               className="brand-gradient rounded-full px-4 py-2 text-sm font-semibold text-white"
-              aria-label="Sesli mesajı gönder"
+              aria-label={tc.sendVoiceAria}
             >
-              Gönder
+              {tc.send}
             </button>
           </>
         ) : (
@@ -966,8 +972,8 @@ export function ChatWindow({
             <button
               onClick={sesBasla}
               disabled={uploading}
-              title="Sesli mesaj kaydet"
-              aria-label="Sesli mesaj kaydet"
+              title={tc.recordVoice}
+              aria-label={tc.recordVoice}
               className="text-muted transition hover:text-brand disabled:opacity-50"
             >
               <Mic />
@@ -986,16 +992,16 @@ export function ChatWindow({
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              title="Fotoğraf gönder"
-              aria-label="Fotoğraf gönder"
+              title={tc.sendPhoto}
+              aria-label={tc.sendPhoto}
               className="text-muted transition hover:text-brand disabled:opacity-50"
             >
               <ImageIcon />
             </button>
             <button
               onClick={() => setPickerOpen((v) => !v)}
-              title="Emoji / GIF"
-              aria-label="Emoji ve GIF"
+              title={tc.emojiGif}
+              aria-label={tc.emojiGif}
               className={`transition hover:text-brand ${pickerOpen ? "text-brand" : "text-muted"}`}
             >
               <Smile />
@@ -1007,16 +1013,16 @@ export function ChatWindow({
                 notifyTyping();
               }}
               onKeyDown={(e) => e.key === "Enter" && gonder()}
-              placeholder="Bir mesaj yaz…"
+              placeholder={tc.messagePlaceholder}
               enterKeyHint="send"
-              aria-label="Mesaj"
+              aria-label={tc.messageAria}
               className="flex-1 rounded-full border border-white/10 bg-[#151318] px-4 py-2.5 text-text outline-none transition placeholder:text-muted focus:border-accent/50"
             />
             <button
               onClick={gonder}
               disabled={!text.trim()}
               className="brand-gradient rounded-full p-2.5 text-white transition disabled:opacity-40"
-              aria-label="Gönder"
+              aria-label={tc.send}
             >
               <Send size={18} />
             </button>
@@ -1040,9 +1046,9 @@ export function ChatWindow({
         <div className="fixed inset-0 z-40 flex items-end bg-black/50" onClick={() => setMeetOpen(false)}>
           <div onClick={(e) => e.stopPropagation()} className="animate-slide-up w-full rounded-t-3xl border-t border-border bg-surface p-5">
             <p className="t-h4 mb-1 flex items-center gap-2">
-              <CalendarDays size={18} className="text-brand" /> Buluşma öner
+              <CalendarDays size={18} className="text-brand" /> {tc.meetTitle}
             </p>
-            <p className="mb-4 text-xs text-muted">Gerçek hayatta tanışmak için bir öneri gönder.</p>
+            <p className="mb-4 text-xs text-muted">{tc.meetDesc}</p>
             <div className="grid grid-cols-3 gap-2.5">
               {MEET_KINDS.map((m) => (
                 <button
@@ -1069,10 +1075,10 @@ export function ChatWindow({
             className="max-h-[70dvh] w-full overflow-y-auto rounded-t-3xl border-t border-border bg-surface p-5"
           >
             <p className="mb-3 flex items-center gap-2 t-h4">
-              <Clock size={18} /> Arama geçmişi
+              <Clock size={18} /> {tc.callHistory}
             </p>
             {history.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted">Henüz arama yok.</p>
+              <p className="py-6 text-center text-sm text-muted">{tc.noCallHistory}</p>
             ) : (
               <div className="space-y-2">
                 {history.map((c, idx) => {
@@ -1081,11 +1087,11 @@ export function ChatWindow({
                     c.status === "ended"
                       ? `${Math.floor((c.duration_seconds || 0) / 60)}:${String((c.duration_seconds || 0) % 60).padStart(2, "0")}`
                       : c.status === "missed"
-                        ? "Cevapsız"
+                        ? tc.missed
                         : c.status === "declined"
-                          ? "Reddedildi"
+                          ? tc.declined
                           : c.status === "cancelled"
-                            ? "İptal"
+                            ? tc.cancelled
                             : c.status;
                   return (
                     <div key={idx} className="flex items-center gap-3 rounded-2xl border border-border bg-elevated p-3">
@@ -1096,7 +1102,7 @@ export function ChatWindow({
                       )}
                       <div className="flex-1">
                         <p className="text-sm font-medium">
-                          {mine ? "Giden" : "Gelen"} {c.type === "video" ? "görüntülü" : "sesli"} arama
+                          {mine ? tc.outgoing : tc.incoming} {c.type === "video" ? tc.videoType : tc.voiceType} {tc.callWord}
                         </p>
                         <p className="t-caption text-muted">{label}</p>
                       </div>

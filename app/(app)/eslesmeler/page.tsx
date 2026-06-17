@@ -5,6 +5,8 @@ import { getIncomingLikes } from "@/lib/likes";
 import { isActivePremium } from "@/lib/plans";
 import { Heart, Lock, ChevronRight } from "lucide-react";
 import MatchList from "@/components/MatchList";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,7 @@ export default async function Eslesmeler() {
     supabase.from("profiles").select("premium_plan, premium_until").eq("id", user!.id).single(),
   ]);
   const premium = isActivePremium(me);
+  const tm = getAppDict(normalizeLang(cookies().get("lang")?.value)).mesajlar;
 
   // N+1 yerine 2 toplu sorgu: tüm profiller + ilgili tüm son mesajlar.
   const ms = matches || [];
@@ -67,10 +70,10 @@ export default async function Eslesmeler() {
       const online = !!p?.last_active && Date.now() - new Date(p.last_active).getTime() < ONLINE_MS;
       return {
         matchId: m.id as string,
-        name: (p?.name as string) || "Biri",
+        name: (p?.name as string) || tm.someone,
         tier: (p?.tier as string) || "free",
         lastText: lastMsg
-          ? lastMsg.type === "text" ? (lastMsg.body as string) : lastMsg.type === "voice" ? "Sesli mesaj" : "Fotoğraf"
+          ? lastMsg.type === "text" ? (lastMsg.body as string) : lastMsg.type === "voice" ? tm.voiceMsg : tm.photo
           : null,
         lastTime: (lastMsg?.created_at as string) ?? null,
         unread,
@@ -83,8 +86,8 @@ export default async function Eslesmeler() {
   return (
     <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
       <div className="mb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk sohbet</p>
-        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">Mesajlar</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">{tm.title}</h1>
       </div>
 
       {likes.count > 0 && (
@@ -96,11 +99,11 @@ export default async function Eslesmeler() {
             <Heart size={18} className="text-accent" fill="currentColor" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-text">Seni beğenenler</p>
+            <p className="font-semibold text-text">{tm.likesTitle}</p>
             <p className="text-xs text-muted">
               {premium
-                ? `${likes.count} kişi seninle tanışmak istiyor`
-                : `${likes.count} kişi seni beğendi — kim olduklarını gör`}
+                ? tm.likesPremium.replace("{n}", String(likes.count))
+                : tm.likesFree.replace("{n}", String(likes.count))}
             </p>
           </div>
           {!premium && <Lock size={15} className="shrink-0 text-muted" />}
@@ -113,12 +116,12 @@ export default async function Eslesmeler() {
           <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
             A
           </span>
-          <p className="mt-4 font-display text-lg font-semibold text-text">Henüz sohbet yok</p>
+          <p className="mt-4 font-display text-lg font-semibold text-text">{tm.noChats}</p>
           <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">
-            Keşfet'ten ahengini bulan biriyle karşılıklı ilgi kur — ilk sohbetin burada açılır.
+            {tm.noChatsDesc}
           </p>
           <Link href="/kesfet" className="lp-cta-gold mt-6 inline-flex rounded-full px-6 py-3 text-sm font-semibold">
-            Keşfet'e git
+            {tm.goDiscover}
           </Link>
         </div>
       ) : (

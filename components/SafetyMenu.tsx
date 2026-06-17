@@ -4,15 +4,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { MoreVertical, Flag, Ban, ShieldAlert } from "lucide-react";
-
-const REASONS = [
-  "Uygunsuz içerik veya fotoğraf",
-  "Taciz, hakaret veya zorbalık",
-  "Sahte profil / dolandırıcılık",
-  "Spam veya reklam",
-  "Reşit değil görünüyor",
-  "Diğer",
-];
+import { useLang } from "@/components/LangProvider";
 
 /**
  * Ortak güvenlik menüsü: şikayet (nedenli) + engelle (onaylı).
@@ -31,6 +23,9 @@ export default function SafetyMenu({
   extra?: { label: string; onClick: () => void }[];
 }) {
   const supabase = createClient();
+  const { t } = useLang();
+  const ts = t.safety;
+  const REASONS = ts.reasons;
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<null | "block" | "report">(null);
   const [reason, setReason] = useState("");
@@ -58,7 +53,7 @@ export default function SafetyMenu({
       );
     setBusy(false);
     if (error) {
-      setToast("Bir şeyler ters gitti, tekrar dene.");
+      setToast(ts.somethingWrong);
       return;
     }
     close();
@@ -73,11 +68,11 @@ export default function SafetyMenu({
       .insert({ reporter_id: meId, reported_id: targetId, reason, details: details.trim() || null });
     setBusy(false);
     if (error) {
-      setToast("Bir şeyler ters gitti, tekrar dene.");
+      setToast(ts.somethingWrong);
       return;
     }
     close();
-    setToast("Bildirimin alındı. Ekibimiz en kısa sürede inceleyecek.");
+    setToast(ts.reportReceived);
   }
 
   return (
@@ -86,7 +81,7 @@ export default function SafetyMenu({
         <button
           onClick={() => setOpen((v) => !v)}
           className="text-muted transition hover:text-text"
-          aria-label="Seçenekler"
+          aria-label={t.mesajlar.options}
           aria-haspopup="menu"
           aria-expanded={open}
         >
@@ -117,14 +112,14 @@ export default function SafetyMenu({
                 onClick={() => setView("report")}
                 className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm transition hover:bg-elevated"
               >
-                <Flag size={15} /> Şikayet et
+                <Flag size={15} /> {ts.report}
               </button>
               <button
                 role="menuitem"
                 onClick={() => setView("block")}
                 className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-error transition hover:bg-elevated"
               >
-                <Ban size={15} /> Engelle
+                <Ban size={15} /> {ts.block}
               </button>
             </div>
           </>
@@ -136,20 +131,20 @@ export default function SafetyMenu({
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-error/10">
             <Ban size={22} className="text-error" />
           </div>
-          <h3 className="t-h4 text-center">Engellensin mi?</h3>
+          <h3 className="t-h4 text-center">{ts.blockTitle}</h3>
           <p className="mt-1.5 text-center text-sm text-muted">
-            Bu kişi seni göremeyecek, sana yazamayacak ve arayamayacak. Varsa eşleşmeniz kaldırılır.
+            {ts.blockDesc}
           </p>
           <div className="mt-5 flex gap-2">
             <button onClick={close} className="flex-1 rounded-full border border-border py-2.5 text-sm font-medium">
-              Vazgeç
+              {ts.cancel}
             </button>
             <button
               onClick={block}
               disabled={busy}
               className="flex-1 rounded-full bg-error py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
             >
-              {busy ? "Engelleniyor…" : "Engelle"}
+              {busy ? ts.blocking : ts.block}
             </button>
           </div>
         </Modal>
@@ -158,7 +153,7 @@ export default function SafetyMenu({
       {view === "report" && (
         <Modal onClose={close}>
           <h3 className="t-h4 flex items-center gap-2">
-            <ShieldAlert size={18} className="text-brand" /> Şikayet nedeni
+            <ShieldAlert size={18} className="text-brand" /> {ts.reportReason}
           </h3>
           <div className="mt-3 space-y-1.5">
             {REASONS.map((r) => (
@@ -176,20 +171,20 @@ export default function SafetyMenu({
           <textarea
             value={details}
             onChange={(e) => setDetails(e.target.value)}
-            placeholder="Detay ekle (isteğe bağlı)"
+            placeholder={ts.detailPlaceholder}
             rows={2}
             className="mt-3 w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-brand"
           />
           <div className="mt-4 flex gap-2">
             <button onClick={close} className="flex-1 rounded-full border border-border py-2.5 text-sm font-medium">
-              Vazgeç
+              {ts.cancel}
             </button>
             <button
               onClick={report}
               disabled={busy || !reason}
               className="brand-gradient flex-1 rounded-full py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
             >
-              {busy ? "Gönderiliyor…" : "Gönder"}
+              {busy ? ts.sending : t.chat.send}
             </button>
           </div>
         </Modal>

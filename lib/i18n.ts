@@ -240,6 +240,43 @@ export type AppDict = {
     title: string; reward: string; preparing: string; copyAria: string;
     share: string; leaderboard: string; shareText: string;
   };
+  mesajlar: {
+    title: string; likesTitle: string; likesPremium: string; likesFree: string;
+    noChats: string; noChatsDesc: string; goDiscover: string;
+    voiceMsg: string; photo: string; someone: string; firstMessage: string;
+    options: string; undo: string; undoTitle: string;
+    archive: string; moveHidden: string; deleteForMe: string; deleteForMeDesc: string;
+    pinAsk: string; pinSet: string; wrongPin: string; pinRule: string;
+    tabActive: string; tabArchive: string; tabHidden: string;
+    emptyActive: string; emptyArchive: string; emptyHidden: string;
+    hiddenLocked: string; unlock: string;
+  };
+  chat: {
+    bondSpecial: string; bondStrong: string; bondHarmonious: string; bondWarming: string; bondNew: string;
+    callSoon: string; videoConfirm: string; insufficientCall: string; callFailed: string;
+    metMarked: string; metAck: string; msgTooFast: string; onlyPhoto: string; photoMax: string;
+    uploadFailed: string; sendSlow: string; giftFailed: string; sendFailed: string; voiceFailed: string; voiceSlow: string; micError: string;
+    typing: string; online: string; photoOpen: string; clarity: string; metBadge: string;
+    backToMatches: string; profilePhoto: string;
+    voiceCall: string; callLocked: string; callSoonTitle: string;
+    videoCall: string; videoCallFree: string; videoCallPaid: string;
+    suggestMeet: string; sendGift: string; callHistory: string; metConfirmed: string; metFaceToFace: string;
+    chemMatch: string; youSent: string; giftWord: string; photoAlt: string;
+    translatedTo: string; showTranslation: string; showOriginal: string; translating: string; translate: string;
+    hideText: string; toText: string; read: string; icebreakers: string;
+    meetPlanned: string; meetWaiting: string; meetSuggested: string; accept: string; reject: string;
+    meetTitle: string; meetDesc: string; uploadingPhoto: string;
+    sendTrOn: string; sendTrOff: string;
+    recording: string; cancel: string; send: string; sendVoiceAria: string;
+    recordVoice: string; sendPhoto: string; emojiGif: string; messagePlaceholder: string; messageAria: string;
+    noCallHistory: string; missed: string; declined: string; cancelled: string;
+    outgoing: string; incoming: string; videoType: string; voiceType: string; callWord: string;
+  };
+  safety: {
+    reasons: string[]; somethingWrong: string; reportReceived: string;
+    report: string; block: string; blockTitle: string; blockDesc: string;
+    cancel: string; blocking: string; reportReason: string; detailPlaceholder: string; sending: string;
+  };
   premium: {
     eyebrow: string; title: string; jetonChip: string;
     club: string; memberLabel: string; memberFallback: string;
@@ -331,6 +368,54 @@ const appTr: AppDict = {
     preparing: "Davet kodun hazırlanıyor…", copyAria: "Davet linkini kopyala",
     share: "Paylaş", leaderboard: "Liderlikte gör",
     shareText: "Karakter önce, yüz sonra. Ahenk'e davetlisin — kayıt olunca 25 jeton hediye:",
+  },
+  mesajlar: {
+    title: "Mesajlar", likesTitle: "Seni beğenenler",
+    likesPremium: "{n} kişi seninle tanışmak istiyor", likesFree: "{n} kişi seni beğendi — kim olduklarını gör",
+    noChats: "Henüz sohbet yok",
+    noChatsDesc: "Keşfet'ten ahengini bulan biriyle karşılıklı ilgi kur — ilk sohbetin burada açılır.",
+    goDiscover: "Keşfet'e git", voiceMsg: "Sesli mesaj", photo: "Fotoğraf", someone: "Biri",
+    firstMessage: "Eşleştiniz — ilk mesajı sen at!", options: "Seçenekler", undo: "Geri al", undoTitle: "Aktif sohbetlere geri al",
+    archive: "Arşivle", moveHidden: "Gizli klasöre taşı", deleteForMe: "Benim için sil",
+    deleteForMeDesc: "Mesajlar silinmez — tekrar yazışınca geri gelir",
+    pinAsk: "Gizli klasör PIN'i:", pinSet: "Gizli klasör için 4 haneli PIN belirle:", wrongPin: "Yanlış PIN.", pinRule: "PIN 4-8 haneli rakam olmalı.",
+    tabActive: "Aktif", tabArchive: "Arşiv", tabHidden: "Gizli",
+    emptyActive: "Henüz aktif sohbetin yok.", emptyArchive: "Arşivde sohbet yok.", emptyHidden: "Gizli klasör boş.",
+    hiddenLocked: "Gizli klasör PIN ile korunuyor.", unlock: "Kilidi aç",
+  },
+  chat: {
+    bondSpecial: "Özel Bağ", bondStrong: "Güçlü Bağ", bondHarmonious: "Uyumlu", bondWarming: "Isınıyor", bondNew: "Yeni Tanışıyor",
+    callSoon: "Arama biraz sohbet edince açılır 🔓",
+    videoConfirm: "Görüntülü görüşme 50 jeton (kimya %100 olunca ücretsiz). Devam edilsin mi?",
+    insufficientCall: "Yetersiz jeton — 50 jeton gerekli (Cüzdandan al).", callFailed: "Görüşme başlatılamadı.",
+    metMarked: "Görüşüldü olarak işaretlendi ✓", metAck: "Onayın alındı — karşı taraf da onaylayınca rozet açılır.",
+    msgTooFast: "Mesaj gönderilemedi — çok hızlı olabilirsin, biraz bekle.", onlyPhoto: "Yalnız fotoğraf gönderebilirsin.",
+    photoMax: "Fotoğraf 8MB'den küçük olmalı.", uploadFailed: "Yükleme başarısız, tekrar dene.",
+    sendSlow: "Gönderilemedi — biraz yavaşla ve tekrar dene.", giftFailed: "Hediye gönderilemedi, tekrar dene.",
+    sendFailed: "Gönderilemedi, tekrar dene.", voiceFailed: "Ses gönderilemedi, tekrar dene.",
+    voiceSlow: "Ses gönderilemedi — biraz yavaşla ve tekrar dene.", micError: "Mikrofona erişilemedi. Tarayıcı iznini kontrol et.",
+    typing: "yazıyor…", online: "Çevrimiçi", photoOpen: "Fotoğraf açık", clarity: "Netlik %{n} — yazdıkça açılır", metBadge: "Görüşüldü ✓",
+    backToMatches: "Eşleşmelere dön", profilePhoto: "Profil fotoğrafı",
+    voiceCall: "Sesli ara", callLocked: "Arama kilitli", callSoonTitle: "Biraz sohbet edince açılır",
+    videoCall: "Görüntülü ara", videoCallFree: "Görüntülü ara (ücretsiz)", videoCallPaid: "Görüntülü ara (50 jeton · %100 kimyada ücretsiz)",
+    suggestMeet: "Buluşma öner", sendGift: "Hediye gönder", callHistory: "Arama geçmişi", metConfirmed: "Görüşmeyi onayladın ✓", metFaceToFace: "Yüz yüze görüştük",
+    chemMatch: "%{n} uyum", youSent: "Gönderdin", giftWord: "Hediye", photoAlt: "Fotoğraf",
+    translatedTo: "{lang} diline çevrildi", showTranslation: "Çeviriyi göster", showOriginal: "Orijinali göster", translating: "Çevriliyor…", translate: "Çevir",
+    hideText: "Yazıyı gizle", toText: "Yazıya dök", read: "okundu", icebreakers: "✨ Buz kırıcı sorular",
+    meetPlanned: "Buluşma planlandı:", meetWaiting: "{label} önerin yanıt bekliyor…", meetSuggested: "{label} buluşması önerildi", accept: "Kabul", reject: "Reddet",
+    meetTitle: "Buluşma öner", meetDesc: "Gerçek hayatta tanışmak için bir öneri gönder.", uploadingPhoto: "Fotoğraf yükleniyor…",
+    sendTrOn: "Mesajların {lang} diline çevriliyor", sendTrOff: "Gönderirken {lang} diline çevir",
+    recording: "Kaydediliyor…", cancel: "İptal", send: "Gönder", sendVoiceAria: "Sesli mesajı gönder",
+    recordVoice: "Sesli mesaj kaydet", sendPhoto: "Fotoğraf gönder", emojiGif: "Emoji ve GIF", messagePlaceholder: "Bir mesaj yaz…", messageAria: "Mesaj",
+    noCallHistory: "Henüz arama yok.", missed: "Cevapsız", declined: "Reddedildi", cancelled: "İptal",
+    outgoing: "Giden", incoming: "Gelen", videoType: "görüntülü", voiceType: "sesli", callWord: "arama",
+  },
+  safety: {
+    reasons: ["Uygunsuz içerik veya fotoğraf", "Taciz, hakaret veya zorbalık", "Sahte profil / dolandırıcılık", "Spam veya reklam", "Reşit değil görünüyor", "Diğer"],
+    somethingWrong: "Bir şeyler ters gitti, tekrar dene.", reportReceived: "Bildirimin alındı. Ekibimiz en kısa sürede inceleyecek.",
+    report: "Şikayet et", block: "Engelle", blockTitle: "Engellensin mi?",
+    blockDesc: "Bu kişi seni göremeyecek, sana yazamayacak ve arayamayacak. Varsa eşleşmeniz kaldırılır.",
+    cancel: "Vazgeç", blocking: "Engelleniyor…", reportReason: "Şikayet nedeni", detailPlaceholder: "Detay ekle (isteğe bağlı)", sending: "Gönderiliyor…",
   },
   premium: {
     eyebrow: "Ahenk üyelik", title: "Premium", jetonChip: "Jeton",
@@ -449,6 +534,54 @@ const appEn: AppDict = {
     share: "Share", leaderboard: "See on leaderboard",
     shareText: "Character first, face later. You're invited to Ahenk — get 25 tokens when you sign up:",
   },
+  mesajlar: {
+    title: "Messages", likesTitle: "People who like you",
+    likesPremium: "{n} people want to meet you", likesFree: "{n} people liked you — see who they are",
+    noChats: "No chats yet",
+    noChatsDesc: "Build mutual interest with someone who matches your vibe in Discover — your first chat opens here.",
+    goDiscover: "Go to Discover", voiceMsg: "Voice message", photo: "Photo", someone: "Someone",
+    firstMessage: "It's a match — send the first message!", options: "Options", undo: "Undo", undoTitle: "Move back to active chats",
+    archive: "Archive", moveHidden: "Move to hidden folder", deleteForMe: "Delete for me",
+    deleteForMeDesc: "Messages aren't deleted — they return if you chat again",
+    pinAsk: "Hidden folder PIN:", pinSet: "Set a 4-digit PIN for the hidden folder:", wrongPin: "Wrong PIN.", pinRule: "PIN must be 4-8 digits.",
+    tabActive: "Active", tabArchive: "Archive", tabHidden: "Hidden",
+    emptyActive: "You have no active chats yet.", emptyArchive: "No chats in archive.", emptyHidden: "Hidden folder is empty.",
+    hiddenLocked: "Hidden folder is PIN-protected.", unlock: "Unlock",
+  },
+  chat: {
+    bondSpecial: "Special Bond", bondStrong: "Strong Bond", bondHarmonious: "In Harmony", bondWarming: "Warming Up", bondNew: "Just Met",
+    callSoon: "Calls unlock after you chat a bit 🔓",
+    videoConfirm: "Video call costs 50 tokens (free at 100% chemistry). Continue?",
+    insufficientCall: "Insufficient tokens — 50 needed (get them in Wallet).", callFailed: "Couldn't start the call.",
+    metMarked: "Marked as met ✓", metAck: "Your confirmation is in — the badge unlocks when the other side confirms too.",
+    msgTooFast: "Message not sent — you may be too fast, wait a moment.", onlyPhoto: "You can only send photos.",
+    photoMax: "Photo must be under 8MB.", uploadFailed: "Upload failed, try again.",
+    sendSlow: "Couldn't send — slow down and try again.", giftFailed: "Gift couldn't be sent, try again.",
+    sendFailed: "Couldn't send, try again.", voiceFailed: "Voice couldn't be sent, try again.",
+    voiceSlow: "Voice couldn't be sent — slow down and try again.", micError: "Couldn't access the mic. Check your browser permission.",
+    typing: "typing…", online: "Online", photoOpen: "Photo unlocked", clarity: "Clarity {n}% — opens as you chat", metBadge: "Met ✓",
+    backToMatches: "Back to matches", profilePhoto: "Profile photo",
+    voiceCall: "Voice call", callLocked: "Call locked", callSoonTitle: "Unlocks after you chat a bit",
+    videoCall: "Video call", videoCallFree: "Video call (free)", videoCallPaid: "Video call (50 tokens · free at 100% chemistry)",
+    suggestMeet: "Suggest a meetup", sendGift: "Send a gift", callHistory: "Call history", metConfirmed: "You confirmed the meeting ✓", metFaceToFace: "We met in person",
+    chemMatch: "{n}% match", youSent: "You sent", giftWord: "Gift", photoAlt: "Photo",
+    translatedTo: "translated to {lang}", showTranslation: "Show translation", showOriginal: "Show original", translating: "Translating…", translate: "Translate",
+    hideText: "Hide text", toText: "Transcribe", read: "read", icebreakers: "✨ Icebreaker questions",
+    meetPlanned: "Meetup planned:", meetWaiting: "Your {label} suggestion is awaiting a reply…", meetSuggested: "A {label} meetup was suggested", accept: "Accept", reject: "Decline",
+    meetTitle: "Suggest a meetup", meetDesc: "Send a suggestion to meet in real life.", uploadingPhoto: "Uploading photo…",
+    sendTrOn: "Your messages are translated to {lang}", sendTrOff: "Translate to {lang} when sending",
+    recording: "Recording…", cancel: "Cancel", send: "Send", sendVoiceAria: "Send voice message",
+    recordVoice: "Record a voice message", sendPhoto: "Send a photo", emojiGif: "Emoji and GIF", messagePlaceholder: "Write a message…", messageAria: "Message",
+    noCallHistory: "No calls yet.", missed: "Missed", declined: "Declined", cancelled: "Canceled",
+    outgoing: "Outgoing", incoming: "Incoming", videoType: "video", voiceType: "voice", callWord: "call",
+  },
+  safety: {
+    reasons: ["Inappropriate content or photo", "Harassment, insults or bullying", "Fake profile / scam", "Spam or ads", "Appears underage", "Other"],
+    somethingWrong: "Something went wrong, try again.", reportReceived: "Your report is in. Our team will review it shortly.",
+    report: "Report", block: "Block", blockTitle: "Block this person?",
+    blockDesc: "They won't be able to see you, message you or call you. Any match between you is removed.",
+    cancel: "Cancel", blocking: "Blocking…", reportReason: "Report reason", detailPlaceholder: "Add details (optional)", sending: "Sending…",
+  },
   premium: {
     eyebrow: "Ahenk membership", title: "Premium", jetonChip: "Tokens",
     club: "Quiet Luxury Club", memberLabel: "Member", memberFallback: "Ahenk Member",
@@ -565,6 +698,54 @@ const appKu: AppDict = {
     preparing: "Koda vexwendina te tê amadekirin…", copyAria: "Lînka vexwendinê kopî bike",
     share: "Parve bike", leaderboard: "Li serketinê bibîne",
     shareText: "Pêşî karakter, paşê rû. Tu li Ahengê hatî vexwendin — gava tomar bibî 25 jeton diyarî:",
+  },
+  mesajlar: {
+    title: "Peyam", likesTitle: "Yên ku ji te hez dikin",
+    likesPremium: "{n} kes dixwazin bi te re nas bibin", likesFree: "{n} kesan ji te hez kir — bibîne ew kî ne",
+    noChats: "Hîna axaftin tune",
+    noChatsDesc: "Li Keşfê bi kesê ku li gorî te ye berjewendiyeke dualî ava bike — axaftina te ya yekem li vir vedibe.",
+    goDiscover: "Here Keşfê", voiceMsg: "Peyama dengî", photo: "Wêne", someone: "Kesek",
+    firstMessage: "We li hev hat — peyama yekem tu bişîne!", options: "Vebijark", undo: "Vegere", undoTitle: "Vegerîne axaftinên çalak",
+    archive: "Arşîv bike", moveHidden: "Bibe peldanka veşartî", deleteForMe: "Ji bo min jê bibe",
+    deleteForMeDesc: "Peyam nayên jêbirin — gava tu dîsa binivîsî vedigerin",
+    pinAsk: "PIN-a peldanka veşartî:", pinSet: "Ji bo peldanka veşartî PIN-eke 4-reqemî diyar bike:", wrongPin: "PIN şaş e.", pinRule: "PIN divê 4-8 reqem be.",
+    tabActive: "Çalak", tabArchive: "Arşîv", tabHidden: "Veşartî",
+    emptyActive: "Hîna axaftina te ya çalak tune.", emptyArchive: "Di arşîvê de axaftin tune.", emptyHidden: "Peldanka veşartî vala ye.",
+    hiddenLocked: "Peldanka veşartî bi PIN tê parastin.", unlock: "Kilît veke",
+  },
+  chat: {
+    bondSpecial: "Girêdana Taybet", bondStrong: "Girêdana Xurt", bondHarmonious: "Lihevhatî", bondWarming: "Germ dibe", bondNew: "Nû Nas Dibin",
+    callSoon: "Bang piştî hinekî axaftinê vedibe 🔓",
+    videoConfirm: "Banga vîdyo 50 jeton (gava kîmya %100 be belaş). Bidome?",
+    insufficientCall: "Jeton nebes — 50 jeton hewce ne (ji Berîkê bistîne).", callFailed: "Bang nehat destpêkirin.",
+    metMarked: "Wek dîtin hat nîşankirin ✓", metAck: "Pejirandina te hat — gava aliyê din jî bipejirîne nîşan vedibe.",
+    msgTooFast: "Peyam nehat şandin — dibe tu pir bilez bî, hinekî bisekine.", onlyPhoto: "Tu tenê dikarî wêne bişînî.",
+    photoMax: "Wêne divê ji 8MB biçûktir be.", uploadFailed: "Barkirin bi ser neket, dîsa biceribîne.",
+    sendSlow: "Nehat şandin — hêdî bibe û dîsa biceribîne.", giftFailed: "Diyarî nehat şandin, dîsa biceribîne.",
+    sendFailed: "Nehat şandin, dîsa biceribîne.", voiceFailed: "Deng nehat şandin, dîsa biceribîne.",
+    voiceSlow: "Deng nehat şandin — hêdî bibe û dîsa biceribîne.", micError: "Negihîşt mîkrofonê. Destûra geroka xwe kontrol bike.",
+    typing: "dinivîse…", online: "Serhêl", photoOpen: "Wêne vekirî", clarity: "Zelalî %{n} — gava tu dinivîsî vedibe", metBadge: "Dîtin ✓",
+    backToMatches: "Vegere lihevhatinan", profilePhoto: "Wêneyê profîlê",
+    voiceCall: "Banga dengî", callLocked: "Bang girtî ye", callSoonTitle: "Piştî hinekî axaftinê vedibe",
+    videoCall: "Banga vîdyo", videoCallFree: "Banga vîdyo (belaş)", videoCallPaid: "Banga vîdyo (50 jeton · li %100 kîmyayê belaş)",
+    suggestMeet: "Hevdîtinê pêşniyar bike", sendGift: "Diyarî bişîne", callHistory: "Dîroka bangan", metConfirmed: "Te hevdîtin pejirand ✓", metFaceToFace: "Em rû bi rû hevdîtin",
+    chemMatch: "%{n} lihev", youSent: "Te şand", giftWord: "Diyarî", photoAlt: "Wêne",
+    translatedTo: "ji bo {lang} hat wergerandin", showTranslation: "Wergerê nîşan bide", showOriginal: "Orîjînalê nîşan bide", translating: "Tê wergerandin…", translate: "Wergerîne",
+    hideText: "Nivîsê veşêre", toText: "Bike nivîs", read: "hat xwendin", icebreakers: "✨ Pirsên cemed-şikênê",
+    meetPlanned: "Hevdîtin hat plankirin:", meetWaiting: "Pêşniyara te ya {label} li benda bersivê ye…", meetSuggested: "Hevdîtineke {label} hat pêşniyarkirin", accept: "Qebûl", reject: "Red bike",
+    meetTitle: "Hevdîtinê pêşniyar bike", meetDesc: "Ji bo nasîna di jiyana rastîn de pêşniyarekê bişîne.", uploadingPhoto: "Wêne tê barkirin…",
+    sendTrOn: "Peyamên te ji bo {lang} têne wergerandin", sendTrOff: "Gava tu dişînî ji bo {lang} wergerîne",
+    recording: "Tê tomarkirin…", cancel: "Betal", send: "Bişîne", sendVoiceAria: "Peyama dengî bişîne",
+    recordVoice: "Peyama dengî tomar bike", sendPhoto: "Wêne bişîne", emojiGif: "Emoji û GIF", messagePlaceholder: "Peyamekê binivîse…", messageAria: "Peyam",
+    noCallHistory: "Hîna bang tune.", missed: "Bêbersiv", declined: "Red kirin", cancelled: "Betal",
+    outgoing: "Derketî", incoming: "Hatî", videoType: "vîdyo", voiceType: "dengî", callWord: "bang",
+  },
+  safety: {
+    reasons: ["Naveroka an wêneya neguncaw", "Tacîz, heqaret an zordarî", "Profîla sexte / dexesî", "Spam an reklam", "Wek bin temen xuya dike", "Yên din"],
+    somethingWrong: "Tiştek çewt çû, dîsa biceribîne.", reportReceived: "Ragihandina te hat. Tîma me dê di demeke kurt de binirxîne.",
+    report: "Gilî bike", block: "Asteng bike", blockTitle: "Were astengkirin?",
+    blockDesc: "Ev kes nikare te bibîne, ji te re binivîse an bang li te bike. Eger hebe lihevhatina we tê rakirin.",
+    cancel: "Dev jê berde", blocking: "Tê astengkirin…", reportReason: "Sedema gilî", detailPlaceholder: "Hûragahî zêde bike (bijarî)", sending: "Tê şandin…",
   },
   premium: {
     eyebrow: "Endametiya Ahenk", title: "Premium", jetonChip: "Jeton",

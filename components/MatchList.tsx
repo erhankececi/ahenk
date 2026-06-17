@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { zamanFarki } from "@/lib/utils";
 import { PremiumBadge, tierFrame } from "@/components/PremiumBadge";
 import { MoreVertical, Archive, Lock, Trash2, RotateCcw, Inbox } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 export type Row = {
   matchId: string;
@@ -22,6 +23,8 @@ type Tab = "normal" | "archived" | "hidden";
 
 export default function MatchList({ meId, rows }: { meId: string; rows: Row[] }) {
   const supabase = createClient();
+  const { t } = useLang();
+  const tm = t.mesajlar;
   const [override, setOverride] = useState<Record<string, string>>({});
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("normal");
@@ -42,14 +45,14 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
     const st = await fetch("/api/chat-folder/pin", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "status" }),
     }).then((r) => r.json());
-    const pin = prompt(st.hasPin ? "Gizli klasör PIN'i:" : "Gizli klasör için 4 haneli PIN belirle:");
+    const pin = prompt(st.hasPin ? tm.pinAsk : tm.pinSet);
     if (!pin) return;
     const action = st.hasPin ? "verify" : "set";
     const r = await fetch("/api/chat-folder/pin", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, pin }),
     }).then((r) => r.json());
     if (r.ok) { setUnlocked(true); setTab("hidden"); }
-    else alert(st.hasPin ? "Yanlış PIN." : "PIN 4-8 haneli rakam olmalı.");
+    else alert(st.hasPin ? tm.wrongPin : tm.pinRule);
   }
 
   function onTab(t: Tab) {
@@ -72,31 +75,31 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 font-semibold">{r.name} <PremiumBadge tier={r.tier} /></p>
             <p className={`truncate text-sm ${r.unread ? "font-medium text-text" : "text-muted"}`}>
-              {r.lastText || "Eşleştiniz — ilk mesajı sen at!"}
+              {r.lastText || tm.firstMessage}
             </p>
           </div>
           {r.lastTime && <span className={`shrink-0 text-xs ${r.unread ? "text-brand" : "text-muted"}`}>{zamanFarki(r.lastTime)}</span>}
         </Link>
         {mode === "normal" ? (
-          <button onClick={() => setMenuFor(menuFor === r.matchId ? null : r.matchId)} className="shrink-0 px-2 text-muted" aria-label="Seçenekler">
+          <button data-menu-trigger onClick={() => setMenuFor(menuFor === r.matchId ? null : r.matchId)} className="shrink-0 px-2 text-muted" aria-label={tm.options}>
             <MoreVertical size={18} />
           </button>
         ) : (
-          <button onClick={() => setState(r.matchId, "normal")} className="shrink-0 px-3 text-xs text-brand" aria-label="Geri al" title="Aktif sohbetlere geri al">
+          <button onClick={() => setState(r.matchId, "normal")} className="shrink-0 px-3 text-xs text-brand" aria-label={tm.undo} title={tm.undoTitle}>
             <RotateCcw size={16} />
           </button>
         )}
         {menuFor === r.matchId && (
           <div className="absolute right-2 top-12 z-10 w-52 overflow-hidden rounded-2xl border border-border bg-elevated shadow-float">
             <button onClick={() => setState(r.matchId, "archived")} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface">
-              <Archive size={15} /> Arşivle
+              <Archive size={15} /> {tm.archive}
             </button>
             <button onClick={() => setState(r.matchId, "hidden")} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface">
-              <Lock size={15} /> Gizli klasöre taşı
+              <Lock size={15} /> {tm.moveHidden}
             </button>
             <button onClick={() => setState(r.matchId, "deleted")} className="flex w-full flex-col items-start gap-0.5 px-4 py-3 text-sm text-error hover:bg-surface">
-              <span className="flex items-center gap-2"><Trash2 size={15} /> Benim için sil</span>
-              <span className="pl-6 text-[11px] font-normal text-muted">Mesajlar silinmez — tekrar yazışınca geri gelir</span>
+              <span className="flex items-center gap-2"><Trash2 size={15} /> {tm.deleteForMe}</span>
+              <span className="pl-6 text-[11px] font-normal text-muted">{tm.deleteForMeDesc}</span>
             </button>
           </div>
         )}
@@ -105,19 +108,19 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
   }
 
   const TABS: { key: Tab; label: string; n: number }[] = [
-    { key: "normal", label: "Aktif", n: normal.length },
-    { key: "archived", label: "Arşiv", n: archived.length },
-    { key: "hidden", label: "Gizli", n: unlocked ? hidden.length : 0 },
+    { key: "normal", label: tm.tabActive, n: normal.length },
+    { key: "archived", label: tm.tabArchive, n: archived.length },
+    { key: "hidden", label: tm.tabHidden, n: unlocked ? hidden.length : 0 },
   ];
 
   const list = tab === "normal" ? normal : tab === "archived" ? archived : hidden;
   const empty =
-    tab === "normal" ? "Henüz aktif sohbetin yok." :
-    tab === "archived" ? "Arşivde sohbet yok." :
-    "Gizli klasör boş.";
+    tab === "normal" ? tm.emptyActive :
+    tab === "archived" ? tm.emptyArchive :
+    tm.emptyHidden;
 
   return (
-    <div onClick={(e) => { if (menuFor && !(e.target as HTMLElement).closest("[aria-label='Seçenekler']")) setMenuFor(null); }}>
+    <div onClick={(e) => { if (menuFor && !(e.target as HTMLElement).closest("[data-menu-trigger]")) setMenuFor(null); }}>
       {/* Sekmeler: Aktif / Arşiv / Gizli */}
       <div className="mb-3 flex gap-1 rounded-2xl bg-elevated p-1">
         {TABS.map((t) => (
@@ -140,9 +143,9 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
       {tab === "hidden" && !unlocked ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Lock size={28} className="text-accent" />
-          <p className="text-sm text-muted">Gizli klasör PIN ile korunuyor.</p>
+          <p className="text-sm text-muted">{tm.hiddenLocked}</p>
           <button onClick={gizliAc} className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-white">
-            Kilidi aç
+            {tm.unlock}
           </button>
         </div>
       ) : list.length === 0 ? (
