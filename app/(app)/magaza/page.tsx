@@ -17,24 +17,39 @@ const TABS: { id: string; label: string; match: (g: Gift) => boolean }[] = [
   { id: "etkinlik", label: "Etkinlik", match: (g) => g.category === "seyahat" || g.category === "efsane" || g.category === "kraliyet" },
 ];
 
-function Thumb({ g, delay }: { g: Gift; delay: number }) {
+function Thumb({ g, delay, active }: { g: Gift; delay: number; active?: boolean }) {
   const [err, setErr] = useState(false);
+  const [vidOk, setVidOk] = useState(true);
   const reduce = useReducedMotion();
   // Asset yoksa koyu sinematik placeholder (emoji/ikon YOK)
   if (err) return <span className="block h-[78%] w-[78%] rounded-xl" style={{ background: "radial-gradient(circle at 50% 40%, #1b1825, #0b0a0d)" }} />;
+  // Seçili kartta + hareket açıkken WebM önizleme dene (varsa); yoksa PNG'ye düşer.
+  // Performans: yalnız aktif kart video mount eder.
+  const showPreview = !!active && !reduce && vidOk;
   return (
     <motion.div
       className="relative h-[80%] w-[80%]"
-      animate={reduce ? undefined : { y: [0, -5, 0], scale: [1, 1.025, 1] }}
-      transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut", delay }}
+      animate={reduce ? undefined : { y: [0, -5, 0], scale: active ? [1, 1.06, 1] : [1, 1.025, 1] }}
+      transition={{ duration: active ? 3.2 : 4.6, repeat: Infinity, ease: "easeInOut", delay }}
     >
+      {showPreview && (
+        <video
+          src={`/gifts/animations/${g.key}.webm`}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onError={() => setVidOk(false)}
+          className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]"
+        />
+      )}
       <Image
         src={`/gifts/${g.key}.png`}
         alt={g.name}
         fill
         sizes="120px"
         onError={() => setErr(true)}
-        className="object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]"
+        className={`object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)] transition-opacity ${showPreview ? "opacity-0" : "opacity-100"}`}
       />
     </motion.div>
   );
@@ -126,7 +141,12 @@ export default function Magaza() {
               {/* görsel vitrini */}
               <div className="relative flex aspect-[1/0.92] items-center justify-center">
                 <span className="pointer-events-none absolute inset-0 transition-opacity" style={{ background: "radial-gradient(72% 62% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)", opacity: active ? 1 : 0.55 }} />
-                <Thumb g={g} delay={(i % 6) * 0.5} />
+                {(g.rarity === "legendary" || g.rarity === "mythic") && (
+                  <span className="pointer-events-none absolute right-1.5 top-1.5 z-10 rounded-full border border-accent/40 bg-[#0E0D10]/80 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-accent">
+                    Özel
+                  </span>
+                )}
+                <Thumb g={g} delay={(i % 6) * 0.5} active={active} />
               </div>
               {/* ad + fiyat */}
               <div className="px-2 pb-2.5 pt-0.5">
