@@ -1,16 +1,31 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ahenk">
   <defs>
-    <linearGradient id="ah-brass" x1="300" y1="250" x2="724" y2="762" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#DBBF8E"/>
-      <stop offset="0.55" stop-color="#C7A977"/>
-      <stop offset="1" stop-color="#9C8052"/>
+    <linearGradient id="ahA" x1="300" y1="180" x2="724" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8D2A2"/>
+      <stop offset="0.5" stop-color="#C7A977"/>
+      <stop offset="1" stop-color="#8C7244"/>
     </linearGradient>
+    <radialGradient id="ahSheen" cx="0.5" cy="0" r="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
   </defs>
+
+  <!-- Onyx tile + ince pirinç hairline + üst sessiz parıltı -->
   <rect width="1024" height="1024" rx="232" fill="#0E0D10"/>
-  <rect x="6" y="6" width="1012" height="1012" rx="226" fill="none" stroke="#C7A977" stroke-opacity="0.18" stroke-width="6"/>
-  <!-- Ahenk monogramı (A) — mat pirinç -->
-  <path d="M512 250 L300 762" stroke="url(#ah-brass)" stroke-width="86" stroke-linecap="round"/>
-  <path d="M512 250 L724 762" stroke="url(#ah-brass)" stroke-width="86" stroke-linecap="round"/>
-  <path d="M398 596 H626" stroke="url(#ah-brass)" stroke-width="74" stroke-linecap="round"/>
-  <circle cx="512" cy="250" r="54" fill="#DBBF8E"/>
+  <rect width="1024" height="1024" rx="232" fill="url(#ahSheen)"/>
+  <rect x="7" y="7" width="1010" height="1010" rx="226" fill="none" stroke="#C7A977" stroke-opacity="0.22" stroke-width="6"/>
+
+  <!-- Ahenk / aura arkı (harmoni) + kıvılcım — "karakter önce" -->
+  <path d="M432 204 A92 92 0 0 1 592 204" fill="none" stroke="url(#ahA)" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="512" cy="158" r="12" fill="#E8D2A2"/>
+
+  <!-- A monogram: iki uyumlu ayak (incelen apeks, geniş taban) -->
+  <path d="M512 250 L300 790 L388 790 L512 372 Z" fill="url(#ahA)"/>
+  <path d="M512 250 L724 790 L636 790 L512 372 Z" fill="url(#ahA)"/>
+
+  <!-- Harmoni düğümü (mücevher) -->
+  <rect x="404" y="588" width="216" height="26" rx="13" fill="url(#ahA)"/>
+  <circle cx="512" cy="601" r="23" fill="#0E0D10"/>
+  <circle cx="512" cy="601" r="10" fill="#E8D2A2"/>
 </svg>
