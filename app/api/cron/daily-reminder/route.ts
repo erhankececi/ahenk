@@ -34,14 +34,16 @@ export async function GET(req: Request) {
   // Son 14 günde aktif, banlanmamış, silinmemiş kullanıcılar (sıcak-idle havuz).
   const { data: pool } = await admin
     .from("profiles")
-    .select("id")
+    .select("id, notif_prefs")
     .gte("last_active", since14)
     .is("deleted_at", null)
     .or("banned.is.null,banned.eq.false")
     .order("last_active", { ascending: false })
     .limit(2000);
 
+  // notif_prefs.daily === false olanlar günlük hatırlatma istemiyor (opt-out).
   const targets = (pool || [])
+    .filter((r: any) => r?.notif_prefs?.daily !== false)
     .map((r: any) => r.id as string)
     .filter((id) => id && id !== ZERO && !answeredIds.has(id) && !alreadyIds.has(id))
     .slice(0, 1000);

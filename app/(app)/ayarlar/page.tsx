@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isActivePremium } from "@/lib/plans";
 import PushOptIn from "@/components/PushOptIn";
 import SoundToggle from "@/components/SoundToggle";
+import BildirimTercihleri from "@/components/BildirimTercihleri";
 import IncognitoToggle from "@/components/IncognitoToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import TranslateToggle from "@/components/TranslateToggle";
@@ -55,6 +56,11 @@ export default async function Ayarlar() {
         <div className="p-4"><PushOptIn /></div>
         <SoundToggle />
       </Group>
+
+      <div className="mb-5">
+        <p className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Bildirim tercihleri</p>
+        <BildirimTercihleri />
+      </div>
 
       <Group title="Gizlilik">
         <div className="p-4"><IncognitoToggle userId={user!.id} initial={!!p?.incognito} premium={premium} /></div>
