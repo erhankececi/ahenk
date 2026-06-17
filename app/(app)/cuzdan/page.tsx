@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Card, Skeleton } from "@/components/ui";
 import { Coins, Plus, Minus, ArrowLeft, Crown, Zap, Banknote, ArrowRight } from "lucide-react";
+import DavetKart from "@/components/DavetKart";
 
 const PACKAGES = [
   { id: "p100", jeton: 100, price: 29, label: "100 Jeton" },
@@ -190,6 +191,8 @@ export default function Cuzdan() {
           </div>
           <ArrowRight size={18} className="shrink-0 text-muted" />
         </Link>
+
+        <DavetKart />
 
         {notice && (
           <div
