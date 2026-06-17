@@ -179,3 +179,85 @@ export function getDict(lang?: string): Dict {
 export function normalizeLang(lang?: string): Lang {
   return lang === "en" ? "en" : lang === "ku" ? "ku" : "tr";
 }
+
+// Yazı yönü — mevcut dillerin hepsi soldan sağa. (RTL eklenirse buraya.)
+export const LANG_DIR: Record<Lang, "ltr" | "rtl"> = { tr: "ltr", en: "ltr", ku: "ltr" };
+
+// ——— Uygulama-içi sözlük (navigasyon + ayarlar chrome'u) ———
+// Uygulama ekranları kademeli olarak buraya taşınır. Şimdilik en görünür
+// chrome (alt/yan navigasyon + Ayarlar) tüm dillerde çalışır.
+export type AppDict = {
+  nav: {
+    kesfet: string; moments: string; reels: string; oyun: string;
+    mesajlar: string; etkinlikler: string; profil: string; premium: string; cuzdan: string;
+  };
+  settings: {
+    title: string;
+    groupNotif: string; groupNotifPrefs: string; groupAppearance: string; groupPrivacy: string;
+    groupSecurity: string; groupLang: string; groupPremium: string; groupAccount: string;
+    theme: string; themeDesc: string; appLang: string;
+    privacyPolicy: string; security: string; blocked: string;
+    premiumMembership: string; analytics: string; visitors: string; feedback: string; deleteAccount: string;
+  };
+  common: { back: string };
+};
+
+const appTr: AppDict = {
+  nav: {
+    kesfet: "Keşfet", moments: "Moments", reels: "Reels", oyun: "Oyun Salonu",
+    mesajlar: "Mesajlar", etkinlikler: "Etkinlikler", profil: "Profil", premium: "Premium", cuzdan: "Cüzdan",
+  },
+  settings: {
+    title: "Ayarlar",
+    groupNotif: "Bildirimler & Sesler", groupNotifPrefs: "Bildirim tercihleri", groupAppearance: "Görünüm",
+    groupPrivacy: "Gizlilik", groupSecurity: "Güvenlik", groupLang: "Dil & Çeviri",
+    groupPremium: "Premium", groupAccount: "Hesap",
+    theme: "Tema", themeDesc: "Premium görünüm tercihlerin", appLang: "Uygulama dili",
+    privacyPolicy: "Gizlilik Politikası", security: "Güvenlik & Topluluk", blocked: "Engellenenler",
+    premiumMembership: "Premium üyelik", analytics: "Analiz (Premium+)", visitors: "Profil ziyaretçileri",
+    feedback: "Öneri / Geri bildirim", deleteAccount: "Hesabı sil",
+  },
+  common: { back: "Geri" },
+};
+
+const appEn: AppDict = {
+  nav: {
+    kesfet: "Discover", moments: "Moments", reels: "Reels", oyun: "Game Room",
+    mesajlar: "Messages", etkinlikler: "Events", profil: "Profile", premium: "Premium", cuzdan: "Wallet",
+  },
+  settings: {
+    title: "Settings",
+    groupNotif: "Notifications & Sounds", groupNotifPrefs: "Notification preferences", groupAppearance: "Appearance",
+    groupPrivacy: "Privacy", groupSecurity: "Security", groupLang: "Language & Translation",
+    groupPremium: "Premium", groupAccount: "Account",
+    theme: "Theme", themeDesc: "Your premium appearance preferences", appLang: "App language",
+    privacyPolicy: "Privacy Policy", security: "Safety & Community", blocked: "Blocked users",
+    premiumMembership: "Premium membership", analytics: "Analytics (Premium+)", visitors: "Profile visitors",
+    feedback: "Suggestion / Feedback", deleteAccount: "Delete account",
+  },
+  common: { back: "Back" },
+};
+
+const appKu: AppDict = {
+  nav: {
+    kesfet: "Keşf", moments: "Moments", reels: "Reels", oyun: "Salona Lîstikê",
+    mesajlar: "Peyam", etkinlikler: "Çalakî", profil: "Profîl", premium: "Premium", cuzdan: "Berîk",
+  },
+  settings: {
+    title: "Mîheng",
+    groupNotif: "Agahdarî & Deng", groupNotifPrefs: "Bijarteyên agahdariyê", groupAppearance: "Xuyang",
+    groupPrivacy: "Nepenîtî", groupSecurity: "Ewlehî", groupLang: "Ziman & Wergerandin",
+    groupPremium: "Premium", groupAccount: "Hesab",
+    theme: "Tema", themeDesc: "Bijarteyên xuyanga premium", appLang: "Zimanê sepanê",
+    privacyPolicy: "Polîtîkaya Nepenîtiyê", security: "Ewlehî & Civat", blocked: "Astengkirî",
+    premiumMembership: "Endametiya Premium", analytics: "Analîz (Premium+)", visitors: "Serdana profîlê",
+    feedback: "Pêşniyar / Bersiv", deleteAccount: "Hesabê jê bibe",
+  },
+  common: { back: "Vegere" },
+};
+
+const APP_DICT: Record<Lang, AppDict> = { tr: appTr, en: appEn, ku: appKu };
+
+export function getAppDict(lang?: string): AppDict {
+  return APP_DICT[normalizeLang(lang)];
+}

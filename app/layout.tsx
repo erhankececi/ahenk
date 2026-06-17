@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import VisitTracker from "@/components/VisitTracker";
+import { LangProvider } from "@/components/LangProvider";
+import { normalizeLang, LANG_DIR } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ahenk.live"),
@@ -42,12 +45,15 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = normalizeLang(cookies().get("lang")?.value);
   return (
-    <html lang="tr" className="dark">
+    <html lang={lang} dir={LANG_DIR[lang]} className="dark">
       <body>
         <ThemeProvider>
-          <VisitTracker />
-          <div className="min-h-dvh bg-bg">{children}</div>
+          <LangProvider lang={lang}>
+            <VisitTracker />
+            <div className="min-h-dvh bg-bg">{children}</div>
+          </LangProvider>
         </ThemeProvider>
       </body>
     </html>

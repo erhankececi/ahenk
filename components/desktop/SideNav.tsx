@@ -8,16 +8,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-
-const primary = [
-  { href: "/kesfet", icon: Home, label: "Keşfet" },
-  { href: "/moments", icon: Sparkles, label: "Moments" },
-  { href: "/reels", icon: Clapperboard, label: "Reels" },
-  { href: "/oyun", icon: Gamepad2, label: "Oyun Salonu" },
-  { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar", badge: true },
-  { href: "/etkinlikler", icon: CalendarHeart, label: "Etkinlikler" },
-  { href: "/profil", icon: User, label: "Profil" },
-];
+import { useLang } from "@/components/LangProvider";
 
 const ZERO = "00000000-0000-0000-0000-000000000000";
 
@@ -47,7 +38,18 @@ function Item({ href, icon: Icon, label, active, badge }: any) {
 export default function SideNav() {
   const path = usePathname();
   const supabase = createClient();
+  const { t } = useLang();
   const [unread, setUnread] = useState(0);
+
+  const primary = [
+    { href: "/kesfet", icon: Home, label: t.nav.kesfet },
+    { href: "/moments", icon: Sparkles, label: t.nav.moments },
+    { href: "/reels", icon: Clapperboard, label: t.nav.reels },
+    { href: "/oyun", icon: Gamepad2, label: t.nav.oyun },
+    { href: "/eslesmeler", icon: MessageCircle, label: t.nav.mesajlar, badge: true },
+    { href: "/etkinlikler", icon: CalendarHeart, label: t.nav.etkinlikler },
+    { href: "/profil", icon: User, label: t.nav.profil },
+  ];
 
   useEffect(() => {
     let active = true;
@@ -78,8 +80,8 @@ export default function SideNav() {
       </nav>
 
       <div className="flex flex-col items-center gap-2 border-t border-white/[0.06] pt-4">
-        <Item href="/premium" icon={Crown} label="Premium" active={path.startsWith("/premium")} />
-        <Item href="/cuzdan" icon={Wallet} label="Cüzdan" active={path.startsWith("/cuzdan")} />
+        <Item href="/premium" icon={Crown} label={t.nav.premium} active={path.startsWith("/premium")} />
+        <Item href="/cuzdan" icon={Wallet} label={t.nav.cuzdan} active={path.startsWith("/cuzdan")} />
       </div>
     </aside>
   );

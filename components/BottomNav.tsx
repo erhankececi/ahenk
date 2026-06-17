@@ -6,21 +6,23 @@ import { usePathname } from "next/navigation";
 import { Home, MessageCircle, User, Sparkles, Clapperboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-
-const items = [
-  { href: "/kesfet", icon: Home, label: "Keşfet" },
-  { href: "/moments", icon: Sparkles, label: "Moments" },
-  { href: "/reels", icon: Clapperboard, label: "Reels" },
-  { href: "/eslesmeler", icon: MessageCircle, label: "Mesajlar" },
-  { href: "/profil", icon: User, label: "Profil" },
-];
+import { useLang } from "@/components/LangProvider";
 
 const ZERO = "00000000-0000-0000-0000-000000000000";
 
 export function BottomNav() {
   const path = usePathname();
   const supabase = createClient();
+  const { t } = useLang();
   const [unread, setUnread] = useState(0);
+
+  const items = [
+    { href: "/kesfet", icon: Home, label: t.nav.kesfet },
+    { href: "/moments", icon: Sparkles, label: t.nav.moments },
+    { href: "/reels", icon: Clapperboard, label: t.nav.reels },
+    { href: "/eslesmeler", icon: MessageCircle, label: t.nav.mesajlar },
+    { href: "/profil", icon: User, label: t.nav.profil },
+  ];
 
   useEffect(() => {
     let active = true;
