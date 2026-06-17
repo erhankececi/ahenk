@@ -348,6 +348,11 @@ export type AppDict = {
     eyebrow: string; title: string; seeAdmirers: string; lockedCount: string; seePremium: string;
     emptyTitle: string; emptyDesc: string; someone: string;
   };
+  begenenler: {
+    title: string; countWant: string; noLikesYet: string;
+    emptyTitle: string; emptyDesc: string; goDiscover: string; superLike: string;
+    gateTitle: string; gateDesc: string; unlockPremium: string; gatePerks: string;
+  };
   common: { back: string };
 };
 
@@ -616,6 +621,13 @@ const appTr: AppDict = {
     eyebrow: "Ahenk profil", title: "Seni ziyaret edenler", seeAdmirers: "Seni fark edenleri gör",
     lockedCount: "{n} kişi profiline baktı — kimler olduğunu Premium ile gör.", seePremium: "Premium ile gör",
     emptyTitle: "Henüz ziyaretçi yok", emptyDesc: "Keşfette aktif oldukça profilin daha çok görüntülenir.", someone: "Biri",
+  },
+  begenenler: {
+    title: "Seni beğenenler", countWant: "{n} kişi seninle tanışmak istiyor", noLikesYet: "Henüz beğenen yok",
+    emptyTitle: "Henüz kimse seni beğenmedi", emptyDesc: "Profilini zenginleştir ve keşfette aktif ol — ilgi çoğaldıkça burada görünecek.",
+    goDiscover: "Keşfete git", superLike: "Süper beğeni",
+    gateTitle: "Seni beğenenleri aç", gateDesc: "{n} kişi seni beğendi. Kim olduklarını gör, tek dokunuşla eşleş — Premium ile aç.",
+    unlockPremium: "Premium ile aç", gatePerks: "Sınırsız keşif, görüşme ve dahası",
   },
   common: { back: "Geri" },
 };
@@ -886,6 +898,13 @@ const appEn: AppDict = {
     lockedCount: "{n} people viewed your profile — see who they are with Premium.", seePremium: "See with Premium",
     emptyTitle: "No visitors yet", emptyDesc: "The more active you are in Discover, the more your profile is viewed.", someone: "Someone",
   },
+  begenenler: {
+    title: "People who like you", countWant: "{n} people want to meet you", noLikesYet: "No likes yet",
+    emptyTitle: "No one has liked you yet", emptyDesc: "Enrich your profile and stay active in Discover — as interest grows it'll show up here.",
+    goDiscover: "Go to Discover", superLike: "Super like",
+    gateTitle: "Unlock who likes you", gateDesc: "{n} people liked you. See who they are and match in one tap — unlock with Premium.",
+    unlockPremium: "Unlock with Premium", gatePerks: "Unlimited discovery, calls and more",
+  },
   common: { back: "Back" },
 };
 
@@ -1154,6 +1173,13 @@ const appKu: AppDict = {
     eyebrow: "Profîla Ahenk", title: "Kê serdana te kir", seeAdmirers: "Bibîne kê tu ferq kirî",
     lockedCount: "{n} kesan li profîla te nêrî — bi Premium bibîne ew kî ne.", seePremium: "Bi Premium bibîne",
     emptyTitle: "Hîna serdanker tune", emptyDesc: "Çiqas tu li Keşfê çalak bî, ewqas profîla te bêtir tê dîtin.", someone: "Kesek",
+  },
+  begenenler: {
+    title: "Yên ku ji te hez dikin", countWant: "{n} kes dixwazin bi te re nas bibin", noLikesYet: "Hîna ecibandin tune",
+    emptyTitle: "Hîna kesî ji te hez nekiriye", emptyDesc: "Profîla xwe dewlemend bike û li Keşfê çalak be — gava berjewendî zêde bibe li vir xuya dibe.",
+    goDiscover: "Here Keşfê", superLike: "Super ecibandin",
+    gateTitle: "Yên ku ji te hez dikin veke", gateDesc: "{n} kesan ji te hez kir. Bibîne ew kî ne û bi yek tikandinê li hev were — bi Premium veke.",
+    unlockPremium: "Bi Premium veke", gatePerks: "Keşfa bêsînor, bang û bêtir",
   },
   common: { back: "Vegere" },
 };

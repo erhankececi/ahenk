@@ -6,6 +6,8 @@ import { PremiumBadge, tierFrame, tierName } from "@/components/PremiumBadge";
 import LikeBackButton from "@/components/LikeBackButton";
 import BackButton from "@/components/BackButton";
 import { Heart, BadgeCheck, Lock, Crown, Sparkles, Star } from "lucide-react";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict, type AppDict } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,7 @@ export default async function Begenenler() {
     .eq("id", user!.id)
     .single();
   const premium = isActivePremium(me);
+  const tb = getAppDict(normalizeLang(cookies().get("lang")?.value)).begenenler;
 
   const { count, people } = await getIncomingLikes(user!.id);
 
@@ -30,10 +33,10 @@ export default async function Begenenler() {
         <BackButton fallback="/eslesmeler" />
         <div>
           <h1 className="t-h3 flex items-center gap-2">
-            <Heart size={20} className="text-accent" fill="currentColor" /> Seni beğenenler
+            <Heart size={20} className="text-accent" fill="currentColor" /> {tb.title}
           </h1>
           <p className="text-sm text-muted">
-            {count > 0 ? `${count} kişi seninle tanışmak istiyor` : "Henüz beğenen yok"}
+            {count > 0 ? tb.countWant.replace("{n}", String(count)) : tb.noLikesYet}
           </p>
         </div>
       </div>
@@ -43,15 +46,15 @@ export default async function Begenenler() {
           <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
             A
           </span>
-          <p className="mt-4 font-display text-lg font-semibold text-text">Henüz kimse seni beğenmedi</p>
+          <p className="mt-4 font-display text-lg font-semibold text-text">{tb.emptyTitle}</p>
           <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-muted">
-            Profilini zenginleştir ve keşfette aktif ol — ilgi çoğaldıkça burada görünecek.
+            {tb.emptyDesc}
           </p>
           <Link
             href="/kesfet"
             className="lp-cta-gold mt-6 inline-flex rounded-full px-6 py-2.5 text-sm font-semibold"
           >
-            Keşfete git
+            {tb.goDiscover}
           </Link>
         </div>
       ) : premium ? (
@@ -71,7 +74,7 @@ export default async function Begenenler() {
                 <p className="truncate text-xs text-muted">{p.city || "—"}</p>
                 {p.super ? (
                   <p className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-accent/35 bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">
-                    <Star size={10} fill="currentColor" /> Süper beğeni
+                    <Star size={10} fill="currentColor" /> {tb.superLike}
                   </p>
                 ) : (
                   <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
@@ -91,13 +94,13 @@ export default async function Begenenler() {
           ))}
         </div>
       ) : (
-        <FreeGate count={count} />
+        <FreeGate count={count} t={tb} />
       )}
     </div>
   );
 }
 
-function FreeGate({ count }: { count: number }) {
+function FreeGate({ count, t }: { count: number; t: AppDict["begenenler"] }) {
   const tiles = Math.min(count, 6);
   return (
     <div>
@@ -119,18 +122,18 @@ function FreeGate({ count }: { count: number }) {
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
           <Lock size={20} className="text-accent" />
         </div>
-        <h2 className="font-display text-lg font-semibold text-text">Seni beğenenleri aç</h2>
+        <h2 className="font-display text-lg font-semibold text-text">{t.gateTitle}</h2>
         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-muted">
-          {count} kişi seni beğendi. Kim olduklarını gör, tek dokunuşla eşleş — Premium ile aç.
+          {t.gateDesc.replace("{n}", String(count))}
         </p>
         <Link
           href="/premium?source=likes_locked"
           className="lp-cta-gold mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
         >
-          <Crown size={16} /> Premium ile aç
+          <Crown size={16} /> {t.unlockPremium}
         </Link>
         <p className="mt-3 flex items-center justify-center gap-1 text-xs text-muted">
-          <Sparkles size={12} /> Sınırsız keşif, görüşme ve dahası
+          <Sparkles size={12} /> {t.gatePerks}
         </p>
       </div>
     </div>
