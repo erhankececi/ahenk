@@ -5,21 +5,22 @@ import { User, Images, Award } from "lucide-react";
 
 type TabKey = "profil" | "icerik" | "rozetler";
 
-const TABS: { key: TabKey; label: string; Icon: any }[] = [
-  { key: "profil", label: "Profil", Icon: User },
-  { key: "icerik", label: "İçerik", Icon: Images },
-  { key: "rozetler", label: "Rozetler", Icon: Award },
-];
-
 export default function ProfileTabs({
   profil,
   icerik,
   rozetler,
+  labels,
 }: {
   profil: React.ReactNode;
   icerik: React.ReactNode;
   rozetler: React.ReactNode;
+  labels?: { profil: string; icerik: string; rozetler: string };
 }) {
+  const TABS: { key: TabKey; label: string; Icon: any }[] = [
+    { key: "profil", label: labels?.profil ?? "Profil", Icon: User },
+    { key: "icerik", label: labels?.icerik ?? "İçerik", Icon: Images },
+    { key: "rozetler", label: labels?.rozetler ?? "Rozetler", Icon: Award },
+  ];
   const [tab, setTab] = useState<TabKey>("profil");
 
   return (

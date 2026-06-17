@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 type B = { id: string; label: string; emoji: string; desc: string; need: number; current: number; earned: boolean };
 
 export default function Achievements() {
+  const { t } = useLang();
   const [badges, setBadges] = useState<B[] | null>(null);
   const [earned, setEarned] = useState(0);
   const [total, setTotal] = useState(0);
@@ -29,7 +31,7 @@ export default function Achievements() {
     <div>
       <div className="mb-3 flex items-center justify-between">
         <p className="t-h4 flex items-center gap-2">
-          <Trophy size={18} className="text-accent" /> Başarılar
+          <Trophy size={18} className="text-accent" /> {t.profil.achievementsTitle}
         </p>
         <span className="text-sm text-muted">
           {earned}/{total}

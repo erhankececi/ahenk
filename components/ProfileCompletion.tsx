@@ -7,8 +7,12 @@ import { Sparkles } from "lucide-react";
  */
 export default function ProfileCompletion({
   items,
+  title = "Profilini tamamla",
+  hint = "Daha dolu profiller daha çok ve daha isabetli eşleşir.",
 }: {
   items: { label: string; done: boolean; href?: string }[];
+  title?: string;
+  hint?: string;
 }) {
   const done = items.filter((i) => i.done).length;
   const pct = Math.round((done / items.length) * 100);
@@ -19,7 +23,7 @@ export default function ProfileCompletion({
     <div className="mb-6 rounded-3xl border border-border bg-surface p-5">
       <div className="flex items-center justify-between">
         <p className="flex items-center gap-2 font-semibold">
-          <Sparkles size={16} className="text-brand" /> Profilini tamamla
+          <Sparkles size={16} className="text-brand" /> {title}
         </p>
         <span className="text-sm font-bold text-brand">%{pct}</span>
       </div>
@@ -29,7 +33,7 @@ export default function ProfileCompletion({
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="mt-3 text-xs text-muted">Daha dolu profiller daha çok ve daha isabetli eşleşir.</p>
+      <p className="mt-3 text-xs text-muted">{hint}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {missing.map((m) =>
           m.href ? (

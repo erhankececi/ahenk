@@ -29,6 +29,8 @@ import { PremiumBadge, tierFrame, tierName, VipTag, MembershipCard } from "@/com
 import CopyButton from "@/components/CopyButton";
 import { isActivePremium } from "@/lib/plans";
 import { themeClass } from "@/lib/themes";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
 import ProfileCompletion from "@/components/ProfileCompletion";
 import PhotoManager from "@/components/PhotoManager";
 import PromptEditor from "@/components/PromptEditor";
@@ -46,6 +48,7 @@ export default async function Profil() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const tpr = getAppDict(normalizeLang(cookies().get("lang")?.value)).profil;
   const { data: p } = await supabase.from("profiles").select("*").eq("id", user!.id).single();
   const { data: photoRows } = await supabase
     .from("photos")
@@ -71,38 +74,38 @@ export default async function Profil() {
     ? new Date(p.created_at).toLocaleDateString("tr-TR", { year: "numeric", month: "long" })
     : null;
   const attrs = [
-    { Icon: Hash, label: "Üye No", value: uyeNo(p?.member_no), copy: uyeNo(p?.member_no) },
-    { Icon: Briefcase, label: "Meslek", value: p?.profession || null, copy: null },
-    { Icon: MapPin, label: "Şehir", value: p?.city || null, copy: null },
-    { Icon: Sparkles, label: "Burç", value: p?.zodiac || null, copy: null },
-    { Icon: Languages, label: "Diller", value: p?.languages?.length ? p.languages.join(", ") : null, copy: null },
-    { Icon: Calendar, label: "Katılım", value: katilim, copy: null },
+    { Icon: Hash, label: tpr.attrMemberNo, value: uyeNo(p?.member_no), copy: uyeNo(p?.member_no) },
+    { Icon: Briefcase, label: tpr.attrProfession, value: p?.profession || null, copy: null },
+    { Icon: MapPin, label: tpr.attrCity, value: p?.city || null, copy: null },
+    { Icon: Sparkles, label: tpr.attrZodiac, value: p?.zodiac || null, copy: null },
+    { Icon: Languages, label: tpr.attrLanguages, value: p?.languages?.length ? p.languages.join(", ") : null, copy: null },
+    { Icon: Calendar, label: tpr.attrJoined, value: katilim, copy: null },
   ].filter((a) => a.value);
 
   const completionItems = [
-    { label: "Fotoğraf", done: (photos?.length || 0) > 0, href: "/onboarding" },
-    { label: "Biyografi", done: !!p?.bio, href: "/onboarding" },
-    { label: "İlgi alanları", done: !!p?.interests?.length, href: "/onboarding" },
-    { label: "Meslek", done: !!p?.profession, href: "/onboarding" },
-    { label: "Şehir", done: !!p?.city, href: "/onboarding" },
-    { label: "Ses kartı", done: !!p?.voice_card_path },
+    { label: tpr.ciFoto, done: (photos?.length || 0) > 0, href: "/onboarding" },
+    { label: tpr.ciBio, done: !!p?.bio, href: "/onboarding" },
+    { label: tpr.ciInterests, done: !!p?.interests?.length, href: "/onboarding" },
+    { label: tpr.ciProfession, done: !!p?.profession, href: "/onboarding" },
+    { label: tpr.ciCity, done: !!p?.city, href: "/onboarding" },
+    { label: tpr.ciVoice, done: !!p?.voice_card_path },
   ];
 
   const profileStats = [
     {
       Icon: Eye,
-      label: "Görünürlük",
-      value: premiumActive ? "Premium" : "Standart",
+      label: tpr.statVisibility,
+      value: premiumActive ? tpr.valPremium : tpr.valStandard,
     },
     {
       Icon: TrendingUp,
-      label: "Enerji",
-      value: typeof p?.energy_score === "number" ? `${Math.round(p.energy_score)}` : "Hazır",
+      label: tpr.statEnergy,
+      value: typeof p?.energy_score === "number" ? `${Math.round(p.energy_score)}` : tpr.valReady,
     },
     {
       Icon: MessageSquare,
-      label: "Sohbet",
-      value: p?.voice_card_path ? "Sesli" : "Klasik",
+      label: tpr.statChat,
+      value: p?.voice_card_path ? tpr.valVoice : tpr.valClassic,
     },
   ];
 
@@ -133,7 +136,7 @@ export default async function Profil() {
               <div className="min-w-0 flex-1 pt-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className={`truncate text-[28px] font-semibold tracking-[-0.05em] text-text ${tierName(tier)}`}>
-                    {p?.name || "Ahenk üyesi"}
+                    {p?.name || tpr.nameFallback}
                   </h2>
                   {p?.is_verified && <BadgeCheck className="text-accent" size={20} />}
                 </div>
@@ -149,12 +152,12 @@ export default async function Profil() {
                   {(tier === "platinum" || tier === "legend") && <VipTag tier={tier} />}
                   {kurucuUye(p?.member_no) && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
-                      <Sparkles size={12} /> Kurucu Üye
+                      <Sparkles size={12} /> {tpr.founding}
                     </span>
                   )}
                   {boostAktif && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-[#C7A977]/30 bg-[#C7A977]/10 px-2.5 py-1 text-xs font-medium text-accent">
-                      <Zap size={12} /> Boost aktif
+                      <Zap size={12} /> {tpr.boostActive}
                     </span>
                   )}
                 </div>
@@ -198,9 +201,9 @@ export default async function Profil() {
               <Crown size={19} />
             </div>
             <div>
-              <p className="font-semibold text-text">Daha fazla görünür ol</p>
+              <p className="font-semibold text-text">{tpr.upsellTitle}</p>
               <p className="text-xs leading-5 text-muted">
-                Sınırsız keşif, profil ziyaretleri, görüşme ve özel ayrıcalıklar · Premium’a geç
+                {tpr.upsellDesc}
               </p>
             </div>
           </div>
@@ -212,8 +215,8 @@ export default async function Profil() {
         <section className="lp-panel mb-5 p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
             <div>
-              <h3 className="text-sm font-semibold text-text">Profil bilgileri</h3>
-              <p className="mt-0.5 text-xs text-muted">Kimliğini tamamlayan detaylar</p>
+              <h3 className="text-sm font-semibold text-text">{tpr.infoTitle}</h3>
+              <p className="mt-0.5 text-xs text-muted">{tpr.infoDesc}</p>
             </div>
             <Shield size={17} className="text-accent" />
           </div>
@@ -243,8 +246,8 @@ export default async function Profil() {
         <section className="lp-panel p-4">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-text">İlgi alanları</h3>
-              <p className="mt-0.5 text-xs text-muted">Uyum motorunda öne çıkan başlıklar</p>
+              <h3 className="text-sm font-semibold text-text">{tpr.interestsTitle}</h3>
+              <p className="mt-0.5 text-xs text-muted">{tpr.interestsDesc}</p>
             </div>
             <Heart size={17} className="text-accent" />
           </div>
@@ -266,8 +269,8 @@ export default async function Profil() {
       <section className="lp-panel p-4">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-text">Fotoğraflar</h3>
-            <p className="mt-0.5 text-xs text-muted">Profil vitrinin ve görünürlük alanın</p>
+            <h3 className="text-sm font-semibold text-text">{tpr.photosTitle}</h3>
+            <p className="mt-0.5 text-xs text-muted">{tpr.photosDesc}</p>
           </div>
           <Sparkles size={17} className="text-accent" />
         </div>
@@ -277,8 +280,8 @@ export default async function Profil() {
       <section className="lp-panel p-4">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-text">Hikaye vitrinleri</h3>
-            <p className="mt-0.5 text-xs text-muted">Öne çıkan anlarını düzenle</p>
+            <h3 className="text-sm font-semibold text-text">{tpr.storiesTitle}</h3>
+            <p className="mt-0.5 text-xs text-muted">{tpr.storiesDesc}</p>
           </div>
           <Eye size={17} className="text-accent" />
         </div>
@@ -288,8 +291,8 @@ export default async function Profil() {
       <section className="lp-panel p-4">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-text">Profil soruları</h3>
-            <p className="mt-0.5 text-xs text-muted">Karakter uyumunu güçlendiren cevaplar</p>
+            <h3 className="text-sm font-semibold text-text">{tpr.promptsTitle}</h3>
+            <p className="mt-0.5 text-xs text-muted">{tpr.promptsDesc}</p>
           </div>
           <MessageSquare size={17} className="text-accent" />
         </div>
@@ -310,7 +313,7 @@ export default async function Profil() {
   const rozetlerTab = (
     <div className="space-y-5">
       <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#151318]/80 shadow-[0_18px_80px_rgba(0,0,0,0.24)]">
-        <ProfileCompletion items={completionItems} />
+        <ProfileCompletion items={completionItems} title={tpr.completionTitle} hint={tpr.completionHint} />
       </div>
 
       <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#151318]/80">
@@ -328,8 +331,8 @@ export default async function Profil() {
       <section className="lp-panel p-4">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-text">Başarılar</h3>
-            <p className="mt-0.5 text-xs text-muted">Ahenk içindeki ilerlemen</p>
+            <h3 className="text-sm font-semibold text-text">{tpr.achievementsTitle}</h3>
+            <p className="mt-0.5 text-xs text-muted">{tpr.achievementsDesc}</p>
           </div>
           <Trophy size={17} className="text-accent" />
         </div>
@@ -343,27 +346,32 @@ export default async function Profil() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk profil</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-text">Profilim</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tpr.eyebrow}</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-text">{tpr.title}</h1>
           </div>
 
           <Link
             href="/ayarlar"
             className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-text shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition hover:border-[#C7A977]/45 hover:text-accent"
-            aria-label="Ayarlar"
+            aria-label={tpr.settingsAria}
           >
             <Settings size={18} />
           </Link>
         </div>
 
-        <ProfileTabs profil={profilTab} icerik={icerikTab} rozetler={rozetlerTab} />
+        <ProfileTabs
+          profil={profilTab}
+          icerik={icerikTab}
+          rozetler={rozetlerTab}
+          labels={{ profil: tpr.tabProfil, icerik: tpr.tabContent, rozetler: tpr.tabBadges }}
+        />
 
         <section className="mt-5 space-y-2">
           <Link href="/onboarding" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
               <Pencil size={18} />
             </div>
-            <span className="font-medium text-text">Profili düzenle</span>
+            <span className="font-medium text-text">{tpr.editProfile}</span>
             <ChevronRight size={17} className="ml-auto text-muted" />
           </Link>
 
@@ -371,7 +379,7 @@ export default async function Profil() {
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
               <Settings size={18} />
             </div>
-            <span className="font-medium text-text">Ayarlar</span>
+            <span className="font-medium text-text">{tpr.settings}</span>
             <ChevronRight size={17} className="ml-auto text-muted" />
           </Link>
 
@@ -380,7 +388,7 @@ export default async function Profil() {
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
                 <Shield size={18} />
               </div>
-              <span className="font-medium text-text">Admin paneli</span>
+              <span className="font-medium text-text">{tpr.adminPanel}</span>
               <ChevronRight size={17} className="ml-auto text-muted" />
             </Link>
           )}
@@ -392,9 +400,9 @@ export default async function Profil() {
               <Ban size={17} />
             </div>
             <div>
-              <p className="text-sm font-medium text-text">Güvenli deneyim</p>
+              <p className="text-sm font-medium text-text">{tpr.safeTitle}</p>
               <p className="mt-1 text-xs leading-5 text-muted">
-                Profil ayarların, gizlilik tercihlerin ve güvenlik kontrollerin Ahenk standartlarıyla korunur.
+                {tpr.safeDesc}
               </p>
             </div>
           </div>

@@ -277,6 +277,24 @@ export type AppDict = {
     report: string; block: string; blockTitle: string; blockDesc: string;
     cancel: string; blocking: string; reportReason: string; detailPlaceholder: string; sending: string;
   };
+  profil: {
+    eyebrow: string; title: string; settingsAria: string;
+    statVisibility: string; statEnergy: string; statChat: string;
+    valPremium: string; valStandard: string; valReady: string; valVoice: string; valClassic: string;
+    nameFallback: string; founding: string; boostActive: string;
+    upsellTitle: string; upsellDesc: string;
+    infoTitle: string; infoDesc: string;
+    attrMemberNo: string; attrProfession: string; attrCity: string; attrZodiac: string; attrLanguages: string; attrJoined: string;
+    interestsTitle: string; interestsDesc: string;
+    photosTitle: string; photosDesc: string; storiesTitle: string; storiesDesc: string; promptsTitle: string; promptsDesc: string;
+    achievementsTitle: string; achievementsDesc: string;
+    editProfile: string; settings: string; adminPanel: string; safeTitle: string; safeDesc: string;
+    tabProfil: string; tabContent: string; tabBadges: string;
+    completionTitle: string; completionHint: string;
+    ciFoto: string; ciBio: string; ciInterests: string; ciProfession: string; ciCity: string; ciVoice: string;
+    journeyTitle: string; journeyDesc: string; journeyBadge: string;
+    journeySteps: Record<string, { label: string; desc: string }>;
+  };
   onboarding: {
     headerTitle: string; stepCounter: string; steps: string[];
     namePlaceholder: string; nameError: string; birthdate: string; tooYoung: string; ageYears: string;
@@ -427,6 +445,35 @@ const appTr: AppDict = {
     report: "Şikayet et", block: "Engelle", blockTitle: "Engellensin mi?",
     blockDesc: "Bu kişi seni göremeyecek, sana yazamayacak ve arayamayacak. Varsa eşleşmeniz kaldırılır.",
     cancel: "Vazgeç", blocking: "Engelleniyor…", reportReason: "Şikayet nedeni", detailPlaceholder: "Detay ekle (isteğe bağlı)", sending: "Gönderiliyor…",
+  },
+  profil: {
+    eyebrow: "Ahenk profil", title: "Profilim", settingsAria: "Ayarlar",
+    statVisibility: "Görünürlük", statEnergy: "Enerji", statChat: "Sohbet",
+    valPremium: "Premium", valStandard: "Standart", valReady: "Hazır", valVoice: "Sesli", valClassic: "Klasik",
+    nameFallback: "Ahenk üyesi", founding: "Kurucu Üye", boostActive: "Boost aktif",
+    upsellTitle: "Daha fazla görünür ol", upsellDesc: "Sınırsız keşif, profil ziyaretleri, görüşme ve özel ayrıcalıklar · Premium’a geç",
+    infoTitle: "Profil bilgileri", infoDesc: "Kimliğini tamamlayan detaylar",
+    attrMemberNo: "Üye No", attrProfession: "Meslek", attrCity: "Şehir", attrZodiac: "Burç", attrLanguages: "Diller", attrJoined: "Katılım",
+    interestsTitle: "İlgi alanları", interestsDesc: "Uyum motorunda öne çıkan başlıklar",
+    photosTitle: "Fotoğraflar", photosDesc: "Profil vitrinin ve görünürlük alanın",
+    storiesTitle: "Hikaye vitrinleri", storiesDesc: "Öne çıkan anlarını düzenle",
+    promptsTitle: "Profil soruları", promptsDesc: "Karakter uyumunu güçlendiren cevaplar",
+    achievementsTitle: "Başarılar", achievementsDesc: "Ahenk içindeki ilerlemen",
+    editProfile: "Profili düzenle", settings: "Ayarlar", adminPanel: "Admin paneli",
+    safeTitle: "Güvenli deneyim", safeDesc: "Profil ayarların, gizlilik tercihlerin ve güvenlik kontrollerin Ahenk standartlarıyla korunur.",
+    tabProfil: "Profil", tabContent: "İçerik", tabBadges: "Rozetler",
+    completionTitle: "Profilini tamamla", completionHint: "Daha dolu profiller daha çok ve daha isabetli eşleşir.",
+    ciFoto: "Fotoğraf", ciBio: "Biyografi", ciInterests: "İlgi alanları", ciProfession: "Meslek", ciCity: "Şehir", ciVoice: "Ses kartı",
+    journeyTitle: "İlk 7 Gün Yolculuğun", journeyDesc: "Ahenk'te görünürlüğünü ve çevreni adım adım güçlendirir.", journeyBadge: "Rozet",
+    journeySteps: {
+      profil: { label: "Profilini tamamla", desc: "Fotoğraf, bio ve ilgi alanların" },
+      gunluk: { label: "Günün sorusunu yanıtla", desc: "Gün serini başlat" },
+      begeni: { label: "İlk beğenini gönder", desc: "Keşfet'te uyumlu birini beğen" },
+      mesaj: { label: "İlk mesajını başlat", desc: "Bir eşleşmene merhaba de" },
+      moment: { label: "Bir Moment paylaş", desc: "Kendini anlat, çevreni büyüt" },
+      davet: { label: "Bir arkadaşını davet et", desc: "Davet eden 250 jeton kazanır" },
+      kurucu: { label: "Kurucu çevreni tamamla", desc: "İlk 1000 üye · kalıcı rozet" },
+    },
   },
   onboarding: {
     headerTitle: "Profilini oluştur", stepCounter: "Adım {n} / {t}",
@@ -613,6 +660,35 @@ const appEn: AppDict = {
     blockDesc: "They won't be able to see you, message you or call you. Any match between you is removed.",
     cancel: "Cancel", blocking: "Blocking…", reportReason: "Report reason", detailPlaceholder: "Add details (optional)", sending: "Sending…",
   },
+  profil: {
+    eyebrow: "Ahenk profile", title: "My profile", settingsAria: "Settings",
+    statVisibility: "Visibility", statEnergy: "Energy", statChat: "Chat",
+    valPremium: "Premium", valStandard: "Standard", valReady: "Ready", valVoice: "Voice", valClassic: "Classic",
+    nameFallback: "Ahenk member", founding: "Founding Member", boostActive: "Boost active",
+    upsellTitle: "Be more visible", upsellDesc: "Unlimited discovery, profile visits, calls and special perks · Go Premium",
+    infoTitle: "Profile info", infoDesc: "Details that complete your identity",
+    attrMemberNo: "Member No", attrProfession: "Profession", attrCity: "City", attrZodiac: "Zodiac", attrLanguages: "Languages", attrJoined: "Joined",
+    interestsTitle: "Interests", interestsDesc: "Top topics in the compatibility engine",
+    photosTitle: "Photos", photosDesc: "Your profile showcase and visibility space",
+    storiesTitle: "Story highlights", storiesDesc: "Curate your standout moments",
+    promptsTitle: "Profile prompts", promptsDesc: "Answers that strengthen character matching",
+    achievementsTitle: "Achievements", achievementsDesc: "Your progress within Ahenk",
+    editProfile: "Edit profile", settings: "Settings", adminPanel: "Admin panel",
+    safeTitle: "Safe experience", safeDesc: "Your profile settings, privacy preferences and safety controls are protected to Ahenk standards.",
+    tabProfil: "Profile", tabContent: "Content", tabBadges: "Badges",
+    completionTitle: "Complete your profile", completionHint: "Fuller profiles match more, and more accurately.",
+    ciFoto: "Photo", ciBio: "Bio", ciInterests: "Interests", ciProfession: "Profession", ciCity: "City", ciVoice: "Voice card",
+    journeyTitle: "Your First 7 Days", journeyDesc: "Strengthens your visibility and circle in Ahenk, step by step.", journeyBadge: "Badge",
+    journeySteps: {
+      profil: { label: "Complete your profile", desc: "Photos, bio and interests" },
+      gunluk: { label: "Answer the daily question", desc: "Start your streak" },
+      begeni: { label: "Send your first like", desc: "Like someone compatible in Discover" },
+      mesaj: { label: "Start your first message", desc: "Say hi to a match" },
+      moment: { label: "Share a Moment", desc: "Express yourself, grow your circle" },
+      davet: { label: "Invite a friend", desc: "The inviter earns 250 tokens" },
+      kurucu: { label: "Complete your founding circle", desc: "First 1000 members · permanent badge" },
+    },
+  },
   onboarding: {
     headerTitle: "Build your profile", stepCounter: "Step {n} / {t}",
     steps: ["Who are you?", "Where, what do you do?", "Interests & lifestyle", "Photos"],
@@ -797,6 +873,35 @@ const appKu: AppDict = {
     report: "Gilî bike", block: "Asteng bike", blockTitle: "Were astengkirin?",
     blockDesc: "Ev kes nikare te bibîne, ji te re binivîse an bang li te bike. Eger hebe lihevhatina we tê rakirin.",
     cancel: "Dev jê berde", blocking: "Tê astengkirin…", reportReason: "Sedema gilî", detailPlaceholder: "Hûragahî zêde bike (bijarî)", sending: "Tê şandin…",
+  },
+  profil: {
+    eyebrow: "Profîla Ahenk", title: "Profîla min", settingsAria: "Mîheng",
+    statVisibility: "Xuyabûn", statEnergy: "Enerjî", statChat: "Axaftin",
+    valPremium: "Premium", valStandard: "Standard", valReady: "Amade", valVoice: "Dengî", valClassic: "Klasîk",
+    nameFallback: "Endamê Ahengê", founding: "Endamê Damezrîner", boostActive: "Boost çalak",
+    upsellTitle: "Bêtir xuya bibe", upsellDesc: "Keşfa bêsînor, serdana profîlê, bang û îmtiyazên taybet · Derbasî Premium bibe",
+    infoTitle: "Agahiyên profîlê", infoDesc: "Hûragahiyên ku nasnameya te temam dikin",
+    attrMemberNo: "Hejmara endam", attrProfession: "Pîşe", attrCity: "Bajar", attrZodiac: "Burc", attrLanguages: "Ziman", attrJoined: "Beşdarî",
+    interestsTitle: "Berjewendî", interestsDesc: "Mijarên sereke yên di motora lihevhatinê de",
+    photosTitle: "Wêne", photosDesc: "Vîtrîn û qada xuyabûna profîla te",
+    storiesTitle: "Vîtrînên çîrokan", storiesDesc: "Kêliyên xwe yên berbiçav saz bike",
+    promptsTitle: "Pirsên profîlê", promptsDesc: "Bersivên ku lihevhatina karakterê xurt dikin",
+    achievementsTitle: "Serketin", achievementsDesc: "Pêşketina te ya di Ahengê de",
+    editProfile: "Profîlê sererast bike", settings: "Mîheng", adminPanel: "Panela admin",
+    safeTitle: "Ezmûna ewle", safeDesc: "Mîhengên profîl, bijarteyên nepenîtî û kontrolên ewlehiyê yên te bi standardên Ahengê têne parastin.",
+    tabProfil: "Profîl", tabContent: "Naverok", tabBadges: "Nîşan",
+    completionTitle: "Profîla xwe temam bike", completionHint: "Profîlên temamtir bêtir û rasttir li hev tên.",
+    ciFoto: "Wêne", ciBio: "Bîo", ciInterests: "Berjewendî", ciProfession: "Pîşe", ciCity: "Bajar", ciVoice: "Karta dengî",
+    journeyTitle: "7 Rojên Te yên Yekem", journeyDesc: "Xuyabûn û dorhêla te ya li Ahengê gav bi gav xurt dike.", journeyBadge: "Nîşan",
+    journeySteps: {
+      profil: { label: "Profîla xwe temam bike", desc: "Wêne, bîo û berjewendî" },
+      gunluk: { label: "Pirsa rojê bersivîne", desc: "Rêza xwe dest pê bike" },
+      begeni: { label: "Ecibandina xwe ya yekem bişîne", desc: "Li Keşfê kesekî lihev eciband" },
+      mesaj: { label: "Peyama xwe ya yekem dest pê bike", desc: "Ji lihevhatineke xwe re silav bike" },
+      moment: { label: "Momentekê parve bike", desc: "Xwe bide nasîn, dorhêla xwe mezin bike" },
+      davet: { label: "Hevalekî xwe vexwîne", desc: "Vexwender 250 jeton qezenc dike" },
+      kurucu: { label: "Dorhêla xwe ya damezrîner temam bike", desc: "1000 endamên yekem · nîşana mayînde" },
+    },
   },
   onboarding: {
     headerTitle: "Profîla xwe ava bike", stepCounter: "Gav {n} / {t}",
