@@ -6,10 +6,13 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
 import { ArrowLeft } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLang();
+  const ta = t.auth;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
@@ -21,7 +24,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("dogrulama") === "hata") {
       setNeedConfirm(true);
-      setErr("Doğrulama bağlantısı geçersiz veya süresi geçmiş. Girişini yapıp yeni bağlantı isteyebilirsin.");
+      setErr(ta.errVerifyExpired);
     }
   }, []);
 
@@ -37,9 +40,9 @@ export default function LoginPage() {
       // E-posta doğrulaması açıkken doğrulanmamış kullanıcıyı net yönlendir.
       if (/confirm/i.test(error.message)) {
         setNeedConfirm(true);
-        setErr("E-postan henüz doğrulanmamış. Gelen kutunu kontrol et.");
+        setErr(ta.errNotConfirmed);
       } else {
-        setErr("E-posta veya şifre hatalı.");
+        setErr(ta.errBadCreds);
       }
       return;
     }
@@ -51,7 +54,7 @@ export default function LoginPage() {
 
   async function tekrarGonder() {
     if (!email) {
-      setErr("Önce e-posta adresini yaz.");
+      setErr(ta.errEmailFirst);
       return;
     }
     const { error } = await supabase.auth.resend({
@@ -59,10 +62,10 @@ export default function LoginPage() {
       email,
       options: { emailRedirectTo: `${location.origin}/auth/callback` },
     });
-    if (error) setErr("Tekrar gönderilemedi, biraz sonra dene.");
+    if (error) setErr(ta.errResendFail);
     else {
       setErr("");
-      setInfo("Doğrulama e-postası tekrar gönderildi.");
+      setInfo(ta.resendInfo);
     }
   }
 
@@ -82,21 +85,21 @@ export default function LoginPage() {
         <div className="lp-monogram mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
           A
         </div>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Tekrar hoş geldin</h1>
-        <p className="mt-1.5 text-muted">Karakter önce, yüz sonra.</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">{ta.loginTitle}</h1>
+        <p className="mt-1.5 text-muted">{ta.loginSubtitle}</p>
       </div>
 
       <form onSubmit={girisYap} className="lp-panel space-y-3 rounded-3xl p-6">
         <Input
           type="email"
-          placeholder="E-posta"
+          placeholder={ta.email}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <Input
           type="password"
-          placeholder="Şifre"
+          placeholder={ta.password}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -109,11 +112,11 @@ export default function LoginPage() {
             onClick={tekrarGonder}
             className="text-sm font-semibold text-brand underline-offset-2 hover:underline"
           >
-            Doğrulama e-postasını tekrar gönder
+            {ta.resendConfirm}
           </button>
         )}
         <Button full disabled={loading}>
-          {loading ? "Giriş yapılıyor..." : "Giriş yap"}
+          {loading ? ta.loggingIn : ta.login}
         </Button>
       </form>
 
@@ -121,20 +124,20 @@ export default function LoginPage() {
         href="/sifremi-unuttum"
         className="mt-3 block text-center text-sm text-muted transition hover:text-text"
       >
-        Şifreni mi unuttun?
+        {ta.forgot}
       </Link>
 
       <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <div className="h-px flex-1 bg-border" /> veya <div className="h-px flex-1 bg-border" />
+        <div className="h-px flex-1 bg-border" /> {ta.or} <div className="h-px flex-1 bg-border" />
       </div>
       <Button variant="outline" full onClick={google} type="button">
-        Google ile devam et
+        {ta.googleContinue}
       </Button>
 
       <p className="mt-8 text-center text-sm text-muted">
-        Hesabın yok mu?{" "}
+        {ta.noAccount}{" "}
         <Link href="/register" className="font-semibold text-brand">
-          Kayıt ol
+          {ta.signupLink}
         </Link>
       </p>
     </div>

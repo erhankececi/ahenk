@@ -7,10 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, Input, PasswordInput } from "@/components/ui";
 import { adSoyadGecerli } from "@/lib/utils";
 import { ArrowLeft, Gift } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLang();
+  const ta = t.auth;
   const ref = useSearchParams().get("ref") || "";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,19 +27,19 @@ export default function RegisterPage() {
   async function kayitOl(e: React.FormEvent) {
     e.preventDefault();
     if (!adSoyadGecerli(name)) {
-      setErr("Lütfen ad ve soyadını gir (örn. Ahmet Yılmaz).");
+      setErr(ta.errNameInvalid);
       return;
     }
     if (password.length < 6) {
-      setErr("Şifre en az 6 karakter olmalı.");
+      setErr(ta.errPwShort);
       return;
     }
     if (password !== password2) {
-      setErr("Şifreler eşleşmiyor. Lütfen aynı şifreyi iki kez gir.");
+      setErr(ta.errPwMismatch);
       return;
     }
     if (!kabul) {
-      setErr("Devam etmek için 18+ olduğunu ve Koşullar/Gizlilik/KVKK metinlerini kabul etmelisin.");
+      setErr(ta.errConsent);
       return;
     }
     setLoading(true);
@@ -58,7 +61,7 @@ export default function RegisterPage() {
       router.push("/onboarding");
       router.refresh();
     } else {
-      setMsg("E-postana doğrulama bağlantısı gönderdik. Onayla, sonra giriş yap.");
+      setMsg(ta.regCheckEmail);
     }
   }
 
@@ -78,39 +81,39 @@ export default function RegisterPage() {
         <div className="lp-monogram mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">
           A
         </div>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Ahenk’e katıl</h1>
-        <p className="mt-1.5 text-muted">Karakterinle tanış, yüzün sonra gelir.</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">{ta.registerTitle}</h1>
+        <p className="mt-1.5 text-muted">{ta.registerSubtitle}</p>
       </div>
 
       <form onSubmit={kayitOl} className="lp-panel space-y-3 rounded-3xl p-6">
-        <Input placeholder="Ad Soyad" value={name} onChange={(e) => setName(e.target.value)} required />
+        <Input placeholder={ta.name} value={name} onChange={(e) => setName(e.target.value)} required />
         <Input
           type="email"
-          placeholder="E-posta"
+          placeholder={ta.email}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <PasswordInput
-          placeholder="Şifre (en az 6 karakter)"
+          placeholder={ta.passwordMin}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           minLength={6}
           required
         />
         <PasswordInput
-          placeholder="Şifre (tekrar)"
+          placeholder={ta.passwordRepeat}
           value={password2}
           onChange={(e) => setPassword2(e.target.value)}
           minLength={6}
           required
         />
         {password2.length > 0 && password !== password2 && (
-          <p className="text-sm text-warning">Şifreler henüz eşleşmiyor.</p>
+          <p className="text-sm text-warning">{ta.pwNotMatchYet}</p>
         )}
         {ref && (
           <p className="flex items-center gap-2 rounded-2xl border border-accent/25 bg-accent/[0.07] px-3 py-2 text-sm text-accent">
-            <Gift size={15} className="shrink-0" /> Bir davetle geldin ({ref}) — hesabın 25 jeton hediyeyle başlayacak.
+            <Gift size={15} className="shrink-0" /> {ta.refInvite.replace("{ref}", ref)}
           </p>
         )}
         <label className="flex items-start gap-2.5 rounded-2xl border border-border bg-surface px-3 py-2.5 text-xs text-muted">
@@ -121,30 +124,30 @@ export default function RegisterPage() {
             className="mt-0.5 h-4 w-4 shrink-0 accent-[color:rgb(var(--accent))]"
           />
           <span>
-            <b className="text-text">18 yaşından büyüğüm</b> ve{" "}
-            <Link href="/kosullar" className="text-accent underline">Kullanım Koşulları</Link>,{" "}
-            <Link href="/gizlilik" className="text-accent underline">Gizlilik Politikası</Link> ve{" "}
-            <Link href="/kvkk" className="text-accent underline">KVKK Aydınlatma</Link> metinlerini okudum, kabul ediyorum.
+            <b className="text-text">{ta.consentAge}</b> {ta.consentAnd}{" "}
+            <Link href="/kosullar" className="text-accent underline">{ta.consentTerms}</Link>,{" "}
+            <Link href="/gizlilik" className="text-accent underline">{ta.consentPrivacy}</Link> {ta.consentAnd}{" "}
+            <Link href="/kvkk" className="text-accent underline">{ta.consentKvkk}</Link> {ta.consentPost}
           </span>
         </label>
         {err && <p className="text-sm text-error">{err}</p>}
         {msg && <p className="text-sm text-brand">{msg}</p>}
         <Button full disabled={loading || !kabul}>
-          {loading ? "Oluşturuluyor..." : "Hesap oluştur"}
+          {loading ? ta.creating : ta.signup}
         </Button>
       </form>
 
       <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <div className="h-px flex-1 bg-border" /> veya <div className="h-px flex-1 bg-border" />
+        <div className="h-px flex-1 bg-border" /> {ta.or} <div className="h-px flex-1 bg-border" />
       </div>
       <Button variant="outline" full onClick={google} type="button">
-        Google ile devam et
+        {ta.googleContinue}
       </Button>
 
       <p className="mt-8 text-center text-sm text-muted">
-        Zaten üye misin?{" "}
+        {ta.haveAccount}{" "}
         <Link href="/login" className="font-semibold text-brand">
-          Giriş yap
+          {ta.loginLink}
         </Link>
       </p>
     </div>

@@ -334,6 +334,16 @@ export type AppDict = {
     mDiscover: string; mMoments: string; mGiftStore: string; chipsDiscover: string[]; chipsGift: string[];
     mNewMember: string; mOnline: string; mBuyTokens: string; mBuyTokensDesc: string; mYourMoment: string; mCaption: string; mAgo: string;
   };
+  auth: {
+    loginTitle: string; loginSubtitle: string; registerTitle: string; registerSubtitle: string;
+    email: string; password: string; name: string; passwordMin: string; passwordRepeat: string;
+    login: string; loggingIn: string; signup: string; creating: string; forgot: string; or: string; googleContinue: string;
+    noAccount: string; signupLink: string; haveAccount: string; loginLink: string;
+    resendConfirm: string; resendInfo: string; pwNotMatchYet: string; refInvite: string;
+    consentAge: string; consentAnd: string; consentTerms: string; consentPrivacy: string; consentKvkk: string; consentPost: string;
+    errVerifyExpired: string; errNotConfirmed: string; errBadCreds: string; errEmailFirst: string; errResendFail: string;
+    errNameInvalid: string; errPwShort: string; errPwMismatch: string; errConsent: string; regCheckEmail: string;
+  };
   common: { back: string };
 };
 
@@ -579,6 +589,24 @@ const appTr: AppDict = {
     chipsDiscover: ["Tümü", "Yakınında", "Online", "Yeni", "Popüler"], chipsGift: ["Tümü", "Popüler", "Lüks", "Özel", "Etkinlik"],
     mNewMember: "Yeni üye", mOnline: "Online", mBuyTokens: "Jeton satın al", mBuyTokensDesc: "Avantajlı paketleri keşfet",
     mYourMoment: "Anın", mCaption: "Gün batımının huzuru", mAgo: "2 saat önce · İstanbul",
+  },
+  auth: {
+    loginTitle: "Tekrar hoş geldin", loginSubtitle: "Karakter önce, yüz sonra.",
+    registerTitle: "Ahenk’e katıl", registerSubtitle: "Karakterinle tanış, yüzün sonra gelir.",
+    email: "E-posta", password: "Şifre", name: "Ad Soyad", passwordMin: "Şifre (en az 6 karakter)", passwordRepeat: "Şifre (tekrar)",
+    login: "Giriş yap", loggingIn: "Giriş yapılıyor...", signup: "Hesap oluştur", creating: "Oluşturuluyor...",
+    forgot: "Şifreni mi unuttun?", or: "veya", googleContinue: "Google ile devam et",
+    noAccount: "Hesabın yok mu?", signupLink: "Kayıt ol", haveAccount: "Zaten üye misin?", loginLink: "Giriş yap",
+    resendConfirm: "Doğrulama e-postasını tekrar gönder", resendInfo: "Doğrulama e-postası tekrar gönderildi.",
+    pwNotMatchYet: "Şifreler henüz eşleşmiyor.", refInvite: "Bir davetle geldin ({ref}) — hesabın 25 jeton hediyeyle başlayacak.",
+    consentAge: "18 yaşından büyüğüm", consentAnd: "ve", consentTerms: "Kullanım Koşulları", consentPrivacy: "Gizlilik Politikası", consentKvkk: "KVKK Aydınlatma", consentPost: "metinlerini okudum, kabul ediyorum.",
+    errVerifyExpired: "Doğrulama bağlantısı geçersiz veya süresi geçmiş. Girişini yapıp yeni bağlantı isteyebilirsin.",
+    errNotConfirmed: "E-postan henüz doğrulanmamış. Gelen kutunu kontrol et.", errBadCreds: "E-posta veya şifre hatalı.",
+    errEmailFirst: "Önce e-posta adresini yaz.", errResendFail: "Tekrar gönderilemedi, biraz sonra dene.",
+    errNameInvalid: "Lütfen ad ve soyadını gir (örn. Ahmet Yılmaz).", errPwShort: "Şifre en az 6 karakter olmalı.",
+    errPwMismatch: "Şifreler eşleşmiyor. Lütfen aynı şifreyi iki kez gir.",
+    errConsent: "Devam etmek için 18+ olduğunu ve Koşullar/Gizlilik/KVKK metinlerini kabul etmelisin.",
+    regCheckEmail: "E-postana doğrulama bağlantısı gönderdik. Onayla, sonra giriş yap.",
   },
   common: { back: "Geri" },
 };
@@ -826,6 +854,24 @@ const appEn: AppDict = {
     mNewMember: "New member", mOnline: "Online", mBuyTokens: "Buy tokens", mBuyTokensDesc: "Explore great-value packs",
     mYourMoment: "Your moment", mCaption: "The calm of sunset", mAgo: "2 hours ago · İstanbul",
   },
+  auth: {
+    loginTitle: "Welcome back", loginSubtitle: "Character first, face later.",
+    registerTitle: "Join Ahenk", registerSubtitle: "Meet who they are, the face comes later.",
+    email: "Email", password: "Password", name: "Full name", passwordMin: "Password (at least 6 characters)", passwordRepeat: "Password (repeat)",
+    login: "Log in", loggingIn: "Logging in...", signup: "Create account", creating: "Creating...",
+    forgot: "Forgot your password?", or: "or", googleContinue: "Continue with Google",
+    noAccount: "Don't have an account?", signupLink: "Sign up", haveAccount: "Already a member?", loginLink: "Log in",
+    resendConfirm: "Resend verification email", resendInfo: "Verification email sent again.",
+    pwNotMatchYet: "Passwords don't match yet.", refInvite: "You came via an invite ({ref}) — your account starts with a 25-token gift.",
+    consentAge: "I am over 18", consentAnd: "and", consentTerms: "Terms of Use", consentPrivacy: "Privacy Policy", consentKvkk: "KVKK Notice", consentPost: "— I have read and accept them.",
+    errVerifyExpired: "The verification link is invalid or expired. Log in and request a new link.",
+    errNotConfirmed: "Your email isn't verified yet. Check your inbox.", errBadCreds: "Wrong email or password.",
+    errEmailFirst: "Enter your email address first.", errResendFail: "Couldn't resend, try again shortly.",
+    errNameInvalid: "Please enter your first and last name (e.g. John Smith).", errPwShort: "Password must be at least 6 characters.",
+    errPwMismatch: "Passwords don't match. Please enter the same password twice.",
+    errConsent: "To continue, you must accept that you're 18+ and the Terms/Privacy/KVKK texts.",
+    regCheckEmail: "We've sent a verification link to your email. Confirm it, then log in.",
+  },
   common: { back: "Back" },
 };
 
@@ -1071,6 +1117,24 @@ const appKu: AppDict = {
     chipsDiscover: ["Hemû", "Nêzîk", "Online", "Nû", "Populer"], chipsGift: ["Hemû", "Populer", "Luks", "Taybet", "Çalakî"],
     mNewMember: "Endamê nû", mOnline: "Online", mBuyTokens: "Jeton bikire", mBuyTokensDesc: "Pakêtên biavantaj keşf bike",
     mYourMoment: "Kêliya te", mCaption: "Aramiya rojava", mAgo: "2 saet berê · İstanbul",
+  },
+  auth: {
+    loginTitle: "Bi xêr hatî dîsa", loginSubtitle: "Pêşî karakter, paşê rû.",
+    registerTitle: "Tev li Ahengê bibe", registerSubtitle: "Bi karakterê nas bike, rû paşê tê.",
+    email: "E-name", password: "Şîfre", name: "Nav û paşnav", passwordMin: "Şîfre (herî kêm 6 tîp)", passwordRepeat: "Şîfre (dubare)",
+    login: "Têkeve", loggingIn: "Tê têketin...", signup: "Hesab çêke", creating: "Tê çêkirin...",
+    forgot: "Te şîfreya xwe ji bîr kir?", or: "an", googleContinue: "Bi Google bidomîne",
+    noAccount: "Hesabê te tune?", signupLink: "Tomar bibe", haveAccount: "Jixwe endam î?", loginLink: "Têkeve",
+    resendConfirm: "E-nameya pejirandinê dîsa bişîne", resendInfo: "E-nameya pejirandinê dîsa hat şandin.",
+    pwNotMatchYet: "Şîfre hîna li hev nayên.", refInvite: "Tu bi vexwendinekê hatî ({ref}) — hesabê te bi diyariya 25 jetonan dest pê dike.",
+    consentAge: "Ez ji 18 salî mezintir im", consentAnd: "û", consentTerms: "Mercên Bikaranînê", consentPrivacy: "Polîtîkaya Nepenîtiyê", consentKvkk: "Agahdariya KVKK", consentPost: "— min xwend û qebûl dikim.",
+    errVerifyExpired: "Lînka pejirandinê nederbasdar e an demborî ye. Têkeve û lînkeke nû bixwaze.",
+    errNotConfirmed: "E-nameya te hîna nehatiye pejirandin. Qutîka xwe kontrol bike.", errBadCreds: "E-name an şîfre çewt e.",
+    errEmailFirst: "Pêşî navnîşana e-nameyê binivîse.", errResendFail: "Nehat şandin, piştî demekê biceribîne.",
+    errNameInvalid: "Ji kerema xwe nav û paşnavê xwe binivîse (mînak: Ahmet Yılmaz).", errPwShort: "Şîfre divê herî kêm 6 tîp be.",
+    errPwMismatch: "Şîfre li hev nayên. Ji kerema xwe heman şîfreyê du caran binivîse.",
+    errConsent: "Ji bo domandinê divê tu qebûl bikî ku 18+ yî û nivîsên Merc/Nepenîtî/KVKK.",
+    regCheckEmail: "Me lînka pejirandinê ji e-nameya te re şand. Bipejirîne, paşê têkeve.",
   },
   common: { back: "Vegere" },
 };
