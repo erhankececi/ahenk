@@ -8,7 +8,16 @@ type Data = {
   huni: Huni[];
   hacim: { dau: number; wau: number; dailyAnswers: number; interactions: number; messages: number; kurucuUye: number };
   eventler?: Record<string, number>;
+  kaynak?: Record<string, number>;
   signups: number;
+};
+
+const SOURCE_LABEL: Record<string, string> = {
+  visitors_locked: "Ziyaretçiler kilidi",
+  likes_locked: "Beğenenler kilidi",
+  analysis_locked: "Analiz kilidi",
+  profile_card: "Profil kartı",
+  direct: "Doğrudan",
 };
 
 const EVENT_LABEL: Record<string, string> = {
@@ -94,6 +103,23 @@ export default function AdminGrowth() {
                   <div key={k} className="flex items-center justify-between text-xs">
                     <span className="text-text/80">{label}</span>
                     <span className="font-semibold text-accent">{tr(d.eventler?.[k] ?? 0)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Premium isteği nereden geliyor? */}
+          {d.kaynak && Object.values(d.kaynak).some((v) => v > 0) && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Premium isteği nereden? · 30 gün
+              </p>
+              <div className="space-y-1.5">
+                {Object.entries(SOURCE_LABEL).map(([k, label]) => (
+                  <div key={k} className="flex items-center justify-between text-xs">
+                    <span className="text-text/80">{label}</span>
+                    <span className="font-semibold text-accent">{tr(d.kaynak?.[k] ?? 0)}</span>
                   </div>
                 ))}
               </div>

@@ -88,11 +88,14 @@ export default function Premium() {
 
   useEffect(() => {
     load();
-    trackEvent("premium_paywall_viewed");
+    const source = new URLSearchParams(window.location.search).get("source") || "direct";
+    trackEvent("premium_paywall_viewed", { source });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function abone(pkg: StorePackage) {
-    trackEvent("premium_cta_clicked", { plan: pkg.plan });
+    const source = new URLSearchParams(window.location.search).get("source") || "direct";
+    trackEvent("premium_cta_clicked", { plan: pkg.plan, source });
     setBusy(pkg.id);
     setMsg(null);
     const r = await purchase(pkg);

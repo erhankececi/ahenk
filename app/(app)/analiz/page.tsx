@@ -53,7 +53,7 @@ export default function Analiz() {
           <p className="mt-1.5 text-sm leading-6 text-muted">
             Seni kim aradı, kim tekrar profiline baktı, haftalık performansın — hepsi Premium Plus’ta.
           </p>
-          <Link href="/premium" className="lp-cta-gold mt-5 inline-block rounded-full px-6 py-2.5 text-sm font-semibold">
+          <Link href="/premium?source=analysis_locked" className="lp-cta-gold mt-5 inline-block rounded-full px-6 py-2.5 text-sm font-semibold">
             Premium Plus’a geç
           </Link>
         </div>

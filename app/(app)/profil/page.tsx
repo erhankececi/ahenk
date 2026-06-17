@@ -209,7 +209,7 @@ export default async function Profil() {
 
         {!premiumActive && (
           <Link
-            href="/premium"
+            href="/premium?source=profile_card"
             className="lp-panel-hover mb-5 flex items-center justify-between p-4"
           >
             <div className="flex items-center gap-3">

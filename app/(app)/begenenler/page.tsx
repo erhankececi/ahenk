@@ -124,7 +124,7 @@ function FreeGate({ count }: { count: number }) {
           Kim olduklarını gör ve tek dokunuşla eşleş. Beğenenleri görmek Premium ayrıcalığıdır.
         </p>
         <Link
-          href="/premium"
+          href="/premium?source=likes_locked"
           className="lp-cta-gold mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
         >
           <Crown size={16} /> Premium ile gör

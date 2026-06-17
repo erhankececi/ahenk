@@ -87,5 +87,25 @@ export async function GET() {
     names.forEach((n, i) => (eventler[n] = counts[i]));
   } catch {}
 
-  return NextResponse.json({ huni, hacim, eventler, signups });
+  // Premium isteği nereden geliyor? (premium_paywall_viewed kaynak kırılımı, 30 gün)
+  const kaynak: Record<string, number> = {};
+  try {
+    const monthAgo = new Date(now.getTime() - 30 * DAY).toISOString();
+    const sources = ["visitors_locked", "likes_locked", "analysis_locked", "profile_card", "direct"];
+    const counts = await Promise.all(
+      sources.map((s) =>
+        cnt(
+          admin
+            .from("analytics_events")
+            .select("id", { count: "exact", head: true })
+            .eq("event_name", "premium_paywall_viewed")
+            .filter("metadata->>source", "eq", s)
+            .gte("created_at", monthAgo)
+        )
+      )
+    );
+    sources.forEach((s, i) => (kaynak[s] = counts[i]));
+  } catch {}
+
+  return NextResponse.json({ huni, hacim, eventler, kaynak, signups });
 }
