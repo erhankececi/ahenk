@@ -378,6 +378,7 @@ export type AppDict = {
     lblGo: string; lblMaybe: string; lblInterested: string; lblCant: string;
     yourEvent: string; noResponses: string; approvedSuffix: string; rejectedSuffix: string; approve: string; reject: string;
   };
+  eventchat: { subtitle: string; empty: string; placeholder: string; send: string; close: string };
   common: { back: string };
 };
 
@@ -686,6 +687,7 @@ const appTr: AppDict = {
     lblGo: "Katılacak", lblMaybe: "Belki", lblInterested: "İlgileniyor", lblCant: "Gelemez",
     yourEvent: "Senin etkinliğin", noResponses: "Henüz yanıt veren yok.", approvedSuffix: " · onaylı", rejectedSuffix: " · reddedildi", approve: "Onayla", reject: "Reddet",
   },
+  eventchat: { subtitle: "Etkinlik sohbeti · katılımcılar", empty: "İlk mesajı sen yaz — katılımcılarla buluşmayı planla.", placeholder: "Mesaj yaz…", send: "Gönder", close: "Kapat" },
   common: { back: "Geri" },
 };
 
@@ -994,6 +996,7 @@ const appEn: AppDict = {
     lblGo: "Attending", lblMaybe: "Maybe", lblInterested: "Interested", lblCant: "Can't",
     yourEvent: "Your event", noResponses: "No responses yet.", approvedSuffix: " · approved", rejectedSuffix: " · declined", approve: "Approve", reject: "Decline",
   },
+  eventchat: { subtitle: "Event chat · attendees", empty: "Write the first message — plan meeting the attendees.", placeholder: "Write a message…", send: "Send", close: "Close" },
   common: { back: "Back" },
 };
 
@@ -1302,6 +1305,7 @@ const appKu: AppDict = {
     lblGo: "Beşdar dibe", lblMaybe: "Belkî", lblInterested: "Eleqedar", lblCant: "Nayê",
     yourEvent: "Çalakiya te", noResponses: "Hîna bersivder tune.", approvedSuffix: " · pejirandî", rejectedSuffix: " · red kirî", approve: "Bipejirîne", reject: "Red bike",
   },
+  eventchat: { subtitle: "Axaftina çalakiyê · beşdar", empty: "Peyama yekem tu binivîse — bi beşdaran re hevdîtinê plan bike.", placeholder: "Peyamekê binivîse…", send: "Bişîne", close: "Bigire" },
   common: { back: "Vegere" },
 };
 

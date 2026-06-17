@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { X, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { saat } from "@/lib/utils";
+import { useLang } from "@/components/LangProvider";
 
 type Msg = { id: string; body: string; created_at: string; sender_id: string; name: string; mine: boolean };
 
 export default function EventChat({ eventId, title, onClose }: { eventId: string; title: string; onClose: () => void }) {
   const supabase = createClient();
+  const ec = useLang().t.eventchat;
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [me, setMe] = useState<string>("");
@@ -52,14 +54,14 @@ export default function EventChat({ eventId, title, onClose }: { eventId: string
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="min-w-0">
             <p className="truncate font-display font-semibold">{title}</p>
-            <p className="text-xs text-muted">Etkinlik sohbeti · katılımcılar</p>
+            <p className="text-xs text-muted">{ec.subtitle}</p>
           </div>
-          <button onClick={onClose} className="text-muted"><X size={20} /></button>
+          <button onClick={onClose} className="text-muted" aria-label={ec.close}><X size={20} /></button>
         </div>
 
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
           {msgs.length === 0 ? (
-            <p className="mt-12 text-center text-sm text-muted">İlk mesajı sen yaz — katılımcılarla buluşmayı planla.</p>
+            <p className="mt-12 text-center text-sm text-muted">{ec.empty}</p>
           ) : (
             msgs.map((m) => (
               <div key={m.id} className={`flex flex-col ${m.mine ? "items-end" : "items-start"}`}>
@@ -79,10 +81,10 @@ export default function EventChat({ eventId, title, onClose }: { eventId: string
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && gonder()}
-            placeholder="Mesaj yaz…"
+            placeholder={ec.placeholder}
             className="flex-1 rounded-full border border-border bg-elevated px-4 py-2.5 text-sm outline-none focus:border-brand"
           />
-          <button onClick={gonder} disabled={!text.trim()} className="brand-gradient flex h-10 w-10 items-center justify-center rounded-full disabled:opacity-40" aria-label="Gönder">
+          <button onClick={gonder} disabled={!text.trim()} className="brand-gradient flex h-10 w-10 items-center justify-center rounded-full disabled:opacity-40" aria-label={ec.send}>
             <Send size={17} />
           </button>
         </div>
