@@ -366,6 +366,11 @@ export type AppDict = {
     title: string; topGifters: string; noGifters: string; jetonSuffix: string;
     topInviters: string; noInviters: string; davetSuffix: string; someone: string;
   };
+  topluluk: {
+    noCityTitle: string; noCityDesc: string; addCity: string; eyebrow: string;
+    cityTitle: string; memberCount: string; cityEvents: string; all: string; noEvents: string;
+    popularMembers: string; noMembers: string;
+  };
   common: { back: string };
 };
 
@@ -659,6 +664,11 @@ const appTr: AppDict = {
   liderlik: {
     title: "Liderlik", topGifters: "En çok hediye kazananlar", noGifters: "Henüz hediye kazanan yok — ilk sen ol!", jetonSuffix: "jeton",
     topInviters: "En çok davet edenler", noInviters: "Henüz davet yok — arkadaşlarını çağır!", davetSuffix: "davet", someone: "Biri",
+  },
+  topluluk: {
+    noCityTitle: "Şehir Topluluğu", noCityDesc: "Topluluğunu görmek için profilinde şehrini seç.", addCity: "Şehrimi ekle", eyebrow: "Ahenk topluluk",
+    cityTitle: "{city} Topluluğu", memberCount: "{n} üye", cityEvents: "Şehrindeki etkinlikler", all: "Tümü", noEvents: "Yakında etkinlik yok — ilkini sen başlat.",
+    popularMembers: "Şehrin popüler üyeleri", noMembers: "Henüz üye yok.",
   },
   common: { back: "Geri" },
 };
@@ -954,6 +964,11 @@ const appEn: AppDict = {
     title: "Leaderboard", topGifters: "Top gift earners", noGifters: "No gift earners yet — be the first!", jetonSuffix: "tokens",
     topInviters: "Top inviters", noInviters: "No invites yet — call your friends!", davetSuffix: "invites", someone: "Someone",
   },
+  topluluk: {
+    noCityTitle: "City Community", noCityDesc: "Set your city in your profile to see your community.", addCity: "Add my city", eyebrow: "Ahenk community",
+    cityTitle: "{city} Community", memberCount: "{n} members", cityEvents: "Events in your city", all: "All", noEvents: "No events soon — start the first one.",
+    popularMembers: "Popular members in your city", noMembers: "No members yet.",
+  },
   common: { back: "Back" },
 };
 
@@ -1247,6 +1262,11 @@ const appKu: AppDict = {
   liderlik: {
     title: "Serketin", topGifters: "Yên herî zêde diyarî qezenc kirin", noGifters: "Hîna kesî diyarî qezenc nekiriye — bibe yê yekem!", jetonSuffix: "jeton",
     topInviters: "Yên herî zêde vexwendin", noInviters: "Hîna vexwendin tune — hevalên xwe gazî bike!", davetSuffix: "vexwendin", someone: "Kesek",
+  },
+  topluluk: {
+    noCityTitle: "Civata Bajêr", noCityDesc: "Ji bo dîtina civata xwe, li profîla xwe bajarê xwe hilbijêre.", addCity: "Bajarê min lê zêde bike", eyebrow: "Civata Ahenk",
+    cityTitle: "Civata {city}", memberCount: "{n} endam", cityEvents: "Çalakiyên li bajarê te", all: "Hemû", noEvents: "Di nêzîk de çalakî tune — ya yekem tu dest pê bike.",
+    popularMembers: "Endamên populer ên bajarê te", noMembers: "Hîna endam tune.",
   },
   common: { back: "Vegere" },
 };

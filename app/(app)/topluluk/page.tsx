@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Users, CalendarHeart, MapPin, BadgeCheck, Crown } from "lucide-react";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -11,15 +13,16 @@ export default async function Topluluk() {
   } = await supabase.auth.getUser();
   const { data: me } = await supabase.from("profiles").select("city").eq("id", user!.id).single();
   const city = me?.city as string | null;
+  const tt = getAppDict(normalizeLang(cookies().get("lang")?.value)).topluluk;
 
   if (!city) {
     return (
       <div className="lp-page flex min-h-dvh flex-col items-center px-4 pb-24 pt-24 text-center">
         <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">A</span>
-        <h1 className="mt-4 font-display text-xl font-semibold text-text">Şehir Topluluğu</h1>
-        <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">Topluluğunu görmek için profilinde şehrini seç.</p>
+        <h1 className="mt-4 font-display text-xl font-semibold text-text">{tt.noCityTitle}</h1>
+        <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">{tt.noCityDesc}</p>
         <Link href="/onboarding" className="lp-cta-gold mt-6 inline-block rounded-full px-6 py-2.5 text-sm font-semibold">
-          Şehrimi ekle
+          {tt.addCity}
         </Link>
       </div>
     );
@@ -47,25 +50,25 @@ export default async function Topluluk() {
 
   return (
     <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk topluluk</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tt.eyebrow}</p>
       <div className="mt-1 flex items-center gap-2">
         <MapPin size={20} className="text-accent" />
-        <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">{city} Topluluğu</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">{tt.cityTitle.replace("{city}", city)}</h1>
       </div>
       <p className="mb-5 mt-1 flex items-center gap-1.5 text-sm text-muted">
-        <Users size={14} /> {count ?? 0} üye
+        <Users size={14} /> {tt.memberCount.replace("{n}", String(count ?? 0))}
       </p>
 
       {/* Etkinlikler */}
       <div className="mb-6">
         <div className="mb-2.5 flex items-center justify-between">
           <p className="flex items-center gap-2 text-sm font-semibold text-text">
-            <CalendarHeart size={17} className="text-accent" /> Şehrindeki etkinlikler
+            <CalendarHeart size={17} className="text-accent" /> {tt.cityEvents}
           </p>
-          <Link href="/etkinlikler" className="text-xs text-accent">Tümü</Link>
+          <Link href="/etkinlikler" className="text-xs text-accent">{tt.all}</Link>
         </div>
         {(events || []).length === 0 ? (
-          <p className="text-sm text-muted">Yakında etkinlik yok — ilkini sen başlat.</p>
+          <p className="text-sm text-muted">{tt.noEvents}</p>
         ) : (
           <div className="space-y-2">
             {(events || []).map((e) => (
@@ -84,10 +87,10 @@ export default async function Topluluk() {
 
       {/* Popüler üyeler */}
       <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
-        <Crown size={17} className="text-accent" /> Şehrin popüler üyeleri
+        <Crown size={17} className="text-accent" /> {tt.popularMembers}
       </p>
       {(members || []).length === 0 ? (
-        <p className="text-sm text-muted">Henüz üye yok.</p>
+        <p className="text-sm text-muted">{tt.noMembers}</p>
       ) : (
         <div className="grid grid-cols-3 gap-2.5">
           {(members || []).map((m: any) => (
