@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Check, Coins, Flame } from "lucide-react";
 import PushOptIn from "@/components/PushOptIn";
+import { useLang } from "@/components/LangProvider";
 
 export default function DailyQuestion() {
+  const { t } = useLang();
   const [q, setQ] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
   const [answer, setAnswer] = useState("");
@@ -55,26 +57,26 @@ export default function DailyQuestion() {
   const ringIndex = ((dolu - 1) % dotCount + dotCount) % dotCount; // bugünün noktası (0-tabanlı)
   const filled = dolu === 0 ? 0 : ringIndex + 1;
   const nextHint = !answered
-    ? `Bugün yanıtla, +${reward} jeton kazan`
+    ? t.daily.todayEarn.replace("{n}", String(reward))
     : filled === 3
-      ? "Süper — 3 günlük seri! Yarın da gel."
+      ? t.daily.streak3
       : filled >= 7
-        ? "7 günlük seri tamam — efsane!"
+        ? t.daily.streak7
         : filled === 2
-          ? "Yarın 3. gün: +50 jeton bonus"
+          ? t.daily.next3
           : filled === 6
-            ? "Yarın 7. gün: +150 jeton bonus"
-            : "Serini koru, yarın tekrar 20 jeton";
+            ? t.daily.next7
+            : t.daily.keepStreak;
 
   return (
     <div className="rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
       <div className="flex items-center justify-between">
         <p className="flex items-center gap-2 text-sm font-semibold text-accent">
-          <Sparkles size={15} /> Günün Sorusu
+          <Sparkles size={15} /> {t.daily.title}
         </p>
         {answered ? (
           <span className="flex items-center gap-1 text-xs text-success">
-            <Check size={13} /> Yanıtlandı
+            <Check size={13} /> {t.daily.answered}
           </span>
         ) : (
           <span className="flex items-center gap-1 text-xs text-accent">
@@ -89,7 +91,7 @@ export default function DailyQuestion() {
           onClick={() => setOpen(true)}
           className="mt-3 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-[#1c1407]"
         >
-          Yanıtla
+          {t.daily.answer}
         </button>
       )}
       {!answered && open && (
@@ -99,7 +101,7 @@ export default function DailyQuestion() {
             onChange={(e) => setAnswer(e.target.value)}
             rows={2}
             autoFocus
-            placeholder="Yanıtın…"
+            placeholder={t.daily.placeholder}
             className="w-full rounded-xl border border-white/10 bg-[#0E0D10] px-3 py-2 text-sm text-text outline-none focus:border-accent/50"
           />
           <button
@@ -107,7 +109,7 @@ export default function DailyQuestion() {
             disabled={busy || !answer.trim()}
             className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-[#1c1407] disabled:opacity-50"
           >
-            {busy ? "…" : `Gönder · +${reward} jeton`}
+            {busy ? "…" : t.daily.send.replace("{n}", String(reward))}
           </button>
         </div>
       )}
@@ -117,7 +119,7 @@ export default function DailyQuestion() {
       <div className="mt-3 border-t border-white/10 pt-3">
         <div className="flex items-center justify-between">
           <p className="flex items-center gap-1.5 text-xs font-semibold text-accent">
-            <Flame size={13} /> Gün serin{streak > 0 ? ` · ${streak}` : ""}
+            <Flame size={13} /> {t.daily.streakLabel}{streak > 0 ? ` · ${streak}` : ""}
           </p>
           <div className="flex items-center gap-1">
             {Array.from({ length: dotCount }).map((_, i) => (
@@ -131,7 +133,7 @@ export default function DailyQuestion() {
         <p className="mt-1.5 text-[11px] leading-4 text-muted">{nextHint}</p>
         {bonus > 0 && (
           <p className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-accent">
-            <Coins size={11} /> +{bonus} seri bonusu kazandın!
+            <Coins size={11} /> {t.daily.bonusEarned.replace("{n}", String(bonus))}
           </p>
         )}
       </div>

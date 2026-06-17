@@ -18,13 +18,7 @@ import WelcomeTour from "@/components/WelcomeTour";
 import DailyQuestion from "@/components/DailyQuestion";
 import { PremiumBadge, tierName, tierGlow, tierCard, tierFrame, VipTag } from "@/components/PremiumBadge";
 import { DEFAULT_FILTER, filterToQuery, kmLabel, type DiscoveryFilter } from "@/lib/discoveryFilters";
-
-const ACTIONS = [
-  { type: "daha_fazla", label: "Daha fazla", icon: Search },
-  { type: "ilginc", label: "İlginç geldi", icon: Sparkles },
-  { type: "ortak", label: "Ortak yönler", icon: Heart },
-  { type: "tanis", label: "Tanışmak isterim", icon: Send },
-];
+import { useLang } from "@/components/LangProvider";
 
 type Meta = {
   count: number;
@@ -37,6 +31,8 @@ type Meta = {
 
 export default function Kesfet() {
   const router = useRouter();
+  const { t: tr_ } = useLang();
+  const tk = tr_.kesfet;
   const [cands, setCands] = useState<any[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [i, setI] = useState(0);
@@ -72,11 +68,11 @@ export default function Kesfet() {
 
   // Üst hızlı çipler (mockup): Tümü / Yakınında / Online / Yeni / Popüler
   const CHIPS = [
-    { id: "tumu", label: "Tümü", sort: "smart" as const },
-    { id: "yakin", label: "Yakınında", sort: "near" as const },
-    { id: "online", label: "Online", sort: null },
-    { id: "yeni", label: "Yeni", sort: "new" as const },
-    { id: "populer", label: "Popüler", sort: "active" as const },
+    { id: "tumu", label: tk.chipTumu, sort: "smart" as const },
+    { id: "yakin", label: tk.chipYakin, sort: "near" as const },
+    { id: "online", label: tk.chipOnline, sort: null },
+    { id: "yeni", label: tk.chipYeni, sort: "new" as const },
+    { id: "populer", label: tk.chipPopuler, sort: "active" as const },
   ];
   function selectChip(c: (typeof CHIPS)[number]) {
     setChip(c.id);
@@ -114,9 +110,7 @@ export default function Kesfet() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setSuperMsg(
-        data?.error === "insufficient"
-          ? "Bugünkü ücretsiz süper beğenini kullandın. Bir tane daha için 30 jeton gerekli."
-          : "Süper beğeni gönderilemedi, tekrar dene."
+        data?.error === "insufficient" ? tk.superUsedFree : tk.superFailed
       );
       setTimeout(() => setSuperMsg(""), 4500);
       return;
@@ -135,7 +129,7 @@ export default function Kesfet() {
     const data = await res.json();
     if (data.matched) {
       const c = cands.find((x) => x.id === id);
-      setMatchPop({ name: c?.name || "Biri", matchId: data.matchId, tier: c?.tier });
+      setMatchPop({ name: c?.name || tk.someone, matchId: data.matchId, tier: c?.tier });
     }
     setCands((cs) => cs.filter((x) => x.id !== id));
   }
@@ -164,15 +158,15 @@ export default function Kesfet() {
     <div className="px-5 pt-[calc(env(safe-area-inset-top)+18px)]">
       <WelcomeTour />
       <header className="mb-4 flex items-center justify-between">
-        <Link href="/magaza" aria-label="Hediye Mağazası" className="flex h-11 w-11 items-center justify-center rounded-full border border-accent/25 bg-[#151318] font-display text-[26px] font-semibold text-accent shadow-[0_12px_30px_-18px_rgba(0,0,0,0.9)]">
+        <Link href="/magaza" aria-label={tk.giftStore} className="flex h-11 w-11 items-center justify-center rounded-full border border-accent/25 bg-[#151318] font-display text-[26px] font-semibold text-accent shadow-[0_12px_30px_-18px_rgba(0,0,0,0.9)]">
           A
         </Link>
-        <h1 className="font-display text-[25px] font-bold tracking-[-0.03em]">Keşfet</h1>
+        <h1 className="font-display text-[25px] font-bold tracking-[-0.03em]">{tk.title}</h1>
         <div className="flex items-center gap-4 text-muted">
-          <Link href="/oyun" aria-label="Oyun Salonu" className="transition hover:text-text">
+          <Link href="/oyun" aria-label={tk.gameRoom} className="transition hover:text-text">
             <Gamepad2 size={20} strokeWidth={1.7} />
           </Link>
-          <button onClick={() => setFiltersOpen(true)} aria-label="Filtre" className="transition hover:text-text">
+          <button onClick={() => setFiltersOpen(true)} aria-label={tk.filter} className="transition hover:text-text">
             <SlidersHorizontal size={20} strokeWidth={1.7} />
           </button>
         </div>
@@ -216,11 +210,11 @@ export default function Kesfet() {
       {!loading && !current && (
         <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
           <Sparkles className="mb-4 text-brand" size={36} strokeWidth={1.5} />
-          <h2 className="font-display text-xl font-semibold">Şimdilik bu kadar</h2>
+          <h2 className="font-display text-xl font-semibold">{tk.emptyTitle}</h2>
           <p className="mt-2 text-muted">
             {filter.cities.length || filter.verified || filter.minAge > 18 || filter.maxAge < 60
-              ? "Şehir, yaş veya doğrulama filtreni gevşet — mesafe artık kimseyi gizlemiyor, sadece sıralıyor."
-              : "Yeni profiller geldikçe burada görünecek. Profilini zenginleştir, daha çok kişiye öneril."}
+              ? tk.emptyFiltered
+              : tk.emptyDefault}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             {filter.km !== "all" || filter.cities.length > 0 ? (
@@ -228,21 +222,21 @@ export default function Kesfet() {
                 onClick={() => applyFilter(DEFAULT_FILTER)}
                 className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium transition hover:border-brand/50"
               >
-                Filtreyi sıfırla
+                {tk.resetFilter}
               </button>
             ) : (
               <Link
                 href="/onboarding"
                 className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium transition hover:border-brand/50"
               >
-                Profilini zenginleştir
+                {tk.enrichProfile}
               </Link>
             )}
             <button
               onClick={() => yukle(filter)}
               className="brand-gradient inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-semibold"
             >
-              <RefreshCw size={15} /> Yenile
+              <RefreshCw size={15} /> {tk.refresh}
             </button>
           </div>
         </div>
@@ -253,7 +247,7 @@ export default function Kesfet() {
           {kmNum && (
             <p className="mb-3 flex items-center gap-1.5 text-xs text-muted">
               <MapPin size={13} strokeWidth={1.6} />
-              {current.priority ? `Öncelikli alan · 0–${kmNum} km` : `Daha uzaktakiler · ${kmNum} km üstü`}
+              {current.priority ? `${tk.nearArea} · 0–${kmNum} km` : `${tk.farArea} · ${kmNum}+ km`}
             </p>
           )}
           <AnimatePresence mode="wait">
@@ -286,18 +280,18 @@ export default function Kesfet() {
                   </svg>
                   <div className="text-center leading-none">
                     <span className="block text-[13px] font-bold text-accent">%{current.ortakYuzde}</span>
-                    <span className="block text-[7px] uppercase tracking-[0.12em] text-white/55">uyum</span>
+                    <span className="block text-[7px] uppercase tracking-[0.12em] text-white/55">{tk.match}</span>
                   </div>
                 </div>
 
                 {/* Sağ üst: yeni üye / vibe / öne çıkan */}
                 <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
                   {current.isNew && (
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-black">Yeni üye</span>
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-black">{tk.newMember}</span>
                   )}
                   {current.boosted && (
                     <span className="flex items-center gap-1 rounded-full bg-accent/90 px-2.5 py-1 text-[11px] font-semibold text-black">
-                      <Zap size={11} /> Öne çıkan
+                      <Zap size={11} /> {tk.featured}
                     </span>
                   )}
                   {current.vibe && (
@@ -320,18 +314,18 @@ export default function Kesfet() {
                       <span className="flex items-center gap-1.5">
                         <MapPin size={14} strokeWidth={1.6} /> {current.city}
                         {current.mesafe != null &&
-                          (current.sameCity || current.mesafe === 0 ? " · yakınında" : ` · ${current.mesafe} km`)}
+                          (current.sameCity || current.mesafe === 0 ? ` · ${tk.nearby}` : ` · ${current.mesafe} km`)}
                       </span>
                     )}
                     {current.online && (
                       <span className="flex items-center gap-1.5 text-emerald-400">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> Online
+                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> {tk.online}
                       </span>
                     )}
                   </div>
                   {!revealMore && (
                     <p className="mt-2 flex items-center gap-1.5 text-[11px] text-white/50">
-                      <Lock size={11} strokeWidth={1.8} /> Fotoğraf sohbet ilerledikçe netleşir
+                      <Lock size={11} strokeWidth={1.8} /> {tk.photoReveal}
                     </p>
                   )}
                 </div>
@@ -369,7 +363,7 @@ export default function Kesfet() {
 
                 {current.voice_card && (
                   <audio controls src={current.voice_card} className="w-full" preload="none">
-                    Sesli tanıtım
+                    {tk.voiceIntro}
                   </audio>
                 )}
 
@@ -377,7 +371,7 @@ export default function Kesfet() {
 
                 {current.interests?.length > 0 && (
                   <div>
-                    <p className="mb-2 text-xs font-medium text-muted">İlgi alanları</p>
+                    <p className="mb-2 text-xs font-medium text-muted">{tk.interests}</p>
                     <div className="flex flex-wrap gap-2">
                       {current.interests.map((it: string) => (
                         <span key={it} className="rounded-full border border-white/8 bg-white/[0.04] px-3 py-1 text-sm text-text/80">{it}</span>
@@ -389,9 +383,9 @@ export default function Kesfet() {
                 {revealMore && (
                   <div className="space-y-3 animate-fade-up">
                     {current.music?.length > 0 && (
-                      <p className="text-sm text-muted">Müzik · {current.music.join(", ")}</p>
+                      <p className="text-sm text-muted">{tk.musicLabel} · {current.music.join(", ")}</p>
                     )}
-                    {current.zodiac && <Badge>{current.zodiac} burcu</Badge>}
+                    {current.zodiac && <Badge>{current.zodiac}{tk.zodiacSuffix}</Badge>}
                   </div>
                 )}
               </div>
@@ -406,7 +400,7 @@ export default function Kesfet() {
           <div className="mt-6 flex items-center justify-center gap-5">
             <button
               onClick={() => act("daha_fazla")}
-              aria-label="Geri al"
+              aria-label={tk.ariaRewind}
               className="flex items-center justify-center rounded-full border border-white/10 bg-[#151318] text-accent shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)] transition hover:border-accent/40 active:scale-90"
               style={{ height: 52, width: 52 }}
             >
@@ -414,7 +408,7 @@ export default function Kesfet() {
             </button>
             <button
               onClick={gec}
-              aria-label="Geç"
+              aria-label={tk.ariaPass}
               className="flex items-center justify-center rounded-full border border-white/10 bg-[#151318] text-text/70 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)] transition hover:border-white/25 hover:text-text active:scale-90"
               style={{ height: 60, width: 60 }}
             >
@@ -422,7 +416,7 @@ export default function Kesfet() {
             </button>
             <button
               onClick={() => act("tanis")}
-              aria-label="Beğen"
+              aria-label={tk.ariaLike}
               className="flex items-center justify-center rounded-full text-[#1c1407] shadow-[0_14px_36px_-10px_rgba(199,169,119,0.5)] transition hover:brightness-105 active:scale-90"
               style={{ height: 68, width: 68, background: "linear-gradient(150deg,#DBBF8E,#C7A977 55%,#b2945f)" }}
             >
@@ -430,7 +424,7 @@ export default function Kesfet() {
             </button>
             <button
               onClick={superBegen}
-              aria-label="Süper beğen"
+              aria-label={tk.ariaSuper}
               className="flex items-center justify-center rounded-full border border-accent/35 bg-accent/[0.12] text-accent shadow-[0_10px_30px_-12px_rgba(199,169,119,0.35)] transition hover:bg-accent/20 active:scale-90"
               style={{ height: 60, width: 60 }}
             >
@@ -441,10 +435,10 @@ export default function Kesfet() {
           {/* İkincil ilgi sinyalleri */}
           <div className="mt-4 flex justify-center gap-2">
             <button onClick={() => act("ilginc")} className="rounded-full border border-border px-3.5 py-1.5 text-xs text-muted transition hover:border-accent/60">
-              İlginç geldi
+              {tk.interesting}
             </button>
             <button onClick={() => act("ortak")} className="rounded-full border border-border px-3.5 py-1.5 text-xs text-muted transition hover:border-accent/60">
-              Ortak yönler
+              {tk.inCommon}
             </button>
           </div>
         </>
@@ -488,23 +482,23 @@ export default function Kesfet() {
                 </motion.div>
               </div>
 
-              <p className="t-caption font-semibold uppercase tracking-[0.18em] text-brand">Yeni Ahenk</p>
-              <h3 className="mt-1 text-2xl font-bold">{matchPop.name} ile eşleştiniz</h3>
+              <p className="t-caption font-semibold uppercase tracking-[0.18em] text-brand">{tk.matchEyebrow}</p>
+              <h3 className="mt-1 text-2xl font-bold">{tk.matchedWith.replace("{name}", matchPop.name)}</h3>
               <p className="mt-2 text-sm text-muted">
-                Karşılıklı ilgi var. İlk mesajı sen at — sohbet ettikçe fotoğraf netleşir.
+                {tk.matchDesc}
               </p>
 
               <button
                 onClick={() => router.push(`/sohbet/${matchPop.matchId}`)}
                 className="brand-gradient mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold"
               >
-                <Send size={16} /> Sohbete başla
+                <Send size={16} /> {tk.startChat}
               </button>
               <button
                 onClick={() => setMatchPop(null)}
                 className="mt-3 text-sm text-muted transition hover:text-text"
               >
-                Keşfetmeye devam
+                {tk.keepDiscovering}
               </button>
             </motion.div>
           </motion.div>

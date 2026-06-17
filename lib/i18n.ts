@@ -199,6 +199,25 @@ export type AppDict = {
     privacyPolicy: string; security: string; blocked: string;
     premiumMembership: string; analytics: string; visitors: string; feedback: string; deleteAccount: string;
   };
+  kesfet: {
+    title: string; giftStore: string; gameRoom: string; filter: string;
+    chipTumu: string; chipYakin: string; chipOnline: string; chipYeni: string; chipPopuler: string;
+    emptyTitle: string; emptyFiltered: string; emptyDefault: string;
+    resetFilter: string; enrichProfile: string; refresh: string;
+    nearArea: string; farArea: string;
+    newMember: string; featured: string; online: string; photoReveal: string; nearby: string; match: string;
+    interests: string; voiceIntro: string; zodiacSuffix: string; musicLabel: string;
+    superUsedFree: string; superFailed: string;
+    ariaRewind: string; ariaPass: string; ariaLike: string; ariaSuper: string;
+    interesting: string; inCommon: string;
+    matchEyebrow: string; matchedWith: string; matchDesc: string; startChat: string; keepDiscovering: string; someone: string;
+  };
+  daily: {
+    title: string; answered: string; answer: string; placeholder: string;
+    send: string; todayEarn: string;
+    streak3: string; streak7: string; next3: string; next7: string; keepStreak: string;
+    streakLabel: string; bonusEarned: string;
+  };
   common: { back: string };
 };
 
@@ -216,6 +235,33 @@ const appTr: AppDict = {
     privacyPolicy: "Gizlilik Politikası", security: "Güvenlik & Topluluk", blocked: "Engellenenler",
     premiumMembership: "Premium üyelik", analytics: "Analiz (Premium+)", visitors: "Profil ziyaretçileri",
     feedback: "Öneri / Geri bildirim", deleteAccount: "Hesabı sil",
+  },
+  kesfet: {
+    title: "Keşfet", giftStore: "Hediye Mağazası", gameRoom: "Oyun Salonu", filter: "Filtre",
+    chipTumu: "Tümü", chipYakin: "Yakınında", chipOnline: "Online", chipYeni: "Yeni", chipPopuler: "Popüler",
+    emptyTitle: "Şimdilik bu kadar",
+    emptyFiltered: "Şehir, yaş veya doğrulama filtreni gevşet — mesafe artık kimseyi gizlemiyor, sadece sıralıyor.",
+    emptyDefault: "Yeni profiller geldikçe burada görünecek. Profilini zenginleştir, daha çok kişiye öneril.",
+    resetFilter: "Filtreyi sıfırla", enrichProfile: "Profilini zenginleştir", refresh: "Yenile",
+    nearArea: "Öncelikli alan", farArea: "Daha uzaktakiler",
+    newMember: "Yeni üye", featured: "Öne çıkan", online: "Online",
+    photoReveal: "Fotoğraf sohbet ilerledikçe netleşir", nearby: "yakınında", match: "uyum",
+    interests: "İlgi alanları", voiceIntro: "Sesli tanıtım", zodiacSuffix: " burcu", musicLabel: "Müzik",
+    superUsedFree: "Bugünkü ücretsiz süper beğenini kullandın. Bir tane daha için 30 jeton gerekli.",
+    superFailed: "Süper beğeni gönderilemedi, tekrar dene.",
+    ariaRewind: "Geri al", ariaPass: "Geç", ariaLike: "Beğen", ariaSuper: "Süper beğen",
+    interesting: "İlginç geldi", inCommon: "Ortak yönler",
+    matchEyebrow: "Yeni Ahenk", matchedWith: "{name} ile eşleştiniz",
+    matchDesc: "Karşılıklı ilgi var. İlk mesajı sen at — sohbet ettikçe fotoğraf netleşir.",
+    startChat: "Sohbete başla", keepDiscovering: "Keşfetmeye devam", someone: "Biri",
+  },
+  daily: {
+    title: "Günün Sorusu", answered: "Yanıtlandı", answer: "Yanıtla", placeholder: "Yanıtın…",
+    send: "Gönder · +{n} jeton", todayEarn: "Bugün yanıtla, +{n} jeton kazan",
+    streak3: "Süper — 3 günlük seri! Yarın da gel.", streak7: "7 günlük seri tamam — efsane!",
+    next3: "Yarın 3. gün: +50 jeton bonus", next7: "Yarın 7. gün: +150 jeton bonus",
+    keepStreak: "Serini koru, yarın tekrar 20 jeton",
+    streakLabel: "Gün serin", bonusEarned: "+{n} seri bonusu kazandın!",
   },
   common: { back: "Geri" },
 };
@@ -235,6 +281,33 @@ const appEn: AppDict = {
     premiumMembership: "Premium membership", analytics: "Analytics (Premium+)", visitors: "Profile visitors",
     feedback: "Suggestion / Feedback", deleteAccount: "Delete account",
   },
+  kesfet: {
+    title: "Discover", giftStore: "Gift Store", gameRoom: "Game Room", filter: "Filter",
+    chipTumu: "All", chipYakin: "Nearby", chipOnline: "Online", chipYeni: "New", chipPopuler: "Popular",
+    emptyTitle: "That's all for now",
+    emptyFiltered: "Loosen your city, age or verification filter — distance no longer hides anyone, it only sorts.",
+    emptyDefault: "New profiles will show up here. Enrich your profile to be suggested to more people.",
+    resetFilter: "Reset filter", enrichProfile: "Enrich your profile", refresh: "Refresh",
+    nearArea: "Priority area", farArea: "Farther away",
+    newMember: "New member", featured: "Featured", online: "Online",
+    photoReveal: "Photo clears as the conversation deepens", nearby: "nearby", match: "match",
+    interests: "Interests", voiceIntro: "Voice intro", zodiacSuffix: "", musicLabel: "Music",
+    superUsedFree: "You've used today's free super like. One more costs 30 tokens.",
+    superFailed: "Super like couldn't be sent, try again.",
+    ariaRewind: "Rewind", ariaPass: "Pass", ariaLike: "Like", ariaSuper: "Super like",
+    interesting: "Interesting", inCommon: "In common",
+    matchEyebrow: "New Ahenk", matchedWith: "You matched with {name}",
+    matchDesc: "The interest is mutual. Send the first message — photos clear as you chat.",
+    startChat: "Start chatting", keepDiscovering: "Keep discovering", someone: "Someone",
+  },
+  daily: {
+    title: "Question of the day", answered: "Answered", answer: "Answer", placeholder: "Your answer…",
+    send: "Send · +{n} tokens", todayEarn: "Answer today, earn +{n} tokens",
+    streak3: "Nice — a 3-day streak! Come back tomorrow.", streak7: "7-day streak complete — legendary!",
+    next3: "Tomorrow is day 3: +50 token bonus", next7: "Tomorrow is day 7: +150 token bonus",
+    keepStreak: "Keep your streak, 20 tokens again tomorrow",
+    streakLabel: "Your streak", bonusEarned: "+{n} streak bonus earned!",
+  },
   common: { back: "Back" },
 };
 
@@ -252,6 +325,33 @@ const appKu: AppDict = {
     privacyPolicy: "Polîtîkaya Nepenîtiyê", security: "Ewlehî & Civat", blocked: "Astengkirî",
     premiumMembership: "Endametiya Premium", analytics: "Analîz (Premium+)", visitors: "Serdana profîlê",
     feedback: "Pêşniyar / Bersiv", deleteAccount: "Hesabê jê bibe",
+  },
+  kesfet: {
+    title: "Keşf", giftStore: "Dikana Diyariyan", gameRoom: "Salona Lîstikê", filter: "Parzûn",
+    chipTumu: "Hemû", chipYakin: "Nêzîk", chipOnline: "Online", chipYeni: "Nû", chipPopuler: "Populer",
+    emptyTitle: "Ji bo niha ev e",
+    emptyFiltered: "Parzûna bajar, temen an pejirandinê sist bike — dûrahî êdî kesî venaşêre, tenê rêz dike.",
+    emptyDefault: "Gava profîlên nû werin li vir xuya dibin. Profîla xwe dewlemend bike, ji bo bêtir kesan were pêşniyarkirin.",
+    resetFilter: "Parzûnê paqij bike", enrichProfile: "Profîla xwe dewlemend bike", refresh: "Nû bike",
+    nearArea: "Qada pêşîn", farArea: "Yên dûrtir",
+    newMember: "Endamê nû", featured: "Berbiçav", online: "Online",
+    photoReveal: "Wêne gava axaftin kûr dibe zelal dibe", nearby: "nêzîk", match: "lihev",
+    interests: "Berjewendî", voiceIntro: "Danasîna dengî", zodiacSuffix: "", musicLabel: "Muzîk",
+    superUsedFree: "Te superbeğeniya îro ya belaş bi kar anî. Ji bo yekê din 30 jeton hewce ne.",
+    superFailed: "Superbeğenî nehat şandin, dîsa biceribîne.",
+    ariaRewind: "Vegere", ariaPass: "Derbas", ariaLike: "Eciband", ariaSuper: "Super eciband",
+    interesting: "Balkêş", inCommon: "Hevpar",
+    matchEyebrow: "Ahengê nû", matchedWith: "Tu bi {name} re li hev hatî",
+    matchDesc: "Berjewendî hevdu ye. Peyama yekem tu bişîne — gava tu diaxivî wêne zelal dibin.",
+    startChat: "Dest bi axaftinê bike", keepDiscovering: "Berdewam keşf bike", someone: "Kesek",
+  },
+  daily: {
+    title: "Pirsa rojê", answered: "Hat bersivandin", answer: "Bersivê bide", placeholder: "Bersiva te…",
+    send: "Bişîne · +{n} jeton", todayEarn: "Îro bersivê bide, +{n} jeton bistîne",
+    streak3: "Süper — rêzeke 3 rojan! Sibê jî were.", streak7: "Rêzeke 7 rojan temam — efsane!",
+    next3: "Sibê roja 3.: +50 jeton bonus", next7: "Sibê roja 7.: +150 jeton bonus",
+    keepStreak: "Rêza xwe biparêze, sibê dîsa 20 jeton",
+    streakLabel: "Rêza te", bonusEarned: "+{n} bonusa rêzê qezenc kir!",
   },
   common: { back: "Vegere" },
 };
