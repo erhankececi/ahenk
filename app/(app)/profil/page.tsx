@@ -40,6 +40,7 @@ import PromptEditor from "@/components/PromptEditor";
 import Achievements from "@/components/Achievements";
 import TrustBadge from "@/components/TrustBadge";
 import StoryHighlights from "@/components/StoryHighlights";
+import IlkAdimlar from "@/components/IlkAdimlar";
 
 export const dynamic = "force-dynamic";
 
@@ -200,6 +201,10 @@ export default async function Profil() {
 
         <div className="mb-5">
           <MembershipCard tier={premiumActive ? tier : null} name={p?.name} />
+        </div>
+
+        <div className="mb-5">
+          <IlkAdimlar />
         </div>
 
         {!premiumActive && (
