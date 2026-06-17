@@ -35,8 +35,8 @@ const featureCards = [
   },
   {
     icon: Heart,
-    title: "Güçlü İlk İzlenim",
-    text: "Büyük profiller, doğrulama rozetleri ve online durumu ile güven veren bir keşif ekranı.",
+    title: "Karakter Önce",
+    text: "Fotoğraf değil karakter önce gelir; profil sohbet derinleştikçe netleşir. Önyargı değil, merak.",
   },
   {
     icon: Zap,
@@ -269,6 +269,11 @@ export default async function Home() {
               <Link href="/#deneyim" className="lp-cta-ghost rounded-full px-7 py-3.5 font-semibold">
                 Deneyimi Gör
               </Link>
+            </div>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-text/55">
+              <span className="flex items-center gap-1.5"><ShieldCheck size={15} className="text-accent" /> 18+ doğrulamalı topluluk</span>
+              <span className="flex items-center gap-1.5"><Lock size={15} className="text-accent" /> Fotoğraf gizliliği sende</span>
+              <span className="flex items-center gap-1.5"><Sparkles size={15} className="text-accent" /> Sohbetle netleşen profiller</span>
             </div>
           </div>
 
