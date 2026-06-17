@@ -5,25 +5,28 @@ import { EmptyState } from "@/components/ui";
 import { zamanFarki } from "@/lib/utils";
 import { Heart, MessageCircle, Eye, Bell, Gift, Sparkles } from "lucide-react";
 import PushOptIn from "@/components/PushOptIn";
+import { cookies } from "next/headers";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
-
-const META: Record<string, { icon: any; href?: string; label: (p: any) => string }> = {
-  match: { icon: Heart, href: "/eslesmeler", label: () => "Yeni bir ahenk yakaladın!" },
-  super: { icon: Heart, href: "/begenenler", label: () => "Biri seni çok beğendi — kim olduğunu gör" },
-  like: { icon: Heart, href: "/begenenler", label: () => "Biri seni beğendi — kim olduğunu gör" },
-  message: { icon: MessageCircle, href: "/eslesmeler", label: () => "Yeni mesajın var" },
-  visit: { icon: Eye, href: "/ziyaretciler", label: () => "Profilini biri ziyaret etti" },
-  gift: { icon: Gift, href: "/eslesmeler", label: (p) => `Sana ${p?.label || "bir hediye"} geldi${p?.earned ? ` — +${p.earned} jeton kazandın` : ""}` },
-  daily: { icon: Sparkles, href: "/kesfet", label: (p) => p?.text || "Günün sorusu hazır — gün serini koru" },
-  system: { icon: Bell, label: (p) => p?.text || "Bildirim" },
-};
 
 export default async function Bildirimler() {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const tn = getAppDict(normalizeLang(cookies().get("lang")?.value)).bildirimler;
+  const META: Record<string, { icon: any; href?: string; label: (p: any) => string }> = {
+    match: { icon: Heart, href: "/eslesmeler", label: () => tn.match },
+    super: { icon: Heart, href: "/begenenler", label: () => tn.superLike },
+    like: { icon: Heart, href: "/begenenler", label: () => tn.like },
+    message: { icon: MessageCircle, href: "/eslesmeler", label: () => tn.message },
+    visit: { icon: Eye, href: "/ziyaretciler", label: () => tn.visit },
+    gift: { icon: Gift, href: "/eslesmeler", label: (p) => tn.giftMsg.replace("{gift}", p?.label || tn.giftFallback) + (p?.earned ? tn.giftEarned.replace("{n}", String(p.earned)) : "") },
+    daily: { icon: Sparkles, href: "/kesfet", label: (p) => p?.text || tn.dailyFallback },
+    system: { icon: Bell, label: (p) => p?.text || tn.systemFallback },
+  };
 
   const { data: notifs } = await supabase
     .from("notifications")
@@ -39,14 +42,14 @@ export default async function Bildirimler() {
 
   return (
     <div className="pb-6">
-      <TopBar title="Bildirimler" />
+      <TopBar title={tn.title} />
       <div className="px-4">
         <PushOptIn />
         {(notifs || []).length === 0 ? (
           <EmptyState
             icon={<Bell size={40} />}
-            title="Henüz bildirim yok"
-            desc="Yeni eşleşmeler, mesajlar ve ziyaretler burada görünecek."
+            title={tn.emptyTitle}
+            desc={tn.emptyDesc}
           />
         ) : (
           <div className="space-y-2">

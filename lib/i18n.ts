@@ -357,6 +357,11 @@ export type AppDict = {
     back: string; title: string; lockedTitle: string; lockedDesc: string; unlock: string; tipsTitle: string;
     sViews: string; sRepeat: string; sLikes: string; sMatches: string; sCalled: string; sTotal: string;
   };
+  bildirimler: {
+    title: string; emptyTitle: string; emptyDesc: string;
+    match: string; superLike: string; like: string; message: string; visit: string;
+    giftMsg: string; giftEarned: string; giftFallback: string; dailyFallback: string; systemFallback: string;
+  };
   common: { back: string };
 };
 
@@ -639,6 +644,13 @@ const appTr: AppDict = {
     unlock: "Analizi aç", tipsTitle: "Profil önerileri",
     sViews: "Bu hafta görüntülenme", sRepeat: "Tekrar bakanlar", sLikes: "Bu hafta beğeni",
     sMatches: "Bu hafta eşleşme", sCalled: "Seni arayanlar", sTotal: "Toplam ziyaretçi",
+  },
+  bildirimler: {
+    title: "Bildirimler", emptyTitle: "Henüz bildirim yok", emptyDesc: "Yeni eşleşmeler, mesajlar ve ziyaretler burada görünecek.",
+    match: "Yeni bir ahenk yakaladın!", superLike: "Biri seni çok beğendi — kim olduğunu gör", like: "Biri seni beğendi — kim olduğunu gör",
+    message: "Yeni mesajın var", visit: "Profilini biri ziyaret etti",
+    giftMsg: "Sana {gift} geldi", giftEarned: " — +{n} jeton kazandın", giftFallback: "bir hediye",
+    dailyFallback: "Günün sorusu hazır — gün serini koru", systemFallback: "Bildirim",
   },
   common: { back: "Geri" },
 };
@@ -923,6 +935,13 @@ const appEn: AppDict = {
     sViews: "Views this week", sRepeat: "Repeat viewers", sLikes: "Likes this week",
     sMatches: "Matches this week", sCalled: "Who called you", sTotal: "Total visitors",
   },
+  bildirimler: {
+    title: "Notifications", emptyTitle: "No notifications yet", emptyDesc: "New matches, messages and visits will appear here.",
+    match: "You caught a new ahenk!", superLike: "Someone really liked you — see who", like: "Someone liked you — see who",
+    message: "You have a new message", visit: "Someone visited your profile",
+    giftMsg: "You received {gift}", giftEarned: " — you earned +{n} tokens", giftFallback: "a gift",
+    dailyFallback: "The daily question is ready — keep your streak", systemFallback: "Notification",
+  },
   common: { back: "Back" },
 };
 
@@ -1205,6 +1224,13 @@ const appKu: AppDict = {
     unlock: "Analîzê veke", tipsTitle: "Pêşniyarên profîlê",
     sViews: "Vê hefteyê dîtin", sRepeat: "Yên dubare nêrî", sLikes: "Vê hefteyê ecibandin",
     sMatches: "Vê hefteyê lihevhatin", sCalled: "Yên bang li te kirin", sTotal: "Tevahiya serdankeran",
+  },
+  bildirimler: {
+    title: "Agahdarî", emptyTitle: "Hîna agahdarî tune", emptyDesc: "Lihevhatinên nû, peyam û serdan dê li vir xuya bibin.",
+    match: "Te ahengeke nû girt!", superLike: "Yekî gelek ji te hez kir — bibîne kî ye", like: "Yekî ji te hez kir — bibîne kî ye",
+    message: "Peyama te ya nû heye", visit: "Yekî serdana profîla te kir",
+    giftMsg: "{gift} ji te re hat", giftEarned: " — te +{n} jeton qezenc kir", giftFallback: "diyariyek",
+    dailyFallback: "Pirsa rojê amade ye — rêza xwe biparêze", systemFallback: "Agahdarî",
   },
   common: { back: "Vegere" },
 };
