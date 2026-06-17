@@ -13,6 +13,12 @@ export function uyeNo(n?: number | null): string | null {
   return `AHK-${String(n).padStart(4, "0")}${check}`;
 }
 
+/** Lansman kampanyası: ilk FOUNDING_LIMIT üye kalıcı "Kurucu Üye" statüsü alır. */
+export const FOUNDING_LIMIT = 1000;
+export function kurucuUye(memberNo?: number | null): boolean {
+  return typeof memberNo === "number" && memberNo > 0 && memberNo <= FOUNDING_LIMIT;
+}
+
 /** İki coğrafi nokta arası mesafe (km) — Haversine. */
 export function distanceKm(
   lat1?: number | null,

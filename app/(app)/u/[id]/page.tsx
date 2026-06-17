@@ -4,6 +4,7 @@ import { Hash, Briefcase, MapPin, Sparkles, Languages, BadgeCheck, MessageCircle
 import { PremiumBadge, tierFrame, tierName, VipTag } from "@/components/PremiumBadge";
 import TrustBadge from "@/components/TrustBadge";
 import { karakterUyumu } from "@/lib/matchScore";
+import { kurucuUye } from "@/lib/utils";
 import {
   etiketBul, SMOKING_OPTS, DRINKING_OPTS, PETS_OPTS, GOAL_OPTS, KIDS_OPTS, EXERCISE_OPTS,
 } from "@/lib/constants";
@@ -100,6 +101,11 @@ export default async function UserProfile({ params }: { params: { id: string } }
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           <PremiumBadge tier={tier} />
           {(tier === "platinum" || tier === "legend") && <VipTag tier={tier} />}
+          {kurucuUye(p.member_no) && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+              <Sparkles size={12} /> Kurucu Üye
+            </span>
+          )}
           <TrustBadge
             compact
             data={{

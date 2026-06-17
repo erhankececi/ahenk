@@ -4,7 +4,7 @@ import { ProfileActions } from "@/components/ProfileActions";
 import VibeVoiceCard from "@/components/VibeVoiceCard";
 import ProfilRetention from "@/components/ProfilRetention";
 import { signPhoto } from "@/lib/storage";
-import { yas, uyeNo } from "@/lib/utils";
+import { yas, uyeNo, kurucuUye } from "@/lib/utils";
 import {
   BadgeCheck,
   Crown,
@@ -165,6 +165,11 @@ export default async function Profil() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     <PremiumBadge tier={tier} />
                     {(tier === "platinum" || tier === "legend") && <VipTag tier={tier} />}
+                    {kurucuUye(p?.member_no) && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+                        <Sparkles size={12} /> Kurucu Üye
+                      </span>
+                    )}
                     {boostAktif && (
                       <span className="inline-flex items-center gap-1 rounded-full border border-[#C7A977]/30 bg-[#C7A977]/10 px-2.5 py-1 text-xs font-medium text-accent">
                         <Zap size={12} /> Boost aktif
