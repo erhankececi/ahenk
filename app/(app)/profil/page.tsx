@@ -217,9 +217,9 @@ export default async function Profil() {
                 <Crown size={19} />
               </div>
               <div>
-                <p className="font-semibold text-text">Ahenk Premium</p>
+                <p className="font-semibold text-text">Daha fazla görünür ol</p>
                 <p className="text-xs leading-5 text-muted">
-                  Sınırsız keşif, profil ziyaretleri, görüşme ve özel ayrıcalıklar
+                  Sınırsız keşif, profil ziyaretleri, görüşme ve özel ayrıcalıklar · Premium’a geç
                 </p>
               </div>
             </div>

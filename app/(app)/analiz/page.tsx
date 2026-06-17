@@ -49,12 +49,12 @@ export default function Analiz() {
       ) : d.locked ? (
         <div className="lp-panel rounded-3xl p-6 text-center">
           <Crown size={32} className="mx-auto text-accent" />
-          <p className="mt-3 font-display text-lg font-semibold text-text">Premium Plus’a özel</p>
+          <p className="mt-3 font-display text-lg font-semibold text-text">Profil etkini analiz et</p>
           <p className="mt-1.5 text-sm leading-6 text-muted">
             Seni kim aradı, kim tekrar profiline baktı, haftalık performansın — hepsi Premium Plus’ta.
           </p>
           <Link href="/premium?source=analysis_locked" className="lp-cta-gold mt-5 inline-block rounded-full px-6 py-2.5 text-sm font-semibold">
-            Premium Plus’a geç
+            Analizi aç
           </Link>
         </div>
       ) : (

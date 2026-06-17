@@ -64,13 +64,13 @@ export default async function Ziyaretciler() {
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent">
             <Lock size={26} />
           </span>
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text">{visitCount} kişi profiline baktı</p>
-          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted">Kimler olduğunu görmek Premium ayrıcalığıdır.</p>
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text">Seni fark edenleri gör</p>
+          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted">{visitCount} kişi profiline baktı — kimler olduğunu Premium ile gör.</p>
           <Link
             href="/premium?source=visitors_locked"
             className="lp-cta-gold inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold"
           >
-            <Crown size={18} /> Premium ol
+            <Crown size={18} /> Premium ile gör
           </Link>
         </div>
       ) : visitors.length === 0 ? (

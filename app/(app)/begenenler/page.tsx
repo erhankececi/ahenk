@@ -119,15 +119,15 @@ function FreeGate({ count }: { count: number }) {
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
           <Lock size={20} className="text-accent" />
         </div>
-        <h2 className="font-display text-lg font-semibold text-text">{count} kişi seni beğendi</h2>
+        <h2 className="font-display text-lg font-semibold text-text">Seni beğenenleri aç</h2>
         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-muted">
-          Kim olduklarını gör ve tek dokunuşla eşleş. Beğenenleri görmek Premium ayrıcalığıdır.
+          {count} kişi seni beğendi. Kim olduklarını gör, tek dokunuşla eşleş — Premium ile aç.
         </p>
         <Link
           href="/premium?source=likes_locked"
           className="lp-cta-gold mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
         >
-          <Crown size={16} /> Premium ile gör
+          <Crown size={16} /> Premium ile aç
         </Link>
         <p className="mt-3 flex items-center justify-center gap-1 text-xs text-muted">
           <Sparkles size={12} /> Sınırsız keşif, görüşme ve dahası
