@@ -1,6 +1,6 @@
 import Link from "next/link";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { getDict, type Lang } from "@/lib/i18n";
+import { getDict, getAppDict, type Lang } from "@/lib/i18n";
 import { Instagram, Twitter, Youtube } from "lucide-react";
 
 export default function MarketingShell({
@@ -11,6 +11,7 @@ export default function MarketingShell({
   children: React.ReactNode;
 }) {
   const t = getDict(lang);
+  const tl = getAppDict(lang).landing;
   const year = new Date().getFullYear();
 
   return (
@@ -26,9 +27,9 @@ export default function MarketingShell({
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm text-muted md:flex">
-            <Link href="/#kesfet" className="transition hover:text-text">Keşfet</Link>
-            <Link href="/#moments" className="transition hover:text-text">Moments</Link>
-            <Link href="/#premium" className="transition hover:text-text">Premium</Link>
+            <Link href="/#kesfet" className="transition hover:text-text">{tl.navKesfet}</Link>
+            <Link href="/#moments" className="transition hover:text-text">{tl.navMoments}</Link>
+            <Link href="/#premium" className="transition hover:text-text">{tl.navPremium}</Link>
             <Link href="/guvenlik" className="transition hover:text-text">{t.nav.safety}</Link>
           </nav>
 
@@ -40,13 +41,13 @@ export default function MarketingShell({
               href="/login"
               className="lp-cta-ghost rounded-full px-4 py-2 text-sm font-medium transition"
             >
-              Giriş Yap
+              {tl.login}
             </Link>
             <Link
               href="/register"
               className="lp-cta-gold rounded-full px-4 py-2 text-sm font-semibold transition"
             >
-              Ahenk’e Katıl
+              {tl.join}
             </Link>
           </div>
         </div>
@@ -65,7 +66,7 @@ export default function MarketingShell({
               <span className="font-display text-lg font-bold tracking-tight">Ahenk</span>
             </Link>
             <p className="mt-3 max-w-[16rem] text-sm leading-relaxed text-muted">
-              Karakter önce, yüz sonra. Premium sosyal keşif platformu.
+              {tl.footerTagline}
             </p>
             <div className="mt-5 flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-muted transition hover:border-accent/40 hover:text-accent" aria-label="Instagram">
@@ -83,9 +84,9 @@ export default function MarketingShell({
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">{t.footer.product}</p>
             <div className="space-y-2 text-sm">
-              <Link href="/#kesfet" className="block text-muted transition hover:text-text">Keşfet</Link>
-              <Link href="/#moments" className="block text-muted transition hover:text-text">Moments</Link>
-              <Link href="/#premium" className="block text-muted transition hover:text-text">Premium</Link>
+              <Link href="/#kesfet" className="block text-muted transition hover:text-text">{tl.navKesfet}</Link>
+              <Link href="/#moments" className="block text-muted transition hover:text-text">{tl.navMoments}</Link>
+              <Link href="/#premium" className="block text-muted transition hover:text-text">{tl.navPremium}</Link>
               <Link href="/indir" className="block text-muted transition hover:text-text">{t.nav.download}</Link>
             </div>
           </div>
@@ -110,7 +111,7 @@ export default function MarketingShell({
         <div className="border-t border-white/[0.07]">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-5 text-xs text-muted sm:flex-row">
             <span>© {year} Ahenk. {t.footer.rights}</span>
-            <span className="text-muted/70">Türkiye’nin premium sosyal keşif platformu</span>
+            <span className="text-muted/70">{tl.footerBottom}</span>
           </div>
         </div>
       </footer>

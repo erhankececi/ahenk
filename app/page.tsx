@@ -4,7 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import MarketingShell from "@/components/marketing/MarketingShell";
-import { normalizeLang } from "@/lib/i18n";
+import { normalizeLang, getAppDict, type AppDict } from "@/lib/i18n";
+
+type LD = AppDict["landing"];
 import {
   ArrowRight,
   BadgeCheck,
@@ -101,36 +103,30 @@ function PhoneFrame({ children, className = "" }: { children: React.ReactNode; c
   );
 }
 
-function DiscoverPhone() {
+function DiscoverPhone({ t }: { t: LD }) {
   return (
     <PhoneFrame className="vision-phone-left">
       <div className="flex h-full flex-col px-5 pb-5 pt-10">
         <div className="mb-5 flex items-center justify-between">
           <span className="font-display text-3xl font-semibold text-accent">A</span>
-          <h3 className="font-display text-2xl font-bold tracking-tight">Keşfet</h3>
+          <h3 className="font-display text-2xl font-bold tracking-tight">{t.mDiscover}</h3>
           <SlidersHorizontal size={20} strokeWidth={1.6} className="text-text/80" />
         </div>
         <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto">
-          {[
-            "Tümü",
-            "Yakınında",
-            "Online",
-            "Yeni",
-            "Popüler",
-          ].map((x, i) => (
+          {t.chipsDiscover.map((x, i) => (
             <span key={x} className={i === 0 ? "vision-chip-active" : "vision-chip"}>{x}</span>
           ))}
         </div>
         <div className="relative flex-1 overflow-hidden rounded-[1.7rem] border border-accent/35 bg-[#120f13] shadow-[0_24px_70px_-38px_rgba(0,0,0,1)]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_20%,rgba(199,169,119,.45),transparent_10rem),linear-gradient(160deg,#3a2b1e_0%,#121013_50%,#050506_100%)]" />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/62 to-transparent p-6 pt-28">
-            <span className="mb-3 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs text-text/90">Yeni üye</span>
+            <span className="mb-3 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs text-text/90">{t.mNewMember}</span>
             <div className="flex items-center gap-2">
               <h4 className="font-display text-2xl font-bold tracking-tight">Dilara, 24</h4>
               <BadgeCheck size={19} className="text-accent" />
             </div>
             <p className="mt-1 text-sm text-text/70">İstanbul · 2 km</p>
-            <p className="mt-2 text-sm text-success">Online</p>
+            <p className="mt-2 text-sm text-success">{t.mOnline}</p>
             <div className="mt-5 flex items-center justify-between">
               {[Star, Heart, MessageCircle].map((Icon, i) => (
                 <span key={i} className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-accent shadow-inner">
@@ -145,12 +141,12 @@ function DiscoverPhone() {
   );
 }
 
-function MomentsPhone() {
+function MomentsPhone({ t }: { t: LD }) {
   return (
     <PhoneFrame className="vision-phone-center">
       <div className="flex h-full flex-col px-5 pb-5 pt-10">
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="font-display text-2xl font-bold tracking-tight">Moments</h3>
+          <h3 className="font-display text-2xl font-bold tracking-tight">{t.mMoments}</h3>
           <div className="flex items-center gap-3">
             <Search size={21} strokeWidth={1.65} />
             <Bell size={21} strokeWidth={1.65} />
@@ -159,7 +155,7 @@ function MomentsPhone() {
         </div>
         <div className="mb-4 flex gap-4 overflow-hidden">
           {[
-            "Anın",
+            t.mYourMoment,
             "Melisa",
             "Ahmet",
             "Seda",
@@ -175,12 +171,12 @@ function MomentsPhone() {
             <div className="h-10 w-10 rounded-full bg-[radial-gradient(circle_at_35%_20%,#c7a977,#2b2222_62%)]" />
             <div>
               <div className="flex items-center gap-1.5 font-semibold">Seda <BadgeCheck size={15} className="text-accent" /></div>
-              <p className="text-xs text-text/58">2 saat önce · İstanbul</p>
+              <p className="text-xs text-text/58">{t.mAgo}</p>
             </div>
           </div>
           <div className="h-72 bg-[radial-gradient(circle_at_50%_20%,rgba(255,163,84,.9),transparent_8rem),linear-gradient(180deg,#e49d4c_0%,#37211b_52%,#090a0e_100%)]" />
           <div className="p-4">
-            <p className="text-sm">Gün batımının huzuru</p>
+            <p className="text-sm">{t.mCaption}</p>
             <div className="mt-4 flex gap-5 text-sm text-text/70">
               <span className="flex items-center gap-1.5"><Heart size={17} fill="currentColor" />128</span>
               <span className="flex items-center gap-1.5"><MessageCircle size={17} />24</span>
@@ -192,16 +188,16 @@ function MomentsPhone() {
   );
 }
 
-function GiftPhone() {
+function GiftPhone({ t }: { t: LD }) {
   return (
     <PhoneFrame className="vision-phone-right">
       <div className="flex h-full flex-col px-5 pb-5 pt-10">
         <div className="mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-3"><span className="text-2xl leading-none">‹</span><h3 className="font-display text-xl font-bold tracking-tight">Hediye Mağazası</h3></div>
+          <div className="flex items-center gap-3"><span className="text-2xl leading-none">‹</span><h3 className="font-display text-xl font-bold tracking-tight">{t.mGiftStore}</h3></div>
           <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent">12.450 +</span>
         </div>
         <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto">
-          {["Tümü", "Popüler", "Lüks", "Özel", "Etkinlik"].map((x, i) => (
+          {t.chipsGift.map((x, i) => (
             <span key={x} className={i === 0 ? "vision-chip-active" : "vision-chip"}>{x}</span>
           ))}
         </div>
@@ -218,7 +214,7 @@ function GiftPhone() {
         </div>
         <div className="mt-auto flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-[#1b1409]">●</span>
-          <span className="flex-1"><b className="block text-sm">Jeton satın al</b><span className="text-xs text-text/58">Avantajlı paketleri keşfet</span></span>
+          <span className="flex-1"><b className="block text-sm">{t.mBuyTokens}</b><span className="text-xs text-text/58">{t.mBuyTokensDesc}</span></span>
           <span className="text-accent">+</span>
         </div>
       </div>
@@ -226,12 +222,12 @@ function GiftPhone() {
   );
 }
 
-function Showcase() {
+function Showcase({ t }: { t: LD }) {
   return (
     <div className="vision-showcase">
-      <DiscoverPhone />
-      <MomentsPhone />
-      <GiftPhone />
+      <DiscoverPhone t={t} />
+      <MomentsPhone t={t} />
+      <GiftPhone t={t} />
     </div>
   );
 }
@@ -246,6 +242,7 @@ export default async function Home() {
   }
 
   const lang = normalizeLang(cookies().get("lang")?.value);
+  const tl = getAppDict(lang).landing;
 
   return (
     <MarketingShell lang={lang}>
@@ -253,38 +250,38 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-10 max-w-4xl text-center">
             <span className="lp-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
-              <Sparkles size={15} /> Türkiye’nin premium sosyal keşif deneyimi
+              <Sparkles size={15} /> {tl.badge}
             </span>
             <h1 className="mt-7 font-display text-5xl font-extrabold leading-[0.98] tracking-[-0.06em] sm:text-7xl lg:text-8xl">
-              Karakter önce,
-              <span className="block text-accent">yüz sonra.</span>
+              {tl.titleLine1}
+              <span className="block text-accent">{tl.titleLine2}</span>
             </h1>
             <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-text/62 sm:text-xl">
-              Ahenk; keşif, moments, reels, canlı oyun masaları ve premium hediye ekonomisini tek bir sessiz lüks arayüzde birleştirir.
+              {tl.subtitle}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/register" className="lp-cta-gold inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold">
-                Ahenk’e Katıl <ArrowRight size={18} />
+                {tl.ctaJoin} <ArrowRight size={18} />
               </Link>
               <Link href="/#deneyim" className="lp-cta-ghost rounded-full px-7 py-3.5 font-semibold">
-                Deneyimi Gör
+                {tl.ctaExperience}
               </Link>
             </div>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-text/55">
-              <span className="flex items-center gap-1.5"><ShieldCheck size={15} className="text-accent" /> 18+ doğrulamalı topluluk</span>
-              <span className="flex items-center gap-1.5"><Lock size={15} className="text-accent" /> Fotoğraf gizliliği sende</span>
-              <span className="flex items-center gap-1.5"><Sparkles size={15} className="text-accent" /> Sohbetle netleşen profiller</span>
+              <span className="flex items-center gap-1.5"><ShieldCheck size={15} className="text-accent" /> {tl.trust1}</span>
+              <span className="flex items-center gap-1.5"><Lock size={15} className="text-accent" /> {tl.trust2}</span>
+              <span className="flex items-center gap-1.5"><Sparkles size={15} className="text-accent" /> {tl.trust3}</span>
             </div>
           </div>
 
-          <Showcase />
+          <Showcase t={tl} />
 
           <div className="vision-feature-strip mt-7 grid gap-0 overflow-hidden rounded-[1.8rem] lg:grid-cols-5">
-            {featureCards.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="border-white/8 p-6 lg:border-r last:lg:border-r-0">
+            {featureCards.map(({ icon: Icon }, i) => (
+              <div key={i} className="border-white/8 p-6 lg:border-r last:lg:border-r-0">
                 <Icon size={30} strokeWidth={1.65} className="mb-4 text-accent" />
-                <h3 className="font-display text-lg font-bold tracking-tight">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-text/62">{text}</p>
+                <h3 className="font-display text-lg font-bold tracking-tight">{tl.features[i]?.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-text/62">{tl.features[i]?.text}</p>
               </div>
             ))}
           </div>
@@ -294,15 +291,15 @@ export default async function Home() {
       <section id="deneyim" className="mx-auto max-w-6xl px-5 py-16">
         <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-accent">Ürün mimarisi</p>
-            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-5xl">Sıradan dating değil, canlı sosyal dünya.</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-accent">{tl.prodEyebrow}</p>
+            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-5xl">{tl.prodTitle}</h2>
           </div>
           <p className="max-w-md text-sm leading-relaxed text-text/62">
-            Her modül aynı tasarım sistemine bağlı: onyx yüzey, pirinç vurgu, net hiyerarşi ve premium boşluk.
+            {tl.prodDesc}
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {products.map((p) => (
+          {tl.products.map((p) => (
             <article key={p.k} className="lp-panel lp-panel-hover rounded-[1.6rem] p-6">
               <span className="text-sm font-semibold text-accent">{p.k}</span>
               <h3 className="mt-3 font-display text-2xl font-bold tracking-tight">{p.t}</h3>
@@ -317,32 +314,25 @@ export default async function Home() {
           <div className="grid gap-8 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
             <div>
               <Crown size={38} strokeWidth={1.5} className="text-accent" />
-              <h2 className="mt-5 font-display text-3xl font-extrabold tracking-tight sm:text-5xl">Premium hissi ilk ekrandan başlar.</h2>
+              <h2 className="mt-5 font-display text-3xl font-extrabold tracking-tight sm:text-5xl">{tl.premiumTitle}</h2>
               <p className="mt-4 max-w-2xl text-lg leading-relaxed text-text/62">
-                Girişten mağazaya, profilden mesaja kadar tüm akış aynı marka diliyle çalışır: az renk, güçlü kontrast, iyi boşluk ve zarif hareket.
+                {tl.premiumDesc}
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link href="/register" className="lp-cta-gold inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 font-semibold">
-                  Hemen Başla <ArrowRight size={18} />
+                  {tl.ctaStart} <ArrowRight size={18} />
                 </Link>
                 <Link href="/guvenlik" className="lp-cta-ghost inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 font-semibold">
-                  Güvenlik standardı <Lock size={17} />
+                  {tl.ctaSafety} <Lock size={17} />
                 </Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {[
-                ["Doğrulama", BadgeCheck],
-                ["Premium", Crown],
-                ["Hediyeler", Gift],
-                ["Topluluk", User],
-                ["Reels", Clapperboard],
-                ["Gizlilik", Lock],
-              ].map(([label, Icon]: any) => (
-                <div key={label} className="rounded-2xl border border-white/9 bg-black/18 p-4">
+              {[BadgeCheck, Crown, Gift, User, Clapperboard, Lock].map((Icon, i) => (
+                <div key={i} className="rounded-2xl border border-white/9 bg-black/18 p-4">
                   <Icon size={22} className="mb-3 text-accent" strokeWidth={1.6} />
-                  <p className="font-semibold">{label}</p>
-                  <p className="mt-1 text-xs text-text/48">Ahenk standardı</p>
+                  <p className="font-semibold">{tl.badges[i]}</p>
+                  <p className="mt-1 text-xs text-text/48">{tl.badgeSub}</p>
                 </div>
               ))}
             </div>

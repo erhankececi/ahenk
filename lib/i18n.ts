@@ -322,6 +322,18 @@ export type AppDict = {
     featLegend: { title: string; desc: string }[];
     compareRows: string[];
   };
+  landing: {
+    navKesfet: string; navMoments: string; navPremium: string; login: string; join: string;
+    footerTagline: string; footerBottom: string;
+    badge: string; titleLine1: string; titleLine2: string; subtitle: string; ctaJoin: string; ctaExperience: string;
+    trust1: string; trust2: string; trust3: string;
+    features: { title: string; text: string }[];
+    prodEyebrow: string; prodTitle: string; prodDesc: string;
+    products: { k: string; t: string; d: string }[];
+    premiumTitle: string; premiumDesc: string; ctaStart: string; ctaSafety: string; badges: string[]; badgeSub: string;
+    mDiscover: string; mMoments: string; mGiftStore: string; chipsDiscover: string[]; chipsGift: string[];
+    mNewMember: string; mOnline: string; mBuyTokens: string; mBuyTokensDesc: string; mYourMoment: string; mCaption: string; mAgo: string;
+  };
   common: { back: string };
 };
 
@@ -535,6 +547,38 @@ const appTr: AppDict = {
       "Profil temaları", "Sesli görüşme", "Görüntülü görüşme (HD)", "1080p + VIP arama", "Öncelikli görünürlük",
       "Black Diamond profil + LEGEND",
     ],
+  },
+  landing: {
+    navKesfet: "Keşfet", navMoments: "Moments", navPremium: "Premium", login: "Giriş Yap", join: "Ahenk’e Katıl",
+    footerTagline: "Karakter önce, yüz sonra. Premium sosyal keşif platformu.", footerBottom: "Türkiye’nin premium sosyal keşif platformu",
+    badge: "Türkiye’nin premium sosyal keşif deneyimi",
+    titleLine1: "Karakter önce,", titleLine2: "yüz sonra.",
+    subtitle: "Ahenk; keşif, moments, reels, canlı oyun masaları ve premium hediye ekonomisini tek bir sessiz lüks arayüzde birleştirir.",
+    ctaJoin: "Ahenk’e Katıl", ctaExperience: "Deneyimi Gör",
+    trust1: "18+ doğrulamalı topluluk", trust2: "Fotoğraf gizliliği sende", trust3: "Sohbetle netleşen profiller",
+    features: [
+      { title: "Premium Tasarım Dili", text: "Koyu tonlar, mat pirinç vurgu ve sakin tipografiyle pahalı, temiz ve güven veren bir deneyim." },
+      { title: "Karakter Önce", text: "Fotoğraf değil karakter önce gelir; profil sohbet derinleştikçe netleşir. Önyargı değil, merak." },
+      { title: "Canlı ve Etkileşimli", text: "Moments, hikayeler, reels, sesli masalar ve sosyal etkileşim tek ürün içinde birleşir." },
+      { title: "Lüks Hediye Deneyimi", text: "Her hediye özel tasarım, sinematik animasyon ve ayrıcalık hissi verir." },
+      { title: "Güven ve Kalite", text: "Doğrulama, rozetler, KVKK/5651 kayıtları ve premium özellikler güvenli topluluk kurar." },
+    ],
+    prodEyebrow: "Ürün mimarisi", prodTitle: "Sıradan dating değil, canlı sosyal dünya.",
+    prodDesc: "Her modül aynı tasarım sistemine bağlı: onyx yüzey, pirinç vurgu, net hiyerarşi ve premium boşluk.",
+    products: [
+      { k: "Keşfet", t: "Karakter önce, yüz sonra", d: "Fotoğrafı değil karakteri öne alan keşif sistemi; sohbet ilerledikçe güvenli reveal akışı." },
+      { k: "Moments", t: "İçerik gücü ve sosyal enerji", d: "Hikayeler, moments ve reels ile kullanıcı sadece kaydırmaz; kendini anlatır." },
+      { k: "Canlı Deneyim", t: "Ses, görüntü ve 101 masaları", d: "WebRTC görüşmeler, sesli oyun masaları ve canlı sosyal alanlar premium hisle birleşir." },
+      { k: "Güvenlik", t: "KVKK uyumlu, kontrollü topluluk", d: "Gizlilik, şikayet, engelleme, doğrulama ve denetimli mesaj inceleme akışları tek çizgide." },
+    ],
+    premiumTitle: "Premium hissi ilk ekrandan başlar.",
+    premiumDesc: "Girişten mağazaya, profilden mesaja kadar tüm akış aynı marka diliyle çalışır: az renk, güçlü kontrast, iyi boşluk ve zarif hareket.",
+    ctaStart: "Hemen Başla", ctaSafety: "Güvenlik standardı",
+    badges: ["Doğrulama", "Premium", "Hediyeler", "Topluluk", "Reels", "Gizlilik"], badgeSub: "Ahenk standardı",
+    mDiscover: "Keşfet", mMoments: "Moments", mGiftStore: "Hediye Mağazası",
+    chipsDiscover: ["Tümü", "Yakınında", "Online", "Yeni", "Popüler"], chipsGift: ["Tümü", "Popüler", "Lüks", "Özel", "Etkinlik"],
+    mNewMember: "Yeni üye", mOnline: "Online", mBuyTokens: "Jeton satın al", mBuyTokensDesc: "Avantajlı paketleri keşfet",
+    mYourMoment: "Anın", mCaption: "Gün batımının huzuru", mAgo: "2 saat önce · İstanbul",
   },
   common: { back: "Geri" },
 };
@@ -750,6 +794,38 @@ const appEn: AppDict = {
       "Black Diamond profile + LEGEND",
     ],
   },
+  landing: {
+    navKesfet: "Discover", navMoments: "Moments", navPremium: "Premium", login: "Log In", join: "Join Ahenk",
+    footerTagline: "Character first, face later. Premium social discovery platform.", footerBottom: "Türkiye's premium social discovery platform",
+    badge: "Türkiye's premium social discovery experience",
+    titleLine1: "Character first,", titleLine2: "face later.",
+    subtitle: "Ahenk brings discovery, moments, reels, live game tables and a premium gift economy together in one quiet-luxury interface.",
+    ctaJoin: "Join Ahenk", ctaExperience: "See the experience",
+    trust1: "18+ verified community", trust2: "Photo privacy is yours", trust3: "Profiles that clear up through chat",
+    features: [
+      { title: "Premium Design Language", text: "A rich, clean and reassuring experience with dark tones, matte brass accents and calm typography." },
+      { title: "Character First", text: "Character comes before the photo; the profile clears up as the conversation deepens. Curiosity, not prejudice." },
+      { title: "Live & Interactive", text: "Moments, stories, reels, voice tables and social interaction unite in one product." },
+      { title: "Luxury Gift Experience", text: "Every gift has a custom design, cinematic animation and a sense of privilege." },
+      { title: "Trust & Quality", text: "Verification, badges, KVKK/5651 records and premium features build a safe community." },
+    ],
+    prodEyebrow: "Product architecture", prodTitle: "Not ordinary dating — a living social world.",
+    prodDesc: "Every module follows the same design system: onyx surface, brass accent, clear hierarchy and premium spacing.",
+    products: [
+      { k: "Discover", t: "Character first, face later", d: "A discovery system that puts character before the photo; a safe reveal flow as the chat progresses." },
+      { k: "Moments", t: "Content power and social energy", d: "With stories, moments and reels the user doesn't just scroll — they express themselves." },
+      { k: "Live Experience", t: "Voice, video and 101 tables", d: "WebRTC calls, voice game tables and live social spaces unite with a premium feel." },
+      { k: "Safety", t: "KVKK-compliant, controlled community", d: "Privacy, reporting, blocking, verification and moderated message review on one line." },
+    ],
+    premiumTitle: "Premium feel starts from the first screen.",
+    premiumDesc: "From sign-in to the store, from profile to messages, the whole flow runs in the same brand language: few colors, strong contrast, good spacing and elegant motion.",
+    ctaStart: "Get Started", ctaSafety: "Safety standard",
+    badges: ["Verification", "Premium", "Gifts", "Community", "Reels", "Privacy"], badgeSub: "Ahenk standard",
+    mDiscover: "Discover", mMoments: "Moments", mGiftStore: "Gift Store",
+    chipsDiscover: ["All", "Nearby", "Online", "New", "Popular"], chipsGift: ["All", "Popular", "Luxury", "Special", "Event"],
+    mNewMember: "New member", mOnline: "Online", mBuyTokens: "Buy tokens", mBuyTokensDesc: "Explore great-value packs",
+    mYourMoment: "Your moment", mCaption: "The calm of sunset", mAgo: "2 hours ago · İstanbul",
+  },
   common: { back: "Back" },
 };
 
@@ -963,6 +1039,38 @@ const appKu: AppDict = {
       "Temayên profîlê", "Bangên dengî", "Bangên vîdyo (HD)", "1080p + bangên VIP", "Xuyabûna pêşîn",
       "Profîla Black Diamond + LEGEND",
     ],
+  },
+  landing: {
+    navKesfet: "Keşf", navMoments: "Moments", navPremium: "Premium", login: "Têkeve", join: "Tev li Ahengê bibe",
+    footerTagline: "Pêşî karakter, paşê rû. Platforma keşfa civakî ya premium.", footerBottom: "Platforma keşfa civakî ya premium a Tirkiyeyê",
+    badge: "Ezmûna keşfa civakî ya premium a Tirkiyeyê",
+    titleLine1: "Pêşî karakter,", titleLine2: "paşê rû.",
+    subtitle: "Ahenk; keşf, moments, reels, masayên lîstika zindî û aboriya diyariyên premium di yek navrûyeke luksa bêdeng de tîne ba hev.",
+    ctaJoin: "Tev li Ahengê bibe", ctaExperience: "Ezmûnê bibîne",
+    trust1: "Civata pejirandî ya 18+", trust2: "Nepenîtiya wêneyan ya te ye", trust3: "Profîlên ku bi axaftinê zelal dibin",
+    features: [
+      { title: "Zimanê Sêwirana Premium", text: "Bi tonên tarî, vegirtina pirinca mat û tîpografiya aram ezmûneke biha, paqij û pêbawer." },
+      { title: "Pêşî Karakter", text: "Karakter beriya wêneyê tê; profîl gava axaftin kûr dibe zelal dibe. Meraq, ne pêşdarazî." },
+      { title: "Zindî û Înteraktîf", text: "Moments, çîrok, reels, masayên dengî û têkiliya civakî di yek hilberê de tên ba hev." },
+      { title: "Ezmûna Diyariya Luks", text: "Her diyarî sêwirana taybet, anîmasyona sînematîk û hesta îmtiyazê dide." },
+      { title: "Pêbawerî û Kalîte", text: "Pejirandin, nîşan, qeydên KVKK/5651 û taybetmendiyên premium civateke ewle ava dikin." },
+    ],
+    prodEyebrow: "Mîmariya hilberê", prodTitle: "Ne datinga asayî — cîhaneke civakî ya zindî.",
+    prodDesc: "Her modul bi heman pergala sêwiranê ve girêdayî ye: rûyê onyx, vegirtina pirinc, hiyerarşiya zelal û valahiya premium.",
+    products: [
+      { k: "Keşf", t: "Pêşî karakter, paşê rû", d: "Pergala keşfê ya ku karakter datîne pêş ne wêne; herikîna reveal a ewle gava axaftin pêş diçe." },
+      { k: "Moments", t: "Hêza naverokê û enerjiya civakî", d: "Bi çîrok, moments û reels bikarhêner ne tenê dikişîne — xwe dide nasîn." },
+      { k: "Ezmûna Zindî", t: "Deng, vîdyo û masayên 101", d: "Bangên WebRTC, masayên lîstika dengî û qadên civakî yên zindî bi hesteke premium tên ba hev." },
+      { k: "Ewlehî", t: "Civata kontrolkirî ya li gorî KVKK", d: "Nepenîtî, gilî, astengkirin, pejirandin û vekolîna peyamê ya çavdêrkirî di yek xetê de." },
+    ],
+    premiumTitle: "Hesta premium ji ekrana yekem dest pê dike.",
+    premiumDesc: "Ji têketinê heta dikanê, ji profîlê heta peyaman, tevahiya herikînê bi heman zimanê markayê dixebite: kêm reng, kontrasta xurt, valahiya baş û livîna xweşik.",
+    ctaStart: "Niha Dest Pê Bike", ctaSafety: "Standarda ewlehiyê",
+    badges: ["Pejirandin", "Premium", "Diyarî", "Civat", "Reels", "Nepenîtî"], badgeSub: "Standarda Ahengê",
+    mDiscover: "Keşf", mMoments: "Moments", mGiftStore: "Dikana Diyariyan",
+    chipsDiscover: ["Hemû", "Nêzîk", "Online", "Nû", "Populer"], chipsGift: ["Hemû", "Populer", "Luks", "Taybet", "Çalakî"],
+    mNewMember: "Endamê nû", mOnline: "Online", mBuyTokens: "Jeton bikire", mBuyTokensDesc: "Pakêtên biavantaj keşf bike",
+    mYourMoment: "Kêliya te", mCaption: "Aramiya rojava", mAgo: "2 saet berê · İstanbul",
   },
   common: { back: "Vegere" },
 };
