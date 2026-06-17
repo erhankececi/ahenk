@@ -16,6 +16,7 @@ import {
 import { Crown, Check, Sparkles, Smartphone, RefreshCw, Gem, Coins, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui";
 import { tierCard, tierName, VipTag } from "@/components/PremiumBadge";
+import { trackEvent } from "@/lib/track";
 
 const LEGEND_FEATURES = [
   { title: "Black Diamond profil", desc: "Siyah elmas kart + LEGEND rozeti" },
@@ -87,9 +88,11 @@ export default function Premium() {
 
   useEffect(() => {
     load();
+    trackEvent("premium_paywall_viewed");
   }, []);
 
   async function abone(pkg: StorePackage) {
+    trackEvent("premium_cta_clicked", { plan: pkg.plan });
     setBusy(pkg.id);
     setMsg(null);
     const r = await purchase(pkg);

@@ -70,5 +70,22 @@ export async function GET() {
     kurucuUye: kuruluk,
   };
 
-  return NextResponse.json({ huni, hacim, signups });
+  // 30 günlük granüler dönüşüm sinyalleri (events tablosu; yoksa güvenli boş).
+  const eventler: Record<string, number> = {};
+  try {
+    const monthAgo = new Date(now.getTime() - 30 * DAY).toISOString();
+    const names = [
+      "referral_link_copied",
+      "referral_link_shared",
+      "coin_purchase_clicked",
+      "premium_paywall_viewed",
+      "premium_cta_clicked",
+    ];
+    const counts = await Promise.all(
+      names.map((n) => cnt(admin.from("events").select("id", { count: "exact", head: true }).eq("event_name", n).gte("created_at", monthAgo)))
+    );
+    names.forEach((n, i) => (eventler[n] = counts[i]));
+  } catch {}
+
+  return NextResponse.json({ huni, hacim, eventler, signups });
 }

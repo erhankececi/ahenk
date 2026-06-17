@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/track";
 import { Users, Copy, Check, Share2, Trophy, Coins } from "lucide-react";
 
 // Davet/referral kartı — cüzdanda gösterilir. Davet eden 250, gelen 25 jeton kazanır.
@@ -31,6 +32,7 @@ export default function DavetKart() {
     try {
       await navigator.clipboard.writeText(link);
       setCopied(true);
+      trackEvent("referral_link_copied");
       setTimeout(() => setCopied(false), 1800);
     } catch {}
   }
@@ -43,7 +45,7 @@ export default function DavetKart() {
       url: link,
     };
     if (navigator.share) {
-      try { await navigator.share(data); } catch {}
+      try { await navigator.share(data); trackEvent("referral_link_shared"); } catch {}
     } else {
       kopyala();
     }

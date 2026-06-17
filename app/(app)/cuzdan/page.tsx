@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, Skeleton } from "@/components/ui";
 import { Coins, Plus, Minus, ArrowLeft, Crown, Zap, Banknote, ArrowRight } from "lucide-react";
 import DavetKart from "@/components/DavetKart";
+import { trackEvent } from "@/lib/track";
 
 const PACKAGES = [
   { id: "p100", jeton: 100, price: 29, label: "100 Jeton" },
@@ -58,6 +59,7 @@ export default function Cuzdan() {
 
   async function satinAl(pkg: string) {
     if (buying) return;
+    trackEvent("coin_purchase_clicked", { pkg });
     setBuying(pkg);
     setNotice(null);
     try {

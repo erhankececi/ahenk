@@ -7,7 +7,16 @@ type Huni = { key: string; label: string; value: number; pct: number };
 type Data = {
   huni: Huni[];
   hacim: { dau: number; wau: number; dailyAnswers: number; interactions: number; messages: number; kurucuUye: number };
+  eventler?: Record<string, number>;
   signups: number;
+};
+
+const EVENT_LABEL: Record<string, string> = {
+  referral_link_copied: "Davet linki kopyalandı",
+  referral_link_shared: "Davet paylaşıldı",
+  premium_paywall_viewed: "Premium görüntülendi",
+  premium_cta_clicked: "Premium CTA tıklandı",
+  coin_purchase_clicked: "Jeton al tıklandı",
 };
 
 export default function AdminGrowth() {
@@ -73,6 +82,23 @@ export default function AdminGrowth() {
               </div>
             ))}
           </div>
+
+          {/* 30 günlük dönüşüm sinyalleri (granüler event'ler) */}
+          {d.eventler && Object.keys(d.eventler).length > 0 && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Son 30 gün · dönüşüm sinyalleri
+              </p>
+              <div className="space-y-1.5">
+                {Object.entries(EVENT_LABEL).map(([k, label]) => (
+                  <div key={k} className="flex items-center justify-between text-xs">
+                    <span className="text-text/80">{label}</span>
+                    <span className="font-semibold text-accent">{tr(d.eventler?.[k] ?? 0)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </section>
