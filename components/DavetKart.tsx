@@ -5,12 +5,22 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/track";
 import { Users, Copy, Check, Share2, Trophy, Coins } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 // Davet/referral kartı — cüzdanda gösterilir. Davet eden 250, gelen 25 jeton kazanır.
 export default function DavetKart() {
   const supabase = createClient();
+  const { t } = useLang();
+  const td = t.davet;
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Ödül cümlesi — sayılar kalın; placeholder'lar dil sırasından bağımsız çalışır.
+  const rewardParts = td.reward.split(/(\{a\}|\{b\})/).map((part, i) =>
+    part === "{a}" ? <b key={i} className="text-accent">250</b>
+      : part === "{b}" ? <b key={i} className="text-accent">25</b>
+        : <span key={i}>{part}</span>
+  );
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -41,7 +51,7 @@ export default function DavetKart() {
     if (!link) return;
     const data = {
       title: "Ahenk",
-      text: "Karakter önce, yüz sonra. Ahenk'e davetlisin — kayıt olunca 25 jeton hediye:",
+      text: td.shareText,
       url: link,
     };
     if (navigator.share) {
@@ -61,9 +71,9 @@ export default function DavetKart() {
               <Users size={20} />
             </span>
             <div>
-              <p className="font-semibold text-text">Arkadaşını davet et</p>
+              <p className="font-semibold text-text">{td.title}</p>
               <p className="text-xs leading-5 text-muted">
-                Davet eden <b className="text-accent">250</b>, davetle gelen <b className="text-accent">25</b> jeton kazanır.
+                {rewardParts}
               </p>
             </div>
           </div>
@@ -71,13 +81,13 @@ export default function DavetKart() {
           <div className="mt-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-[#0E0D10]/70 px-3 py-2.5">
             <Coins size={15} className="shrink-0 text-accent" />
             <span className="min-w-0 flex-1 truncate text-sm text-text/90">
-              {code ? `ahenk.live/register?ref=${code}` : "Davet kodun hazırlanıyor…"}
+              {code ? `ahenk.live/register?ref=${code}` : td.preparing}
             </span>
             <button
               onClick={kopyala}
               disabled={!code}
               className="shrink-0 rounded-xl border border-[#C7A977]/35 bg-[#C7A977]/12 px-2.5 py-1.5 text-xs font-semibold text-accent transition hover:bg-[#C7A977]/20 active:scale-95 disabled:opacity-50"
-              aria-label="Davet linkini kopyala"
+              aria-label={td.copyAria}
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
@@ -89,13 +99,13 @@ export default function DavetKart() {
               disabled={!code}
               className="lp-cta-gold flex flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold disabled:opacity-50"
             >
-              <Share2 size={16} /> Paylaş
+              <Share2 size={16} /> {td.share}
             </button>
             <Link
               href="/liderlik"
               className="lp-cta-ghost flex flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold"
             >
-              <Trophy size={16} /> Liderlikte gör
+              <Trophy size={16} /> {td.leaderboard}
             </Link>
           </div>
         </div>

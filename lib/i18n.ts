@@ -236,6 +236,10 @@ export type AppDict = {
     paid: string; canceled: string; buyClosed: string; buyFailed: string; loaded: string; connError: string;
     activated: string; insufficient: string; opFailed: string;
   };
+  davet: {
+    title: string; reward: string; preparing: string; copyAria: string;
+    share: string; leaderboard: string; shareText: string;
+  };
   common: { back: string };
 };
 
@@ -304,6 +308,13 @@ const appTr: AppDict = {
     buyClosed: "Jeton satın alma şu an kapalı — yakında. Jetonu görev ve davetle kazanabilirsin.",
     buyFailed: "Satın alma başarısız, tekrar dene.", loaded: "+{n} jeton yüklendi!", connError: "Bağlantı hatası.",
     activated: "{title} aktifleştirildi!", insufficient: "Yetersiz bakiye — {n} jeton gerekli. Görev yap veya jeton al.", opFailed: "İşlem başarısız, tekrar dene.",
+  },
+  davet: {
+    title: "Arkadaşını davet et",
+    reward: "Davet eden {a}, davetle gelen {b} jeton kazanır.",
+    preparing: "Davet kodun hazırlanıyor…", copyAria: "Davet linkini kopyala",
+    share: "Paylaş", leaderboard: "Liderlikte gör",
+    shareText: "Karakter önce, yüz sonra. Ahenk'e davetlisin — kayıt olunca 25 jeton hediye:",
   },
   common: { back: "Geri" },
 };
@@ -374,6 +385,13 @@ const appEn: AppDict = {
     buyFailed: "Purchase failed, try again.", loaded: "+{n} tokens loaded!", connError: "Connection error.",
     activated: "{title} activated!", insufficient: "Insufficient balance — {n} tokens needed. Do a quest or buy tokens.", opFailed: "Operation failed, try again.",
   },
+  davet: {
+    title: "Invite a friend",
+    reward: "The inviter earns {a}, the invited friend gets {b} tokens.",
+    preparing: "Your invite code is being prepared…", copyAria: "Copy invite link",
+    share: "Share", leaderboard: "See on leaderboard",
+    shareText: "Character first, face later. You're invited to Ahenk — get 25 tokens when you sign up:",
+  },
   common: { back: "Back" },
 };
 
@@ -442,6 +460,13 @@ const appKu: AppDict = {
     buyClosed: "Jeton-kirîn niha girtî ye — di nêzîk de. Tu dikarî bi peywir û vexwendinê jeton qezenc bikî.",
     buyFailed: "Kirîn bi ser neket, dîsa biceribîne.", loaded: "+{n} jeton hat barkirin!", connError: "Çewtiya girêdanê.",
     activated: "{title} hat çalakkirin!", insufficient: "Bakiya nebes — {n} jeton hewce ne. Peywirekê bike an jeton bikire.", opFailed: "Kar bi ser neket, dîsa biceribîne.",
+  },
+  davet: {
+    title: "Hevalê xwe vexwîne",
+    reward: "Vexwender {a}, hevalê bi vexwendinê tê {b} jeton qezenc dike.",
+    preparing: "Koda vexwendina te tê amadekirin…", copyAria: "Lînka vexwendinê kopî bike",
+    share: "Parve bike", leaderboard: "Li serketinê bibîne",
+    shareText: "Pêşî karakter, paşê rû. Tu li Ahengê hatî vexwendin — gava tomar bibî 25 jeton diyarî:",
   },
   common: { back: "Vegere" },
 };
