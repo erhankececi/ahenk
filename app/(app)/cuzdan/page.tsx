@@ -54,8 +54,13 @@ export default function Cuzdan() {
     load();
     trackEvent("coin_wallet_opened");
     const satin = new URLSearchParams(window.location.search).get("satin");
-    if (satin === "ok") setNotice({ ok: true, msg: "Ödeme alındı! Jetonların birazdan yüklenecek." });
-    else if (satin === "iptal") setNotice({ ok: false, msg: "Ödeme iptal edildi." });
+    if (satin === "ok") {
+      setNotice({ ok: true, msg: "Ödeme alındı! Jetonların birazdan yüklenecek." });
+      trackEvent("coin_purchase_success");
+    } else if (satin === "iptal") {
+      setNotice({ ok: false, msg: "Ödeme iptal edildi." });
+      trackEvent("checkout_canceled", { source: "coin" });
+    }
   }, []);
 
   async function satinAl(pkg: string) {

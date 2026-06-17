@@ -28,6 +28,8 @@ const EVENT_LABEL: Record<string, string> = {
   coin_wallet_opened: "Cüzdan açıldı",
   coin_purchase_clicked: "Jeton al tıklandı",
   coin_checkout_started: "Jeton ödemesi başladı",
+  coin_purchase_success: "Jeton ödemesi tamamlandı",
+  premium_purchase_success: "Premium satın alındı",
   gift_store_opened: "Hediye mağazası açıldı",
   gift_send_clicked: "Hediye gönder tıklandı",
 };

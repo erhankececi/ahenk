@@ -101,9 +101,11 @@ export default function Premium() {
     const r = await purchase(pkg);
     setBusy(null);
     if (r.ok) {
+      trackEvent("premium_purchase_success", { plan: pkg.plan });
       setMsg({ ok: true, text: "Satın alma alındı. Aboneliğin birkaç saniye içinde aktifleşecek." });
       setTimeout(load, 4000);
     } else if (r.error === "cancelled") {
+      trackEvent("checkout_canceled", { source: "premium" });
       setMsg({ ok: false, text: "Satın alma iptal edildi." });
     } else {
       setMsg({ ok: false, text: "Satın alma başarısız, tekrar dene." });

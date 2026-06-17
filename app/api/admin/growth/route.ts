@@ -82,6 +82,8 @@ export async function GET() {
       "coin_wallet_opened",
       "coin_purchase_clicked",
       "coin_checkout_started",
+      "coin_purchase_success",
+      "premium_purchase_success",
       "gift_store_opened",
       "gift_send_clicked",
     ];

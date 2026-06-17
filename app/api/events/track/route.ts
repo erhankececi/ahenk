@@ -13,7 +13,11 @@ const VALID = new Set([
   "coin_package_clicked",
   "coin_purchase_clicked",
   "coin_checkout_started",
+  "coin_purchase_success",
   "coin_demo_checkout_clicked",
+  "checkout_canceled",
+  // Premium ödeme
+  "premium_purchase_success",
   // Hediye ekonomisi
   "gift_store_opened",
   "gift_selected",
