@@ -17,6 +17,7 @@ import { Crown, Check, Sparkles, Smartphone, RefreshCw, Gem, Coins, ChevronRight
 import { Button } from "@/components/ui";
 import { tierCard, tierName, VipTag } from "@/components/PremiumBadge";
 import { trackEvent } from "@/lib/track";
+import { useLang } from "@/components/LangProvider";
 
 const LEGEND_FEATURES = [
   { title: "Black Diamond profil", desc: "Siyah elmas kart + LEGEND rozeti" },
@@ -56,6 +57,14 @@ const COMPARE_ROWS: { feat: string; on: string[] }[] = [
 
 export default function Premium() {
   const supabase = createClient();
+  const { t } = useLang();
+  const tp = t.premium;
+  const tierFeatures: Record<string, { title: string; desc: string }[]> = {
+    plus: tp.featPlus, platinum: tp.featPlatinum, legend: tp.featLegend,
+  };
+  const tierSub: Record<string, string> = {
+    plus: tp.plusSub, platinum: tp.platinumSub, legend: tp.legendSub,
+  };
   const [native, setNative] = useState(false);
   const [packages, setPackages] = useState<StorePackage[]>([]);
   const [plan, setPlan] = useState<string>("free");
@@ -102,18 +111,18 @@ export default function Premium() {
     setBusy(null);
     if (r.ok) {
       trackEvent("premium_purchase_success", { plan: pkg.plan });
-      setMsg({ ok: true, text: "Satın alma alındı. Aboneliğin birkaç saniye içinde aktifleşecek." });
+      setMsg({ ok: true, text: tp.purchaseReceived });
       setTimeout(load, 4000);
     } else if (r.error === "cancelled") {
       trackEvent("checkout_canceled", { source: "premium" });
-      setMsg({ ok: false, text: "Satın alma iptal edildi." });
+      setMsg({ ok: false, text: tp.purchaseCanceled });
     } else {
-      setMsg({ ok: false, text: "Satın alma başarısız, tekrar dene." });
+      setMsg({ ok: false, text: tp.purchaseFailed });
     }
   }
 
   const aktif = isActivePremium({ premium_plan: plan, premium_until: until });
-  const tierLabel = plan === "legend" ? "Legend" : plan === "platinum" ? "Premium+" : plan === "gold" ? "Premium" : aktif ? "Plus" : "Standart";
+  const tierLabel = plan === "legend" ? "Legend" : plan === "platinum" ? "Premium+" : plan === "gold" ? "Premium" : aktif ? "Plus" : tp.standart;
 
   // Kart malzemesi — Amex Black / Apple Card / Raya hissi
   const cardBg =
@@ -130,13 +139,13 @@ export default function Premium() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk üyelik</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-text">Premium</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tp.eyebrow}</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-text">{tp.title}</h1>
           </div>
 
           <Link href="/cuzdan" className="lp-chip hidden items-center gap-2 sm:inline-flex">
             <Coins size={14} />
-            Jeton
+            {tp.jetonChip}
           </Link>
         </div>
 
@@ -166,7 +175,7 @@ export default function Premium() {
                   <span className="font-display text-base font-bold uppercase tracking-[0.32em] text-accent">
                     Ahenk
                   </span>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted">Sessiz Lüks Kulübü</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted">{tp.club}</p>
                 </div>
 
                 <span className="rounded-full border border-[#C7A977]/30 bg-[#C7A977]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
@@ -185,8 +194,8 @@ export default function Premium() {
 
               <div className="relative z-10 flex items-end justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-muted">Üye</p>
-                  <p className="truncate font-display text-lg font-semibold text-text">{name || "Ahenk Üyesi"}</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-muted">{tp.memberLabel}</p>
+                  <p className="truncate font-display text-lg font-semibold text-text">{name || tp.memberFallback}</p>
                 </div>
                 <p className="shrink-0 font-mono text-xs tracking-widest text-muted">
                   {memberNo ? `AHK ${String(memberNo).padStart(4, "0").slice(-4)}` : "AHK 0000"}
@@ -196,8 +205,8 @@ export default function Premium() {
 
             <p className="mt-4 text-center text-sm leading-6 text-muted">
               {aktif
-                ? `Aktif · ${tierLabel}${until ? ` · bitiş ${new Date(until).toLocaleDateString("tr-TR")}` : ""}`
-                : "Statünü yükselt. Daha görünür, daha ayrıcalıklı ve daha sakin bir Ahenk deneyimi."}
+                ? `${tp.active} · ${tierLabel}${until ? ` · ${tp.ends} ${new Date(until).toLocaleDateString("tr-TR")}` : ""}`
+                : tp.upsell}
             </p>
           </div>
         </section>
@@ -209,9 +218,9 @@ export default function Premium() {
               <Coins size={20} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-text">Jetonla hemen Premium aç</p>
+              <p className="font-semibold text-text">{tp.tokenBridgeTitle}</p>
               <p className="text-xs leading-5 text-muted">
-                Görev yap, jeton kazan; 1 gün / 1 hafta Premium ya da Boost aç.
+                {tp.tokenBridgeDesc}
               </p>
             </div>
             <ChevronRight size={18} className="shrink-0 text-muted" />
@@ -222,8 +231,8 @@ export default function Premium() {
         <section className="mb-5">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <p className="text-sm font-semibold text-text">Üyelik paketleri</p>
-              <p className="mt-0.5 text-xs text-muted">Ahenk içindeki görünürlüğünü ve deneyimini yükselt</p>
+              <p className="text-sm font-semibold text-text">{tp.packagesTitle}</p>
+              <p className="mt-0.5 text-xs text-muted">{tp.packagesDesc}</p>
             </div>
             <Crown size={18} className="text-accent" />
           </div>
@@ -256,24 +265,20 @@ export default function Premium() {
                             {tier.plan === "legend" && <VipTag tier="legend" />}
                           </p>
                           <p className="mt-0.5 text-xs text-muted">
-                            {tier.plan === "plus"
-                              ? "Temel ayrıcalıklar ve görünürlük"
-                              : tier.plan === "platinum"
-                                ? "Daha güçlü keşif ve yüksek kalite"
-                                : "Ahenk’in en özel kulüp deneyimi"}
+                            {tierSub[tier.plan] ?? ""}
                           </p>
                         </div>
                       </div>
 
                       {buColumn && (
                         <span className="shrink-0 rounded-full border border-[#C7A977]/30 bg-[#C7A977]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
-                          Aktif
+                          {tp.active}
                         </span>
                       )}
                     </div>
 
                     <div className="mb-4 grid gap-2">
-                      {tier.features.map((f) => (
+                      {(tierFeatures[tier.plan] ?? tier.features).map((f) => (
                         <div key={f.title} className="flex items-start gap-2.5 rounded-2xl border border-white/10 bg-[#0E0D10]/55 p-3">
                           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent">
                             <Check size={12} />
@@ -288,7 +293,7 @@ export default function Premium() {
 
                     {buColumn ? (
                       <div className="rounded-2xl border border-[#C7A977]/30 bg-[#C7A977]/10 py-3 text-center text-sm font-semibold text-accent">
-                        Bu plan aktif
+                        {tp.planActive}
                       </div>
                     ) : native ? (
                       pkg ? (
@@ -299,16 +304,16 @@ export default function Premium() {
                           disabled={busy === pkg.id}
                           className="lp-cta-gold border-[#C7A977]/35 text-[#0E0D10]"
                         >
-                          {busy === pkg.id ? "İşleniyor…" : `Abone ol — ${pkg.priceString}`}
+                          {busy === pkg.id ? tp.processing : `${tp.subscribe} — ${pkg.priceString}`}
                         </Button>
                       ) : (
                         <div className="rounded-2xl border border-white/10 bg-[#0E0D10]/60 py-3 text-center text-sm text-muted">
-                          Şu an uygun değil
+                          {tp.notAvailable}
                         </div>
                       )
                     ) : (
                       <div className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-[#0E0D10]/60 py-3 text-center text-sm text-muted">
-                        <Smartphone size={15} /> Mobil uygulamadan abone ol
+                        <Smartphone size={15} /> {tp.subscribeMobile}
                       </div>
                     )}
                   </div>
@@ -322,8 +327,8 @@ export default function Premium() {
         <section className="lp-panel mb-5 p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
             <div>
-              <h2 className="text-sm font-semibold text-text">Planları karşılaştır</h2>
-              <p className="mt-0.5 text-xs text-muted">Her plan bir öncekinin tüm ayrıcalıklarını kapsar.</p>
+              <h2 className="text-sm font-semibold text-text">{tp.compareTitle}</h2>
+              <p className="mt-0.5 text-xs text-muted">{tp.compareDesc}</p>
             </div>
             <Sparkles size={17} className="text-accent" />
           </div>
@@ -333,7 +338,7 @@ export default function Premium() {
               <thead>
                 <tr className="border-b border-white/10 bg-[#0E0D10]/65">
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Özellik
+                    {tp.featureCol}
                   </th>
                   {COMPARE_COLS.map((c) => (
                     <th key={c.key} className="px-2 py-3 text-center text-xs font-semibold text-text">
@@ -345,7 +350,7 @@ export default function Premium() {
               <tbody>
                 {COMPARE_ROWS.map((r, i) => (
                   <tr key={i} className="border-b border-white/10 last:border-0">
-                    <td className="px-4 py-3 text-left text-text">{r.feat}</td>
+                    <td className="px-4 py-3 text-left text-text">{tp.compareRows[i] ?? r.feat}</td>
                     {COMPARE_COLS.map((c) => (
                       <td key={c.key} className="px-2 py-3 text-center">
                         {r.on.includes(c.key) ? (
@@ -383,20 +388,20 @@ export default function Premium() {
               const r = await restorePurchases();
               setMsg(
                 r.ok
-                  ? { ok: true, text: "Satın almalar geri yüklendi." }
-                  : { ok: false, text: "Geri yüklenecek satın alma bulunamadı." }
+                  ? { ok: true, text: tp.restored }
+                  : { ok: false, text: tp.nothingRestore }
               );
               load();
             }}
             className="mx-auto mt-5 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#151318] px-4 py-2 text-sm text-muted transition hover:border-[#C7A977]/35 hover:text-accent"
           >
-            <RefreshCw size={15} /> Satın almaları geri yükle
+            <RefreshCw size={15} /> {tp.restore}
           </button>
         )}
 
         {!native && (
           <p className="mt-5 text-center text-xs leading-5 text-muted">
-            Abonelikler güvenli şekilde App Store / Google Play üzerinden yönetilir. Web tarafında jetonla günlük veya haftalık Premium açabilirsin.
+            {tp.manageNote}
           </p>
         )}
       </div>

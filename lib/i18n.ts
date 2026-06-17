@@ -240,6 +240,22 @@ export type AppDict = {
     title: string; reward: string; preparing: string; copyAria: string;
     share: string; leaderboard: string; shareText: string;
   };
+  premium: {
+    eyebrow: string; title: string; jetonChip: string;
+    club: string; memberLabel: string; memberFallback: string;
+    active: string; ends: string; upsell: string; standart: string;
+    tokenBridgeTitle: string; tokenBridgeDesc: string;
+    packagesTitle: string; packagesDesc: string;
+    plusSub: string; platinumSub: string; legendSub: string;
+    planActive: string; processing: string; subscribe: string; notAvailable: string; subscribeMobile: string;
+    compareTitle: string; compareDesc: string; featureCol: string;
+    restore: string; restored: string; nothingRestore: string; manageNote: string;
+    purchaseReceived: string; purchaseCanceled: string; purchaseFailed: string;
+    featPlus: { title: string; desc: string }[];
+    featPlatinum: { title: string; desc: string }[];
+    featLegend: { title: string; desc: string }[];
+    compareRows: string[];
+  };
   common: { back: string };
 };
 
@@ -315,6 +331,47 @@ const appTr: AppDict = {
     preparing: "Davet kodun hazırlanıyor…", copyAria: "Davet linkini kopyala",
     share: "Paylaş", leaderboard: "Liderlikte gör",
     shareText: "Karakter önce, yüz sonra. Ahenk'e davetlisin — kayıt olunca 25 jeton hediye:",
+  },
+  premium: {
+    eyebrow: "Ahenk üyelik", title: "Premium", jetonChip: "Jeton",
+    club: "Sessiz Lüks Kulübü", memberLabel: "Üye", memberFallback: "Ahenk Üyesi",
+    active: "Aktif", ends: "bitiş",
+    upsell: "Statünü yükselt. Daha görünür, daha ayrıcalıklı ve daha sakin bir Ahenk deneyimi.", standart: "Standart",
+    tokenBridgeTitle: "Jetonla hemen Premium aç", tokenBridgeDesc: "Görev yap, jeton kazan; 1 gün / 1 hafta Premium ya da Boost aç.",
+    packagesTitle: "Üyelik paketleri", packagesDesc: "Ahenk içindeki görünürlüğünü ve deneyimini yükselt",
+    plusSub: "Temel ayrıcalıklar ve görünürlük", platinumSub: "Daha güçlü keşif ve yüksek kalite", legendSub: "Ahenk’in en özel kulüp deneyimi",
+    planActive: "Bu plan aktif", processing: "İşleniyor…", subscribe: "Abone ol", notAvailable: "Şu an uygun değil", subscribeMobile: "Mobil uygulamadan abone ol",
+    compareTitle: "Planları karşılaştır", compareDesc: "Her plan bir öncekinin tüm ayrıcalıklarını kapsar.", featureCol: "Özellik",
+    restore: "Satın almaları geri yükle", restored: "Satın almalar geri yüklendi.", nothingRestore: "Geri yüklenecek satın alma bulunamadı.",
+    manageNote: "Abonelikler güvenli şekilde App Store / Google Play üzerinden yönetilir. Web tarafında jetonla günlük veya haftalık Premium açabilirsin.",
+    purchaseReceived: "Satın alma alındı. Aboneliğin birkaç saniye içinde aktifleşecek.", purchaseCanceled: "Satın alma iptal edildi.", purchaseFailed: "Satın alma başarısız, tekrar dene.",
+    featPlus: [
+      { title: "Kimler ziyaret etti", desc: "Profiline bakan herkesi gör" },
+      { title: "Sınırsız keşif", desc: "Günlük limit olmadan keşfet" },
+      { title: "Gelişmiş filtreler", desc: "İlgi, burç, yaşam tarzına göre" },
+      { title: "Profil öne çıkarma", desc: "Daha çok kişi seni görsün" },
+      { title: "Gizli mod", desc: "Sadece beğendiklerin seni görsün" },
+    ],
+    featPlatinum: [
+      { title: "AI profil danışmanı", desc: "Profilini sürekli güçlendiren öneriler" },
+      { title: "AI sohbet önerileri", desc: "Akışı bozmadan ne yazacağını öner" },
+      { title: "Profil analizi", desc: "Görüntülenme ve dönüşüm istatistiklerin" },
+      { title: "Gelişmiş görünürlük", desc: "Keşfet ve Moments akışında öne çık" },
+      { title: "Moment performansı", desc: "Momentlerini kim gördü, nasıl performans verdi" },
+      { title: "Öncelikli destek", desc: "Sorularına önce yanıt" },
+    ],
+    featLegend: [
+      { title: "Black Diamond profil", desc: "Siyah elmas kart + LEGEND rozeti" },
+      { title: "En üst görünürlük", desc: "Keşfet ve akışta en önde" },
+      { title: "1080p + VIP arama", desc: "Öncelikli bağlantı kalitesi" },
+      { title: "Özel sohbet teması", desc: "Animasyonlu isim etiketi + VIP balon" },
+      { title: "Tüm Premium Plus ayrıcalıkları", desc: "ve fazlası" },
+    ],
+    compareRows: [
+      "Sınırsız keşif", "Kimler ziyaret etti", "Gelişmiş filtreler", "Profil öne çıkarma", "Gizli mod",
+      "Profil temaları", "Sesli görüşme", "Görüntülü görüşme (HD)", "1080p + VIP arama", "Öncelikli görünürlük",
+      "Black Diamond profil + LEGEND",
+    ],
   },
   common: { back: "Geri" },
 };
@@ -392,6 +449,47 @@ const appEn: AppDict = {
     share: "Share", leaderboard: "See on leaderboard",
     shareText: "Character first, face later. You're invited to Ahenk — get 25 tokens when you sign up:",
   },
+  premium: {
+    eyebrow: "Ahenk membership", title: "Premium", jetonChip: "Tokens",
+    club: "Quiet Luxury Club", memberLabel: "Member", memberFallback: "Ahenk Member",
+    active: "Active", ends: "ends",
+    upsell: "Level up your status. A more visible, more privileged and calmer Ahenk experience.", standart: "Standard",
+    tokenBridgeTitle: "Unlock Premium now with tokens", tokenBridgeDesc: "Do quests, earn tokens; unlock 1 day / 1 week Premium or Boost.",
+    packagesTitle: "Membership packages", packagesDesc: "Boost your visibility and experience within Ahenk",
+    plusSub: "Core perks and visibility", platinumSub: "Stronger discovery and higher quality", legendSub: "Ahenk's most exclusive club experience",
+    planActive: "This plan is active", processing: "Processing…", subscribe: "Subscribe", notAvailable: "Not available right now", subscribeMobile: "Subscribe from the mobile app",
+    compareTitle: "Compare plans", compareDesc: "Each plan includes all perks of the one before it.", featureCol: "Feature",
+    restore: "Restore purchases", restored: "Purchases restored.", nothingRestore: "No purchases found to restore.",
+    manageNote: "Subscriptions are managed securely via the App Store / Google Play. On the web you can unlock daily or weekly Premium with tokens.",
+    purchaseReceived: "Purchase received. Your subscription will activate in a few seconds.", purchaseCanceled: "Purchase canceled.", purchaseFailed: "Purchase failed, try again.",
+    featPlus: [
+      { title: "Who visited", desc: "See everyone who viewed your profile" },
+      { title: "Unlimited discovery", desc: "Explore with no daily limit" },
+      { title: "Advanced filters", desc: "By interest, zodiac, lifestyle" },
+      { title: "Profile boost", desc: "Let more people see you" },
+      { title: "Incognito mode", desc: "Only people you like see you" },
+    ],
+    featPlatinum: [
+      { title: "AI profile advisor", desc: "Tips that keep strengthening your profile" },
+      { title: "AI chat suggestions", desc: "What to write without breaking the flow" },
+      { title: "Profile analytics", desc: "Your views and conversion stats" },
+      { title: "Enhanced visibility", desc: "Stand out in Discover and Moments" },
+      { title: "Moment performance", desc: "Who saw your moments and how they performed" },
+      { title: "Priority support", desc: "Your questions answered first" },
+    ],
+    featLegend: [
+      { title: "Black Diamond profile", desc: "Black diamond card + LEGEND badge" },
+      { title: "Top visibility", desc: "First in Discover and the feed" },
+      { title: "1080p + VIP calls", desc: "Priority connection quality" },
+      { title: "Exclusive chat theme", desc: "Animated name tag + VIP bubble" },
+      { title: "All Premium Plus perks", desc: "and more" },
+    ],
+    compareRows: [
+      "Unlimited discovery", "Who visited", "Advanced filters", "Profile boost", "Incognito mode",
+      "Profile themes", "Voice calls", "Video calls (HD)", "1080p + VIP calls", "Priority visibility",
+      "Black Diamond profile + LEGEND",
+    ],
+  },
   common: { back: "Back" },
 };
 
@@ -467,6 +565,47 @@ const appKu: AppDict = {
     preparing: "Koda vexwendina te tê amadekirin…", copyAria: "Lînka vexwendinê kopî bike",
     share: "Parve bike", leaderboard: "Li serketinê bibîne",
     shareText: "Pêşî karakter, paşê rû. Tu li Ahengê hatî vexwendin — gava tomar bibî 25 jeton diyarî:",
+  },
+  premium: {
+    eyebrow: "Endametiya Ahenk", title: "Premium", jetonChip: "Jeton",
+    club: "Klûba Luksa Bêdeng", memberLabel: "Endam", memberFallback: "Endamê Ahengê",
+    active: "Çalak", ends: "diqede",
+    upsell: "Statûya xwe bilind bike. Ezmûneke Ahengê ya bêtir xuya, bêtir bi îmtiyaz û aramtir.", standart: "Standard",
+    tokenBridgeTitle: "Bi jetonan niha Premium veke", tokenBridgeDesc: "Peywiran bike, jeton qezenc bike; 1 roj / 1 hefte Premium an Boost veke.",
+    packagesTitle: "Pakêtên endametiyê", packagesDesc: "Xuyabûn û ezmûna xwe ya di Ahengê de bilind bike",
+    plusSub: "Îmtiyaz û xuyabûna bingehîn", platinumSub: "Keşfa xurttir û kalîteya bilind", legendSub: "Ezmûna klûba herî taybet a Ahengê",
+    planActive: "Ev plan çalak e", processing: "Tê hilanîn…", subscribe: "Abone bibe", notAvailable: "Niha ne berdest e", subscribeMobile: "Ji sepana mobîl abone bibe",
+    compareTitle: "Planan bidin ber hev", compareDesc: "Her plan hemû îmtiyazên ya berî xwe digire nav xwe.", featureCol: "Taybetmendî",
+    restore: "Kirînan vegerîne", restored: "Kirîn hatin vegerandin.", nothingRestore: "Tu kirîn ji bo vegerandinê nehat dîtin.",
+    manageNote: "Abonetî bi ewlehî bi rêya App Store / Google Play têne birêvebirin. Li ser webê tu dikarî bi jetonan Premium-a rojane an heftane vekî.",
+    purchaseReceived: "Kirîn hat girtin. Abonetiya te di çend saniyeyan de çalak dibe.", purchaseCanceled: "Kirîn hat betalkirin.", purchaseFailed: "Kirîn bi ser neket, dîsa biceribîne.",
+    featPlus: [
+      { title: "Kê serdan kir", desc: "Her kesê li profîla te nêrî bibîne" },
+      { title: "Keşfa bêsînor", desc: "Bê sînorê rojane keşf bike" },
+      { title: "Parzûnên pêşketî", desc: "Li gorî berjewendî, burc, awayê jiyanê" },
+      { title: "Pêşxistina profîlê", desc: "Bila bêtir kes te bibînin" },
+      { title: "Moda veşartî", desc: "Tenê yên tu eciband te bibînin" },
+    ],
+    featPlatinum: [
+      { title: "Şêwirmendê profîlê yê AI", desc: "Pêşniyarên ku profîla te xurt dikin" },
+      { title: "Pêşniyarên axaftinê yên AI", desc: "Çi binivîsî bêyî ku herikîn xera bibe" },
+      { title: "Analîza profîlê", desc: "Statîstîkên dîtin û veguherînê" },
+      { title: "Xuyabûna pêşketî", desc: "Li Keşf û Moments derkeve pêş" },
+      { title: "Performansa Momentê", desc: "Kê momentên te dîtin û çawa performans dan" },
+      { title: "Piştgiriya pêşîn", desc: "Pêşî bersiva pirsên te" },
+    ],
+    featLegend: [
+      { title: "Profîla Black Diamond", desc: "Karta elmasê reş + nîşana LEGEND" },
+      { title: "Xuyabûna herî jor", desc: "Li Keşf û herikînê pêşî" },
+      { title: "1080p + bangên VIP", desc: "Kalîteya girêdana pêşîn" },
+      { title: "Temaya axaftinê ya taybet", desc: "Etîketa navê anîmasyon + balona VIP" },
+      { title: "Hemû îmtiyazên Premium Plus", desc: "û bêtir" },
+    ],
+    compareRows: [
+      "Keşfa bêsînor", "Kê serdan kir", "Parzûnên pêşketî", "Pêşxistina profîlê", "Moda veşartî",
+      "Temayên profîlê", "Bangên dengî", "Bangên vîdyo (HD)", "1080p + bangên VIP", "Xuyabûna pêşîn",
+      "Profîla Black Diamond + LEGEND",
+    ],
   },
   common: { back: "Vegere" },
 };
