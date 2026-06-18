@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Heart, Send, Pin, Trash2, CornerDownRight, X } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 type C = {
   id: string; parent_id: string | null; name: string; text: string; created_at: string;
@@ -9,6 +10,7 @@ type C = {
 };
 
 export default function MomentComments({ momentId, onClose, onCount }: { momentId: string; onClose: () => void; onCount?: (d: number) => void }) {
+  const tmo = useLang().t.moments;
   const [list, setList] = useState<C[] | null>(null);
   const [text, setText] = useState("");
   const [reply, setReply] = useState<{ id: string; name: string } | null>(null);
@@ -54,8 +56,8 @@ export default function MomentComments({ momentId, onClose, onCount }: { momentI
               <span className="font-semibold">{c.name}</span>{c.pinned && <Pin size={11} className="ml-1 inline text-accent" />} <span className="text-text/90">{c.text}</span>
             </p>
             <div className="mt-0.5 flex items-center gap-3 text-[11px] text-muted">
-              {!nested && <button onClick={() => setReply({ id: c.id, name: c.name })} className="hover:text-text">Yanıtla</button>}
-              {c.canPin && <button onClick={() => act(c.pinned ? "unpin" : "pin", c.id)} className="hover:text-text">{c.pinned ? "Sabiti kaldır" : "Sabitle"}</button>}
+              {!nested && <button onClick={() => setReply({ id: c.id, name: c.name })} className="hover:text-text">{tmo.cReply}</button>}
+              {c.canPin && <button onClick={() => act(c.pinned ? "unpin" : "pin", c.id)} className="hover:text-text">{c.pinned ? tmo.cUnpin : tmo.cPin}</button>}
               {c.canRemove && <button onClick={() => act("delete", c.id)} className="hover:text-error"><Trash2 size={12} /></button>}
             </div>
           </div>
@@ -73,14 +75,14 @@ export default function MomentComments({ momentId, onClose, onCount }: { momentI
     <div className="fixed inset-0 z-40 flex items-end bg-black/50" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="flex h-[75dvh] w-full flex-col rounded-t-3xl border-t border-border bg-surface">
         <div className="flex items-center justify-between px-5 py-3">
-          <p className="t-h4">Yorumlar</p>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted"><X size={20} /></button>
+          <p className="t-h4">{tmo.cTitle}</p>
+          <button onClick={onClose} aria-label={tmo.cClose} className="text-muted"><X size={20} /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-5">
           {!list ? (
-            <p className="py-8 text-center text-sm text-muted">Yükleniyor…</p>
+            <p className="py-8 text-center text-sm text-muted">{tmo.cLoading}</p>
           ) : tops.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted">İlk yorumu sen yaz.</p>
+            <p className="py-8 text-center text-sm text-muted">{tmo.cNoComments}</p>
           ) : (
             tops.map((c) => <Row key={c.id} c={c} />)
           )}
@@ -88,8 +90,8 @@ export default function MomentComments({ momentId, onClose, onCount }: { momentI
         <div className="border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           {reply && (
             <p className="mb-1 flex items-center gap-1 px-1 text-xs text-muted">
-              <CornerDownRight size={12} /> {reply.name} yanıtlanıyor
-              <button onClick={() => setReply(null)} className="ml-1 text-error">iptal</button>
+              <CornerDownRight size={12} /> {tmo.cReplyingTo.replace("{name}", reply.name)}
+              <button onClick={() => setReply(null)} className="ml-1 text-error">{tmo.cCancel}</button>
             </p>
           )}
           <div className="flex items-center gap-2">
@@ -97,7 +99,7 @@ export default function MomentComments({ momentId, onClose, onCount }: { momentI
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && ekle()}
-              placeholder="Yorum yaz…"
+              placeholder={tmo.cPlaceholder}
               className="flex-1 rounded-full border border-border bg-elevated px-4 py-2.5 text-sm outline-none focus:border-brand"
             />
             <button onClick={ekle} disabled={!text.trim()} className="brand-gradient rounded-full p-2.5 text-white disabled:opacity-40">

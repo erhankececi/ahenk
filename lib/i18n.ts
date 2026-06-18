@@ -379,6 +379,14 @@ export type AppDict = {
     yourEvent: string; noResponses: string; approvedSuffix: string; rejectedSuffix: string; approve: string; reject: string;
   };
   eventchat: { subtitle: string; empty: string; placeholder: string; send: string; close: string };
+  moments: {
+    composerPlaceholder: string; filesSkipped: string; photoVideo: string; sharing: string; share: string;
+    emptyTitle: string; emptyDesc: string;
+    archive: string; commentsOn: string; commentsOff: string; giftsOn: string; giftsOff: string; delete: string;
+    deleteConfirm: string; linkCopied: string; insufficientGift: string; giftFailed: string; viewAllComments: string; shareMoment: string;
+    cTitle: string; cClose: string; cLoading: string; cNoComments: string;
+    cReply: string; cUnpin: string; cPin: string; cReplyingTo: string; cCancel: string; cPlaceholder: string;
+  };
   reels: {
     loading: string; emptyTitle: string; emptyDesc: string; videoWord: string; shareVideo: string;
     like: string; comment: string; gift: string; soundOn: string; soundOff: string;
@@ -705,6 +713,14 @@ const appTr: AppDict = {
     yourEvent: "Senin etkinliğin", noResponses: "Henüz yanıt veren yok.", approvedSuffix: " · onaylı", rejectedSuffix: " · reddedildi", approve: "Onayla", reject: "Reddet",
   },
   eventchat: { subtitle: "Etkinlik sohbeti · katılımcılar", empty: "İlk mesajı sen yaz — katılımcılarla buluşmayı planla.", placeholder: "Mesaj yaz…", send: "Gönder", close: "Kapat" },
+  moments: {
+    composerPlaceholder: "Bir şeyler yaz… (isteğe bağlı)", filesSkipped: "Bazı dosyalar atlandı (foto ≤10MB, video ≤50MB).", photoVideo: "Foto/Video", sharing: "Paylaşılıyor…", share: "Paylaş",
+    emptyTitle: "Henüz an paylaşılmamış", emptyDesc: "İlk anı sen paylaş.",
+    archive: "Arşivle", commentsOn: "Yorumu aç", commentsOff: "Yorumu kapat", giftsOn: "Hediyeyi aç", giftsOff: "Hediyeyi kapat", delete: "Sil",
+    deleteConfirm: "Bu paylaşımı silmek istediğine emin misin?", linkCopied: "Bağlantı kopyalandı.", insufficientGift: "Yetersiz jeton.", giftFailed: "Hediye gönderilemedi.", viewAllComments: "{n} yorumun tümünü gör", shareMoment: "bir an",
+    cTitle: "Yorumlar", cClose: "Kapat", cLoading: "Yükleniyor…", cNoComments: "İlk yorumu sen yaz.",
+    cReply: "Yanıtla", cUnpin: "Sabiti kaldır", cPin: "Sabitle", cReplyingTo: "{name} yanıtlanıyor", cCancel: "iptal", cPlaceholder: "Yorum yaz…",
+  },
   reels: {
     loading: "Yükleniyor…", emptyTitle: "Henüz reels yok", emptyDesc: "Moments'tan bir {video} paylaş — burada görünür.", videoWord: "video", shareVideo: "Video paylaş",
     like: "Beğen", comment: "Yorumlar", gift: "Hediye gönder", soundOn: "Sesi aç", soundOff: "Sesi kapat",
@@ -1033,6 +1049,14 @@ const appEn: AppDict = {
     yourEvent: "Your event", noResponses: "No responses yet.", approvedSuffix: " · approved", rejectedSuffix: " · declined", approve: "Approve", reject: "Decline",
   },
   eventchat: { subtitle: "Event chat · attendees", empty: "Write the first message — plan meeting the attendees.", placeholder: "Write a message…", send: "Send", close: "Close" },
+  moments: {
+    composerPlaceholder: "Write something… (optional)", filesSkipped: "Some files were skipped (photo ≤10MB, video ≤50MB).", photoVideo: "Photo/Video", sharing: "Posting…", share: "Post",
+    emptyTitle: "No moments shared yet", emptyDesc: "Share the first one.",
+    archive: "Archive", commentsOn: "Enable comments", commentsOff: "Disable comments", giftsOn: "Enable gifts", giftsOff: "Disable gifts", delete: "Delete",
+    deleteConfirm: "Are you sure you want to delete this post?", linkCopied: "Link copied.", insufficientGift: "Insufficient tokens.", giftFailed: "Gift couldn't be sent.", viewAllComments: "View all {n} comments", shareMoment: "a moment",
+    cTitle: "Comments", cClose: "Close", cLoading: "Loading…", cNoComments: "Write the first comment.",
+    cReply: "Reply", cUnpin: "Unpin", cPin: "Pin", cReplyingTo: "Replying to {name}", cCancel: "cancel", cPlaceholder: "Write a comment…",
+  },
   reels: {
     loading: "Loading…", emptyTitle: "No reels yet", emptyDesc: "Share a {video} from Moments — it'll show up here.", videoWord: "video", shareVideo: "Share a video",
     like: "Like", comment: "Comments", gift: "Send a gift", soundOn: "Unmute", soundOff: "Mute",
@@ -1361,6 +1385,14 @@ const appKu: AppDict = {
     yourEvent: "Çalakiya te", noResponses: "Hîna bersivder tune.", approvedSuffix: " · pejirandî", rejectedSuffix: " · red kirî", approve: "Bipejirîne", reject: "Red bike",
   },
   eventchat: { subtitle: "Axaftina çalakiyê · beşdar", empty: "Peyama yekem tu binivîse — bi beşdaran re hevdîtinê plan bike.", placeholder: "Peyamekê binivîse…", send: "Bişîne", close: "Bigire" },
+  moments: {
+    composerPlaceholder: "Tiştekî binivîse… (bijarî)", filesSkipped: "Hin dosye hatin derbaskirin (wêne ≤10MB, vîdyo ≤50MB).", photoVideo: "Wêne/Vîdyo", sharing: "Tê parvekirin…", share: "Parve bike",
+    emptyTitle: "Hîna kêlî nehatine parvekirin", emptyDesc: "Ya yekem tu parve bike.",
+    archive: "Arşîv bike", commentsOn: "Şîroveyan veke", commentsOff: "Şîroveyan bigire", giftsOn: "Diyariyan veke", giftsOff: "Diyariyan bigire", delete: "Jê bibe",
+    deleteConfirm: "Tu bawer î ku dixwazî vê parvekirinê jê bibî?", linkCopied: "Lînk hat kopîkirin.", insufficientGift: "Jeton nebes.", giftFailed: "Diyarî nehat şandin.", viewAllComments: "Hemû {n} şîroveyan bibîne", shareMoment: "kêliyek",
+    cTitle: "Şîrove", cClose: "Bigire", cLoading: "Tê barkirin…", cNoComments: "Şîroveya yekem tu binivîse.",
+    cReply: "Bersivê bide", cUnpin: "Sabitiyê rake", cPin: "Sabit bike", cReplyingTo: "Bersiva {name} tê dayîn", cCancel: "betal", cPlaceholder: "Şîroveyekê binivîse…",
+  },
   reels: {
     loading: "Tê barkirin…", emptyTitle: "Hîna reels tune", emptyDesc: "Ji Moments {video}yekê parve bike — li vir xuya dibe.", videoWord: "vîdyo", shareVideo: "Vîdyo parve bike",
     like: "Eciband", comment: "Şîrove", gift: "Diyarî bişîne", soundOn: "Deng veke", soundOff: "Deng bigire",

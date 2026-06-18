@@ -9,6 +9,7 @@ import MomentComments from "@/components/MomentComments";
 import GiftStore from "@/components/GiftStore";
 import GiftAnimation from "@/components/GiftAnimation";
 import { giftByKey, type Gift as GiftT } from "@/lib/gifts";
+import { useLang } from "@/components/LangProvider";
 
 type Media = { type: string; url: string };
 type Moment = {
@@ -48,6 +49,7 @@ function Carousel({ album }: { album: Media[] }) {
 
 export default function MomentsFeed() {
   const supabase = createClient();
+  const tmo = useLang().t.moments;
   const [moments, setMoments] = useState<Moment[]>([]);
   const [composing, setComposing] = useState(false);
   const [text, setText] = useState("");
@@ -77,7 +79,7 @@ export default function MomentsFeed() {
 
   function dosyaSec(selected: File[]) {
     const ok = selected.filter((f) => (f.type.startsWith("video") ? f.size <= 50 * 1024 * 1024 : f.type.startsWith("image") ? f.size <= 10 * 1024 * 1024 : false));
-    if (ok.length < selected.length) setWarn("Bazı dosyalar atlandı (foto ≤10MB, video ≤50MB).");
+    if (ok.length < selected.length) setWarn(tmo.filesSkipped);
     setFiles((p) => [...p, ...ok].slice(0, 10));
   }
 
@@ -122,14 +124,14 @@ export default function MomentsFeed() {
   async function paylasMoment(m: Moment) {
     const url = `${location.origin}/u/${m.user_id}`;
     try {
-      if (navigator.share) await navigator.share({ title: "Ahenk", text: `${m.name} · bir an`, url });
-      else { await navigator.clipboard.writeText(url); setWarn("Bağlantı kopyalandı."); setTimeout(() => setWarn(""), 2000); }
+      if (navigator.share) await navigator.share({ title: "Ahenk", text: `${m.name} · ${tmo.shareMoment}`, url });
+      else { await navigator.clipboard.writeText(url); setWarn(tmo.linkCopied); setTimeout(() => setWarn(""), 2000); }
     } catch {}
   }
 
   async function sil(id: string) {
     setMenuFor(null);
-    if (!confirm("Bu paylaşımı silmek istediğine emin misin?")) return;
+    if (!confirm(tmo.deleteConfirm)) return;
     await fetch(`/api/moments?id=${id}`, { method: "DELETE" });
     setMoments((ms) => ms.filter((m) => m.id !== id));
   }
@@ -147,7 +149,7 @@ export default function MomentsFeed() {
     const r = await fetch("/api/gift", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to_user: m.user_id, gift: key }) });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.ok) { const g = giftByKey(key); if (g) setGiftAnim(g); }
-    else setWarn(j?.error === "insufficient" ? "Yetersiz jeton." : "Hediye gönderilemedi.");
+    else setWarn(j?.error === "insufficient" ? tmo.insufficientGift : tmo.giftFailed);
   }
 
   if (loading)
@@ -157,7 +159,7 @@ export default function MomentsFeed() {
     <div className="space-y-5 pb-6" onClick={() => menuFor && setMenuFor(null)}>
       {composing && (
         <div className="rounded-[26px] ahenk-panel p-4">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="Bir şeyler yaz… (isteğe bağlı)" className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 outline-none placeholder:text-text/35 focus:border-brand/60" />
+          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder={tmo.composerPlaceholder} className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 outline-none placeholder:text-text/35 focus:border-brand/60" />
           {files.length > 0 && (
             <div className="mt-2 grid grid-cols-4 gap-2">
               {files.map((f, i) => (
@@ -171,8 +173,8 @@ export default function MomentsFeed() {
           {warn && <p className="mt-2 text-xs text-brand-2">{warn}</p>}
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={(e) => { dosyaSec(Array.from(e.target.files || [])); if (fileRef.current) fileRef.current.value = ""; }} />
           <div className="mt-3 flex items-center gap-2">
-            <button onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-2xl border border-border px-3 py-2.5 text-sm font-medium text-muted"><ImagePlus size={16} /> Foto/Video</button>
-            <button onClick={paylas} disabled={uploading || (!files.length && !text.trim())} className="brand-gradient flex-1 rounded-2xl py-2.5 text-sm font-semibold disabled:opacity-50">{uploading ? "Paylaşılıyor…" : "Paylaş"}</button>
+            <button onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-2xl border border-border px-3 py-2.5 text-sm font-medium text-muted"><ImagePlus size={16} /> {tmo.photoVideo}</button>
+            <button onClick={paylas} disabled={uploading || (!files.length && !text.trim())} className="brand-gradient flex-1 rounded-2xl py-2.5 text-sm font-semibold disabled:opacity-50">{uploading ? tmo.sharing : tmo.share}</button>
             <button onClick={() => { setComposing(false); setFiles([]); }} className="rounded-2xl px-4 text-muted"><X size={18} /></button>
           </div>
         </div>
@@ -181,8 +183,8 @@ export default function MomentsFeed() {
       {moments.length === 0 && (
         <div className="flex flex-col items-center py-14 text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10"><Sparkles size={26} className="text-brand" /></div>
-          <h2 className="text-lg font-semibold">Henüz an paylaşılmamış</h2>
-          <p className="mt-1 text-sm text-muted">İlk anı sen paylaş.</p>
+          <h2 className="text-lg font-semibold">{tmo.emptyTitle}</h2>
+          <p className="mt-1 text-sm text-muted">{tmo.emptyDesc}</p>
         </div>
       )}
 
@@ -207,10 +209,10 @@ export default function MomentsFeed() {
             )}
             {menuFor === m.id && (
               <div className="absolute right-3 top-12 z-10 w-44 overflow-hidden rounded-2xl border border-white/10 bg-[#17151A] shadow-[0_20px_50px_-30px_rgba(0,0,0,0.95)]">
-                <button onClick={() => patch(m.id, { archived: true })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><Archive size={15} /> Arşivle</button>
-                <button onClick={() => patch(m.id, { comments_off: !m.comments_off })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><MessageCircle size={15} /> {m.comments_off ? "Yorumu aç" : "Yorumu kapat"}</button>
-                <button onClick={() => patch(m.id, { gifts_off: !m.gifts_off })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><GiftIcon size={15} /> {m.gifts_off ? "Hediyeyi aç" : "Hediyeyi kapat"}</button>
-                <button onClick={() => sil(m.id)} className="flex w-full items-center gap-2 px-4 py-3 text-sm text-error hover:bg-surface"><Trash2 size={15} /> Sil</button>
+                <button onClick={() => patch(m.id, { archived: true })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><Archive size={15} /> {tmo.archive}</button>
+                <button onClick={() => patch(m.id, { comments_off: !m.comments_off })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><MessageCircle size={15} /> {m.comments_off ? tmo.commentsOn : tmo.commentsOff}</button>
+                <button onClick={() => patch(m.id, { gifts_off: !m.gifts_off })} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-surface"><GiftIcon size={15} /> {m.gifts_off ? tmo.giftsOn : tmo.giftsOff}</button>
+                <button onClick={() => sil(m.id)} className="flex w-full items-center gap-2 px-4 py-3 text-sm text-error hover:bg-surface"><Trash2 size={15} /> {tmo.delete}</button>
               </div>
             )}
           </div>
@@ -247,7 +249,7 @@ export default function MomentsFeed() {
           )}
           {!m.comments_off && m.comments > 0 && (
             <button onClick={() => setCommentsFor(m.id)} className="px-4 pb-3 text-left text-xs text-muted">
-              {m.comments} yorumun tümünü gör
+              {tmo.viewAllComments.replace("{n}", String(m.comments))}
             </button>
           )}
         </div>
