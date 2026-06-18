@@ -7,15 +7,17 @@ import MomentComments from "@/components/MomentComments";
 import GiftStore from "@/components/GiftStore";
 import GiftAnimation from "@/components/GiftAnimation";
 import { giftByKey, type Gift as GiftT } from "@/lib/gifts";
+import { useLang } from "@/components/LangProvider";
+import type { AppDict } from "@/lib/i18n";
 
 type Reel = {
   id: string; user_id: string; name: string; video: string; text: string | null;
   reactions: number; comments: number; gifts_off: boolean; comments_off: boolean; mine: boolean;
 };
 
-function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift }: {
+function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, tr }: {
   reel: Reel; muted: boolean; onToggleMute: () => void;
-  onLike: () => void; onComment: () => void; onGift: () => void;
+  onLike: () => void; onComment: () => void; onGift: () => void; tr: AppDict["reels"];
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
@@ -44,21 +46,21 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift }: {
 
       {/* sağ aksiyonlar — ince, sessiz */}
       <div className="absolute bottom-28 right-3.5 flex flex-col items-center gap-6 text-white">
-        <button onClick={() => { if (!liked) { setLiked(true); onLike(); } }} className="flex flex-col items-center gap-1">
+        <button onClick={() => { if (!liked) { setLiked(true); onLike(); } }} aria-label={tr.like} className="flex flex-col items-center gap-1">
           <Heart size={29} strokeWidth={1.6} className={liked ? "fill-rose-500 text-rose-500" : ""} />
           <span className="text-xs font-medium">{reel.reactions}</span>
         </button>
         {!reel.comments_off && (
-          <button onClick={onComment} className="flex flex-col items-center gap-1">
+          <button onClick={onComment} aria-label={tr.comment} className="flex flex-col items-center gap-1">
             <MessageCircle size={28} strokeWidth={1.6} /><span className="text-xs font-medium">{reel.comments}</span>
           </button>
         )}
         {!reel.gifts_off && !reel.mine && (
-          <button onClick={onGift} className="flex flex-col items-center gap-1 text-accent">
+          <button onClick={onGift} aria-label={tr.gift} className="flex flex-col items-center gap-1 text-accent">
             <GiftIcon size={27} strokeWidth={1.6} />
           </button>
         )}
-        <button onClick={onToggleMute}>{muted ? <VolumeX size={25} strokeWidth={1.6} /> : <Volume2 size={25} strokeWidth={1.6} />}</button>
+        <button onClick={onToggleMute} aria-label={muted ? tr.soundOn : tr.soundOff}>{muted ? <VolumeX size={25} strokeWidth={1.6} /> : <Volume2 size={25} strokeWidth={1.6} />}</button>
       </div>
 
       {/* alt bilgi — sessiz overlay */}
@@ -74,6 +76,7 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift }: {
 }
 
 export default function Reels() {
+  const tr = useLang().t.reels;
   const [reels, setReels] = useState<Reel[] | null>(null);
   const [muted, setMuted] = useState(true);
   const [commentsFor, setCommentsFor] = useState<string | null>(null);
@@ -93,16 +96,18 @@ export default function Reels() {
     if (res.ok && j.ok) { const g = giftByKey(key); if (g) setGiftAnim(g); }
   }
 
-  if (!reels) return <div className="flex h-[100dvh] items-center justify-center bg-black text-white/60">Yükleniyor…</div>;
-  if (reels.length === 0)
+  if (!reels) return <div className="flex h-[100dvh] items-center justify-center bg-black text-white/60">{tr.loading}</div>;
+  if (reels.length === 0) {
+    const [pre, post] = tr.emptyDesc.split("{video}");
     return (
       <div className="lp-page flex h-[80dvh] flex-col items-center justify-center gap-3 text-center text-muted">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent"><Film size={26} /></span>
-        <p className="mt-1 font-display text-lg font-semibold text-text">Henüz reels yok</p>
-        <p className="text-sm">Moments'tan bir <b className="text-text">video</b> paylaş — burada görünür.</p>
-        <Link href="/moments" className="lp-cta-gold mt-2 rounded-full px-5 py-2.5 text-sm font-semibold">Video paylaş</Link>
+        <p className="mt-1 font-display text-lg font-semibold text-text">{tr.emptyTitle}</p>
+        <p className="text-sm">{pre}<b className="text-text">{tr.videoWord}</b>{post}</p>
+        <Link href="/moments" className="lp-cta-gold mt-2 rounded-full px-5 py-2.5 text-sm font-semibold">{tr.shareVideo}</Link>
       </div>
     );
+  }
 
   return (
     <div className="no-scrollbar -mt-6 h-[100dvh] snap-y snap-mandatory overflow-y-scroll bg-black">
@@ -115,6 +120,7 @@ export default function Reels() {
           onLike={() => like(r.id)}
           onComment={() => setCommentsFor(r.id)}
           onGift={() => setGiftFor(r)}
+          tr={tr}
         />
       ))}
       {commentsFor && <MomentComments momentId={commentsFor} onClose={() => setCommentsFor(null)} onCount={(d) => setReels((rs) => rs?.map((r) => (r.id === commentsFor ? { ...r, comments: Math.max(0, r.comments + d) } : r)) || null)} />}

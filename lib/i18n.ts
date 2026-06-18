@@ -379,6 +379,10 @@ export type AppDict = {
     yourEvent: string; noResponses: string; approvedSuffix: string; rejectedSuffix: string; approve: string; reject: string;
   };
   eventchat: { subtitle: string; empty: string; placeholder: string; send: string; close: string };
+  reels: {
+    loading: string; emptyTitle: string; emptyDesc: string; videoWord: string; shareVideo: string;
+    like: string; comment: string; gift: string; soundOn: string; soundOff: string;
+  };
   magaza: {
     title: string; back: string; close: string;
     tabAll: string; tabPopular: string; tabLux: string; tabSpecial: string; tabEvent: string; specialBadge: string;
@@ -694,6 +698,10 @@ const appTr: AppDict = {
     yourEvent: "Senin etkinliğin", noResponses: "Henüz yanıt veren yok.", approvedSuffix: " · onaylı", rejectedSuffix: " · reddedildi", approve: "Onayla", reject: "Reddet",
   },
   eventchat: { subtitle: "Etkinlik sohbeti · katılımcılar", empty: "İlk mesajı sen yaz — katılımcılarla buluşmayı planla.", placeholder: "Mesaj yaz…", send: "Gönder", close: "Kapat" },
+  reels: {
+    loading: "Yükleniyor…", emptyTitle: "Henüz reels yok", emptyDesc: "Moments'tan bir {video} paylaş — burada görünür.", videoWord: "video", shareVideo: "Video paylaş",
+    like: "Beğen", comment: "Yorumlar", gift: "Hediye gönder", soundOn: "Sesi aç", soundOff: "Sesi kapat",
+  },
   magaza: {
     title: "Hediye Mağazası", back: "Geri", close: "Kapat",
     tabAll: "Tümü", tabPopular: "Popüler", tabLux: "Lüks", tabSpecial: "Özel", tabEvent: "Etkinlik", specialBadge: "Özel",
@@ -1011,6 +1019,10 @@ const appEn: AppDict = {
     yourEvent: "Your event", noResponses: "No responses yet.", approvedSuffix: " · approved", rejectedSuffix: " · declined", approve: "Approve", reject: "Decline",
   },
   eventchat: { subtitle: "Event chat · attendees", empty: "Write the first message — plan meeting the attendees.", placeholder: "Write a message…", send: "Send", close: "Close" },
+  reels: {
+    loading: "Loading…", emptyTitle: "No reels yet", emptyDesc: "Share a {video} from Moments — it'll show up here.", videoWord: "video", shareVideo: "Share a video",
+    like: "Like", comment: "Comments", gift: "Send a gift", soundOn: "Unmute", soundOff: "Mute",
+  },
   magaza: {
     title: "Gift Store", back: "Back", close: "Close",
     tabAll: "All", tabPopular: "Popular", tabLux: "Luxury", tabSpecial: "Special", tabEvent: "Event", specialBadge: "Special",
@@ -1328,6 +1340,10 @@ const appKu: AppDict = {
     yourEvent: "Çalakiya te", noResponses: "Hîna bersivder tune.", approvedSuffix: " · pejirandî", rejectedSuffix: " · red kirî", approve: "Bipejirîne", reject: "Red bike",
   },
   eventchat: { subtitle: "Axaftina çalakiyê · beşdar", empty: "Peyama yekem tu binivîse — bi beşdaran re hevdîtinê plan bike.", placeholder: "Peyamekê binivîse…", send: "Bişîne", close: "Bigire" },
+  reels: {
+    loading: "Tê barkirin…", emptyTitle: "Hîna reels tune", emptyDesc: "Ji Moments {video}yekê parve bike — li vir xuya dibe.", videoWord: "vîdyo", shareVideo: "Vîdyo parve bike",
+    like: "Eciband", comment: "Şîrove", gift: "Diyarî bişîne", soundOn: "Deng veke", soundOff: "Deng bigire",
+  },
   magaza: {
     title: "Dikana Diyariyan", back: "Vegere", close: "Bigire",
     tabAll: "Hemû", tabPopular: "Populer", tabLux: "Luks", tabSpecial: "Taybet", tabEvent: "Çalakî", specialBadge: "Taybet",
