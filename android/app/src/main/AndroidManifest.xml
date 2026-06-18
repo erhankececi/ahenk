@@ -18,6 +18,17 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Android App Links: https://ahenk.live linklerini uygulamada aç.
+                 autoVerify, /.well-known/assetlinks.json (uygulama imza SHA-256'sı) ile
+                 doğrulandığında çalışır. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="ahenk.live" />
+                <data android:scheme="https" android:host="www.ahenk.live" />
+            </intent-filter>
         </activity>
 
         <provider

@@ -135,6 +135,60 @@ PKCE `code` → `exchangeCodeForSession` (server-side, cookie/SSR) veya e-posta 
 > E-posta/şifre akışı Android hosted-shell'de **çalışır**; mağaza öncesi tek
 > kritik auth işi Google için native/sistem-tarayıcı entegrasyonu + callback deep link.
 
+## 4b) Android App Links (deep link) — ✅ ALTYAPI HAZIR
+
+`https://ahenk.live` linklerinin uygulamada açılması için altyapı kuruldu:
+
+- **Manifest intent-filter** — `android/app/src/main/AndroidManifest.xml` MainActivity'ye
+  `android:autoVerify="true"` + `VIEW`/`DEFAULT`/`BROWSABLE` + `https` host
+  `ahenk.live` ve `www.ahenk.live` eklendi.
+- **assetlinks.json route** — `app/.well-known/assetlinks.json/route.ts` →
+  `https://ahenk.live/.well-known/assetlinks.json`. `package_name: app.ahenk`,
+  `sha256_cert_fingerprints` **env'den** (`ANDROID_SHA256_FINGERPRINTS`, virgülle
+  çoklu). Secret değil; hardcode yok. Env boşken liste boş (geçerli JSON).
+
+### Gereken SHA-256 (kod dışı — env'e girilecek)
+
+App Links doğrulaması için uygulama **imza sertifikasının SHA-256** parmak izi:
+
+```bash
+# Debug (geliştirme):
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey \
+  -storepass android -keypass android | grep SHA256
+# Release: Play App Signing kullanıyorsan Play Console → Setup → App integrity →
+#   "App signing key certificate" SHA-256'sını al.
+```
+
+Bulunan değer(ler) Vercel env'ine: `ANDROID_SHA256_FINGERPRINTS="AA:BB:...:FF"`
+(debug + release'i virgülle ayır).
+
+### Test komutları
+
+```bash
+# 1) assetlinks erişilebilir mi:
+curl -s https://ahenk.live/.well-known/assetlinks.json
+# 2) Google doğrulayıcı statüsü (parmak izi girildikten sonra):
+#   https://developers.google.com/digital-asset-links/tools/generator
+# 3) Cihazda link açılışı (adb):
+adb shell am start -a android.intent.action.VIEW -d "https://ahenk.live/u/test123" app.ahenk
+# 4) App Links doğrulama durumu (Android 12+):
+adb shell pm get-app-links app.ahenk
+```
+
+### Test edilecek linkler
+
+| Link | Beklenen |
+|------|----------|
+| `https://ahenk.live/auth/callback?...` | OAuth/e-posta dönüşü uygulamaya gelir |
+| `https://ahenk.live/register?ref=KOD` | Davet kodu uygulamada açılır (25 jeton) |
+| `https://ahenk.live/u/[id]` | Profil uygulamada açılır |
+| `https://ahenk.live/sohbet/[matchId]` | Sohbet uygulamada açılır |
+| `https://ahenk.live/etkinlikler` / `/moments` | İlgili ekran uygulamada açılır |
+
+> Not: autoVerify yalnız `ANDROID_SHA256_FINGERPRINTS` doğru girilip assetlinks.json
+> imza ile eşleştikten sonra çalışır. Eşleşene kadar linkler tarayıcıda açılır
+> (uygulama akışı bozulmaz).
+
 ## 5) Özet
 
 Web tarafı yayında ve mağaza-uyumlu temeller (IAP kodu, hesap silme, moderasyon,
