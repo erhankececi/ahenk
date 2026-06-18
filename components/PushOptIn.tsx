@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Bell } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 const VAPID = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -16,6 +17,8 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushOptIn({ compact = false }: { compact?: boolean }) {
+  const { t } = useLang();
+  const tp = t.settings.push;
   const supabase = createClient();
   const [state, setState] = useState<"idle" | "off" | "granted" | "denied" | "busy">("off");
 
@@ -76,10 +79,10 @@ export default function PushOptIn({ compact = false }: { compact?: boolean }) {
 
   const desc =
     state === "denied"
-      ? "Tarayıcı izni kapalı — site ayarlarından açabilirsin."
+      ? tp.denied
       : state === "busy"
-        ? "Ayarlanıyor…"
-        : "Gün serini ve yeni etkileşimleri kaçırma. Günde en fazla birkaç önemli bildirim; istediğin zaman kapatabilirsin.";
+        ? tp.busy
+        : tp.desc;
 
   if (compact) {
     return (
@@ -90,10 +93,10 @@ export default function PushOptIn({ compact = false }: { compact?: boolean }) {
       >
         <Bell size={15} className="shrink-0 text-accent" />
         <span className="min-w-0 flex-1 text-xs leading-4 text-text/85">
-          {state === "denied" ? desc : "Bildirimleri aç — gün serini ve etkileşimleri kaçırma."}
+          {state === "denied" ? desc : tp.compact}
         </span>
         <span className="shrink-0 rounded-lg border border-accent/35 bg-accent/12 px-2 py-1 text-[11px] font-semibold text-accent">
-          {state === "busy" ? "…" : "Aç"}
+          {state === "busy" ? "…" : tp.on}
         </span>
       </button>
     );
@@ -109,7 +112,7 @@ export default function PushOptIn({ compact = false }: { compact?: boolean }) {
         <Bell size={18} className="text-accent" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold text-text">Bildirimleri aç</p>
+        <p className="font-semibold text-text">{tp.title}</p>
         <p className="text-xs leading-4 text-muted">{desc}</p>
       </div>
     </button>

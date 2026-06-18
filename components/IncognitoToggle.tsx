@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { EyeOff, Lock } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 export default function IncognitoToggle({
   userId,
@@ -14,6 +15,8 @@ export default function IncognitoToggle({
   initial: boolean;
   premium: boolean;
 }) {
+  const { t } = useLang();
+  const ts = t.settings;
   const supabase = createClient();
   const [on, setOn] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -33,9 +36,9 @@ export default function IncognitoToggle({
         <EyeOff size={18} className={on && premium ? "text-brand" : "text-muted"} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold">Gizli mod</p>
+        <p className="font-semibold">{ts.incognitoTitle}</p>
         <p className="text-xs text-muted">
-          Profilleri görüntülerken iz bırakma — "kim baktı" listesinde görünmezsin.
+          {ts.incognitoDesc}
         </p>
       </div>
       {premium ? (
@@ -44,7 +47,7 @@ export default function IncognitoToggle({
           disabled={busy}
           role="switch"
           aria-checked={on}
-          aria-label="Gizli mod"
+          aria-label={ts.incognitoTitle}
           className={`relative h-6 w-11 shrink-0 rounded-full transition ${on ? "bg-brand" : "bg-elevated"}`}
         >
           <span
@@ -56,10 +59,10 @@ export default function IncognitoToggle({
       ) : (
         <Link
           href="/premium"
-          aria-label="Premium ile aç"
+          aria-label={ts.premiumUnlock}
           className="flex shrink-0 items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs text-muted transition hover:border-brand"
         >
-          <Lock size={13} /> Premium
+          <Lock size={13} /> {ts.premiumLabel}
         </Link>
       )}
     </div>

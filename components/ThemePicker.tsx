@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { THEMES } from "@/lib/themes";
 import { Check, Palette, Lock } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 export default function ThemePicker({
   userId,
@@ -14,6 +15,8 @@ export default function ThemePicker({
   initial: string;
   locked: boolean;
 }) {
+  const { t: dict } = useLang();
+  const ts = dict.settings;
   const supabase = createClient();
   const [theme, setTheme] = useState(initial || "default");
   const [saving, setSaving] = useState(false);
@@ -31,10 +34,10 @@ export default function ThemePicker({
   return (
     <div className="mb-6 rounded-3xl border border-border bg-surface/80 p-4">
       <p className="mb-1 flex items-center gap-2 t-h4">
-        <Palette size={18} /> Profil teması
+        <Palette size={18} /> {ts.themePickerTitle}
       </p>
       <p className="mb-3 t-caption text-muted">
-        {locked ? "Temalar Premium üyelere özel — profil, kart ve sohbeti renklendirir." : "Profil ve sohbet ekranını etkiler."}
+        {locked ? ts.themeLockedDesc : ts.themeUnlockedDesc}
       </p>
       <div className="grid grid-cols-4 gap-2">
         {THEMES.map((t) => (
@@ -47,7 +50,7 @@ export default function ThemePicker({
             } ${locked ? "opacity-50" : "hover:border-brand/60"}`}
           >
             <span className="h-8 w-full rounded-lg" style={{ background: t.swatch }} />
-            <span className="t-caption">{t.label.split(" ")[0]}</span>
+            <span className="t-caption">{(ts.themeNames[t.id] || t.label).split(" ")[0]}</span>
             {theme === t.id && !locked && (
               <Check size={14} className="absolute right-1 top-1 text-brand" />
             )}

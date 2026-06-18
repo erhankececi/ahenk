@@ -198,6 +198,21 @@ export type AppDict = {
     theme: string; themeDesc: string; appLang: string;
     privacyPolicy: string; security: string; blocked: string;
     premiumMembership: string; analytics: string; visitors: string; feedback: string; deleteAccount: string;
+    soundLabel: string;
+    notifPrefsIntro: string;
+    notifRows: Record<"daily" | "etkilesim" | "mesaj" | "hediye", { label: string; desc: string }>;
+    incognitoTitle: string; incognitoDesc: string; premiumLabel: string; premiumUnlock: string;
+    themePickerTitle: string; themeLockedDesc: string; themeUnlockedDesc: string;
+    themeNames: Record<string, string>;
+    verify: {
+      pickSelfie: string; tooBig: string; uploadFailed: string; sendFailed: string;
+      pendingTitle: string; pendingDesc: string; rejected: string; cta: string;
+      uploading: string; hint: string;
+    };
+    autoTranslate: string;
+    push: {
+      title: string; desc: string; denied: string; busy: string; compact: string; on: string;
+    };
   };
   kesfet: {
     title: string; giftStore: string; gameRoom: string; filter: string;
@@ -421,6 +436,38 @@ const appTr: AppDict = {
     privacyPolicy: "Gizlilik Politikası", security: "Güvenlik & Topluluk", blocked: "Engellenenler",
     premiumMembership: "Premium üyelik", analytics: "Analiz (Premium+)", visitors: "Profil ziyaretçileri",
     feedback: "Öneri / Geri bildirim", deleteAccount: "Hesabı sil",
+    soundLabel: "Uygulama sesleri",
+    notifPrefsIntro: "Ahenk'te hangi önemli gelişmelerden haberdar olmak istediğini seç.",
+    notifRows: {
+      daily: { label: "Günlük soru ve gün serisi", desc: "Serini koru, 20 jeton hatırlatması" },
+      etkilesim: { label: "Beğeni ve ziyaretler", desc: "Biri seni beğendi / profilini gezdi" },
+      mesaj: { label: "Mesajlar", desc: "Yeni mesaj ve eşleşmeler" },
+      hediye: { label: "Hediye, davet ve jeton", desc: "Hediye geldi / davetin katıldı" },
+    },
+    incognitoTitle: "Gizli mod",
+    incognitoDesc: "Profilleri görüntülerken iz bırakma — \"kim baktı\" listesinde görünmezsin.",
+    premiumLabel: "Premium", premiumUnlock: "Premium ile aç",
+    themePickerTitle: "Profil teması",
+    themeLockedDesc: "Temalar Premium üyelere özel — profil, kart ve sohbeti renklendirir.",
+    themeUnlockedDesc: "Profil ve sohbet ekranını etkiler.",
+    themeNames: {
+      default: "Onyx", obsidian: "Obsidyen", royalgold: "Royal Gold", champagne: "Şampanya",
+      bronze: "Bronz", platinum: "Platin", emerald: "Zümrüt", bordo: "Bordo", sapphire: "Safir",
+    },
+    verify: {
+      pickSelfie: "Bir selfie fotoğrafı seç.", tooBig: "Fotoğraf 8MB'den küçük olmalı.",
+      uploadFailed: "Yükleme başarısız, tekrar dene.", sendFailed: "Gönderilemedi, tekrar dene.",
+      pendingTitle: "Doğrulama incelemede", pendingDesc: "Selfie'n ekibimiz tarafından kontrol ediliyor.",
+      rejected: "Doğrulama reddedildi — tekrar dene", cta: "Profilini doğrula",
+      uploading: "Yükleniyor…", hint: "Bir selfie yükle, mavi tik kazan. Profilin daha güvenilir görünür.",
+    },
+    autoTranslate: "Mesajları otomatik çevir",
+    push: {
+      title: "Bildirimleri aç",
+      desc: "Gün serini ve yeni etkileşimleri kaçırma. Günde en fazla birkaç önemli bildirim; istediğin zaman kapatabilirsin.",
+      denied: "Tarayıcı izni kapalı — site ayarlarından açabilirsin.",
+      busy: "Ayarlanıyor…", compact: "Bildirimleri aç — gün serini ve etkileşimleri kaçırma.", on: "Aç",
+    },
   },
   kesfet: {
     title: "Keşfet", giftStore: "Hediye Mağazası", gameRoom: "Oyun Salonu", filter: "Filtre",
@@ -757,6 +804,38 @@ const appEn: AppDict = {
     privacyPolicy: "Privacy Policy", security: "Safety & Community", blocked: "Blocked users",
     premiumMembership: "Premium membership", analytics: "Analytics (Premium+)", visitors: "Profile visitors",
     feedback: "Suggestion / Feedback", deleteAccount: "Delete account",
+    soundLabel: "App sounds",
+    notifPrefsIntro: "Choose which important updates you want to hear about on Ahenk.",
+    notifRows: {
+      daily: { label: "Daily question & streak", desc: "Keep your streak, 20-coin reminder" },
+      etkilesim: { label: "Likes & visits", desc: "Someone liked you / viewed your profile" },
+      mesaj: { label: "Messages", desc: "New messages and matches" },
+      hediye: { label: "Gifts, invites & coins", desc: "A gift arrived / your invite joined" },
+    },
+    incognitoTitle: "Incognito mode",
+    incognitoDesc: "Browse profiles without a trace — you won't appear in the \"who viewed\" list.",
+    premiumLabel: "Premium", premiumUnlock: "Unlock with Premium",
+    themePickerTitle: "Profile theme",
+    themeLockedDesc: "Themes are Premium-only — they color your profile, cards and chat.",
+    themeUnlockedDesc: "Affects your profile and chat screen.",
+    themeNames: {
+      default: "Onyx", obsidian: "Obsidian", royalgold: "Royal Gold", champagne: "Champagne",
+      bronze: "Bronze", platinum: "Platinum", emerald: "Emerald", bordo: "Bordeaux", sapphire: "Sapphire",
+    },
+    verify: {
+      pickSelfie: "Pick a selfie photo.", tooBig: "Photo must be smaller than 8MB.",
+      uploadFailed: "Upload failed, try again.", sendFailed: "Couldn't send, try again.",
+      pendingTitle: "Verification in review", pendingDesc: "Your selfie is being checked by our team.",
+      rejected: "Verification rejected — try again", cta: "Verify your profile",
+      uploading: "Uploading…", hint: "Upload a selfie to earn the blue check. Your profile looks more trustworthy.",
+    },
+    autoTranslate: "Auto-translate messages",
+    push: {
+      title: "Turn on notifications",
+      desc: "Don't miss your streak and new interactions. At most a few important alerts a day; turn off anytime.",
+      denied: "Browser permission is off — you can enable it in site settings.",
+      busy: "Setting up…", compact: "Turn on notifications — don't miss your streak and interactions.", on: "On",
+    },
   },
   kesfet: {
     title: "Discover", giftStore: "Gift Store", gameRoom: "Game Room", filter: "Filter",
@@ -1093,6 +1172,38 @@ const appKu: AppDict = {
     privacyPolicy: "Polîtîkaya Nepenîtiyê", security: "Ewlehî & Civat", blocked: "Astengkirî",
     premiumMembership: "Endametiya Premium", analytics: "Analîz (Premium+)", visitors: "Serdana profîlê",
     feedback: "Pêşniyar / Bersiv", deleteAccount: "Hesabê jê bibe",
+    soundLabel: "Dengên sepanê",
+    notifPrefsIntro: "Hilbijêre ku tu dixwazî li ser Ahenkê ji kîjan pêşveçûnên girîng agahdar bibî.",
+    notifRows: {
+      daily: { label: "Pirsa rojane û rêza rojan", desc: "Rêza xwe biparêze, bîranîna 20 jeton" },
+      etkilesim: { label: "Eciband û serdan", desc: "Yekî tu eciband / li profîla te nêrî" },
+      mesaj: { label: "Peyam", desc: "Peyamên nû û hevgirtin" },
+      hediye: { label: "Diyarî, vexwendin û jeton", desc: "Diyariyek hat / vexwendina te beşdar bû" },
+    },
+    incognitoTitle: "Moda veşartî",
+    incognitoDesc: "Bê şopê li profîlan binêre — di lîsteya \"kê nêrî\" de xuya nabî.",
+    premiumLabel: "Premium", premiumUnlock: "Bi Premium veke",
+    themePickerTitle: "Rûkala profîlê",
+    themeLockedDesc: "Rûkal taybetî endamên Premium in — profîl, kart û chatê rengîn dikin.",
+    themeUnlockedDesc: "Bandorê li profîl û ekrana chatê dike.",
+    themeNames: {
+      default: "Onyx", obsidian: "Obsidyen", royalgold: "Royal Gold", champagne: "Şampanya",
+      bronze: "Bronz", platinum: "Platîn", emerald: "Zûmrût", bordo: "Bordo", sapphire: "Safîr",
+    },
+    verify: {
+      pickSelfie: "Wêneyek selfie hilbijêre.", tooBig: "Divê wêne ji 8MB biçûktir be.",
+      uploadFailed: "Bardan biser neket, dîsa biceribîne.", sendFailed: "Nehat şandin, dîsa biceribîne.",
+      pendingTitle: "Pejirandin di vekolînê de", pendingDesc: "Selfiya te ji aliyê tîma me ve tê kontrolkirin.",
+      rejected: "Pejirandin hat redkirin — dîsa biceribîne", cta: "Profîla xwe bipejirîne",
+      uploading: "Tê barkirin…", hint: "Selfiyekê bar bike, nîşana şîn bistîne. Profîla te bawertir xuya dike.",
+    },
+    autoTranslate: "Peyaman bixweber wergerîne",
+    push: {
+      title: "Agahdariyan veke",
+      desc: "Rêza rojan û têkiliyên nû ji dest neke. Rojê herî zêde çend agahdariyên girîng; kengî bixwazî digirî.",
+      denied: "Destûra gerokê girtî ye — ji mîhengên malperê vekî.",
+      busy: "Tê amadekirin…", compact: "Agahdariyan veke — rêza rojan û têkiliyan ji dest neke.", on: "Veke",
+    },
   },
   kesfet: {
     title: "Keşf", giftStore: "Dikana Diyariyan", gameRoom: "Salona Lîstikê", filter: "Parzûn",

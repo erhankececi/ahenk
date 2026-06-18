@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { BadgeCheck, Camera, Clock } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 /**
  * Selfie ile profil doğrulama isteği. Selfie private 'photos' kovasına yüklenir,
@@ -19,6 +20,8 @@ export default function VerifyRequest({
   status: string;
   isVerified: boolean;
 }) {
+  const { t } = useLang();
+  const tv = t.settings.verify;
   const supabase = createClient();
   const router = useRouter();
   const [st, setSt] = useState(status);
@@ -30,11 +33,11 @@ export default function VerifyRequest({
   async function yukle(file: File) {
     if (busy) return;
     if (!file.type.startsWith("image/")) {
-      setErr("Bir selfie fotoğrafı seç.");
+      setErr(tv.pickSelfie);
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      setErr("Fotoğraf 8MB'den küçük olmalı.");
+      setErr(tv.tooBig);
       return;
     }
     setBusy(true);
@@ -46,7 +49,7 @@ export default function VerifyRequest({
         .from("photos")
         .upload(path, file, { contentType: file.type, upsert: true });
       if (upErr) {
-        setErr("Yükleme başarısız, tekrar dene.");
+        setErr(tv.uploadFailed);
         return;
       }
       const { error: updErr } = await supabase
@@ -54,7 +57,7 @@ export default function VerifyRequest({
         .update({ verification_status: "pending", verification_path: path })
         .eq("id", userId);
       if (updErr) {
-        setErr("Gönderilemedi, tekrar dene.");
+        setErr(tv.sendFailed);
         return;
       }
       setSt("pending");
@@ -69,8 +72,8 @@ export default function VerifyRequest({
       <div className="mb-6 flex items-center gap-3 rounded-3xl border border-border bg-surface p-4">
         <Clock size={18} className="shrink-0 text-warning" />
         <div>
-          <p className="text-sm font-medium">Doğrulama incelemede</p>
-          <p className="text-xs text-muted">Selfie'n ekibimiz tarafından kontrol ediliyor.</p>
+          <p className="text-sm font-medium">{tv.pendingTitle}</p>
+          <p className="text-xs text-muted">{tv.pendingDesc}</p>
         </div>
       </div>
     );
@@ -83,10 +86,10 @@ export default function VerifyRequest({
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-semibold">
-          {st === "rejected" ? "Doğrulama reddedildi — tekrar dene" : "Profilini doğrula"}
+          {st === "rejected" ? tv.rejected : tv.cta}
         </p>
         <p className="text-xs text-muted">
-          {busy ? "Yükleniyor…" : "Bir selfie yükle, mavi tik kazan. Profilin daha güvenilir görünür."}
+          {busy ? tv.uploading : tv.hint}
         </p>
         {err && <p className="mt-1 text-xs text-error">{err}</p>}
       </div>

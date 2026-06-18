@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useLang } from "@/components/LangProvider";
 
 type Prefs = Record<string, boolean>;
 
-const ROWS: { key: string; label: string; desc: string }[] = [
-  { key: "daily", label: "Günlük soru ve gün serisi", desc: "Serini koru, 20 jeton hatırlatması" },
-  { key: "etkilesim", label: "Beğeni ve ziyaretler", desc: "Biri seni beğendi / profilini gezdi" },
-  { key: "mesaj", label: "Mesajlar", desc: "Yeni mesaj ve eşleşmeler" },
-  { key: "hediye", label: "Hediye, davet ve jeton", desc: "Hediye geldi / davetin katıldı" },
-];
+const ROW_KEYS = ["daily", "etkilesim", "mesaj", "hediye"] as const;
 
 export default function BildirimTercihleri() {
+  const { t } = useLang();
+  const rows = t.settings.notifRows;
   const supabase = createClient();
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [uid, setUid] = useState<string>("");
@@ -39,15 +37,16 @@ export default function BildirimTercihleri() {
   return (
     <div>
       <p className="px-1 pb-2 text-xs leading-4 text-muted">
-        Ahenk'te hangi önemli gelişmelerden haberdar olmak istediğini seç.
+        {t.settings.notifPrefsIntro}
       </p>
       <div className="ahenk-panel divide-y divide-white/[0.06] overflow-hidden rounded-2xl">
-        {ROWS.map((r) => {
-          const on = acik(r.key);
+        {ROW_KEYS.map((key) => {
+          const r = rows[key];
+          const on = acik(key);
           return (
             <button
-              key={r.key}
-              onClick={() => degistir(r.key)}
+              key={key}
+              onClick={() => degistir(key)}
               disabled={!prefs}
               className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-white/[0.03] disabled:opacity-60"
             >
