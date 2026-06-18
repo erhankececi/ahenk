@@ -26,9 +26,9 @@
 
 1. **Native platform klasörleri yok** — `android/` ve `ios/` üretilmemiş.
    - `npx cap add ios` (macOS + Xcode gerekli) ve `npx cap add android` (Android Studio).
-2. **🔴 server.url uyuşmazlığı** — `capacitor.config.ts` → `https://ahenk.app`,
-   ama production domain **`ahenk.live`**. Native kabuk yanlış siteyi yükler.
-   Başvurudan önce `CAP_SERVER_URL`/config canlı domaine hizalanmalı.
+2. **✅ server.url uyuşmazlığı DÜZELTİLDİ** — `capacitor.config.ts` `server.url`
+   varsayılanı artık `https://ahenk.live` (önceden yanlışlıkla `ahenk.app`'ti).
+   `CAP_SERVER_URL` env ile override edilebilir.
 3. **Raster app ikonları yok** — şu an sadece SVG. Mağaza PNG ister:
    - iOS AppIcon 1024×1024; Android adaptive icon (foreground+background) 512×512.
 4. **Splash görselleri** — yalnız `splash.svg`. `@capacitor/splash-screen` + raster.

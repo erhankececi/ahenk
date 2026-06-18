@@ -9,8 +9,8 @@ const config: CapacitorConfig = {
   // server.url kullanıldığı için webDir yalnız bir yer tutucudur (cap sync ister).
   webDir: "public",
   server: {
-    // Production: kendi domain'in. Geliştirme: bilgisayarının LAN IP'si (örn. http://192.168.1.20:3000).
-    url: process.env.CAP_SERVER_URL || "https://ahenk.app",
+    // Production: canlı domain (ahenk.live). Geliştirme: bilgisayarının LAN IP'si (örn. http://192.168.1.20:3000).
+    url: process.env.CAP_SERVER_URL || "https://ahenk.live",
     // Geliştirmede http (cleartext) gerekebilir; production https'te false yapabilirsin.
     cleartext: true,
   },
