@@ -5,6 +5,7 @@ import { trackEvent } from "@/lib/track";
 import { createClient } from "@/lib/supabase/client";
 import { GIFT_CATALOG, GIFT_CATEGORIES, RARITY, type GiftCategory, type Gift } from "@/lib/gifts";
 import { Coins, Gift as GiftIcon, X, Plus } from "lucide-react";
+import { useLang } from "@/components/LangProvider";
 
 // 3D görsel; yüklenemezse emoji'ye düşer.
 function GiftThumb({ g }: { g: Gift }) {
@@ -32,6 +33,7 @@ export default function GiftStore({
   onClose: () => void;
 }) {
   const supabase = createClient();
+  const tm = useLang().t.magaza;
   const [cat, setCat] = useState<GiftCategory>("romantik");
   const [balance, setBalance] = useState<number | null>(null);
   const [sel, setSel] = useState<string | null>(null);
@@ -56,7 +58,7 @@ export default function GiftStore({
       >
         <div className="flex items-center justify-between px-5 pt-4">
           <p className="flex items-center gap-2 font-display text-lg font-bold">
-            <GiftIcon size={18} className="text-accent" /> Hediye Mağazası
+            <GiftIcon size={18} className="text-accent" /> {tm.title}
           </p>
           <div className="flex items-center gap-3">
             {balance != null && (
@@ -68,7 +70,7 @@ export default function GiftStore({
                 <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[#1c1407]"><Plus size={11} /></span>
               </a>
             )}
-            <button onClick={onClose} aria-label="Kapat" className="text-muted"><X size={20} /></button>
+            <button onClick={onClose} aria-label={tm.close} className="text-muted"><X size={20} /></button>
           </div>
         </div>
 
@@ -82,7 +84,7 @@ export default function GiftStore({
                 cat === c.id ? "bg-accent text-[#1c1407]" : "bg-white/5 text-muted hover:text-text"
               }`}
             >
-              <span>{c.emoji}</span> {c.label}
+              <span>{c.emoji}</span> {tm.categories[c.id] ?? c.label}
             </button>
           ))}
         </div>
@@ -109,7 +111,7 @@ export default function GiftStore({
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-16 opacity-40" style={{ background: `radial-gradient(60% 80% at 50% 0%, ${r.ring}, transparent 70%)` }} />
                 {/* nadirlik rozeti */}
                 <span className="absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide" style={{ color: r.text, background: "rgba(0,0,0,0.45)" }}>
-                  {r.label}
+                  {tm.rarities[g.rarity] ?? r.label}
                 </span>
                 {/* 3D görsel */}
                 <span className="relative my-1 flex h-14 items-center justify-center">
@@ -133,8 +135,8 @@ export default function GiftStore({
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-accent"><Coins size={18} /></span>
             <span className="flex-1">
-              <span className="block text-sm font-semibold">Jeton satın al</span>
-              <span className="block text-xs text-muted">Avantajlı paketleri keşfet</span>
+              <span className="block text-sm font-semibold">{tm.buyTokens}</span>
+              <span className="block text-xs text-muted">{tm.buyTokensDesc}</span>
             </span>
             <Plus size={18} className="text-accent" />
           </a>
@@ -144,7 +146,7 @@ export default function GiftStore({
             className="brand-gradient flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-semibold transition active:scale-[0.98] disabled:opacity-40"
           >
             <GiftIcon size={18} />
-            {sel ? `${otherName}'a gönder` : "Bir hediye seç"}
+            {sel ? tm.sendTo.replace("{name}", otherName) : tm.selectGift}
           </button>
         </div>
       </div>

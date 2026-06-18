@@ -379,6 +379,12 @@ export type AppDict = {
     yourEvent: string; noResponses: string; approvedSuffix: string; rejectedSuffix: string; approve: string; reject: string;
   };
   eventchat: { subtitle: string; empty: string; placeholder: string; send: string; close: string };
+  magaza: {
+    title: string; back: string; close: string;
+    tabAll: string; tabPopular: string; tabLux: string; tabSpecial: string; tabEvent: string; specialBadge: string;
+    buyTokens: string; buyTokensDesc: string; sendHint: string; sendTo: string; selectGift: string;
+    categories: Record<string, string>; rarities: Record<string, string>;
+  };
   common: { back: string };
 };
 
@@ -688,6 +694,14 @@ const appTr: AppDict = {
     yourEvent: "Senin etkinliğin", noResponses: "Henüz yanıt veren yok.", approvedSuffix: " · onaylı", rejectedSuffix: " · reddedildi", approve: "Onayla", reject: "Reddet",
   },
   eventchat: { subtitle: "Etkinlik sohbeti · katılımcılar", empty: "İlk mesajı sen yaz — katılımcılarla buluşmayı planla.", placeholder: "Mesaj yaz…", send: "Gönder", close: "Kapat" },
+  magaza: {
+    title: "Hediye Mağazası", back: "Geri", close: "Kapat",
+    tabAll: "Tümü", tabPopular: "Popüler", tabLux: "Lüks", tabSpecial: "Özel", tabEvent: "Etkinlik", specialBadge: "Özel",
+    buyTokens: "Jeton satın al", buyTokensDesc: "Avantajlı paketleri keşfet",
+    sendHint: "Göndermek için bir sohbette veya profilde hediye simgesine dokun", sendTo: "{name}'a gönder", selectGift: "Bir hediye seç",
+    categories: { romantik: "Romantik", luks: "Lüks", vip: "VIP", seyahat: "Seyahat", kraliyet: "Kraliyet", efsane: "Efsane", ozel: "Özel" },
+    rarities: { common: "Sıradan", rare: "Nadir", epic: "Destansı", legendary: "Efsanevi", mythic: "Mitik" },
+  },
   common: { back: "Geri" },
 };
 
@@ -997,6 +1011,14 @@ const appEn: AppDict = {
     yourEvent: "Your event", noResponses: "No responses yet.", approvedSuffix: " · approved", rejectedSuffix: " · declined", approve: "Approve", reject: "Decline",
   },
   eventchat: { subtitle: "Event chat · attendees", empty: "Write the first message — plan meeting the attendees.", placeholder: "Write a message…", send: "Send", close: "Close" },
+  magaza: {
+    title: "Gift Store", back: "Back", close: "Close",
+    tabAll: "All", tabPopular: "Popular", tabLux: "Luxury", tabSpecial: "Special", tabEvent: "Event", specialBadge: "Special",
+    buyTokens: "Buy tokens", buyTokensDesc: "Explore great-value packs",
+    sendHint: "To send, tap the gift icon in a chat or on a profile", sendTo: "Send to {name}", selectGift: "Pick a gift",
+    categories: { romantik: "Romantic", luks: "Luxury", vip: "VIP", seyahat: "Travel", kraliyet: "Royal", efsane: "Legend", ozel: "Special" },
+    rarities: { common: "Common", rare: "Rare", epic: "Epic", legendary: "Legendary", mythic: "Mythic" },
+  },
   common: { back: "Back" },
 };
 
@@ -1306,6 +1328,14 @@ const appKu: AppDict = {
     yourEvent: "Çalakiya te", noResponses: "Hîna bersivder tune.", approvedSuffix: " · pejirandî", rejectedSuffix: " · red kirî", approve: "Bipejirîne", reject: "Red bike",
   },
   eventchat: { subtitle: "Axaftina çalakiyê · beşdar", empty: "Peyama yekem tu binivîse — bi beşdaran re hevdîtinê plan bike.", placeholder: "Peyamekê binivîse…", send: "Bişîne", close: "Bigire" },
+  magaza: {
+    title: "Dikana Diyariyan", back: "Vegere", close: "Bigire",
+    tabAll: "Hemû", tabPopular: "Populer", tabLux: "Luks", tabSpecial: "Taybet", tabEvent: "Çalakî", specialBadge: "Taybet",
+    buyTokens: "Jeton bikire", buyTokensDesc: "Pakêtên biavantaj keşf bike",
+    sendHint: "Ji bo şandinê, di axaftinekê an li profîlekê de li îkona diyariyê bitikîne", sendTo: "Ji {name} re bişîne", selectGift: "Diyariyekê hilbijêre",
+    categories: { romantik: "Romantîk", luks: "Luks", vip: "VIP", seyahat: "Geştûguzar", kraliyet: "Padîşahî", efsane: "Efsane", ozel: "Taybet" },
+    rarities: { common: "Asayî", rare: "Kêm", epic: "Destanî", legendary: "Efsaneyî", mythic: "Mîtîk" },
+  },
   common: { back: "Vegere" },
 };
 

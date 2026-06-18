@@ -7,14 +7,15 @@ import { createClient } from "@/lib/supabase/client";
 import { GIFT_CATALOG, type Gift } from "@/lib/gifts";
 import { Coins, Plus, ArrowLeft, ChevronRight, Gift as GiftIcon } from "lucide-react";
 import Link from "next/link";
+import { useLang } from "@/components/LangProvider";
 
 // Kategori sekmeleri — referanstaki 5 sekme (tüm katalog kapsanır)
-const TABS: { id: string; label: string; match: (g: Gift) => boolean }[] = [
-  { id: "tumu", label: "Tümü", match: () => true },
-  { id: "populer", label: "Popüler", match: (g) => g.rarity === "epic" || g.rarity === "legendary" || g.rarity === "mythic" },
-  { id: "luks", label: "Lüks", match: (g) => g.category === "luks" || g.category === "vip" },
-  { id: "ozel", label: "Özel", match: (g) => g.category === "ozel" || g.category === "romantik" },
-  { id: "etkinlik", label: "Etkinlik", match: (g) => g.category === "seyahat" || g.category === "efsane" || g.category === "kraliyet" },
+const TABS: { id: string; match: (g: Gift) => boolean }[] = [
+  { id: "tumu", match: () => true },
+  { id: "populer", match: (g) => g.rarity === "epic" || g.rarity === "legendary" || g.rarity === "mythic" },
+  { id: "luks", match: (g) => g.category === "luks" || g.category === "vip" },
+  { id: "ozel", match: (g) => g.category === "ozel" || g.category === "romantik" },
+  { id: "etkinlik", match: (g) => g.category === "seyahat" || g.category === "efsane" || g.category === "kraliyet" },
 ];
 
 function Thumb({ g, delay, active }: { g: Gift; delay: number; active?: boolean }) {
@@ -57,6 +58,10 @@ function Thumb({ g, delay, active }: { g: Gift; delay: number; active?: boolean 
 
 export default function Magaza() {
   const supabase = createClient();
+  const tm = useLang().t.magaza;
+  const tabLabel: Record<string, string> = {
+    tumu: tm.tabAll, populer: tm.tabPopular, luks: tm.tabLux, ozel: tm.tabSpecial, etkinlik: tm.tabEvent,
+  };
   const [balance, setBalance] = useState<number | null>(null);
   const [tab, setTab] = useState("tumu");
   const [sel, setSel] = useState<string | null>(null);
@@ -85,8 +90,8 @@ export default function Magaza() {
     >
       {/* Üst bar */}
       <header className="sticky top-0 z-20 flex h-14 items-center justify-between px-5" style={{ background: "rgba(14,13,16,0.85)", backdropFilter: "blur(12px)" }}>
-        <Link href="/cuzdan" className="text-text/70 transition hover:text-text" aria-label="Geri"><ArrowLeft size={22} strokeWidth={1.8} /></Link>
-        <h1 className="font-display text-[17px] font-bold tracking-tight">Hediye Mağazası</h1>
+        <Link href="/cuzdan" className="text-text/70 transition hover:text-text" aria-label={tm.back}><ArrowLeft size={22} strokeWidth={1.8} /></Link>
+        <h1 className="font-display text-[17px] font-bold tracking-tight">{tm.title}</h1>
         <Link
           href="/cuzdan"
           className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold text-accent"
@@ -112,7 +117,7 @@ export default function Magaza() {
                   : { background: "#151318", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(243,238,228,0.55)" }
               }
             >
-              {t.label}
+              {tabLabel[t.id]}
             </button>
           );
         })}
@@ -143,7 +148,7 @@ export default function Magaza() {
                 <span className="pointer-events-none absolute inset-0 transition-opacity" style={{ background: "radial-gradient(72% 62% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)", opacity: active ? 1 : 0.55 }} />
                 {(g.rarity === "legendary" || g.rarity === "mythic") && (
                   <span className="pointer-events-none absolute right-1.5 top-1.5 z-10 rounded-full border border-accent/40 bg-[#0E0D10]/80 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-accent">
-                    Özel
+                    {tm.specialBadge}
                   </span>
                 )}
                 <Thumb g={g} delay={(i % 6) * 0.5} active={active} />
@@ -176,14 +181,14 @@ export default function Magaza() {
               <Coins size={20} />
             </span>
             <span className="flex-1">
-              <span className="block text-sm font-semibold text-text">Jeton satın al</span>
-              <span className="block text-xs text-text/55">Avantajlı paketleri keşfet</span>
+              <span className="block text-sm font-semibold text-text">{tm.buyTokens}</span>
+              <span className="block text-xs text-text/55">{tm.buyTokensDesc}</span>
             </span>
             <ChevronRight size={20} className="text-accent" />
           </Link>
         </motion.div>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-text/45">
-          <GiftIcon size={13} /> Göndermek için bir sohbette veya profilde hediye simgesine dokun
+          <GiftIcon size={13} /> {tm.sendHint}
         </p>
       </div>
     </motion.div>
