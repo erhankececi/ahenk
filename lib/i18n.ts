@@ -1,11 +1,13 @@
 // Hafif i18n — herkese açık (pazarlama) site + dil seçici. TR/EN ile başlar,
 // yapı yeni dil eklemeye uygun. Uygulama-içi ekranlar kademeli taşınabilir.
-export type Lang = "tr" | "en" | "ku";
+export type Lang = "tr" | "en" | "ku" | "ar" | "fa";
 
 export const LANGS: { code: Lang; label: string; native: string }[] = [
   { code: "tr", label: "Türkçe", native: "Türkçe" },
   { code: "en", label: "İngilizce", native: "English" },
   { code: "ku", label: "Kürtçe", native: "Kurdî" },
+  { code: "ar", label: "Arapça", native: "العربية" },
+  { code: "fa", label: "Farsça", native: "فارسی" },
 ];
 
 type Dict = {
@@ -170,18 +172,25 @@ const ku: Dict = {
   legal: { privacy: "Polîtîkaya Nepenîtiyê", terms: "Mercên Bikaranînê", kvkk: "Nivîsa Agahdariya KVKK", updated: "Dawî hat nûkirin", back: "Rûpela sereke" },
 };
 
-const DICT: Record<Lang, Dict> = { tr, en, ku };
+// Pazarlama/landing sözlüğü henüz ar/fa için çevrilmedi → şimdilik İngilizceye
+// düşülür (RTL düzeni html dir ile zaten çalışır). Uygulama-içi sözlük (APP_DICT)
+// ayrıca ar/fa kısmi çevirisi + Türkçe fallback ile aşağıda kurulur.
+const DICT: Record<Lang, Dict> = { tr, en, ku, ar: en, fa: en };
 
 export function getDict(lang?: string): Dict {
   return DICT[(lang as Lang) in DICT ? (lang as Lang) : "tr"];
 }
 
 export function normalizeLang(lang?: string): Lang {
-  return lang === "en" ? "en" : lang === "ku" ? "ku" : "tr";
+  return lang === "en" ? "en"
+    : lang === "ku" ? "ku"
+    : lang === "ar" ? "ar"
+    : lang === "fa" ? "fa"
+    : "tr";
 }
 
-// Yazı yönü — mevcut dillerin hepsi soldan sağa. (RTL eklenirse buraya.)
-export const LANG_DIR: Record<Lang, "ltr" | "rtl"> = { tr: "ltr", en: "ltr", ku: "ltr" };
+// Yazı yönü — Arapça/Farsça sağdan sola, diğerleri soldan sola.
+export const LANG_DIR: Record<Lang, "ltr" | "rtl"> = { tr: "ltr", en: "ltr", ku: "ltr", ar: "rtl", fa: "rtl" };
 
 // ——— Uygulama-içi sözlük (navigasyon + ayarlar chrome'u) ———
 // Uygulama ekranları kademeli olarak buraya taşınır. Şimdilik en görünür
@@ -1526,7 +1535,123 @@ const appKu: AppDict = {
   common: { back: "Vegere" },
 };
 
-const APP_DICT: Record<Lang, AppDict> = { tr: appTr, en: appEn, ku: appKu };
+// ——— Arapça / Farsça (RTL) — kısmi çeviri + Türkçe fallback ———
+// Çeviri verilmeyen her alan otomatik olarak Türkçe (appTr) değerine düşer;
+// böylece sistem kırılmadan kademeli olarak Arapça/Farsça'ya geçilebilir.
+type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
+
+function mergeDict(base: any, over: any): any {
+  if (over === undefined || over === null) return base;
+  if (typeof base !== "object" || base === null || Array.isArray(base)) return over;
+  const out: any = { ...base };
+  for (const k of Object.keys(over)) out[k] = mergeDict(base[k], over[k]);
+  return out;
+}
+
+const arOverride: DeepPartial<AppDict> = {
+  nav: {
+    kesfet: "اكتشف", moments: "لحظات", reels: "ريلز", oyun: "غرفة الألعاب",
+    mesajlar: "الرسائل", etkinlikler: "الفعاليات", profil: "الملف الشخصي", premium: "بريميوم", cuzdan: "المحفظة",
+  },
+  settings: {
+    title: "الإعدادات",
+    groupNotif: "الإشعارات والأصوات", groupNotifPrefs: "تفضيلات الإشعارات", groupAppearance: "المظهر",
+    groupPrivacy: "الخصوصية", groupSecurity: "الأمان", groupLang: "اللغة والترجمة",
+    groupPremium: "بريميوم", groupAccount: "الحساب",
+    theme: "السمة", themeDesc: "تفضيلات المظهر المميّزة", appLang: "لغة التطبيق",
+    privacyPolicy: "سياسة الخصوصية", security: "الأمان والمجتمع", blocked: "المحظورون",
+    premiumMembership: "عضوية بريميوم", analytics: "التحليلات (Premium+)", visitors: "زوّار الملف الشخصي",
+    feedback: "اقتراح / ملاحظات", deleteAccount: "حذف الحساب",
+    soundLabel: "أصوات التطبيق",
+    notifPrefsIntro: "اختر التحديثات المهمة التي تريد معرفتها على Ahenk.",
+    notifRows: {
+      daily: { label: "السؤال اليومي والسلسلة", desc: "حافظ على سلسلتك، تذكير 20 جيتون" },
+      etkilesim: { label: "الإعجابات والزيارات", desc: "أعجب بك أحدهم / زار ملفك" },
+      mesaj: { label: "الرسائل", desc: "رسائل وتطابقات جديدة" },
+      hediye: { label: "الهدايا والدعوات والجيتون", desc: "وصلت هدية / انضمّ مدعوّك" },
+    },
+    incognitoTitle: "الوضع المخفي",
+    incognitoDesc: "تصفّح الملفات دون أثر — لن تظهر في قائمة \"من شاهد\".",
+    premiumLabel: "بريميوم", premiumUnlock: "افتح مع بريميوم",
+    themePickerTitle: "سمة الملف الشخصي",
+    themeLockedDesc: "السمات حصريّة لأعضاء بريميوم — تلوّن ملفك وبطاقاتك ومحادثاتك.",
+    themeUnlockedDesc: "تؤثّر على ملفك الشخصي وشاشة المحادثة.",
+    themeNames: {
+      default: "أونيكس", obsidian: "أوبسيديان", royalgold: "ذهبي ملكي", champagne: "شمبانيا",
+      bronze: "برونزي", platinum: "بلاتيني", emerald: "زمرّدي", bordo: "عنّابي", sapphire: "ياقوتي",
+    },
+    verify: {
+      pickSelfie: "اختر صورة سيلفي.", tooBig: "يجب أن تكون الصورة أصغر من 8 ميغابايت.",
+      uploadFailed: "فشل الرفع، حاول مرة أخرى.", sendFailed: "تعذّر الإرسال، حاول مرة أخرى.",
+      pendingTitle: "التحقق قيد المراجعة", pendingDesc: "يقوم فريقنا بفحص صورتك.",
+      rejected: "تم رفض التحقق — حاول مرة أخرى", cta: "وثّق ملفك الشخصي",
+      uploading: "جارٍ الرفع…", hint: "ارفع صورة سيلفي للحصول على العلامة الزرقاء. يبدو ملفك أكثر مصداقية.",
+    },
+    autoTranslate: "ترجمة الرسائل تلقائياً",
+    push: {
+      title: "تفعيل الإشعارات",
+      desc: "لا تفوّت سلسلتك وتفاعلاتك الجديدة. بضعة إشعارات مهمة كحدّ أقصى يومياً؛ يمكنك إيقافها متى شئت.",
+      denied: "إذن المتصفح مغلق — يمكنك تفعيله من إعدادات الموقع.",
+      busy: "جارٍ الإعداد…", compact: "فعّل الإشعارات — لا تفوّت سلسلتك وتفاعلاتك.", on: "تفعيل",
+    },
+  },
+  common: { back: "رجوع" },
+};
+
+const faOverride: DeepPartial<AppDict> = {
+  nav: {
+    kesfet: "کشف", moments: "لحظه‌ها", reels: "ریلز", oyun: "اتاق بازی",
+    mesajlar: "پیام‌ها", etkinlikler: "رویدادها", profil: "نمایه", premium: "پریمیوم", cuzdan: "کیف پول",
+  },
+  settings: {
+    title: "تنظیمات",
+    groupNotif: "اعلان‌ها و صداها", groupNotifPrefs: "تنظیمات اعلان", groupAppearance: "ظاهر",
+    groupPrivacy: "حریم خصوصی", groupSecurity: "امنیت", groupLang: "زبان و ترجمه",
+    groupPremium: "پریمیوم", groupAccount: "حساب",
+    theme: "پوسته", themeDesc: "ترجیحات ظاهری ویژه", appLang: "زبان برنامه",
+    privacyPolicy: "سیاست حریم خصوصی", security: "امنیت و انجمن", blocked: "مسدودشده‌ها",
+    premiumMembership: "عضویت پریمیوم", analytics: "تحلیل (Premium+)", visitors: "بازدیدکنندگان نمایه",
+    feedback: "پیشنهاد / بازخورد", deleteAccount: "حذف حساب",
+    soundLabel: "صداهای برنامه",
+    notifPrefsIntro: "انتخاب کن از کدام به‌روزرسانی‌های مهم در Ahenk باخبر شوی.",
+    notifRows: {
+      daily: { label: "پرسش روزانه و زنجیره", desc: "زنجیره‌ات را حفظ کن، یادآوری ۲۰ ژتون" },
+      etkilesim: { label: "پسندها و بازدیدها", desc: "کسی تو را پسندید / نمایه‌ات را دید" },
+      mesaj: { label: "پیام‌ها", desc: "پیام‌ها و تطبیق‌های جدید" },
+      hediye: { label: "هدیه، دعوت و ژتون", desc: "هدیه‌ای رسید / دعوت‌شده‌ات پیوست" },
+    },
+    incognitoTitle: "حالت ناشناس",
+    incognitoDesc: "بدون ردپا نمایه‌ها را ببین — در فهرست «چه کسی دید» ظاهر نمی‌شوی.",
+    premiumLabel: "پریمیوم", premiumUnlock: "با پریمیوم باز کن",
+    themePickerTitle: "پوسته نمایه",
+    themeLockedDesc: "پوسته‌ها ویژه اعضای پریمیوم‌اند — نمایه، کارت و گفتگو را رنگی می‌کنند.",
+    themeUnlockedDesc: "بر نمایه و صفحه گفتگو اثر می‌گذارد.",
+    themeNames: {
+      default: "اونیکس", obsidian: "اوبسیدین", royalgold: "طلایی سلطنتی", champagne: "شامپاین",
+      bronze: "برنزی", platinum: "پلاتینی", emerald: "زمردی", bordo: "زرشکی", sapphire: "یاقوتی",
+    },
+    verify: {
+      pickSelfie: "یک عکس سلفی انتخاب کن.", tooBig: "عکس باید کوچک‌تر از ۸ مگابایت باشد.",
+      uploadFailed: "بارگذاری ناموفق بود، دوباره تلاش کن.", sendFailed: "ارسال نشد، دوباره تلاش کن.",
+      pendingTitle: "تأیید در حال بررسی", pendingDesc: "سلفی تو توسط تیم ما بررسی می‌شود.",
+      rejected: "تأیید رد شد — دوباره تلاش کن", cta: "نمایه‌ات را تأیید کن",
+      uploading: "در حال بارگذاری…", hint: "یک سلفی بارگذاری کن تا تیک آبی بگیری. نمایه‌ات معتبرتر دیده می‌شود.",
+    },
+    autoTranslate: "ترجمه خودکار پیام‌ها",
+    push: {
+      title: "روشن کردن اعلان‌ها",
+      desc: "زنجیره و تعامل‌های تازه را از دست نده. حداکثر چند اعلان مهم در روز؛ هر وقت خواستی خاموش کن.",
+      denied: "اجازه مرورگر بسته است — از تنظیمات سایت روشن کن.",
+      busy: "در حال تنظیم…", compact: "اعلان‌ها را روشن کن — زنجیره و تعامل‌ها را از دست نده.", on: "روشن",
+    },
+  },
+  common: { back: "بازگشت" },
+};
+
+const appAr: AppDict = mergeDict(appTr, arOverride);
+const appFa: AppDict = mergeDict(appTr, faOverride);
+
+const APP_DICT: Record<Lang, AppDict> = { tr: appTr, en: appEn, ku: appKu, ar: appAr, fa: appFa };
 
 export function getAppDict(lang?: string): AppDict {
   return APP_DICT[normalizeLang(lang)];
