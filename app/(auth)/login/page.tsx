@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
 import { ArrowLeft } from "lucide-react";
 import { useLang } from "@/components/LangProvider";
+import { googleSignIn } from "@/lib/googleAuth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -70,10 +71,18 @@ export default function LoginPage() {
   }
 
   async function google() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    });
+    setErr("");
+    const r = await googleSignIn(supabase);
+    if (r.native) {
+      if (r.ok) {
+        fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "auth:login" }) }).catch(() => {});
+        router.push("/");
+        router.refresh();
+      } else {
+        setErr(ta.googleFailed);
+      }
+    }
+    // web: signInWithOAuth zaten tarayıcıyı yönlendiriyor
   }
 
   return (

@@ -15,6 +15,16 @@ const config: CapacitorConfig = {
     cleartext: true,
   },
   ios: { contentInset: "always" },
+  plugins: {
+    // Native Google Sign-In: serverClientId = Supabase'te tanımlı WEB OAuth client ID.
+    // Secret DEĞİL; env'den gelir (GOOGLE_SERVER_CLIENT_ID). Boşsa native giriş çalışmaz,
+    // web OAuth akışı etkilenmez.
+    GoogleAuth: {
+      scopes: ["profile", "email"],
+      serverClientId: process.env.GOOGLE_SERVER_CLIENT_ID || "",
+      forceCodeForRefreshToken: false,
+    },
+  },
 };
 
 export default config;

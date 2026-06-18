@@ -92,14 +92,38 @@ PKCE `code` → `exchangeCodeForSession` (server-side, cookie/SSR) veya e-posta 
 | 5 | Logout → tekrar login | Oturum kapanır/açılır | ✅ (e-posta), 🔴 (Google, #4 ile aynı) |
 | 6 | Paylaşım / derin link app'i açar | İçerik app'te açılır | ⚠️ App Links/scheme yok → tarayıcıda açılır |
 
-### Tespit edilen blokerler & önerilen çözüm (bu görevde uygulanmadı)
+### Native Google Sign-In — ✅ UYGULANDI (kod)
 
-- **🔴 Google OAuth (disallowed_useragent)** — Capacitor WebView gömülü tarayıcı
-  sayıldığından Google OAuth politikası engeller. Çözüm seçenekleri:
-  1. **Native Google Sign-In** eklentisi (ör. `@capacitor/google-auth`) → idToken al →
-     `supabase.auth.signInWithIdToken({ provider:'google', token })`. (Önerilen)
-  2. **`@capacitor/browser`** ile sistem tarayıcısı/Custom Tab'da OAuth +
-     `skipBrowserRedirect:true` + `App.appUrlOpen` ile callback'i yakala.
+- `@codetrix-studio/capacitor-google-auth` eklendi + `cap sync android` (Android'de
+  kayıtlı: 2 plugin).
+- `lib/googleAuth.ts` → `googleSignIn()`: **web'de** mevcut `signInWithOAuth` (değişmedi),
+  **native'de** `GoogleAuth.signIn()` → `idToken` → `supabase.auth.signInWithIdToken`.
+- `app/(auth)/login` ve `register` `google()` bu helper'ı çağırır; native başarıda
+  `router.push('/')`, hata olunca i18n `googleFailed` mesajı.
+- `capacitor.config.ts` → `plugins.GoogleAuth.serverClientId = process.env.GOOGLE_SERVER_CLIENT_ID`
+  (**secret değil, env'den; hardcode yok**).
+
+### Çalışması için gereken Google Cloud / env kurulumu (kod dışı)
+
+1. **Android OAuth client** (Google Cloud Console → Credentials):
+   - Application type: **Android**
+   - Package name: **`app.ahenk`**
+   - SHA-1 (ve istenirse SHA-256): debug için `keytool -list -v -keystore ~/.android/debug.keystore`
+     (parola `android`); release için imzalama anahtarının SHA-1'i.
+2. **Web OAuth client** — Supabase Google provider'da tanımlı olan WEB client ID.
+   Bu değer iki yere girilir (aynı ID):
+   - `GOOGLE_SERVER_CLIENT_ID` (capacitor.config → Android native `serverClientId`)
+   - `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` (`GoogleAuth.initialize` clientId)
+3. Supabase Auth → Google provider zaten açık olmalı (web OAuth için). signInWithIdToken,
+   token audience'ı bu web client ID ile doğrular.
+
+> Env değerleri girilene kadar native Google girişi çalışmaz ama **web OAuth ve
+> e-posta/şifre akışı etkilenmez** (graceful: serverClientId boşsa native no-op gibi).
+
+### Alternatif (uygulanmadı)
+
+- `@capacitor/browser` ile sistem tarayıcısı/Custom Tab + `skipBrowserRedirect:true` +
+  `App.appUrlOpen` deep link. Native plugin akışı tercih edildi (daha az redirect/deep-link bağımlılığı).
 - **⚠️ Geri dönüş (callback) deep link** — `https://ahenk.live/auth/callback`'in app'e
   dönmesi için **Android App Links** (`.well-known/assetlinks.json` + `intent-filter
   autoVerify`) ya da custom scheme (`app.ahenk://`) gerekir. Şu an yok.

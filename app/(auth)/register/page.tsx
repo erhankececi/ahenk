@@ -8,6 +8,7 @@ import { Button, Input, PasswordInput } from "@/components/ui";
 import { adSoyadGecerli } from "@/lib/utils";
 import { ArrowLeft, Gift } from "lucide-react";
 import { useLang } from "@/components/LangProvider";
+import { googleSignIn } from "@/lib/googleAuth";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -66,10 +67,19 @@ export default function RegisterPage() {
   }
 
   async function google() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    });
+    setErr("");
+    const r = await googleSignIn(supabase);
+    if (r.native) {
+      if (r.ok) {
+        fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "auth:register" }) }).catch(() => {});
+        fetch("/api/consent", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+        router.push("/");
+        router.refresh();
+      } else {
+        setErr(ta.googleFailed);
+      }
+    }
+    // web: signInWithOAuth zaten tarayıcıyı yönlendiriyor
   }
 
   return (

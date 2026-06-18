@@ -342,7 +342,7 @@ export type AppDict = {
     resendConfirm: string; resendInfo: string; pwNotMatchYet: string; refInvite: string;
     consentAge: string; consentAnd: string; consentTerms: string; consentPrivacy: string; consentKvkk: string; consentPost: string;
     errVerifyExpired: string; errNotConfirmed: string; errBadCreds: string; errEmailFirst: string; errResendFail: string;
-    errNameInvalid: string; errPwShort: string; errPwMismatch: string; errConsent: string; regCheckEmail: string;
+    errNameInvalid: string; errPwShort: string; errPwMismatch: string; errConsent: string; regCheckEmail: string; googleFailed: string;
   };
   ziyaretciler: {
     eyebrow: string; title: string; seeAdmirers: string; lockedCount: string; seePremium: string;
@@ -666,7 +666,7 @@ const appTr: AppDict = {
     errNameInvalid: "Lütfen ad ve soyadını gir (örn. Ahmet Yılmaz).", errPwShort: "Şifre en az 6 karakter olmalı.",
     errPwMismatch: "Şifreler eşleşmiyor. Lütfen aynı şifreyi iki kez gir.",
     errConsent: "Devam etmek için 18+ olduğunu ve Koşullar/Gizlilik/KVKK metinlerini kabul etmelisin.",
-    regCheckEmail: "E-postana doğrulama bağlantısı gönderdik. Onayla, sonra giriş yap.",
+    regCheckEmail: "E-postana doğrulama bağlantısı gönderdik. Onayla, sonra giriş yap.", googleFailed: "Google ile giriş başarısız, tekrar dene.",
   },
   ziyaretciler: {
     eyebrow: "Ahenk profil", title: "Seni ziyaret edenler", seeAdmirers: "Seni fark edenleri gör",
@@ -1002,7 +1002,7 @@ const appEn: AppDict = {
     errNameInvalid: "Please enter your first and last name (e.g. John Smith).", errPwShort: "Password must be at least 6 characters.",
     errPwMismatch: "Passwords don't match. Please enter the same password twice.",
     errConsent: "To continue, you must accept that you're 18+ and the Terms/Privacy/KVKK texts.",
-    regCheckEmail: "We've sent a verification link to your email. Confirm it, then log in.",
+    regCheckEmail: "We've sent a verification link to your email. Confirm it, then log in.", googleFailed: "Google sign-in failed, try again.",
   },
   ziyaretciler: {
     eyebrow: "Ahenk profile", title: "Who visited you", seeAdmirers: "See who noticed you",
@@ -1338,7 +1338,7 @@ const appKu: AppDict = {
     errNameInvalid: "Ji kerema xwe nav û paşnavê xwe binivîse (mînak: Ahmet Yılmaz).", errPwShort: "Şîfre divê herî kêm 6 tîp be.",
     errPwMismatch: "Şîfre li hev nayên. Ji kerema xwe heman şîfreyê du caran binivîse.",
     errConsent: "Ji bo domandinê divê tu qebûl bikî ku 18+ yî û nivîsên Merc/Nepenîtî/KVKK.",
-    regCheckEmail: "Me lînka pejirandinê ji e-nameya te re şand. Bipejirîne, paşê têkeve.",
+    regCheckEmail: "Me lînka pejirandinê ji e-nameya te re şand. Bipejirîne, paşê têkeve.", googleFailed: "Têketina bi Google bi ser neket, dîsa biceribîne.",
   },
   ziyaretciler: {
     eyebrow: "Profîla Ahenk", title: "Kê serdana te kir", seeAdmirers: "Bibîne kê tu ferq kirî",
