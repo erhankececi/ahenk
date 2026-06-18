@@ -1,0 +1,30 @@
+<svg width="2732" height="2732" viewBox="0 0 2732 2732" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ahenk splash">
+  <defs>
+    <linearGradient id="sp-bg" x1="0" y1="0" x2="2732" y2="2732" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B0C10"/>
+      <stop offset="0.5" stop-color="#0E0D10"/>
+      <stop offset="1" stop-color="#09090B"/>
+    </linearGradient>
+    <linearGradient id="sp-mark" x1="300" y1="180" x2="724" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8D2A2"/>
+      <stop offset="0.5" stop-color="#C7A977"/>
+      <stop offset="1" stop-color="#8C7244"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Koyu onyx zemin (tam kare; native splash merkezi güvenli alanı korur) -->
+  <rect width="2732" height="2732" fill="url(#sp-bg)"/>
+
+  <!-- Marka işareti — ortalı, pirinç A monogramı -->
+  <g transform="translate(1008 889) scale(0.7)">
+    <path d="M432 204 A92 92 0 0 1 592 204" fill="none" stroke="url(#sp-mark)" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="512" cy="158" r="13" fill="#E8D2A2"/>
+    <path d="M512 250 L300 790 L388 790 L512 372 Z" fill="url(#sp-mark)"/>
+    <path d="M512 250 L724 790 L636 790 L512 372 Z" fill="url(#sp-mark)"/>
+    <rect x="404" y="588" width="216" height="26" rx="13" fill="url(#sp-mark)"/>
+    <circle cx="512" cy="601" r="23" fill="#0E0D10"/><circle cx="512" cy="601" r="10" fill="#E8D2A2"/>
+  </g>
+
+  <text x="1366" y="1640" text-anchor="middle" font-family="Manrope, Inter, system-ui, sans-serif" font-size="150" font-weight="800" letter-spacing="-5" fill="#F3EEE4">Ahenk</text>
+  <text x="1366" y="1730" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="58" font-weight="500" fill="#A39E95">karakter önce, yüz sonra</text>
+</svg>

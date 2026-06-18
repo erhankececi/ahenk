@@ -1,0 +1,19 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ahenk adaptive foreground">
+  <defs>
+    <linearGradient id="ahA" x1="300" y1="180" x2="724" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8D2A2"/>
+      <stop offset="0.5" stop-color="#C7A977"/>
+      <stop offset="1" stop-color="#8C7244"/>
+    </linearGradient>
+  </defs>
+  <!-- Android adaptive icon ÖN PLAN: şeffaf zemin, monogram güvenli alanda (~%66) ortalı.
+       transform mark-merkezini (512,474) tuvalin merkezine (512,512) taşır. -->
+  <g transform="translate(174 199) scale(0.66)">
+    <path d="M432 204 A92 92 0 0 1 592 204" fill="none" stroke="url(#ahA)" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="512" cy="158" r="12" fill="#E8D2A2"/>
+    <path d="M512 250 L300 790 L388 790 L512 372 Z" fill="url(#ahA)"/>
+    <path d="M512 250 L724 790 L636 790 L512 372 Z" fill="url(#ahA)"/>
+    <rect x="404" y="588" width="216" height="26" rx="13" fill="url(#ahA)"/>
+    <circle cx="512" cy="601" r="23" fill="#0E0D10"/><circle cx="512" cy="601" r="10" fill="#E8D2A2"/>
+  </g>
+</svg>
