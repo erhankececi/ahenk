@@ -383,6 +383,13 @@ export type AppDict = {
     loading: string; emptyTitle: string; emptyDesc: string; videoWord: string; shareVideo: string;
     like: string; comment: string; gift: string; soundOn: string; soundOff: string;
   };
+  oyun: {
+    eyebrow: string; title: string; leaderboard: string; createTable: string; quickMatch: string;
+    emptyTitle: string; emptyDesc: string; full: string; sit: string;
+    modalTitle: string; tableName: string; playerCount: string; personSuffix: string; tableType: string;
+    typeOpen: string; typeLocked: string; typeVip: string; tablePassword: string; voice: string; video: string; create: string; creating: string;
+    defaultName: string; quickName: string; errCreate: string; passPrompt: string; errPass: string; errFull: string; errSit: string;
+  };
   magaza: {
     title: string; back: string; close: string;
     tabAll: string; tabPopular: string; tabLux: string; tabSpecial: string; tabEvent: string; specialBadge: string;
@@ -701,6 +708,13 @@ const appTr: AppDict = {
   reels: {
     loading: "Yükleniyor…", emptyTitle: "Henüz reels yok", emptyDesc: "Moments'tan bir {video} paylaş — burada görünür.", videoWord: "video", shareVideo: "Video paylaş",
     like: "Beğen", comment: "Yorumlar", gift: "Hediye gönder", soundOn: "Sesi aç", soundOff: "Sesi kapat",
+  },
+  oyun: {
+    eyebrow: "Ahenk 101", title: "Oyun Salonu", leaderboard: "Liderlik", createTable: "Masa kur", quickMatch: "Hızlı eşleşme",
+    emptyTitle: "Henüz açık masa yok", emptyDesc: "İlk 101 masasını sen kur — arkadaşlarını davet et.", full: "Dolu", sit: "Otur",
+    modalTitle: "Masa kur", tableName: "Masa adı", playerCount: "Kişi sayısı", personSuffix: "kişi", tableType: "Masa türü",
+    typeOpen: "Açık", typeLocked: "Şifreli", typeVip: "VIP", tablePassword: "Masa şifresi", voice: "Sesli", video: "Görüntülü (VIP)", create: "Masayı kur ve otur", creating: "Kuruluyor…",
+    defaultName: "101 Masası", quickName: "Hızlı Masa", errCreate: "Masa kurulamadı.", passPrompt: "Masa şifresi:", errPass: "Yanlış şifre.", errFull: "Masa dolu.", errSit: "Oturulamadı.",
   },
   magaza: {
     title: "Hediye Mağazası", back: "Geri", close: "Kapat",
@@ -1023,6 +1037,13 @@ const appEn: AppDict = {
     loading: "Loading…", emptyTitle: "No reels yet", emptyDesc: "Share a {video} from Moments — it'll show up here.", videoWord: "video", shareVideo: "Share a video",
     like: "Like", comment: "Comments", gift: "Send a gift", soundOn: "Unmute", soundOff: "Mute",
   },
+  oyun: {
+    eyebrow: "Ahenk 101", title: "Game Room", leaderboard: "Leaderboard", createTable: "Create table", quickMatch: "Quick match",
+    emptyTitle: "No open tables yet", emptyDesc: "Start the first 101 table — invite your friends.", full: "Full", sit: "Sit",
+    modalTitle: "Create table", tableName: "Table name", playerCount: "Players", personSuffix: "players", tableType: "Table type",
+    typeOpen: "Open", typeLocked: "Locked", typeVip: "VIP", tablePassword: "Table password", voice: "Voice", video: "Video (VIP)", create: "Create table and sit", creating: "Creating…",
+    defaultName: "101 Table", quickName: "Quick Table", errCreate: "Couldn't create the table.", passPrompt: "Table password:", errPass: "Wrong password.", errFull: "Table is full.", errSit: "Couldn't sit.",
+  },
   magaza: {
     title: "Gift Store", back: "Back", close: "Close",
     tabAll: "All", tabPopular: "Popular", tabLux: "Luxury", tabSpecial: "Special", tabEvent: "Event", specialBadge: "Special",
@@ -1343,6 +1364,13 @@ const appKu: AppDict = {
   reels: {
     loading: "Tê barkirin…", emptyTitle: "Hîna reels tune", emptyDesc: "Ji Moments {video}yekê parve bike — li vir xuya dibe.", videoWord: "vîdyo", shareVideo: "Vîdyo parve bike",
     like: "Eciband", comment: "Şîrove", gift: "Diyarî bişîne", soundOn: "Deng veke", soundOff: "Deng bigire",
+  },
+  oyun: {
+    eyebrow: "Ahenk 101", title: "Salona Lîstikê", leaderboard: "Serketin", createTable: "Maseyê saz bike", quickMatch: "Lihevhatina bilez",
+    emptyTitle: "Hîna maseya vekirî tune", emptyDesc: "Maseya 101 ya yekem tu saz bike — hevalên xwe vexwîne.", full: "Tije", sit: "Rûne",
+    modalTitle: "Maseyê saz bike", tableName: "Navê maseyê", playerCount: "Hejmara kesan", personSuffix: "kes", tableType: "Cureyê maseyê",
+    typeOpen: "Vekirî", typeLocked: "Bi şîfre", typeVip: "VIP", tablePassword: "Şîfreya maseyê", voice: "Bi deng", video: "Bi vîdyo (VIP)", create: "Maseyê saz bike û rûne", creating: "Tê sazkirin…",
+    defaultName: "Maseya 101", quickName: "Maseya Bilez", errCreate: "Mase nehat sazkirin.", passPrompt: "Şîfreya maseyê:", errPass: "Şîfre çewt e.", errFull: "Mase tije ye.", errSit: "Nehat rûniştin.",
   },
   magaza: {
     title: "Dikana Diyariyan", back: "Vegere", close: "Bigire",

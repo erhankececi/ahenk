@@ -8,6 +8,7 @@ import { tierFrame } from "@/components/PremiumBadge";
 import GiftStore from "@/components/GiftStore";
 import GiftAnimation from "@/components/GiftAnimation";
 import { giftByKey, type Gift as GiftT } from "@/lib/gifts";
+import { useLang } from "@/components/LangProvider";
 import {
   Plus, Lock, Crown, Mic, Video, Users, Zap, X, LogOut, Play, Gamepad2, Trophy, Gift, User,
 } from "lucide-react";
@@ -91,6 +92,7 @@ type Table = {
 
 export default function Oyun() {
   const supabase = createClient();
+  const to = useLang().t.oyun;
   const [tables, setTables] = useState<Table[]>([]);
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
@@ -196,21 +198,21 @@ export default function Oyun() {
     setBusy(true); setWarn("");
     const r = await fetch("/api/games", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "create", ...form, name: form.name.trim() || "101 Masası" }),
+      body: JSON.stringify({ action: "create", ...form, name: form.name.trim() || to.defaultName }),
     }).then((x) => x.json()).catch(() => ({}));
     setBusy(false);
     if (r.ok) { setComposing(false); setForm({ name: "", capacity: 4, kind: "acik", password: "", voice: true, video: false }); load(); }
-    else setWarn("Masa kurulamadı.");
+    else setWarn(to.errCreate);
   }
 
   async function otur(t: Table) {
     let password = "";
-    if (t.locked) { password = prompt("Masa şifresi:") || ""; if (!password) return; }
+    if (t.locked) { password = prompt(to.passPrompt) || ""; if (!password) return; }
     const r = await fetch("/api/games", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "join", tableId: t.id, password }),
     }).then((x) => x.json()).catch(() => ({}));
-    if (!r.ok) setWarn(r.error === "sifre" ? "Yanlış şifre." : r.error === "dolu" ? "Masa dolu." : "Oturulamadı.");
+    if (!r.ok) setWarn(r.error === "sifre" ? to.errPass : r.error === "dolu" ? to.errFull : to.errSit);
     else load();
   }
 
@@ -222,7 +224,7 @@ export default function Oyun() {
   async function hizliEslesme() {
     const m = tables.find((t) => t.kind === "acik" && t.seated < t.capacity && !t.mine);
     if (m) return otur(m);
-    setForm((f) => ({ ...f, name: "Hızlı Masa", kind: "acik" })); setComposing(true);
+    setForm((f) => ({ ...f, name: to.quickName, kind: "acik" })); setComposing(true);
   }
 
   // ---- MASA ODASI ----
@@ -410,20 +412,20 @@ export default function Oyun() {
     <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
       <header className="mb-4 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk 101</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{to.eyebrow}</p>
           <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text">
-            <Gamepad2 size={22} className="text-accent" /> Oyun Salonu
+            <Gamepad2 size={22} className="text-accent" /> {to.title}
           </h1>
         </div>
-        <Link href="/liderlik" className="text-muted transition hover:text-text" aria-label="Liderlik"><Trophy size={20} strokeWidth={1.7} /></Link>
+        <Link href="/liderlik" className="text-muted transition hover:text-text" aria-label={to.leaderboard}><Trophy size={20} strokeWidth={1.7} /></Link>
       </header>
 
       <div className="mb-4 flex gap-2">
         <button onClick={() => setComposing(true)} className="brand-gradient flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 font-semibold">
-          <Plus size={18} /> Masa kur
+          <Plus size={18} /> {to.createTable}
         </button>
         <button onClick={hizliEslesme} className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-border py-3 font-semibold text-text transition hover:border-accent/50">
-          <Zap size={18} className="text-accent" /> Hızlı eşleşme
+          <Zap size={18} className="text-accent" /> {to.quickMatch}
         </button>
       </div>
       {warn && <p className="mb-2 text-center text-xs text-error">{warn}</p>}
@@ -433,8 +435,8 @@ export default function Oyun() {
       ) : tables.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
           <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent"><Gamepad2 size={26} strokeWidth={1.6} /></span>
-          <p className="font-display text-lg font-semibold text-text">Henüz açık masa yok</p>
-          <p className="mt-1.5 text-sm text-muted">İlk 101 masasını sen kur — arkadaşlarını davet et.</p>
+          <p className="font-display text-lg font-semibold text-text">{to.emptyTitle}</p>
+          <p className="mt-1.5 text-sm text-muted">{to.emptyDesc}</p>
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -458,7 +460,7 @@ export default function Oyun() {
                 disabled={t.seated >= t.capacity}
                 className="brand-gradient shrink-0 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-40"
               >
-                {t.seated >= t.capacity ? "Dolu" : "Otur"}
+                {t.seated >= t.capacity ? to.full : to.sit}
               </button>
             </div>
           ))}
@@ -470,34 +472,34 @@ export default function Oyun() {
         <div className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm sm:items-center sm:justify-center" onClick={() => setComposing(false)}>
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl border-t border-border bg-surface p-5 sm:rounded-3xl sm:border">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-display font-bold">Masa kur</h3>
+              <h3 className="font-display font-bold">{to.modalTitle}</h3>
               <button onClick={() => setComposing(false)} className="text-muted"><X size={18} /></button>
             </div>
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Masa adı" className="mb-3 w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand" />
+            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={to.tableName} className="mb-3 w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand" />
 
-            <p className="mb-1.5 text-sm text-muted">Kişi sayısı</p>
+            <p className="mb-1.5 text-sm text-muted">{to.playerCount}</p>
             <div className="mb-3 flex gap-2">
               {[2, 3, 4].map((n) => (
-                <button key={n} onClick={() => setForm({ ...form, capacity: n })} className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition ${form.capacity === n ? "bg-accent text-[#1c1407]" : "bg-elevated text-muted"}`}>{n} kişi</button>
+                <button key={n} onClick={() => setForm({ ...form, capacity: n })} className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition ${form.capacity === n ? "bg-accent text-[#1c1407]" : "bg-elevated text-muted"}`}>{n} {to.personSuffix}</button>
               ))}
             </div>
 
-            <p className="mb-1.5 text-sm text-muted">Masa türü</p>
+            <p className="mb-1.5 text-sm text-muted">{to.tableType}</p>
             <div className="mb-3 flex gap-2">
-              {[["acik", "Açık"], ["sifreli", "Şifreli"], ["vip", "VIP"]].map(([k, l]) => (
+              {([["acik", to.typeOpen], ["sifreli", to.typeLocked], ["vip", to.typeVip]] as const).map(([k, l]) => (
                 <button key={k} onClick={() => setForm({ ...form, kind: k })} className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition ${form.kind === k ? "bg-accent text-[#1c1407]" : "bg-elevated text-muted"}`}>{l}</button>
               ))}
             </div>
             {form.kind === "sifreli" && (
-              <input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Masa şifresi" className="mb-3 w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand" />
+              <input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder={to.tablePassword} className="mb-3 w-full rounded-2xl border border-border bg-elevated px-4 py-3 outline-none focus:border-brand" />
             )}
 
             <div className="mb-4 flex gap-2">
-              <button onClick={() => setForm({ ...form, voice: !form.voice })} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm transition ${form.voice ? "bg-accent/15 text-accent" : "border border-border text-muted"}`}><Mic size={15} /> Sesli</button>
-              <button onClick={() => setForm({ ...form, video: !form.video })} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm transition ${form.video ? "bg-accent/15 text-accent" : "border border-border text-muted"}`}><Video size={15} /> Görüntülü (VIP)</button>
+              <button onClick={() => setForm({ ...form, voice: !form.voice })} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm transition ${form.voice ? "bg-accent/15 text-accent" : "border border-border text-muted"}`}><Mic size={15} /> {to.voice}</button>
+              <button onClick={() => setForm({ ...form, video: !form.video })} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm transition ${form.video ? "bg-accent/15 text-accent" : "border border-border text-muted"}`}><Video size={15} /> {to.video}</button>
             </div>
 
-            <button onClick={kur} disabled={busy} className="brand-gradient w-full rounded-2xl py-3 font-semibold disabled:opacity-50">{busy ? "Kuruluyor…" : "Masayı kur ve otur"}</button>
+            <button onClick={kur} disabled={busy} className="brand-gradient w-full rounded-2xl py-3 font-semibold disabled:opacity-50">{busy ? to.creating : to.create}</button>
           </div>
         </div>
       )}
