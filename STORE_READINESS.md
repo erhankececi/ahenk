@@ -73,7 +73,45 @@ Google Play: telefon (min 2), 7"/10" tablet opsiyonel.
 > Not: Keşfet/Sohbet ekran görüntülerinde gerçek kullanıcı fotoğrafı yerine
 > bulanık/temsili görsel kullan (mahremiyet + mağaza içerik kuralı).
 
-## 4) Özet
+## 4) Android auth / OAuth test planı (hosted-shell)
+
+Native kabuk siteyi `server.url = https://ahenk.live` ile **gömülü WebView**'de yükler.
+OAuth çağrısı: `signInWithOAuth({ provider:'google', redirectTo: location.origin + '/auth/callback' })`
+→ hosted-shell'de `redirectTo = https://ahenk.live/auth/callback`. `/auth/callback`
+PKCE `code` → `exchangeCodeForSession` (server-side, cookie/SSR) veya e-posta `token_hash`
+→ `verifyOtp`.
+
+### Test senaryoları (Android cihaz/emülatör)
+
+| # | Senaryo | Beklenen | Risk |
+|---|---------|----------|------|
+| 1 | E-posta/şifre giriş | `/kesfet`'e iner | ✅ WebView içi, dış tarayıcı yok — sorunsuz |
+| 2 | Register (e-posta) | Doğrulama maili gönderilir | ✅ akış WebView içi |
+| 3 | E-posta doğrulama linkine tıkla | Hesap doğrulanır | ⚠️ Link **dış tarayıcıda** açılır; App Links yoksa app'e dönmez. Kullanıcı tarayıcıda doğrulayıp app'e dönüp giriş yapabilir (token_hash cihazdan bağımsız) |
+| 4 | **Google ile giriş** | Google hesabı seçilir, app'e döner | 🔴 **disallowed_useragent**: accounts.google.com gömülü WebView'de açılınca Google engeller ("bu tarayıcı güvenli olmayabilir") |
+| 5 | Logout → tekrar login | Oturum kapanır/açılır | ✅ (e-posta), 🔴 (Google, #4 ile aynı) |
+| 6 | Paylaşım / derin link app'i açar | İçerik app'te açılır | ⚠️ App Links/scheme yok → tarayıcıda açılır |
+
+### Tespit edilen blokerler & önerilen çözüm (bu görevde uygulanmadı)
+
+- **🔴 Google OAuth (disallowed_useragent)** — Capacitor WebView gömülü tarayıcı
+  sayıldığından Google OAuth politikası engeller. Çözüm seçenekleri:
+  1. **Native Google Sign-In** eklentisi (ör. `@capacitor/google-auth`) → idToken al →
+     `supabase.auth.signInWithIdToken({ provider:'google', token })`. (Önerilen)
+  2. **`@capacitor/browser`** ile sistem tarayıcısı/Custom Tab'da OAuth +
+     `skipBrowserRedirect:true` + `App.appUrlOpen` ile callback'i yakala.
+- **⚠️ Geri dönüş (callback) deep link** — `https://ahenk.live/auth/callback`'in app'e
+  dönmesi için **Android App Links** (`.well-known/assetlinks.json` + `intent-filter
+  autoVerify`) ya da custom scheme (`app.ahenk://`) gerekir. Şu an yok.
+- **Not (config):** `capacitor.config` `server.allowNavigation`'a `accounts.google.com`
+  eklemek WebView'in Google'a gitmesine izin verir ama **disallowed_useragent
+  politikasını AŞMAZ** — gerçek çözüm yukarıdaki native/sistem-tarayıcı akışıdır.
+  Bu yüzden yarım bir config eklenmedi.
+
+> E-posta/şifre akışı Android hosted-shell'de **çalışır**; mağaza öncesi tek
+> kritik auth işi Google için native/sistem-tarayıcı entegrasyonu + callback deep link.
+
+## 5) Özet
 
 Web tarafı yayında ve mağaza-uyumlu temeller (IAP kodu, hesap silme, moderasyon,
 yasal sayfalar, çok dil) **hazır**. Native build için kritik yol:
