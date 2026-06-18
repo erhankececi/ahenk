@@ -24,8 +24,14 @@
 
 ## 2) Mağaza başvurusu öncesi — EKSİK / YAPILACAK ⚠️
 
-1. **Native platform klasörleri yok** — `android/` ve `ios/` üretilmemiş.
-   - `npx cap add ios` (macOS + Xcode gerekli) ve `npx cap add android` (Android Studio).
+1. **Native platform klasörleri** — ✅ **Android oluşturuldu** (`android/`,
+   `npx cap add android` + `cap sync` + `@capacitor/assets generate`: 136 asset,
+   ic_launcher/adaptive/splash tüm yoğunluklarda; app_name=Ahenk, applicationId=app.ahenk,
+   server.url=ahenk.live). ⏳ **iOS bekliyor** — `npx cap add ios` macOS + Xcode gerektirir.
+   - ⚠️ Android **APK/gradle derlemesi bu ortamda yapılamadı**: JAVA_HOME / ANDROID_HOME
+     tanımsız, `local.properties` yok ve Gradle bağımlılıkları ağ-kısıtlı proxy'den
+     çekilemiyor. Derleme için Android Studio + JDK 17 + Android SDK olan bir makine:
+     `npx cap open android` → Gradle sync → Run/Build APK.
 2. **✅ server.url uyuşmazlığı DÜZELTİLDİ** — `capacitor.config.ts` `server.url`
    varsayılanı artık `https://ahenk.live` (önceden yanlışlıkla `ahenk.app`'ti).
    `CAP_SERVER_URL` env ile override edilebilir.
