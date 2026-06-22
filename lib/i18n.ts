@@ -240,6 +240,7 @@ export type AppDict = {
     resetFilter: string; enrichProfile: string; refresh: string;
     nearArea: string; farArea: string;
     newMember: string; featured: string; online: string; photoReveal: string; nearby: string; match: string;
+    tagline: string; notifications: string; photoClarity: string;
     interests: string; voiceIntro: string; zodiacSuffix: string; musicLabel: string;
     superUsedFree: string; superFailed: string;
     ariaRewind: string; ariaPass: string; ariaLike: string; ariaSuper: string;
@@ -498,6 +499,7 @@ const appTr: AppDict = {
     nearArea: "Öncelikli alan", farArea: "Daha uzaktakiler",
     newMember: "Yeni üye", featured: "Öne çıkan", online: "Online",
     photoReveal: "Fotoğraf sohbet ilerledikçe netleşir", nearby: "yakınında", match: "uyum",
+    tagline: "Sana uygun ahenkler", notifications: "Bildirimler", photoClarity: "Fotoğraf netliği",
     interests: "İlgi alanları", voiceIntro: "Sesli tanıtım", zodiacSuffix: " burcu", musicLabel: "Müzik",
     superUsedFree: "Bugünkü ücretsiz süper beğenini kullandın. Bir tane daha için 30 jeton gerekli.",
     superFailed: "Süper beğeni gönderilemedi, tekrar dene.",
@@ -866,6 +868,7 @@ const appEn: AppDict = {
     nearArea: "Priority area", farArea: "Farther away",
     newMember: "New member", featured: "Featured", online: "Online",
     photoReveal: "Photo clears as the conversation deepens", nearby: "nearby", match: "match",
+    tagline: "People in tune with you", notifications: "Notifications", photoClarity: "Photo clarity",
     interests: "Interests", voiceIntro: "Voice intro", zodiacSuffix: "", musicLabel: "Music",
     superUsedFree: "You've used today's free super like. One more costs 30 tokens.",
     superFailed: "Super like couldn't be sent, try again.",
@@ -1234,6 +1237,7 @@ const appKu: AppDict = {
     nearArea: "Qada pêşîn", farArea: "Yên dûrtir",
     newMember: "Endamê nû", featured: "Berbiçav", online: "Online",
     photoReveal: "Wêne gava axaftin kûr dibe zelal dibe", nearby: "nêzîk", match: "lihev",
+    tagline: "Ahengên ku li te tên", notifications: "Agahdarî", photoClarity: "Zelaliya wêneyê",
     interests: "Berjewendî", voiceIntro: "Danasîna dengî", zodiacSuffix: "", musicLabel: "Muzîk",
     superUsedFree: "Te superbeğeniya îro ya belaş bi kar anî. Ji bo yekê din 30 jeton hewce ne.",
     superFailed: "Superbeğenî nehat şandin, dîsa biceribîne.",
