@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { GIFT_CATALOG, type Gift } from "@/lib/gifts";
-import { Coins, Plus, ArrowLeft, ChevronRight, Gift as GiftIcon } from "lucide-react";
+import { Coins, Plus, ArrowLeft, ChevronRight, Gift as GiftIcon, Check } from "lucide-react";
 import Link from "next/link";
 import { useLang } from "@/components/LangProvider";
 
@@ -48,7 +48,7 @@ function Thumb({ g, delay, active }: { g: Gift; delay: number; active?: boolean 
         src={`/gifts/${g.key}.png`}
         alt={g.name}
         fill
-        sizes="120px"
+        sizes="160px"
         onError={() => setErr(true)}
         className={`object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)] transition-opacity ${showPreview ? "opacity-0" : "opacity-100"}`}
       />
@@ -80,6 +80,9 @@ export default function Magaza() {
     return GIFT_CATALOG.filter(t.match).sort((a, b) => b.cost - a.cost);
   }, [tab]);
 
+  const selGift = sel ? GIFT_CATALOG.find((g) => g.key === sel) ?? null : null;
+  const isLegend = (g: Gift) => g.rarity === "legendary" || g.rarity === "mythic";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -102,6 +105,9 @@ export default function Magaza() {
         </Link>
       </header>
 
+      {/* Alt açıklama */}
+      <p className="px-5 pt-2 text-[13px] text-text/55">{tm.subtitle}</p>
+
       {/* Kategori sekmeleri */}
       <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 py-3">
         {TABS.map((t) => {
@@ -123,8 +129,40 @@ export default function Magaza() {
         })}
       </div>
 
-      {/* 3 kolon lüks grid */}
-      <div className="grid grid-cols-3 gap-3 px-5 pt-1">
+      {/* Hero — seçili hediye büyük */}
+      {selGift && (
+        <div className="px-5 pb-1">
+          <motion.div
+            key={selGift.key}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="relative flex items-center gap-4 overflow-hidden rounded-3xl p-4"
+            style={{
+              border: "1px solid rgba(199,169,119,0.32)",
+              background: "radial-gradient(120% 110% at 50% 0%, rgba(199,169,119,0.14), transparent 70%), linear-gradient(170deg,#1b170e,#100e12)",
+            }}
+          >
+            <div className="relative h-24 w-24 shrink-0">
+              <Image src={`/gifts/${selGift.key}.png`} alt={selGift.name} fill sizes="96px" className="object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.7)]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              {isLegend(selGift) && (
+                <span className="inline-block rounded-full border border-accent/40 bg-[#0E0D10]/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent">
+                  {tm.specialBadge}
+                </span>
+              )}
+              <h2 className="mt-1 truncate font-display text-2xl font-bold" style={{ color: "#F5EFE4" }}>{selGift.name}</h2>
+              <p className="mt-1 flex items-center gap-1.5 text-lg font-bold text-accent">
+                <Coins size={16} /> {selGift.cost.toLocaleString("tr-TR")}
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* 2 sütun premium grid */}
+      <div className="grid grid-cols-2 gap-3 px-5 pt-2">
         {items.map((g, i) => {
           const active = sel === g.key;
           return (
@@ -136,32 +174,37 @@ export default function Magaza() {
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setSel(active ? null : g.key)}
-              className="group relative flex flex-col overflow-hidden rounded-[16px] text-left"
+              className="group relative flex flex-col overflow-hidden rounded-[20px] text-left"
               style={{
                 background: "linear-gradient(170deg,#18161B,#111014)",
-                border: active ? "1px solid rgba(199,169,119,0.55)" : "1px solid rgba(255,255,255,0.08)",
-                boxShadow: active ? "0 0 0 1px rgba(199,169,119,0.35), 0 0 22px -6px rgba(199,169,119,0.4), inset 0 1px 0 rgba(255,255,255,0.04)" : "inset 0 1px 0 rgba(255,255,255,0.03), 0 6px 16px -10px rgba(0,0,0,0.8)",
+                border: active ? "1px solid rgba(199,169,119,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                boxShadow: active ? "0 0 0 1px rgba(199,169,119,0.4), 0 0 26px -6px rgba(199,169,119,0.45), inset 0 1px 0 rgba(255,255,255,0.04)" : "inset 0 1px 0 rgba(255,255,255,0.03), 0 6px 16px -10px rgba(0,0,0,0.8)",
               }}
             >
               {/* görsel vitrini */}
-              <div className="relative flex aspect-[1/0.92] items-center justify-center">
+              <div className="relative flex aspect-[1/0.96] items-center justify-center">
                 <span className="pointer-events-none absolute inset-0 transition-opacity" style={{ background: "radial-gradient(72% 62% at 50% 42%, rgba(199,169,119,0.10), transparent 72%)", opacity: active ? 1 : 0.55 }} />
-                {(g.rarity === "legendary" || g.rarity === "mythic") && (
-                  <span className="pointer-events-none absolute right-1.5 top-1.5 z-10 rounded-full border border-accent/40 bg-[#0E0D10]/80 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-accent">
+                {active && (
+                  <span className="pointer-events-none absolute left-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-accent px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#1c1407]">
+                    <Check size={9} strokeWidth={3} /> {tm.selected}
+                  </span>
+                )}
+                {isLegend(g) && (
+                  <span className="pointer-events-none absolute right-2 top-2 z-10 rounded-full border border-accent/40 bg-[#0E0D10]/80 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-accent">
                     {tm.specialBadge}
                   </span>
                 )}
                 <Thumb g={g} delay={(i % 6) * 0.5} active={active} />
               </div>
               {/* ad + fiyat */}
-              <div className="px-2 pb-2.5 pt-0.5">
-                <p className="line-clamp-1 text-center text-[12px] font-medium" style={{ color: "#F5EFE4" }}>{g.name}</p>
+              <div className="px-3 pb-3 pt-0.5">
+                <p className="line-clamp-1 text-center text-[13px] font-medium" style={{ color: "#F5EFE4" }}>{g.name}</p>
                 <motion.p
-                  className="mt-1 flex items-center justify-center gap-1 text-[13px] font-bold text-accent"
+                  className="mt-1 flex items-center justify-center gap-1 text-[14px] font-bold text-accent"
                   animate={active ? { opacity: [1, 0.55, 1] } : { opacity: 1 }}
                   transition={active ? { duration: 1.1, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
                 >
-                  <Coins size={12} /> {g.cost.toLocaleString("tr-TR")}
+                  <Coins size={13} /> {g.cost.toLocaleString("tr-TR")}
                 </motion.p>
               </div>
             </motion.button>
@@ -191,6 +234,31 @@ export default function Magaza() {
           <GiftIcon size={13} /> {tm.sendHint}
         </p>
       </div>
+
+      {/* Sticky alt bar — seçili hediye (gerçek aksiyon: Jeton Al; gönderme sohbette) */}
+      {selGift && (
+        <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+84px)] z-30 mx-auto max-w-[460px] px-5 lg:bottom-6">
+          <div
+            className="flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl"
+            style={{ background: "rgba(21,19,26,0.95)", border: "1px solid rgba(199,169,119,0.32)", boxShadow: "0 22px 44px -22px rgba(0,0,0,0.92)" }}
+          >
+            <div className="relative h-11 w-11 shrink-0">
+              <Image src={`/gifts/${selGift.key}.png`} alt={selGift.name} fill sizes="44px" className="object-contain" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-text">{selGift.name}</p>
+              <p className="flex items-center gap-1 text-[13px] font-bold text-accent"><Coins size={12} /> {selGift.cost.toLocaleString("tr-TR")}</p>
+            </div>
+            <Link
+              href="/cuzdan"
+              className="shrink-0 rounded-full px-5 py-2.5 text-sm font-bold text-[#1c1407]"
+              style={{ background: "linear-gradient(150deg,#DBBF8E,#C7A977 55%,#b2945f)" }}
+            >
+              {tm.buyTokens}
+            </Link>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

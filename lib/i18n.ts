@@ -443,7 +443,7 @@ export type AppDict = {
   };
   magaza: {
     title: string; back: string; close: string;
-    tabAll: string; tabPopular: string; tabLux: string; tabSpecial: string; tabEvent: string; specialBadge: string;
+    tabAll: string; tabPopular: string; tabLux: string; tabSpecial: string; tabEvent: string; specialBadge: string; subtitle: string; selected: string;
     buyTokens: string; buyTokensDesc: string; sendHint: string; sendTo: string; selectGift: string;
     categories: Record<string, string>; rarities: Record<string, string>;
   };
@@ -818,7 +818,7 @@ const appTr: AppDict = {
   },
   magaza: {
     title: "Hediye Mağazası", back: "Geri", close: "Kapat",
-    tabAll: "Tümü", tabPopular: "Popüler", tabLux: "Lüks", tabSpecial: "Özel", tabEvent: "Etkinlik", specialBadge: "Özel",
+    tabAll: "Tümü", tabPopular: "Popüler", tabLux: "Lüks", tabSpecial: "Özel", tabEvent: "Etkinlik", specialBadge: "Özel", subtitle: "Etkileşimi özel bir ana dönüştür.", selected: "Seçildi",
     buyTokens: "Jeton satın al", buyTokensDesc: "Avantajlı paketleri keşfet",
     sendHint: "Göndermek için bir sohbette veya profilde hediye simgesine dokun", sendTo: "{name}'a gönder", selectGift: "Bir hediye seç",
     categories: { romantik: "Romantik", luks: "Lüks", vip: "VIP", seyahat: "Seyahat", kraliyet: "Kraliyet", efsane: "Efsane", ozel: "Özel" },
@@ -1195,7 +1195,7 @@ const appEn: AppDict = {
   },
   magaza: {
     title: "Gift Store", back: "Back", close: "Close",
-    tabAll: "All", tabPopular: "Popular", tabLux: "Luxury", tabSpecial: "Special", tabEvent: "Event", specialBadge: "Special",
+    tabAll: "All", tabPopular: "Popular", tabLux: "Luxury", tabSpecial: "Special", tabEvent: "Event", specialBadge: "Special", subtitle: "Turn the moment into something special.", selected: "Selected",
     buyTokens: "Buy tokens", buyTokensDesc: "Explore great-value packs",
     sendHint: "To send, tap the gift icon in a chat or on a profile", sendTo: "Send to {name}", selectGift: "Pick a gift",
     categories: { romantik: "Romantic", luks: "Luxury", vip: "VIP", seyahat: "Travel", kraliyet: "Royal", efsane: "Legend", ozel: "Special" },
@@ -1572,7 +1572,7 @@ const appKu: AppDict = {
   },
   magaza: {
     title: "Dikana Diyariyan", back: "Vegere", close: "Bigire",
-    tabAll: "Hemû", tabPopular: "Populer", tabLux: "Luks", tabSpecial: "Taybet", tabEvent: "Çalakî", specialBadge: "Taybet",
+    tabAll: "Hemû", tabPopular: "Populer", tabLux: "Luks", tabSpecial: "Taybet", tabEvent: "Çalakî", specialBadge: "Taybet", subtitle: "Kêliyê bike tiştek taybet.", selected: "Hilbijartî",
     buyTokens: "Jeton bikire", buyTokensDesc: "Pakêtên biavantaj keşf bike",
     sendHint: "Ji bo şandinê, di axaftinekê an li profîlekê de li îkona diyariyê bitikîne", sendTo: "Ji {name} re bişîne", selectGift: "Diyariyekê hilbijêre",
     categories: { romantik: "Romantîk", luks: "Luks", vip: "VIP", seyahat: "Geştûguzar", kraliyet: "Padîşahî", efsane: "Efsane", ozel: "Taybet" },
