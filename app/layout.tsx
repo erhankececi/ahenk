@@ -13,10 +13,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   applicationName: "Ahenk",
   keywords: ["Ahenk", "sosyal keşif", "tanışma", "karakter uyumu", "premium", "moments", "Türkiye"],
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg" }],
-  },
+  // İkonlar app/icon.png + app/apple-icon.png dosya konvansiyonundan gelir
+  // (Next otomatik hash'li URL üretir → favicon cache-bust).
   appleWebApp: {
     capable: true,
     title: "Ahenk",

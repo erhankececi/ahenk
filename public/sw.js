@@ -9,8 +9,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || "Ahenk";
   const options = {
     body: data.body || "",
-    icon: "/icon.svg",
-    badge: "/icon.svg",
+    icon: "/icon-512.png",
+    badge: "/icon-192.png",
     tag: data.tag || undefined,
     data: { url: data.url || "/" },
   };
