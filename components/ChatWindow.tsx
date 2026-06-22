@@ -964,7 +964,7 @@ export function ChatWindow({
       )}
 
       {/* giriş */}
-      <div className="relative flex items-center gap-2 border-t border-border bg-bg p-3">
+      <div className="relative flex items-center gap-2 border-t border-border bg-bg px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         {pickerOpen && !recording && (
           <EmojiGifPicker onEmoji={(e) => setText((t) => t + e)} onGif={gifGonder} />
         )}
