@@ -291,7 +291,7 @@ export type AppDict = {
     callSoon: string; videoConfirm: string; insufficientCall: string; callFailed: string;
     metMarked: string; metAck: string; msgTooFast: string; onlyPhoto: string; photoMax: string;
     uploadFailed: string; sendSlow: string; giftFailed: string; sendFailed: string; voiceFailed: string; voiceSlow: string; micError: string;
-    typing: string; online: string; photoOpen: string; clarity: string; metBadge: string;
+    typing: string; online: string; photoOpen: string; clarity: string; metBadge: string; revealTitle: string; revealDesc: string;
     backToMatches: string; profilePhoto: string;
     voiceCall: string; callLocked: string; callSoonTitle: string;
     videoCall: string; videoCallFree: string; videoCallPaid: string;
@@ -581,7 +581,7 @@ const appTr: AppDict = {
     sendSlow: "Gönderilemedi — biraz yavaşla ve tekrar dene.", giftFailed: "Hediye gönderilemedi, tekrar dene.",
     sendFailed: "Gönderilemedi, tekrar dene.", voiceFailed: "Ses gönderilemedi, tekrar dene.",
     voiceSlow: "Ses gönderilemedi — biraz yavaşla ve tekrar dene.", micError: "Mikrofona erişilemedi. Tarayıcı iznini kontrol et.",
-    typing: "yazıyor…", online: "Çevrimiçi", photoOpen: "Fotoğraf açık", clarity: "Netlik %{n} — yazdıkça açılır", metBadge: "Görüşüldü ✓",
+    typing: "yazıyor…", online: "Çevrimiçi", photoOpen: "Fotoğraf açık", clarity: "Netlik %{n} — yazdıkça açılır", metBadge: "Görüşüldü ✓", revealTitle: "Fotoğraf sohbetle netleşiyor", revealDesc: "Güvenli ve anlamlı sohbet ilerledikçe profil daha net görünür.",
     backToMatches: "Eşleşmelere dön", profilePhoto: "Profil fotoğrafı",
     voiceCall: "Sesli ara", callLocked: "Arama kilitli", callSoonTitle: "Biraz sohbet edince açılır",
     videoCall: "Görüntülü ara", videoCallFree: "Görüntülü ara (ücretsiz)", videoCallPaid: "Görüntülü ara (50 jeton · %100 kimyada ücretsiz)",
@@ -958,7 +958,7 @@ const appEn: AppDict = {
     sendSlow: "Couldn't send — slow down and try again.", giftFailed: "Gift couldn't be sent, try again.",
     sendFailed: "Couldn't send, try again.", voiceFailed: "Voice couldn't be sent, try again.",
     voiceSlow: "Voice couldn't be sent — slow down and try again.", micError: "Couldn't access the mic. Check your browser permission.",
-    typing: "typing…", online: "Online", photoOpen: "Photo unlocked", clarity: "Clarity {n}% — opens as you chat", metBadge: "Met ✓",
+    typing: "typing…", online: "Online", photoOpen: "Photo unlocked", clarity: "Clarity {n}% — opens as you chat", metBadge: "Met ✓", revealTitle: "Photo clears as you chat", revealDesc: "As the conversation grows safe and meaningful, the profile becomes clearer.",
     backToMatches: "Back to matches", profilePhoto: "Profile photo",
     voiceCall: "Voice call", callLocked: "Call locked", callSoonTitle: "Unlocks after you chat a bit",
     videoCall: "Video call", videoCallFree: "Video call (free)", videoCallPaid: "Video call (50 tokens · free at 100% chemistry)",
@@ -1335,7 +1335,7 @@ const appKu: AppDict = {
     sendSlow: "Nehat şandin — hêdî bibe û dîsa biceribîne.", giftFailed: "Diyarî nehat şandin, dîsa biceribîne.",
     sendFailed: "Nehat şandin, dîsa biceribîne.", voiceFailed: "Deng nehat şandin, dîsa biceribîne.",
     voiceSlow: "Deng nehat şandin — hêdî bibe û dîsa biceribîne.", micError: "Negihîşt mîkrofonê. Destûra geroka xwe kontrol bike.",
-    typing: "dinivîse…", online: "Serhêl", photoOpen: "Wêne vekirî", clarity: "Zelalî %{n} — gava tu dinivîsî vedibe", metBadge: "Dîtin ✓",
+    typing: "dinivîse…", online: "Serhêl", photoOpen: "Wêne vekirî", clarity: "Zelalî %{n} — gava tu dinivîsî vedibe", metBadge: "Dîtin ✓", revealTitle: "Wêne bi axaftinê zelal dibe", revealDesc: "Çiqas axaftin ewle û watedar pêş bikeve, profîl ewqas zelaltir xuya dibe.",
     backToMatches: "Vegere lihevhatinan", profilePhoto: "Wêneyê profîlê",
     voiceCall: "Banga dengî", callLocked: "Bang girtî ye", callSoonTitle: "Piştî hinekî axaftinê vedibe",
     videoCall: "Banga vîdyo", videoCallFree: "Banga vîdyo (belaş)", videoCallPaid: "Banga vîdyo (50 jeton · li %100 kîmyayê belaş)",

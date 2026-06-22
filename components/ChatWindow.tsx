@@ -719,6 +719,25 @@ export function ChatWindow({
         />
       </header>
 
+      {/* Reveal kartı — Stitch: fotoğraf sohbetle netleşir (gerçek reveal_level) */}
+      {revealLevel < 100 && (
+        <div className="border-b border-border bg-surface/30 px-4 py-3">
+          <div className="rounded-2xl border border-accent/20 bg-accent/[0.05] p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">{tc.revealTitle}</span>
+              <span className="text-sm font-bold text-accent">%{revealLevel}</span>
+            </div>
+            <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-accent shadow-[0_0_8px_rgba(199,169,119,0.5)] transition-[width] duration-700"
+                style={{ width: `${revealLevel}%` }}
+              />
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-muted">{tc.revealDesc}</p>
+          </div>
+        </div>
+      )}
+
       {/* Kimya / Uyum çubuğu — iki tarafta da görünür, mesajlaştıkça dolar */}
       <div className="border-b border-border bg-surface/40 px-4 py-2">
         <div className="mb-1 flex items-center justify-between text-xs">
@@ -775,9 +794,11 @@ export function ChatWindow({
               <div
                 onClick={() => !mine && setReactingTo(reactingTo === m.id ? null : m.id)}
                 className={`relative max-w-[78%] overflow-hidden whitespace-pre-wrap break-words rounded-2xl text-sm ${
+                  mine ? "rounded-br-md" : "rounded-bl-md"
+                } ${
                   isImg ? "p-1" : isVoice ? "p-1.5" : "px-4 py-2"
                 } ${
-                  mine ? "brand-gradient text-[#1c1407]" : `border border-white/10 bg-[#151318] ${tierBubble(otherTier)}`
+                  mine ? "brand-gradient text-[#1c1407]" : `border border-white/10 bg-[#17151c] ${tierBubble(otherTier)}`
                 }`}
               >
                 {isImg ? (
@@ -887,12 +908,12 @@ export function ChatWindow({
       {messages.length === 0 && icebreakers.length > 0 && (
         <div className="px-4 pb-2">
           <p className="mb-2 text-xs font-medium text-muted">{tc.icebreakers}</p>
-          <div className="flex flex-col gap-2">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             {icebreakers.map((q) => (
               <button
                 key={q}
                 onClick={() => setText(q)}
-                className="rounded-2xl border border-border bg-surface px-3 py-2 text-left text-sm transition hover:border-brand"
+                className="shrink-0 whitespace-nowrap rounded-full border border-accent/25 bg-accent/[0.06] px-3.5 py-2 text-sm text-accent transition hover:border-accent/50"
               >
                 {q}
               </button>
