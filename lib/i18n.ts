@@ -330,6 +330,14 @@ export type AppDict = {
     journeyTitle: string; journeyDesc: string; journeyBadge: string;
     journeySteps: Record<string, { label: string; desc: string }>;
   };
+  profilDetay: {
+    notFound: string; back: string; uyumSuffix: string; verified: string; founder: string;
+    clarityLabel: string; clarityHint: string; summaryTitle: string; uyumTitle: string; uyumDesc: string;
+    voiceTitle: string; voiceHint: string; voiceListen: string;
+    actionMessage: string; actionLike: string; actionLiked: string; actionGift: string; safetyAria: string;
+    attrMemberNo: string; attrProfession: string; attrCity: string; attrZodiac: string; attrLanguages: string;
+    attrLooking: string; attrKids: string; attrSmoking: string; attrDrinking: string; attrPets: string; attrTempo: string;
+  };
   onboarding: {
     headerTitle: string; stepCounter: string; steps: string[];
     namePlaceholder: string; nameError: string; birthdate: string; tooYoung: string; ageYears: string;
@@ -624,6 +632,14 @@ const appTr: AppDict = {
       davet: { label: "Bir arkadaşını davet et", desc: "Davet eden 250 jeton kazanır" },
       kurucu: { label: "Kurucu çevreni tamamla", desc: "İlk 1000 üye · kalıcı rozet" },
     },
+  },
+  profilDetay: {
+    notFound: "Profil bulunamadı.", back: "Geri dön", uyumSuffix: "uyum", verified: "Doğrulanmış", founder: "Kurucu Üye",
+    clarityLabel: "Fotoğraf netliği", clarityHint: "Sohbet ilerledikçe netleşir", summaryTitle: "Karakter Özeti", uyumTitle: "Uyum", uyumDesc: "Karakter & yaşam tarzına göre",
+    voiceTitle: "Ses kartı", voiceHint: "30 sn karakter ipucu", voiceListen: "Dinle",
+    actionMessage: "Mesaj Gönder", actionLike: "Beğen", actionLiked: "Beğenildi", actionGift: "Hediye Gönder", safetyAria: "Güvenlik",
+    attrMemberNo: "Üye No", attrProfession: "Meslek", attrCity: "Şehir", attrZodiac: "Burç", attrLanguages: "Diller",
+    attrLooking: "Arıyor", attrKids: "Çocuk", attrSmoking: "Sigara", attrDrinking: "Alkol", attrPets: "Evcil hayvan", attrTempo: "Tempo",
   },
   onboarding: {
     headerTitle: "Profilini oluştur", stepCounter: "Adım {n} / {t}",
@@ -994,6 +1010,14 @@ const appEn: AppDict = {
       kurucu: { label: "Complete your founding circle", desc: "First 1000 members · permanent badge" },
     },
   },
+  profilDetay: {
+    notFound: "Profile not found.", back: "Go back", uyumSuffix: "match", verified: "Verified", founder: "Founding Member",
+    clarityLabel: "Photo clarity", clarityHint: "Clears as the conversation deepens", summaryTitle: "Character Summary", uyumTitle: "Match", uyumDesc: "Based on character & lifestyle",
+    voiceTitle: "Voice card", voiceHint: "30s character hint", voiceListen: "Play",
+    actionMessage: "Send Message", actionLike: "Like", actionLiked: "Liked", actionGift: "Send Gift", safetyAria: "Safety",
+    attrMemberNo: "Member No", attrProfession: "Profession", attrCity: "City", attrZodiac: "Zodiac", attrLanguages: "Languages",
+    attrLooking: "Looking for", attrKids: "Kids", attrSmoking: "Smoking", attrDrinking: "Drinking", attrPets: "Pets", attrTempo: "Pace",
+  },
   onboarding: {
     headerTitle: "Build your profile", stepCounter: "Step {n} / {t}",
     steps: ["Who are you?", "Where, what do you do?", "Interests & lifestyle", "Photos"],
@@ -1362,6 +1386,14 @@ const appKu: AppDict = {
       davet: { label: "Hevalekî xwe vexwîne", desc: "Vexwender 250 jeton qezenc dike" },
       kurucu: { label: "Dorhêla xwe ya damezrîner temam bike", desc: "1000 endamên yekem · nîşana mayînde" },
     },
+  },
+  profilDetay: {
+    notFound: "Profîl nehat dîtin.", back: "Vegere", uyumSuffix: "lihev", verified: "Pejirandî", founder: "Endamê Damezrîner",
+    clarityLabel: "Zelaliya wêneyê", clarityHint: "Gava axaftin kûr dibe zelal dibe", summaryTitle: "Kurteya Karakterê", uyumTitle: "Lihevhatin", uyumDesc: "Li gorî karakter û awayê jiyanê",
+    voiceTitle: "Karta dengî", voiceHint: "Şîreta karakterê ya 30 çirkeyî", voiceListen: "Lê bide",
+    actionMessage: "Peyam Bişîne", actionLike: "Eciband", actionLiked: "Hat ecibandin", actionGift: "Diyarî Bişîne", safetyAria: "Ewlehî",
+    attrMemberNo: "Hejmara Endam", attrProfession: "Pîşe", attrCity: "Bajar", attrZodiac: "Burc", attrLanguages: "Ziman",
+    attrLooking: "Li lê digere", attrKids: "Zarok", attrSmoking: "Cigare", attrDrinking: "Alkol", attrPets: "Heywanên kedî", attrTempo: "Lez",
   },
   onboarding: {
     headerTitle: "Profîla xwe ava bike", stepCounter: "Gav {n} / {t}",
