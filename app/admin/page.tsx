@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/ui";
 import { shortDate } from "@/lib/questions";
-import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins } from "lucide-react";
+import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins, CreditCard, Wallet, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -40,13 +40,24 @@ export default async function Admin() {
   ]);
   const { data: tx } = await supabase.from("coin_transactions").select("id, amount, type, description, created_at").order("created_at", { ascending: false }).limit(8);
 
+  const [totalPay, paidPay, pendingPay] = await Promise.all([
+    count(supabase, "payment_orders"),
+    count(supabase, "payment_orders", ["status", "paid"]),
+    count(supabase, "payment_orders", ["status", "pending"]),
+  ]);
+  const { data: paidOrders } = await supabase.from("payment_orders").select("total_coins").eq("status", "paid");
+  const coinsSold = (paidOrders || []).reduce((s: number, o: any) => s + (o.total_coins || 0), 0);
+
   const metrics = [
     { icon: UserCheck, label: "Bekleyen Öğretmen", value: pendingTeachers, tone: "gold" },
     { icon: Users, label: "Bekleyen Koç", value: pendingCoaches, tone: "gold" },
     { icon: HelpCircle, label: "Toplam Soru", value: totalQ, tone: "primary" },
     { icon: MessageSquare, label: "Açık Soru", value: openQ, tone: "primary" },
-    { icon: CheckCircle2, label: "Cevaplanan", value: answeredQ, tone: "primary" },
-    { icon: Coins, label: "Coin Hareketi", value: tx?.length ?? 0, tone: "gold" },
+    { icon: CheckCircle2, label: "Cevaplanan Soru", value: answeredQ, tone: "primary" },
+    { icon: CreditCard, label: "Toplam Ödeme", value: totalPay, tone: "primary" },
+    { icon: Wallet, label: "Başarılı Ödeme", value: paidPay, tone: "gold" },
+    { icon: Clock, label: "Bekleyen Ödeme", value: pendingPay, tone: "primary" },
+    { icon: Coins, label: "Satılan Jeton", value: coinsSold, tone: "gold" },
   ];
 
   return (
@@ -68,6 +79,8 @@ export default async function Admin() {
           </GlassCard>
         ))}
       </div>
+
+      <Link href="/admin/payments" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Tüm ödeme kayıtlarını gör →</Link>
 
       <h2 className="mt-8 mb-3 font-bold">Son Coin Hareketleri</h2>
       <GlassCard className="divide-y divide-line p-2">
