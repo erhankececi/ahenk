@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/ui";
 import { shortDate } from "@/lib/questions";
-import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins, CreditCard, Wallet, Clock } from "lucide-react";
+import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins, CreditCard, Wallet, Clock, Video, Radio } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +48,12 @@ export default async function Admin() {
   const { data: paidOrders } = await supabase.from("payment_orders").select("total_coins").eq("status", "paid");
   const coinsSold = (paidOrders || []).reduce((s: number, o: any) => s + (o.total_coins || 0), 0);
 
+  const [totalRooms, liveRoomsCount, totalParticipations] = await Promise.all([
+    count(supabase, "live_rooms"),
+    count(supabase, "live_rooms", ["status", "live"]),
+    count(supabase, "room_participants"),
+  ]);
+
   const metrics = [
     { icon: UserCheck, label: "Bekleyen Öğretmen", value: pendingTeachers, tone: "gold" },
     { icon: Users, label: "Bekleyen Koç", value: pendingCoaches, tone: "gold" },
@@ -58,6 +64,9 @@ export default async function Admin() {
     { icon: Wallet, label: "Başarılı Ödeme", value: paidPay, tone: "gold" },
     { icon: Clock, label: "Bekleyen Ödeme", value: pendingPay, tone: "primary" },
     { icon: Coins, label: "Satılan Jeton", value: coinsSold, tone: "gold" },
+    { icon: Video, label: "Toplam Oda", value: totalRooms, tone: "primary" },
+    { icon: Radio, label: "Canlı Oda", value: liveRoomsCount, tone: "primary" },
+    { icon: Users, label: "Toplam Katılım", value: totalParticipations, tone: "gold" },
   ];
 
   return (
@@ -80,7 +89,10 @@ export default async function Admin() {
         ))}
       </div>
 
-      <Link href="/admin/payments" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Tüm ödeme kayıtlarını gör →</Link>
+      <div className="mt-4 flex flex-wrap gap-4">
+        <Link href="/admin/payments" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Tüm ödemeler →</Link>
+        <Link href="/admin/rooms" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Tüm odalar →</Link>
+      </div>
 
       <h2 className="mt-8 mb-3 font-bold">Son Coin Hareketleri</h2>
       <GlassCard className="divide-y divide-line p-2">

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Button, GlassCard, LiveBadge, Avatar, Stars, IconBox } from "@/components/ui";
 import { QuestionCard } from "@/components/QuestionCard";
-import { ROOMS, TEACHERS } from "@/lib/mock";
+import { TEACHERS } from "@/lib/mock";
 import Link from "next/link";
 import { Camera, Coins, Crown, Users, ArrowRight, TrendingUp } from "lucide-react";
 
@@ -19,7 +19,8 @@ export default async function StudentDashboard() {
   const coins = sp?.coin_balance ?? 0;
   const { data: recentQ } = await supabase.from("questions").select("*").eq("student_id", user.id).order("created_at", { ascending: false }).limit(3);
 
-  const activeRooms = ROOMS.filter((r) => r.status === "canli").slice(0, 3);
+  const { data: liveRooms } = await supabase.from("live_rooms").select("*, profiles(full_name)").in("status", ["live", "scheduled"]).order("created_at", { ascending: false }).limit(3);
+  const activeRooms = liveRooms || [];
   const recommended = TEACHERS.filter((t) => t.kind === "ogretmen").slice(0, 3);
 
   return (
@@ -47,21 +48,27 @@ export default async function StudentDashboard() {
           <h2 className="font-bold">Aktif Canlı Odalar</h2>
           <Link href="/odalar" className="text-sm text-primary">Tümü</Link>
         </div>
-        <div className="space-y-3">
-          {activeRooms.map((r) => (
-            <GlassCard key={r.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted">{r.tag}</span>
-                <LiveBadge />
-              </div>
-              <h3 className="mt-2 font-bold">{r.name}</h3>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs text-muted"><Users size={14} /> {r.participants}</span>
-                <Button href="/odalar" size="sm">Katıl</Button>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
+        {activeRooms.length === 0 ? (
+          <GlassCard className="p-6 text-center text-sm text-muted">Şu an aktif oda yok. Yakında yeni odalar açılacak.</GlassCard>
+        ) : (
+          <div className="space-y-3">
+            {activeRooms.map((r: any) => (
+              <Link key={r.id} href={`/odalar/${r.id}`} className="block">
+                <GlassCard className="p-4 transition hover:border-primary/30">
+                  <div className="flex items-start justify-between">
+                    <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted">{r.exam_type || r.subject}</span>
+                    <LiveBadge soon={r.status !== "live"} label={r.status === "live" ? "Canlı" : "Yakında"} />
+                  </div>
+                  <h3 className="mt-2 font-bold">{r.title}</h3>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-xs text-muted"><Users size={14} /> {r.participant_count}</span>
+                    <Button size="sm">{r.status === "live" ? "Katıl" : "Gör"}</Button>
+                  </div>
+                </GlassCard>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <section>

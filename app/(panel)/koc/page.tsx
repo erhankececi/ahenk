@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { GlassCard, Button, IconBox, Progress } from "@/components/ui";
-import { Users, Target, CalendarCheck, ArrowUpRight, Crown, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Coins, Target, CalendarCheck, ArrowUpRight, Crown, Clock, CheckCircle2, XCircle, Video } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +16,12 @@ export default async function CoachDashboard() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
-  const { data: cp } = await supabase.from("coach_profiles").select("status").eq("user_id", user.id).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const { data: cp } = await supabase.from("coach_profiles").select("status, coin_balance").eq("user_id", user.id).maybeSingle();
+  const { data: rooms } = await supabase.from("live_rooms").select("id, title, status, participant_count").eq("host_id", user.id).order("created_at", { ascending: false }).limit(3);
   const firstName = (profile?.full_name || "Koç").split(" ")[0];
   const status = (cp?.status as keyof typeof STATUS) || "pending";
+  const coins = cp?.coin_balance ?? 0;
   const s = STATUS[status] ?? STATUS.pending;
 
   return (
@@ -33,11 +35,13 @@ export default async function CoachDashboard() {
         <s.icon size={16} /> {s.label}
       </div>
 
+      <Button href="/odalarim" size="lg" className="w-full"><Video size={18} /> Canlı Oda Aç</Button>
+
       <div className="grid grid-cols-2 gap-3">
         <GlassCard className="p-4">
-          <IconBox><Users size={18} /></IconBox>
-          <p className="mt-3 text-xs uppercase tracking-wide text-muted">Aktif Öğrenci</p>
-          <p className="text-2xl font-bold">18</p>
+          <IconBox tone="gold"><Coins size={18} /></IconBox>
+          <p className="mt-3 text-xs uppercase tracking-wide text-muted">Jeton Kazancı</p>
+          <p className="text-2xl font-bold">{coins.toLocaleString("tr-TR")}</p>
         </GlassCard>
         <GlassCard className="p-4">
           <IconBox tone="gold"><Target size={18} /></IconBox>
@@ -46,22 +50,24 @@ export default async function CoachDashboard() {
         </GlassCard>
       </div>
 
-      <GlassCard className="p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 font-bold"><CalendarCheck size={18} className="text-primary" /> Bugünkü Görüşmeler</h2>
-        </div>
-        <div className="space-y-2">
-          {[{ s: "Ahmet Y.", t: "14:00 · Deneme Analizi" }, { s: "Elif K.", t: "16:30 · Program Görüşmesi" }].map((m) => (
-            <div key={m.s} className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3">
-              <div>
-                <p className="text-sm font-semibold">{m.s}</p>
-                <p className="text-xs text-muted">{m.t}</p>
-              </div>
-              <Button size="sm" variant="glass">Başlat</Button>
-            </div>
-          ))}
-        </div>
-      </GlassCard>
+      <section>
+        <h2 className="mb-3 font-bold">Odalarım</h2>
+        {!rooms || rooms.length === 0 ? (
+          <GlassCard className="p-6 text-center text-sm text-muted">Henüz oda açmadın. Deneme analizi, koçluk veya motivasyon odası aç.</GlassCard>
+        ) : (
+          <div className="space-y-2">
+            {rooms.map((r) => (
+              <a key={r.id} href={`/odalar/${r.id}`} className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold">{r.title}</p>
+                  <p className="text-xs text-muted">{r.status === "live" ? "Canlı" : r.status === "scheduled" ? "Yakında" : "Bitti"} · {r.participant_count} katılımcı</p>
+                </div>
+                <ArrowUpRight size={16} className="text-primary" />
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
 
       <GlassCard className="p-5">
         <div className="mb-2 flex items-center justify-between">
