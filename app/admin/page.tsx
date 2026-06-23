@@ -4,9 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/ui";
 import { shortDate } from "@/lib/questions";
-import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins, CreditCard, Wallet, Clock, Video, Radio } from "lucide-react";
+import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins, CreditCard, Wallet, Clock, Video, Radio, Flag, UserPlus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const ACTION_LABEL: Record<string, string> = {
+  approve_teacher: "Öğretmen onaylandı", reject_teacher: "Öğretmen reddedildi",
+  approve_coach: "Koç onaylandı", reject_coach: "Koç reddedildi", resolve_report: "Bildirim işlendi",
+};
 
 async function count(supabase: any, table: string, filter?: [string, string]) {
   let q = supabase.from(table).select("*", { count: "exact", head: true });
@@ -54,6 +59,22 @@ export default async function Admin() {
     count(supabase, "room_participants"),
   ]);
 
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const dayIso = startOfDay.toISOString();
+  async function countSince(table: string) {
+    const { count } = await supabase.from(table).select("*", { count: "exact", head: true }).gte("created_at", dayIso);
+    return count ?? 0;
+  }
+  const [openReports, newUsersToday, questionsToday, joinsToday] = await Promise.all([
+    count(supabase, "reports", ["status", "open"]),
+    countSince("profiles"),
+    countSince("questions"),
+    countSince("room_participants"),
+  ]);
+  const { count: payToday } = await supabase.from("payment_orders").select("*", { count: "exact", head: true }).eq("status", "paid").gte("created_at", dayIso);
+  const { data: actions } = await supabase.from("admin_actions").select("id, action_type, target_type, created_at").order("created_at", { ascending: false }).limit(8);
+
   const metrics = [
     { icon: UserCheck, label: "Bekleyen Öğretmen", value: pendingTeachers, tone: "gold" },
     { icon: Users, label: "Bekleyen Koç", value: pendingCoaches, tone: "gold" },
@@ -67,6 +88,11 @@ export default async function Admin() {
     { icon: Video, label: "Toplam Oda", value: totalRooms, tone: "primary" },
     { icon: Radio, label: "Canlı Oda", value: liveRoomsCount, tone: "primary" },
     { icon: Users, label: "Toplam Katılım", value: totalParticipations, tone: "gold" },
+    { icon: Flag, label: "Açık Bildirim", value: openReports, tone: "gold" },
+    { icon: UserPlus, label: "Bugün Yeni Kullanıcı", value: newUsersToday, tone: "primary" },
+    { icon: HelpCircle, label: "Bugün Soru", value: questionsToday, tone: "primary" },
+    { icon: Radio, label: "Bugün Oda Katılımı", value: joinsToday, tone: "primary" },
+    { icon: Wallet, label: "Bugün Ödeme", value: payToday ?? 0, tone: "gold" },
   ];
 
   return (
@@ -77,7 +103,7 @@ export default async function Admin() {
       </header>
 
       <h1 className="text-2xl font-bold">Genel Bakış</h1>
-      <p className="mt-1 text-sm text-muted">Başvuru onayı SQL ile: <code className="text-primary">update teacher_profiles set status='approved' where user_id='…';</code></p>
+      <p className="mt-1 text-sm text-muted">Başvuruları onayla, bildirilen içerikleri yönet, platformu izle.</p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {metrics.map((m) => (
@@ -90,8 +116,10 @@ export default async function Admin() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-4">
-        <Link href="/admin/payments" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Tüm ödemeler →</Link>
-        <Link href="/admin/rooms" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Tüm odalar →</Link>
+        <Link href="/admin/applications" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Başvurular →</Link>
+        <Link href="/admin/reports" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Bildirimler →</Link>
+        <Link href="/admin/payments" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Ödemeler →</Link>
+        <Link href="/admin/rooms" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Odalar →</Link>
       </div>
 
       <h2 className="mt-8 mb-3 font-bold">Son Coin Hareketleri</h2>
@@ -104,6 +132,17 @@ export default async function Admin() {
               <p className="text-xs text-muted">{shortDate(t.created_at)}</p>
             </div>
             <span className={`font-bold ${t.amount < 0 ? "text-danger" : "text-success"}`}>{t.amount > 0 ? "+" : ""}{t.amount}</span>
+          </div>
+        ))}
+      </GlassCard>
+
+      <h2 className="mt-8 mb-3 font-bold">Son Admin İşlemleri</h2>
+      <GlassCard className="divide-y divide-line p-2">
+        {(!actions || actions.length === 0) && <p className="px-3 py-4 text-sm text-muted">Henüz işlem yok.</p>}
+        {(actions || []).map((a) => (
+          <div key={a.id} className="flex items-center justify-between px-3 py-3">
+            <p className="text-sm font-medium">{ACTION_LABEL[a.action_type] || a.action_type}</p>
+            <p className="text-xs text-muted">{shortDate(a.created_at)}</p>
           </div>
         ))}
       </GlassCard>

@@ -3,18 +3,26 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Bell } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { JetonPill } from "@/components/ui";
+import { createClient } from "@/lib/supabase/client";
 import { STUDENT_NAV, TEACHER_NAV, type NavItem } from "@/lib/nav";
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const [role, setRole] = useState<"ogrenci" | "ogretmen" | "koc">("ogrenci");
+  const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     const r = localStorage.getItem("ahenk_role");
     if (r === "ogretmen" || r === "koc") setRole(r);
-  }, []);
+    (async () => {
+      const supabase = createClient();
+      const { count } = await supabase.from("notifications").select("*", { count: "exact", head: true }).is("read_at", null);
+      setUnread(count ?? 0);
+    })();
+  }, [path]);
 
   const nav: NavItem[] = role === "ogretmen" ? TEACHER_NAV : STUDENT_NAV;
   const homeHref = role === "ogretmen" ? "/ogretmen" : role === "koc" ? "/koc" : "/ogrenci";
@@ -25,7 +33,17 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
         <Link href={homeHref} aria-label="Ahenk Live">
           <Logo size={22} />
         </Link>
-        <JetonPill amount={1250} />
+        <div className="flex items-center gap-3">
+          <Link href="/bildirimler" aria-label="Bildirimler" className="relative text-muted transition hover:text-text">
+            <Bell size={21} strokeWidth={1.8} />
+            {unread > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-bg">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            )}
+          </Link>
+          <JetonPill amount={1250} />
+        </div>
       </header>
 
       <main className="px-4 pt-5">{children}</main>

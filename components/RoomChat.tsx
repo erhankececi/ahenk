@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Send, Megaphone } from "lucide-react";
+import { ReportButton } from "./ReportButton";
+import { Send, Megaphone, Ban } from "lucide-react";
 
 type Msg = { id: string; user_id: string; message: string; message_type: string; created_at: string };
 
@@ -14,7 +15,14 @@ export function RoomChat({ roomId, meId, hostId, isHost, initial }: {
   const [text, setText] = useState("");
   const [announce, setAnnounce] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [blocked, setBlocked] = useState<Set<string>>(new Set());
   const endRef = useRef<HTMLDivElement>(null);
+
+  async function block(uid: string) {
+    if (!confirm("Bu kullanıcıyı engellemek istiyor musun? Mesajları artık görünmeyecek.")) return;
+    setBlocked((s) => new Set(s).add(uid));
+    await supabase.from("user_blocks").insert({ blocker_id: meId, blocked_id: uid });
+  }
 
   useEffect(() => {
     const ch = supabase
@@ -45,7 +53,7 @@ export function RoomChat({ roomId, meId, hostId, isHost, initial }: {
     <div className="flex h-[60dvh] flex-col">
       <div className="no-scrollbar flex-1 space-y-3 overflow-y-auto pr-1">
         {messages.length === 0 && <p className="mt-10 text-center text-sm text-muted">Henüz mesaj yok, ilk mesajı sen gönder.</p>}
-        {messages.map((m) => {
+        {messages.filter((m) => !blocked.has(m.user_id)).map((m) => {
           if (m.message_type === "announcement") {
             return (
               <div key={m.id} className="gold-card flex items-start gap-2 rounded-xl px-4 py-3">
@@ -65,6 +73,12 @@ export function RoomChat({ roomId, meId, hostId, isHost, initial }: {
               <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${mine ? "btn-primary rounded-br-md" : fromHost ? "rounded-bl-md border border-primary/30 bg-primary/10 text-text" : "glass rounded-bl-md"}`}>
                 {m.message}
               </div>
+              {!mine && (
+                <div className="mt-1 flex items-center gap-2 px-1 opacity-70">
+                  <ReportButton targetType="message" targetId={m.id} compact />
+                  {!fromHost && <button onClick={() => block(m.user_id)} title="Engelle" className="text-muted transition hover:text-danger"><Ban size={13} /></button>}
+                </div>
+              )}
             </div>
           );
         })}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { GlassCard, Button, Avatar, Stars, LiveBadge } from "@/components/ui";
+import { ReportButton } from "@/components/ReportButton";
 import { MessageSquare, Clock, Target } from "lucide-react";
 
 type Item = {
@@ -92,7 +93,10 @@ export default function Teachers() {
                     )}
                     <Stat icon={<Clock size={14} />} label={koc ? "Deneyim" : "Ort. Yanıt"} value={koc ? "Koç" : t.avgTime} />
                   </div>
-                  <Button size="sm" className="mt-4 w-full" variant="glass">Profili Gör</Button>
+                  <div className="mt-4 flex items-center gap-2">
+                    <Button size="sm" className="flex-1" variant="glass">Profili Gör</Button>
+                    <ReportButton targetType={koc ? "coach" : "teacher"} targetId={t.id} />
+                  </div>
                 </div>
               </GlassCard>
             );

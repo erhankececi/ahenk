@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GlassCard, Avatar, LiveBadge } from "@/components/ui";
 import { RoomChat } from "@/components/RoomChat";
 import { JoinRoomButton } from "@/components/JoinRoomButton";
+import { ReportButton } from "@/components/ReportButton";
 import { ArrowLeft, Users, Coins, Lock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,10 @@ export default async function RoomDetail({ params }: { params: { id: string } })
     <div className="space-y-4 pb-4">
       <div className="flex items-center justify-between">
         <Link href="/odalar" className="flex items-center gap-1.5 text-sm text-muted hover:text-text"><ArrowLeft size={16} /> Odalar</Link>
-        <LiveBadge soon={room.status !== "live"} label={room.status === "live" ? "Canlı" : room.status === "scheduled" ? "Yakında" : "Bitti"} />
+        <div className="flex items-center gap-2">
+          <LiveBadge soon={room.status !== "live"} label={room.status === "live" ? "Canlı" : room.status === "scheduled" ? "Yakında" : "Bitti"} />
+          {!isHost && <ReportButton targetType="room" targetId={room.id} compact />}
+        </div>
       </div>
 
       <div>

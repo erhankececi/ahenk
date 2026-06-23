@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GlassCard, Avatar } from "@/components/ui";
 import { QuestionComments } from "@/components/QuestionComments";
 import { statusMeta, shortDate } from "@/lib/questions";
+import { ReportButton } from "@/components/ReportButton";
 import { ArrowLeft, Zap, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,7 +33,10 @@ export default async function QuestionDetail({ params }: { params: { id: string 
     <div className="space-y-5 pb-4">
       <div className="flex items-center justify-between">
         <Link href="/sorularim" className="flex items-center gap-1.5 text-sm text-muted hover:text-text"><ArrowLeft size={16} /> Sorularım</Link>
-        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${s.cls}`}>{s.label}</span>
+        <div className="flex items-center gap-2">
+          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${s.cls}`}>{s.label}</span>
+          <ReportButton targetType="question" targetId={q.id} compact />
+        </div>
       </div>
 
       <div>
@@ -54,6 +58,7 @@ export default async function QuestionDetail({ params }: { params: { id: string 
             <CheckCircle2 size={18} className="text-success" />
             <h2 className="font-bold">Cevap</h2>
             {teacher && <span className="flex items-center gap-1.5 text-xs text-muted">· {teacher.full_name}</span>}
+            <span className="ml-auto"><ReportButton targetType="answer" targetId={q.id} compact /></span>
           </div>
           <GlassCard className="space-y-3 p-4">
             {q.answer_text && <p className="text-sm leading-relaxed text-text/90">{q.answer_text}</p>}
