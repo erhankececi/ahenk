@@ -1,31 +1,67 @@
-import { GlassCard, Button } from "@/components/ui";
-import { INCOMING_QUESTIONS } from "@/lib/mock";
+"use client";
 
-export default function IncomingQuestions() {
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { QuestionCard } from "@/components/QuestionCard";
+
+const TABS = [
+  { id: "pool", label: "Havuz" },
+  { id: "assigned", label: "Atanmış" },
+  { id: "answered", label: "Cevaplanan" },
+] as const;
+
+export default function TeacherQuestions() {
+  const supabase = createClient();
+  const [me, setMe] = useState("");
+  const [all, setAll] = useState<any[]>([]);
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("pool");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setMe(user.id);
+      const { data } = await supabase.from("questions").select("*").order("created_at", { ascending: false });
+      setAll(data || []);
+      setLoading(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const lists: Record<string, any[]> = {
+    pool: all.filter((q) => q.status === "open" && !q.teacher_id),
+    assigned: all.filter((q) => q.status === "assigned" && (q.teacher_id === me || q.claimed_by === me)),
+    answered: all.filter((q) => q.status === "answered" && q.teacher_id === me),
+  };
+  const current = lists[tab];
+
   return (
     <div className="space-y-5 pb-4">
       <div>
         <h1 className="text-2xl font-bold">Gelen Sorular</h1>
-        <p className="mt-1 text-sm text-muted">Öğrencilerden gelen soruları cevapla ve kazan.</p>
+        <p className="mt-1 text-sm text-muted">Havuzdan soru üstlen veya sana atanmış soruları cevapla.</p>
       </div>
-      <div className="space-y-3">
-        {INCOMING_QUESTIONS.map((q) => (
-          <GlassCard key={q.id} className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-secondary">{q.subject} · {q.title}</span>
-              <div className="flex items-center gap-2">
-                {q.priority && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold">ÖNCELİKLİ</span>}
-                <span className="text-[11px] text-muted">{q.time}</span>
-              </div>
-            </div>
-            <p className="mt-1.5 text-sm text-muted">{q.desc}</p>
-            <div className="mt-3 flex gap-2">
-              <Button size="sm" className="flex-1">Odada Cevapla</Button>
-              <Button size="sm" variant="glass" className="flex-1">Metinle Cevapla</Button>
-            </div>
-          </GlassCard>
+
+      <div className="flex gap-2">
+        {TABS.map((t) => (
+          <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 rounded-full border px-3 py-2 text-sm font-medium transition ${tab === t.id ? "border-primary bg-primary/10 text-primary" : "border-line bg-surface text-muted hover:text-text"}`}>
+            {t.label} {lists[t.id].length > 0 && <span className="ml-0.5 opacity-70">{lists[t.id].length}</span>}
+          </button>
         ))}
       </div>
+
+      {loading ? (
+        <div className="glass-card rounded-2xl p-10 text-center text-sm text-muted">Yükleniyor…</div>
+      ) : current.length === 0 ? (
+        <div className="glass-card rounded-2xl p-10 text-center text-sm text-muted">
+          {tab === "pool" ? "Havuzda bekleyen soru yok." : tab === "assigned" ? "Sana atanmış aktif soru yok." : "Henüz cevapladığın soru yok."}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {current.map((q) => <QuestionCard key={q.id} q={q} href={`/gelen-sorular/${q.id}`} />)}
+        </div>
+      )}
     </div>
   );
 }

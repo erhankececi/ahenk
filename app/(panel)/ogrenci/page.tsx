@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Button, GlassCard, LiveBadge, Avatar, Stars, IconBox } from "@/components/ui";
-import { ROOMS, RECENT_ANSWERS, TEACHERS } from "@/lib/mock";
+import { QuestionCard } from "@/components/QuestionCard";
+import { ROOMS, TEACHERS } from "@/lib/mock";
 import Link from "next/link";
-import { Camera, Coins, Crown, Users, ArrowRight, CheckCircle2, TrendingUp } from "lucide-react";
+import { Camera, Coins, Crown, Users, ArrowRight, TrendingUp } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function StudentDashboard() {
   const { data: sp } = await supabase.from("student_profiles").select("coin_balance").eq("user_id", user.id).maybeSingle();
   const firstName = (profile?.full_name || "Öğrenci").split(" ")[0];
   const coins = sp?.coin_balance ?? 0;
+  const { data: recentQ } = await supabase.from("questions").select("*").eq("student_id", user.id).order("created_at", { ascending: false }).limit(3);
 
   const activeRooms = ROOMS.filter((r) => r.status === "canli").slice(0, 3);
   const recommended = TEACHERS.filter((t) => t.kind === "ogretmen").slice(0, 3);
@@ -63,19 +65,19 @@ export default async function StudentDashboard() {
       </section>
 
       <section>
-        <h2 className="mb-3 font-bold">Son Cevaplar</h2>
-        <div className="space-y-2">
-          {RECENT_ANSWERS.map((a) => (
-            <GlassCard key={a.id} className="flex items-center gap-3 p-4">
-              <IconBox><CheckCircle2 size={18} /></IconBox>
-              <div className="flex-1">
-                <p className="text-sm font-semibold">{a.subject} sorusu</p>
-                <p className="text-xs text-muted">{a.teacher} · {a.time}</p>
-              </div>
-              <span className="text-xs font-medium text-success">{a.status}</span>
-            </GlassCard>
-          ))}
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-bold">Son Sorularım</h2>
+          <Link href="/sorularim" className="text-sm text-primary">Tümü</Link>
         </div>
+        {recentQ && recentQ.length > 0 ? (
+          <div className="space-y-3">
+            {recentQ.map((q) => <QuestionCard key={q.id} q={q} href={`/sorularim/${q.id}`} />)}
+          </div>
+        ) : (
+          <GlassCard className="p-6 text-center text-sm text-muted">
+            Henüz soru sormadın. <Link href="/soru-sor" className="font-medium text-primary">İlk soruyu sor →</Link>
+          </GlassCard>
+        )}
       </section>
 
       <section>
