@@ -1,12 +1,36 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { GlassCard, Button, IconBox, Progress } from "@/components/ui";
-import { Users, Target, CalendarCheck, ArrowUpRight, Crown } from "lucide-react";
+import { Users, Target, CalendarCheck, ArrowUpRight, Crown, Clock, CheckCircle2, XCircle } from "lucide-react";
 
-export default function CoachDashboard() {
+export const dynamic = "force-dynamic";
+
+const STATUS = {
+  pending: { label: "Başvurun değerlendiriliyor", icon: Clock, cls: "border-gold/30 bg-gold/10 text-gold" },
+  approved: { label: "Onaylı Koç", icon: CheckCircle2, cls: "border-success/30 bg-success/10 text-success" },
+  rejected: { label: "Başvuru reddedildi", icon: XCircle, cls: "border-danger/30 bg-danger/10 text-danger" },
+} as const;
+
+export default async function CoachDashboard() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+  const { data: cp } = await supabase.from("coach_profiles").select("status").eq("user_id", user.id).maybeSingle();
+  const firstName = (profile?.full_name || "Koç").split(" ")[0];
+  const status = (cp?.status as keyof typeof STATUS) || "pending";
+  const s = STATUS[status] ?? STATUS.pending;
+
   return (
     <div className="space-y-5 pb-4">
       <div>
-        <p className="text-sm text-muted">Hoş geldiniz, Koç 👋</p>
-        <h1 className="text-2xl font-bold">Öğrencilerin bugün seni bekliyor.</h1>
+        <p className="text-sm text-muted">Hoş geldiniz, {firstName} 👋</p>
+        <h1 className="text-2xl font-bold">Koç Panelin</h1>
+      </div>
+
+      <div className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium ${s.cls}`}>
+        <s.icon size={16} /> {s.label}
       </div>
 
       <div className="grid grid-cols-2 gap-3">

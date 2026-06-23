@@ -1,6 +1,6 @@
 import { GlassCard } from "@/components/ui";
-import Link from "next/link";
-import { User, Bell, Shield, HelpCircle, LogOut, ChevronRight } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
+import { User, Bell, Shield, HelpCircle, ChevronRight } from "lucide-react";
 
 const ITEMS = [
   { icon: User, label: "Profil Bilgileri" },
@@ -22,9 +22,7 @@ export default function Settings() {
           </button>
         ))}
       </GlassCard>
-      <Link href="/" className="flex items-center justify-center gap-2 rounded-xl border border-line py-3 text-sm font-medium text-danger transition hover:border-danger/40">
-        <LogOut size={16} /> Çıkış Yap
-      </Link>
+      <LogoutButton />
     </div>
   );
 }

@@ -1,40 +1,60 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { GlassCard, Button, IconBox, Progress, Stars } from "@/components/ui";
 import { INCOMING_QUESTIONS, REVIEWS } from "@/lib/mock";
 import Link from "next/link";
-import { Video, TrendingUp, Radio, MessageSquare, Crown, ArrowUpRight } from "lucide-react";
+import { Video, TrendingUp, Coins, MessageSquare, Crown, ArrowUpRight, Clock, CheckCircle2, XCircle } from "lucide-react";
 
-export default function TeacherPanel() {
+export const dynamic = "force-dynamic";
+
+const STATUS = {
+  pending: { label: "Başvurun değerlendiriliyor", icon: Clock, cls: "border-gold/30 bg-gold/10 text-gold" },
+  approved: { label: "Onaylı Öğretmen", icon: CheckCircle2, cls: "border-success/30 bg-success/10 text-success" },
+  rejected: { label: "Başvuru reddedildi", icon: XCircle, cls: "border-danger/30 bg-danger/10 text-danger" },
+} as const;
+
+export default async function TeacherPanel() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+  const { data: tp } = await supabase.from("teacher_profiles").select("status, coin_balance").eq("user_id", user.id).maybeSingle();
+  const firstName = (profile?.full_name || "Öğretmen").split(" ")[0];
+  const status = (tp?.status as keyof typeof STATUS) || "pending";
+  const coins = tp?.coin_balance ?? 0;
+  const s = STATUS[status] ?? STATUS.pending;
+
   return (
     <div className="space-y-5 pb-4">
-      {/* Hoş geldin */}
       <div>
-        <p className="text-sm text-muted">Hoş geldiniz, Dr. Arslan</p>
-        <h1 className="text-2xl font-bold">Bugün 3 yeni sorun var.</h1>
+        <p className="text-sm text-muted">Hoş geldiniz, {firstName} 👋</p>
+        <h1 className="text-2xl font-bold">Öğretmen Panelin</h1>
+      </div>
+
+      {/* Başvuru durumu */}
+      <div className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium ${s.cls}`}>
+        <s.icon size={16} /> {s.label}
       </div>
 
       <Button href="/odalarim" size="lg" className="w-full"><Video size={18} /> Canlı Oda Aç</Button>
 
-      {/* Kazanç + aktif oda */}
       <div className="grid grid-cols-2 gap-3">
         <GlassCard className="p-4">
+          <IconBox tone="gold"><Coins size={18} /></IconBox>
+          <p className="mt-3 text-xs uppercase tracking-wide text-muted">Jeton Bakiyesi</p>
+          <p className="text-2xl font-bold">{coins.toLocaleString("tr-TR")}</p>
+        </GlassCard>
+        <GlassCard className="p-4">
           <div className="flex items-center justify-between">
-            <IconBox tone="gold"><TrendingUp size={18} /></IconBox>
+            <IconBox><TrendingUp size={18} /></IconBox>
             <span className="text-xs font-semibold text-success">+12%</span>
           </div>
           <p className="mt-3 text-xs uppercase tracking-wide text-muted">Günlük Kazanç</p>
           <p className="text-2xl font-bold">₺250</p>
         </GlassCard>
-        <GlassCard className="p-4">
-          <div className="flex items-center justify-between">
-            <IconBox><Radio size={18} /></IconBox>
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-primary"><span className="live-dot" /> CANLI</span>
-          </div>
-          <p className="mt-3 text-xs uppercase tracking-wide text-muted">Aktif Oda</p>
-          <p className="text-2xl font-bold">4 <span className="text-base text-muted">/ 10</span></p>
-        </GlassCard>
       </div>
 
-      {/* Gelen sorular */}
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 font-bold"><MessageSquare size={18} className="text-primary" /> Gelen Sorular</h2>
@@ -57,7 +77,6 @@ export default function TeacherPanel() {
         </div>
       </section>
 
-      {/* Profil gücü */}
       <GlassCard className="p-5">
         <div className="mb-2 flex items-center justify-between">
           <p className="font-bold">Profil Gücü</p>
@@ -67,7 +86,6 @@ export default function TeacherPanel() {
         <p className="mt-2 text-xs text-muted">Tanıtım videosu ekle (+%15) ve daha çok öğrenciye ulaş.</p>
       </GlassCard>
 
-      {/* Son yorumlar */}
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-bold">Son Yorumlar</h2>
@@ -83,7 +101,6 @@ export default function TeacherPanel() {
         </div>
       </section>
 
-      {/* Pro yükseltme */}
       <GlassCard className="gold-card p-5">
         <div className="flex items-center gap-3">
           <IconBox tone="gold"><Crown size={20} /></IconBox>

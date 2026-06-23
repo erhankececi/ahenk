@@ -1,36 +1,45 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { Button, GlassCard, LiveBadge, Avatar, Stars, IconBox } from "@/components/ui";
 import { ROOMS, RECENT_ANSWERS, TEACHERS } from "@/lib/mock";
 import Link from "next/link";
 import { Camera, Coins, Crown, Users, ArrowRight, CheckCircle2, TrendingUp } from "lucide-react";
 
-export default function StudentDashboard() {
+export const dynamic = "force-dynamic";
+
+export default async function StudentDashboard() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+  const { data: sp } = await supabase.from("student_profiles").select("coin_balance").eq("user_id", user.id).maybeSingle();
+  const firstName = (profile?.full_name || "Öğrenci").split(" ")[0];
+  const coins = sp?.coin_balance ?? 0;
+
   const activeRooms = ROOMS.filter((r) => r.status === "canli").slice(0, 3);
   const recommended = TEACHERS.filter((t) => t.kind === "ogretmen").slice(0, 3);
 
   return (
     <div className="space-y-6 pb-4">
-      {/* Hoş geldin */}
       <div>
-        <p className="text-sm text-muted">Hoş geldin 👋</p>
+        <p className="text-sm text-muted">Hoş geldin, {firstName} 👋</p>
         <h1 className="text-2xl font-bold">Bugün neye çalışıyoruz?</h1>
       </div>
 
-      {/* Jeton bakiyesi */}
       <GlassCard className="flex items-center justify-between p-5">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted">Jeton Bakiyen</p>
-          <p className="mt-1 flex items-center gap-2 text-3xl font-bold text-gold"><Coins size={24} /> 1.250</p>
+          <p className="mt-1 flex items-center gap-2 text-3xl font-bold text-gold"><Coins size={24} /> {coins.toLocaleString("tr-TR")}</p>
         </div>
         <Button href="/cuzdan" variant="glass" size="sm">Jeton Al</Button>
       </GlassCard>
 
-      {/* Soru sor CTA */}
       <Link href="/soru-sor" className="btn-primary flex items-center justify-between rounded-2xl px-5 py-4">
         <span className="flex items-center gap-3 font-bold"><Camera size={22} /> Fotoğrafla Soru Sor</span>
         <ArrowRight size={20} />
       </Link>
 
-      {/* Aktif canlı odalar */}
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-bold">Aktif Canlı Odalar</h2>
@@ -53,7 +62,6 @@ export default function StudentDashboard() {
         </div>
       </section>
 
-      {/* Son cevaplar */}
       <section>
         <h2 className="mb-3 font-bold">Son Cevaplar</h2>
         <div className="space-y-2">
@@ -70,7 +78,6 @@ export default function StudentDashboard() {
         </div>
       </section>
 
-      {/* Önerilen öğretmenler */}
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-bold">Önerilen Öğretmenler</h2>
@@ -89,7 +96,6 @@ export default function StudentDashboard() {
         </div>
       </section>
 
-      {/* Premium yükseltme */}
       <GlassCard className="gold-card p-5">
         <div className="flex items-center gap-3">
           <IconBox tone="gold"><Crown size={20} /></IconBox>

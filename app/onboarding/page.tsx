@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui";
+import { createClient } from "@/lib/supabase/client";
 import { EXAMS, SUBJECTS } from "@/lib/mock";
 import { GraduationCap, Presentation, Compass, Check, Clock, ArrowRight } from "lucide-react";
 
@@ -11,9 +12,12 @@ type Role = "ogrenci" | "ogretmen" | "koc";
 
 function OnboardingInner() {
   const router = useRouter();
+  const supabase = createClient();
   const preset = useSearchParams().get("rol") as Role | null;
   const [role, setRole] = useState<Role | null>(preset && ["ogrenci", "ogretmen", "koc"].includes(preset) ? preset : null);
   const [step, setStep] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
 
   // öğrenci
   const [exam, setExam] = useState("");
@@ -26,11 +30,44 @@ function OnboardingInner() {
   const [services, setServices] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
 
-  function finish(r: Role) {
-    localStorage.setItem("ahenk_role", r);
-  }
   function toggle(arr: string[], set: (v: string[]) => void, val: string) {
     set(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
+  }
+
+  async function getUid(): Promise<string | null> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { router.push("/login"); return null; }
+    return user.id;
+  }
+
+  async function saveStudent(): Promise<boolean> {
+    setErr(""); setSaving(true);
+    const uid = await getUid();
+    if (!uid) { setSaving(false); return false; }
+    const { error: e1 } = await supabase.from("profiles").update({ role: "student", onboarded: true }).eq("id", uid);
+    const { error: e2 } = await supabase.from("student_profiles").upsert(
+      { user_id: uid, exam_type: exam || null, grade_level: grade || null, subjects },
+      { onConflict: "user_id" },
+    );
+    setSaving(false);
+    if (e1 || e2) { setErr("Bilgiler kaydedilemedi, lütfen tekrar dene."); return false; }
+    try { localStorage.setItem("ahenk_role", "ogrenci"); } catch {}
+    return true;
+  }
+
+  async function saveApplicant(): Promise<boolean> {
+    setErr(""); setSaving(true);
+    const uid = await getUid();
+    if (!uid) { setSaving(false); return false; }
+    const isKoc = role === "koc";
+    const { error: e1 } = await supabase.from("profiles").update({ role: isKoc ? "coach" : "teacher", onboarded: true }).eq("id", uid);
+    const { error: e2 } = isKoc
+      ? await supabase.from("coach_profiles").upsert({ user_id: uid, expertise: [branch, ...services].filter(Boolean), bio, status: "pending" }, { onConflict: "user_id" })
+      : await supabase.from("teacher_profiles").upsert({ user_id: uid, branch, experience_years: years ? parseInt(years, 10) : null, bio, status: "pending" }, { onConflict: "user_id" });
+    setSaving(false);
+    if (e1 || e2) { setErr("Başvuru kaydedilemedi, lütfen tekrar dene."); return false; }
+    try { localStorage.setItem("ahenk_role", isKoc ? "koc" : "ogretmen"); } catch {}
+    return true;
   }
 
   // ---- ROL SEÇİMİ ----
@@ -58,18 +95,17 @@ function OnboardingInner() {
     );
   }
 
-  // ---- BAŞVURU BEKLEMEDE (öğretmen/koç) ----
+  // ---- BAŞVURU BEKLEMEDE ----
   if (pending) {
-    const r = role;
     return (
       <Shell title="Başvurun alındı" desc="Ekibimiz başvurunu inceliyor.">
         <div className="glass-card rounded-2xl p-7 text-center">
           <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/12 text-gold"><Clock size={30} /></span>
           <h3 className="mt-4 text-lg font-bold">Başvuru Beklemede</h3>
           <p className="mt-2 text-sm text-muted">
-            {role === "koc" ? "Koçluk" : "Öğretmenlik"} başvurun değerlendirme aşamasında. Onaylandığında panelin aktifleşecek; o zamana kadar paneli önizleyebilirsin.
+            {role === "koc" ? "Koçluk" : "Öğretmenlik"} başvurun değerlendirme aşamasında. Onaylandığında panelin tam aktifleşecek; o zamana kadar paneli önizleyebilirsin.
           </p>
-          <Button size="lg" className="mt-6 w-full" onClick={() => { finish(r); router.push(r === "koc" ? "/koc" : "/ogretmen"); }}>
+          <Button size="lg" className="mt-6 w-full" onClick={() => router.push(role === "koc" ? "/koc" : "/ogretmen")}>
             Paneli Önizle <ArrowRight size={18} />
           </Button>
         </div>
@@ -96,8 +132,9 @@ function OnboardingInner() {
         {step === 2 && (
           <Step title="İlgilendiğin dersler?">
             <Chips>{SUBJECTS.map((s) => <Chip key={s} active={subjects.includes(s)} onClick={() => toggle(subjects, setSubjects, s)}>{s}</Chip>)}</Chips>
-            <Button size="lg" className="mt-7 w-full" disabled={subjects.length === 0} onClick={() => { finish("ogrenci"); router.push("/ogrenci"); }}>
-              Panele Git <ArrowRight size={18} />
+            {err && <Err>{err}</Err>}
+            <Button size="lg" className="mt-7 w-full" disabled={subjects.length === 0 || saving} onClick={async () => { if (await saveStudent()) router.push("/ogrenci"); }}>
+              {saving ? "Kaydediliyor…" : <>Panele Git <ArrowRight size={18} /></>}
             </Button>
           </Step>
         )}
@@ -115,7 +152,7 @@ function OnboardingInner() {
         </Labeled>
         {!isKoc ? (
           <Labeled label="Deneyim yılın">
-            <input value={years} onChange={(e) => setYears(e.target.value)} type="number" placeholder="Örn. 8" className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-[15px] outline-none focus:border-primary/50" />
+            <input value={years} onChange={(e) => setYears(e.target.value)} type="number" min={0} placeholder="Örn. 8" className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-[15px] outline-none focus:border-primary/50" />
           </Labeled>
         ) : (
           <Labeled label="Hizmetlerin">
@@ -125,15 +162,16 @@ function OnboardingInner() {
         <Labeled label="Kısa profil açıklaması">
           <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} placeholder="Kendini ve yaklaşımını kısaca anlat…" className="w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-[15px] outline-none focus:border-primary/50" />
         </Labeled>
-        <Button size="lg" className="mt-2 w-full" disabled={!branch} onClick={() => setPending(true)}>
-          Başvuruyu Gönder <ArrowRight size={18} />
+        {err && <Err>{err}</Err>}
+        <Button size="lg" className="mt-2 w-full" disabled={!branch || saving} onClick={async () => { if (await saveApplicant()) setPending(true); }}>
+          {saving ? "Gönderiliyor…" : <>Başvuruyu Gönder <ArrowRight size={18} /></>}
         </Button>
       </div>
     </Shell>
   );
 }
 
-/* ---------- küçük yapı taşları ---------- */
+/* ---------- yapı taşları ---------- */
 function Shell({ title, desc, children, onBack }: { title: string; desc?: string; children: React.ReactNode; onBack?: () => void }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
@@ -175,6 +213,9 @@ function Labeled({ label, children }: { label: string; children: React.ReactNode
 }
 function Next({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
   return <Button size="lg" className="mt-7 w-full" disabled={disabled} onClick={onClick}>Devam Et <ArrowRight size={18} /></Button>;
+}
+function Err({ children }: { children: React.ReactNode }) {
+  return <p className="mt-4 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">{children}</p>;
 }
 
 export default function Onboarding() {
