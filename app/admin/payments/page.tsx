@@ -8,7 +8,13 @@ import { ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-const STATUS: Record<string, string> = { pending: "text-gold", paid: "text-success", failed: "text-danger", canceled: "text-muted", refunded: "text-secondary" };
+const STATUS: Record<string, { l: string; c: string }> = {
+  pending: { l: "Bekliyor", c: "text-gold" },
+  paid: { l: "Ödendi", c: "text-success" },
+  failed: { l: "Başarısız", c: "text-danger" },
+  canceled: { l: "İptal", c: "text-muted" },
+  refunded: { l: "İade", c: "text-secondary" },
+};
 
 export default async function AdminPayments() {
   const supabase = createClient();
@@ -45,7 +51,7 @@ export default async function AdminPayments() {
                 <p className="text-xs text-muted">{shortDate(o.created_at)} · {o.amount_try} TL · {o.provider_payment_id || "—"}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`text-xs font-bold ${STATUS[o.status] ?? "text-muted"}`}>{o.status}</span>
+                {(() => { const st = STATUS[o.status] ?? { l: o.status, c: "text-muted" }; return <span className={`text-xs font-bold ${st.c}`}>{st.l}</span>; })()}
                 <button className="rounded-lg border border-line px-2.5 py-1 text-xs text-muted">Detay</button>
               </div>
             </GlassCard>

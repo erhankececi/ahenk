@@ -15,5 +15,5 @@ export const TEACHER_NAV: NavItem[] = [
   { href: "/odalarim", label: "Odalarım", icon: Video },
   { href: "/odalarim", label: "Oda Aç", icon: Plus, center: true },
   { href: "/gelen-sorular", label: "Sorular", icon: MessageSquare },
-  { href: "/kazanc", label: "Kazanç", icon: Wallet },
+  { href: "/cuzdan", label: "Kazanç", icon: Wallet },
 ];

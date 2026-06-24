@@ -8,7 +8,12 @@ import { ArrowLeft, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-const ST: Record<string, string> = { live: "text-success", scheduled: "text-gold", ended: "text-muted", canceled: "text-danger" };
+const ST: Record<string, { l: string; c: string }> = {
+  live: { l: "Canlı", c: "text-success" },
+  scheduled: { l: "Planlandı", c: "text-gold" },
+  ended: { l: "Bitti", c: "text-muted" },
+  canceled: { l: "İptal", c: "text-danger" },
+};
 
 export default async function AdminRooms() {
   const supabase = createClient();
@@ -46,7 +51,7 @@ export default async function AdminRooms() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1 text-xs text-muted"><Users size={13} /> {r.participant_count}</span>
-                <span className={`text-xs font-bold ${ST[r.status] ?? "text-muted"}`}>{r.status}</span>
+                {(() => { const st = ST[r.status] ?? { l: r.status, c: "text-muted" }; return <span className={`text-xs font-bold ${st.c}`}>{st.l}</span>; })()}
                 <button className="rounded-lg border border-line px-2.5 py-1 text-xs text-muted">Detay</button>
               </div>
             </GlassCard>

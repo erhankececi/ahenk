@@ -2,15 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { JetonPill } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 import { STUDENT_NAV, TEACHER_NAV, type NavItem } from "@/lib/nav";
 
+const TEACHER_ONLY = ["/ogretmen", "/koc", "/gelen-sorular", "/odalarim"];
+const STUDENT_ONLY = ["/ogrenci", "/soru-sor", "/sorularim"];
+
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const router = useRouter();
   const [role, setRole] = useState<"ogrenci" | "ogretmen" | "koc">("ogrenci");
   const [unread, setUnread] = useState(0);
 
@@ -19,8 +23,25 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
     if (r === "ogretmen" || r === "koc") setRole(r);
     (async () => {
       const supabase = createClient();
-      const { count } = await supabase.from("notifications").select("*", { count: "exact", head: true }).is("read_at", null);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const [{ count }, { data: prof }] = await Promise.all([
+        supabase.from("notifications").select("*", { count: "exact", head: true }).is("read_at", null),
+        supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+      ]);
       setUnread(count ?? 0);
+
+      // Nav rolünü DB ile eşitle (localStorage eski/eksikse düzeltir)
+      const dbRole = prof?.role;
+      if (dbRole === "teacher") setRole("ogretmen");
+      else if (dbRole === "coach") setRole("koc");
+      else if (dbRole === "student") setRole("ogrenci");
+
+      // Basit rol yönlendirmesi — RLS/RPC güvenliğini değiştirmez, sadece UX.
+      const onTeacherOnly = TEACHER_ONLY.some((p) => path === p || path.startsWith(p + "/"));
+      const onStudentOnly = STUDENT_ONLY.some((p) => path === p || path.startsWith(p + "/"));
+      if (dbRole === "student" && onTeacherOnly) router.replace("/ogrenci");
+      else if ((dbRole === "teacher" || dbRole === "coach") && onStudentOnly) router.replace(dbRole === "coach" ? "/koc" : "/ogretmen");
     })();
   }, [path]);
 

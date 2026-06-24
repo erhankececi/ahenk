@@ -28,6 +28,9 @@ export default async function Wallet() {
     if (role === "teacher") {
       const { data } = await supabase.from("teacher_profiles").select("coin_balance").eq("user_id", user.id).maybeSingle();
       coins = data?.coin_balance ?? 0;
+    } else {
+      const { data } = await supabase.from("coach_profiles").select("coin_balance").eq("user_id", user.id).maybeSingle();
+      coins = data?.coin_balance ?? 0;
     }
     const { data: txs } = await supabase.from("coin_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12);
     return (

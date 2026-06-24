@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { GlassCard, Button, IconBox, Progress, Stars } from "@/components/ui";
-import { INCOMING_QUESTIONS, REVIEWS } from "@/lib/mock";
 import Link from "next/link";
-import { Video, TrendingUp, Coins, MessageSquare, Crown, ArrowUpRight, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { GlassCard, Button, IconBox } from "@/components/ui";
+import { QuestionCard } from "@/components/QuestionCard";
+import { Video, Coins, MessageSquare, Crown, ArrowUpRight, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +19,22 @@ export default async function TeacherPanel() {
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
-  const { data: tp } = await supabase.from("teacher_profiles").select("status, coin_balance").eq("user_id", user.id).maybeSingle();
+  const { data: tp } = await supabase.from("teacher_profiles").select("status, coin_balance, answered_questions").eq("user_id", user.id).maybeSingle();
+  const { data: qs } = await supabase
+    .from("questions")
+    .select("id, subject, title, status, priority, teacher_id, claimed_by, created_at")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
   const firstName = (profile?.full_name || "Öğretmen").split(" ")[0];
   const status = (tp?.status as keyof typeof STATUS) || "pending";
   const coins = tp?.coin_balance ?? 0;
+  const answered = tp?.answered_questions ?? 0;
   const s = STATUS[status] ?? STATUS.pending;
+
+  const incoming = (qs || [])
+    .filter((q: any) => (q.status === "open" && !q.teacher_id) || (q.status === "assigned" && (q.teacher_id === user.id || q.claimed_by === user.id)))
+    .slice(0, 3);
 
   return (
     <div className="space-y-5 pb-4">
@@ -40,19 +51,20 @@ export default async function TeacherPanel() {
       <Button href="/odalarim" size="lg" className="w-full"><Video size={18} /> Canlı Oda Aç</Button>
 
       <div className="grid grid-cols-2 gap-3">
-        <GlassCard className="p-4">
-          <IconBox tone="gold"><Coins size={18} /></IconBox>
-          <p className="mt-3 text-xs uppercase tracking-wide text-muted">Jeton Bakiyesi</p>
-          <p className="text-2xl font-bold">{coins.toLocaleString("tr-TR")}</p>
-        </GlassCard>
-        <GlassCard className="p-4">
-          <div className="flex items-center justify-between">
-            <IconBox><TrendingUp size={18} /></IconBox>
-            <span className="text-xs font-semibold text-success">+12%</span>
-          </div>
-          <p className="mt-3 text-xs uppercase tracking-wide text-muted">Günlük Kazanç</p>
-          <p className="text-2xl font-bold">₺250</p>
-        </GlassCard>
+        <Link href="/cuzdan" className="block">
+          <GlassCard className="p-4 transition hover:border-primary/30">
+            <IconBox tone="gold"><Coins size={18} /></IconBox>
+            <p className="mt-3 text-xs uppercase tracking-wide text-muted">Jeton Bakiyesi</p>
+            <p className="text-2xl font-bold">{coins.toLocaleString("tr-TR")}</p>
+          </GlassCard>
+        </Link>
+        <Link href="/gelen-sorular" className="block">
+          <GlassCard className="p-4 transition hover:border-primary/30">
+            <IconBox><CheckCircle2 size={18} /></IconBox>
+            <p className="mt-3 text-xs uppercase tracking-wide text-muted">Cevapladığın Soru</p>
+            <p className="text-2xl font-bold">{answered.toLocaleString("tr-TR")}</p>
+          </GlassCard>
+        </Link>
       </div>
 
       <section>
@@ -60,46 +72,20 @@ export default async function TeacherPanel() {
           <h2 className="flex items-center gap-2 font-bold"><MessageSquare size={18} className="text-primary" /> Gelen Sorular</h2>
           <Link href="/gelen-sorular" className="text-sm text-primary">Tümünü Gör</Link>
         </div>
-        <div className="space-y-3">
-          {INCOMING_QUESTIONS.slice(0, 2).map((q) => (
-            <GlassCard key={q.id} className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-secondary">{q.subject} · {q.title}</span>
-                {q.priority && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold">ÖNCELİKLİ</span>}
-              </div>
-              <p className="mt-1.5 text-sm text-muted">{q.desc}</p>
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" className="flex-1">Odada Cevapla</Button>
-                <Button size="sm" variant="glass" className="flex-1">Metinle Cevapla</Button>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
+        {incoming.length === 0 ? (
+          <GlassCard className="p-6 text-center text-sm text-muted">Henüz gelen sorun yok. Havuza yeni soru düştükçe burada görünür.</GlassCard>
+        ) : (
+          <div className="space-y-3">
+            {incoming.map((q: any) => <QuestionCard key={q.id} q={q} href={`/gelen-sorular/${q.id}`} />)}
+          </div>
+        )}
       </section>
 
-      <GlassCard className="p-5">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="font-bold">Profil Gücü</p>
-          <span className="text-sm font-bold text-primary">%75</span>
-        </div>
-        <Progress value={75} />
-        <p className="mt-2 text-xs text-muted">Tanıtım videosu ekle (+%15) ve daha çok öğrenciye ulaş.</p>
-      </GlassCard>
-
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-bold">Son Yorumlar</h2>
-          <Stars rating={4.9} />
-        </div>
-        <div className="space-y-3">
-          {REVIEWS.map((r) => (
-            <GlassCard key={r.id} className="p-4">
-              <p className="text-sm italic text-text/90">“{r.text}”</p>
-              <p className="mt-2 text-xs text-muted">— {r.author}</p>
-            </GlassCard>
-          ))}
-        </div>
-      </section>
+      {coins === 0 && answered === 0 && (
+        <GlassCard className="p-5 text-center text-sm text-muted">
+          Kazançların, cevapladığın sorular ve jetonlu odalardan sonra burada birikecek.
+        </GlassCard>
+      )}
 
       <GlassCard className="gold-card p-5">
         <div className="flex items-center gap-3">

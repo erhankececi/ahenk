@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Button, GlassCard, LiveBadge, SectionTitle, Avatar, Stars, IconBox } from "@/components/ui";
+import { createClient } from "@/lib/supabase/server";
 import { ROOMS, TEACHERS, STATS, FAQS } from "@/lib/mock";
 import {
   Video, Camera, Users, Coins, Crown, Wallet, ChevronDown, ArrowRight, Zap, ShieldCheck, Clock, GraduationCap,
 } from "lucide-react";
 
-export default function Landing() {
+export const dynamic = "force-dynamic";
+
+export default async function Landing() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const authed = !!user;
+  const roomsHref = authed ? "/odalar" : "/register";
+  const askHref = authed ? "/soru-sor" : "/register";
+  const premiumHref = authed ? "/premium" : "/register";
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
       {/* Üst bar */}
@@ -31,8 +40,8 @@ export default function Landing() {
             Canlı odalara katıl, öğretmenlere soru sor, sınav koçluğu al ve öğrenme sürecini tek platformdan yönet.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button href="/register" size="lg">Hemen Başla <ArrowRight size={18} /></Button>
-            <Button href="/odalar" variant="glass" size="lg"><Video size={18} /> Canlı Odaları Gör</Button>
+            <Button href="/register" size="lg">Ücretsiz Başla <ArrowRight size={18} /></Button>
+            <Button href={roomsHref} variant="glass" size="lg"><Video size={18} /> {authed ? "Canlı Odaları Gör" : "Kayıt Ol ve Odaları Gör"}</Button>
             <Button href="/register?rol=ogretmen" variant="ghost" size="lg"><GraduationCap size={18} /> Öğretmen Ol</Button>
           </div>
         </div>
@@ -83,7 +92,7 @@ export default function Landing() {
           <p className="mt-2 text-[15px] leading-relaxed text-muted">
             Sıra sıra beklemene gerek yok. Çözemediğin sorunun fotoğrafını gönder, uzman öğretmenlerden adım adım çözüm al.
           </p>
-          <Button href="/soru-sor" variant="glass" size="sm" className="mt-5"><Camera size={16} /> Soru Yükle</Button>
+          <Button href={askHref} variant="glass" size="sm" className="mt-5"><Camera size={16} /> {authed ? "Soru Yükle" : "Soru Sormaya Başla"}</Button>
         </GlassCard>
 
         <GlassCard className="p-7">
@@ -114,7 +123,7 @@ export default function Landing() {
           <IconBox tone="gold"><Crown size={20} /></IconBox>
           <h3 className="mt-4 text-xl font-bold text-premium">Öğrenci Premium</h3>
           <p className="mt-2 text-[15px] leading-relaxed text-muted">Sınırsız soru çözümü, öncelikli erişim, koçluk indirimi ve reklamsız deneyim.</p>
-          <Button href="/premium" variant="gold" size="sm" className="mt-5">Premium'a Geç</Button>
+          <Button href={premiumHref} variant="gold" size="sm" className="mt-5">Premium'a Geç</Button>
         </GlassCard>
 
         <GlassCard className="p-7">
@@ -163,7 +172,7 @@ export default function Landing() {
           <h2 className="text-2xl font-bold sm:text-3xl">Öğrenme yolculuğun bugün başlasın.</h2>
           <p className="mx-auto mt-2 max-w-lg text-muted">Ücretsiz hesabını oluştur, ilk canlı odana katıl.</p>
           <div className="mt-6 flex justify-center gap-3">
-            <Button href="/register" size="lg">Hemen Başla <ArrowRight size={18} /></Button>
+            <Button href="/register" size="lg">Ücretsiz Başla <ArrowRight size={18} /></Button>
           </div>
         </GlassCard>
       </section>
@@ -178,9 +187,9 @@ export default function Landing() {
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Platform</p>
             <ul className="space-y-2 text-sm text-muted">
-              <li><Link href="/odalar" className="hover:text-text">Canlı Odalar</Link></li>
-              <li><Link href="/soru-sor" className="hover:text-text">Soru Çözüm</Link></li>
-              <li><Link href="/premium" className="hover:text-text">Öğrenci Premium</Link></li>
+              <li><Link href={roomsHref} className="hover:text-text">Canlı Odalar</Link></li>
+              <li><Link href={askHref} className="hover:text-text">Soru Çözüm</Link></li>
+              <li><Link href={premiumHref} className="hover:text-text">Öğrenci Premium</Link></li>
             </ul>
           </div>
           <div>
