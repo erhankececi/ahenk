@@ -9,11 +9,6 @@ create or replace function public.set_updated_at()
 returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end; $$;
 
-create or replace function public.is_admin()
-returns boolean language sql security definer set search_path = public as $$
-  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
-$$;
-
 -- ---------- tablolar ----------
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -64,6 +59,12 @@ create table if not exists public.coach_profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- ---------- yönetici kontrolü (profiles tablosu oluştuktan SONRA tanımlanır) ----------
+create or replace function public.is_admin()
+returns boolean language sql security definer set search_path = public as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+$$;
 
 -- ---------- updated_at tetikleyicileri ----------
 create trigger trg_profiles_updated before update on public.profiles for each row execute function public.set_updated_at();
