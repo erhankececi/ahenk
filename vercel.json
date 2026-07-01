@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm pkg delete dependencies.@capacitor/android dependencies.@capacitor/cli dependencies.@capacitor/ios && npm install --no-audit --no-fund",
+  "installCommand": "npm pkg delete dependencies.@capacitor/android dependencies.@capacitor/ios && npm install --no-audit --no-fund",
   "crons": [
     { "path": "/api/cron/daily-reminder", "schedule": "0 17 * * *" }
   ]
