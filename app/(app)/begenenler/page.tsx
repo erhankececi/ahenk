@@ -28,7 +28,7 @@ export default async function Begenenler() {
   const { count, people } = await getIncomingLikes(user!.id);
 
   return (
-    <div className="min-h-dvh px-4 pb-24 pt-6">
+    <div className="min-h-dvh px-4 pb-24 pt-6 lg:mx-auto lg:max-w-7xl lg:px-0 lg:pb-10">
       <div className="mb-5 flex items-center gap-3">
         <BackButton fallback="/eslesmeler" />
         <div>
@@ -58,16 +58,16 @@ export default async function Begenenler() {
           </Link>
         </div>
       ) : premium ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
           {people.map((p) => (
-            <div key={p.id} className="lp-panel rounded-3xl p-4 text-center">
+            <div key={p.id} className="lp-panel rounded-3xl p-4 text-center lg:p-5">
               <Link href={`/u/${p.id}`} className="block">
                 <div className={`mx-auto w-fit rounded-full ${tierFrame(p.tier)}`}>
-                  <div className="lp-monogram flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold">
+                  <div className="lp-monogram flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold lg:h-20 lg:w-20 lg:text-3xl">
                     {p.name?.[0]?.toUpperCase() || "?"}
                   </div>
                 </div>
-                <p className={`mt-2.5 flex items-center justify-center gap-1 font-semibold ${tierName(p.tier)}`}>
+                <p className={`mt-2.5 flex items-center justify-center gap-1 font-semibold ${tierName(p.tier)} lg:text-[15px]`}>
                   <span className="truncate">{p.name}{p.age ? `, ${p.age}` : ""}</span>
                   {p.is_verified && <BadgeCheck size={14} className="shrink-0 text-brand" />}
                 </p>
@@ -105,10 +105,10 @@ function FreeGate({ count, t }: { count: number; t: AppDict["begenenler"] }) {
   return (
     <div>
       <div className="relative">
-        <div className="grid grid-cols-2 gap-3" aria-hidden>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4" aria-hidden>
           {Array.from({ length: tiles }).map((_, idx) => (
-            <div key={idx} className="rounded-3xl border border-border bg-surface p-4 text-center">
-              <div className="mx-auto h-16 w-16 rounded-full bg-elevated blur-[2px]" />
+            <div key={idx} className="rounded-3xl border border-border bg-surface p-4 text-center lg:p-5">
+              <div className="mx-auto h-16 w-16 rounded-full bg-elevated blur-[2px] lg:h-20 lg:w-20" />
               <div className="mx-auto mt-3 h-3.5 w-20 rounded-full bg-elevated blur-[2px]" />
               <div className="mx-auto mt-2 h-3 w-14 rounded-full bg-elevated blur-[2px]" />
               <div className="mt-3 h-8 w-full rounded-full bg-elevated blur-[2px]" />
@@ -118,7 +118,7 @@ function FreeGate({ count, t }: { count: number; t: AppDict["begenenler"] }) {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg" />
       </div>
 
-      <div className="lp-panel mt-5 rounded-3xl p-6 text-center">
+      <div className="lp-panel mt-5 rounded-3xl p-6 text-center lg:mx-auto lg:max-w-md lg:p-8">
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
           <Lock size={20} className="text-accent" />
         </div>

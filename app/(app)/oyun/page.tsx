@@ -242,11 +242,11 @@ export default function Oyun() {
     const seatData = (seat: number) => (game?.seats || []).find((s) => s.seat === seat);
 
     return (
-      <div className="min-h-dvh px-3 pb-28 pt-4">
-        <header className="mb-3 flex items-center justify-between px-1">
+      <div className="min-h-dvh px-3 pb-28 pt-4 lg:mx-auto lg:max-w-6xl lg:px-0">
+        <header className="mb-3 flex items-center justify-between px-1 lg:px-0">
           <div className="min-w-0">
-            <h1 className="truncate font-display text-lg font-bold tracking-tight">{room.name}</h1>
-            <p className="text-xs text-muted">101 · {room.seated}/{room.capacity} · {room.kind === "vip" ? "VIP" : room.kind === "sifreli" ? "Şifreli" : "Açık"}</p>
+            <h1 className="truncate font-display text-lg font-bold tracking-tight lg:text-2xl">{room.name}</h1>
+            <p className="text-xs text-muted lg:text-sm">101 · {room.seated}/{room.capacity} · {room.kind === "vip" ? "VIP" : room.kind === "sifreli" ? "Şifreli" : "Açık"}</p>
           </div>
           <div className="flex items-center gap-2">
             {room.voice && (voiceOn ? (
@@ -260,12 +260,14 @@ export default function Oyun() {
           </div>
         </header>
 
+        <div className="lg:flex lg:items-start lg:gap-5">
+        <div className="lg:min-w-0 lg:flex-1">
         {/* ÇUHA MASA */}
         <div
-          className="relative mb-4 h-[340px] overflow-hidden rounded-[44px] border-[6px] border-[#1a140c] shadow-float"
+          className="relative mb-4 h-[340px] overflow-hidden rounded-[44px] border-[6px] border-[#1a140c] shadow-float lg:h-[420px] lg:rounded-[56px] lg:border-[8px]"
           style={{ background: "radial-gradient(120% 90% at 50% 38%, #1f5a3e 0%, #15402c 55%, #0e2c1e 100%)" }}
         >
-          <div className="pointer-events-none absolute inset-3 rounded-[36px] ring-1 ring-accent/20" />
+          <div className="pointer-events-none absolute inset-3 rounded-[36px] ring-1 ring-accent/20 lg:inset-4 lg:rounded-[46px]" />
 
           {/* rakipler */}
           {opps.map((p, i) => {
@@ -386,6 +388,60 @@ export default function Oyun() {
           </>
         )}
         {warn && <p className="mt-2 text-center text-xs text-error">{warn}</p>}
+        </div>
+
+        {/* Masaüstü yan panel: skor / masa bilgisi / liderlik */}
+        <aside className="hidden shrink-0 lg:block lg:w-[300px]">
+          <div className="sticky top-4 space-y-4">
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Masa Bilgisi</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Tür</span>
+                  <span className="font-medium text-text">{room.kind === "vip" ? "VIP" : room.kind === "sifreli" ? "Şifreli" : "Açık"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Oyuncular</span>
+                  <span className="font-medium text-text">{room.seated}/{room.capacity}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Masa sahibi</span>
+                  <span className="font-medium text-text">{room.host}</span>
+                </div>
+                {started && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted">Deste</span>
+                    <span className="font-medium text-text">{game!.deckCount}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted"><Trophy size={13} className="text-accent" /> Skor Tablosu</p>
+              <div className="space-y-2.5">
+                {room.players.length === 0 ? (
+                  <p className="text-sm text-muted">Masada henüz oyuncu yok.</p>
+                ) : (
+                  room.players.slice().sort((a, b) => a.seat - b.seat).map((p) => (
+                    <div key={p.seat} className={`flex items-center justify-between rounded-xl px-2.5 py-2 text-sm ${started && game!.turn === p.seat ? "bg-accent/10 text-accent" : "text-text"}`}>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand/50 to-accent/40 text-[11px] font-bold text-white">{p.name[0]?.toUpperCase()}</span>
+                        <span className="truncate">{p.me ? "Sen" : p.name}</span>
+                      </span>
+                      <span className="shrink-0 text-xs text-muted">{seatData(p.seat)?.handCount ?? "-"} taş</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <Link href="/liderlik" className="flex items-center justify-center gap-2 rounded-2xl border border-border py-3 text-sm font-semibold text-text transition hover:border-accent/50">
+              <Trophy size={16} className="text-accent" /> Genel liderlik tablosu
+            </Link>
+          </div>
+        </aside>
+        </div>
 
         {/* Oyuncu aksiyonları (avatara dokununca) */}
         {actionFor && (
@@ -409,18 +465,18 @@ export default function Oyun() {
 
   // ---- LOBİ ----
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:mx-auto lg:max-w-6xl lg:px-0">
       <header className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{to.eyebrow}</p>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text">
+          <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">
             <Gamepad2 size={22} className="text-accent" /> {to.title}
           </h1>
         </div>
         <Link href="/liderlik" className="text-muted transition hover:text-text" aria-label={to.leaderboard}><Trophy size={20} strokeWidth={1.7} /></Link>
       </header>
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex gap-2 lg:max-w-md">
         <button onClick={() => setComposing(true)} className="brand-gradient flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 font-semibold">
           <Plus size={18} /> {to.createTable}
         </button>
@@ -431,7 +487,7 @@ export default function Oyun() {
       {warn && <p className="mb-2 text-center text-xs text-error">{warn}</p>}
 
       {loading ? (
-        <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="shimmer h-20 rounded-2xl" />)}</div>
+        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">{[0, 1, 2].map((i) => <div key={i} className="shimmer h-20 rounded-2xl" />)}</div>
       ) : tables.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
           <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent"><Gamepad2 size={26} strokeWidth={1.6} /></span>
@@ -439,7 +495,7 @@ export default function Oyun() {
           <p className="mt-1.5 text-sm text-muted">{to.emptyDesc}</p>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
           {tables.map((t) => (
             <div key={t.id} className="lp-panel-hover flex items-center gap-3 rounded-2xl p-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-[#0E0D10]">

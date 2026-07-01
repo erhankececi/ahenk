@@ -110,22 +110,22 @@ export default function Etkinlikler() {
   }
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <header className="mb-4 flex items-center justify-between">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:mx-auto lg:max-w-7xl lg:px-8 lg:pb-16 lg:pt-10">
+      <header className="mb-4 flex items-center justify-between lg:mb-8">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">{te.title}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">{te.title}</h1>
         </div>
         <button
           onClick={() => setComposing((v) => !v)}
-          className="lp-cta-gold flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-semibold"
+          className="lp-cta-gold flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-semibold lg:px-5 lg:py-2.5"
         >
           <Plus size={16} /> {te.create}
         </button>
       </header>
 
       {composing && (
-        <div className="lp-panel mb-5 space-y-3 rounded-3xl p-4">
+        <div className="lp-panel mb-5 space-y-3 rounded-3xl p-4 lg:mx-auto lg:mb-8 lg:max-w-2xl lg:p-6">
           {/* Kapak görseli */}
           {cover ? (
             <div className="relative overflow-hidden rounded-2xl">
@@ -184,7 +184,7 @@ export default function Etkinlikler() {
       )}
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3">
           {[0, 1, 2].map((i) => (
             <div key={i} className="lp-panel rounded-3xl p-4">
               <div className="shimmer h-6 w-2/3 rounded-lg" />
@@ -210,7 +210,7 @@ export default function Etkinlikler() {
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 xl:grid-cols-3">
           {events.map((e) => (
             <div key={e.id} className="lp-panel-hover overflow-hidden rounded-3xl">
               {e.cover && (

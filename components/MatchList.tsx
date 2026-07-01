@@ -21,7 +21,7 @@ export type Row = {
 
 type Tab = "normal" | "archived" | "hidden";
 
-export default function MatchList({ meId, rows }: { meId: string; rows: Row[] }) {
+export default function MatchList({ meId, rows, activeMatchId }: { meId: string; rows: Row[]; activeMatchId?: string }) {
   const supabase = createClient();
   const { t } = useLang();
   const tm = t.mesajlar;
@@ -61,8 +61,13 @@ export default function MatchList({ meId, rows }: { meId: string; rows: Row[] })
   }
 
   function ChatRow({ r, mode }: { r: Row; mode: Tab }) {
+    const active = activeMatchId === r.matchId;
     return (
-      <div className="relative flex items-center gap-1 rounded-2xl border border-transparent transition hover:border-white/10 hover:bg-white/[0.025]">
+      <div
+        className={`relative flex items-center gap-1 rounded-2xl border border-transparent transition hover:border-white/10 hover:bg-white/[0.025] ${
+          active ? "lg:border-accent/30 lg:bg-accent/[0.08]" : ""
+        }`}
+      >
         <Link href={`/sohbet/${r.matchId}`} className="flex min-w-0 flex-1 items-center gap-3 p-3">
           <div className="relative">
             <div className={`rounded-full ${tierFrame(r.tier)}`}>

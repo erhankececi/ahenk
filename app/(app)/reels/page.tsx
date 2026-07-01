@@ -15,9 +15,9 @@ type Reel = {
   reactions: number; comments: number; gifts_off: boolean; comments_off: boolean; mine: boolean;
 };
 
-function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, tr }: {
+function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, onActive, tr }: {
   reel: Reel; muted: boolean; onToggleMute: () => void;
-  onLike: () => void; onComment: () => void; onGift: () => void; tr: AppDict["reels"];
+  onLike: () => void; onComment: () => void; onGift: () => void; onActive?: () => void; tr: AppDict["reels"];
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
@@ -27,12 +27,12 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, tr }: 
     const v = ref.current;
     if (!v) return;
     const io = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting && e.intersectionRatio > 0.6) { v.play().catch(() => {}); setPaused(false); } else v.pause(); },
+      ([e]) => { if (e.isIntersecting && e.intersectionRatio > 0.6) { v.play().catch(() => {}); setPaused(false); onActive?.(); } else v.pause(); },
       { threshold: [0, 0.6, 1] }
     );
     io.observe(v);
     return () => io.disconnect();
-  }, []);
+  }, [onActive]);
 
   function tap() {
     const v = ref.current; if (!v) return;
@@ -40,8 +40,8 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, tr }: 
   }
 
   return (
-    <div className="relative h-[100dvh] w-full shrink-0 snap-start snap-always bg-black">
-      <video ref={ref} src={reel.video} loop playsInline muted={muted} onClick={tap} className="h-full w-full object-cover" />
+    <div className="relative h-[100dvh] w-full shrink-0 snap-start snap-always bg-black lg:mx-auto lg:h-[calc(100dvh-2rem)] lg:max-w-[420px] lg:shrink-0 lg:rounded-3xl lg:my-4">
+      <video ref={ref} src={reel.video} loop playsInline muted={muted} onClick={tap} className="h-full w-full object-cover lg:rounded-3xl" />
       {paused && <div className="pointer-events-none absolute inset-0 flex items-center justify-center"><Play size={60} className="text-white/60" fill="currentColor" strokeWidth={0} /></div>}
 
       {/* sağ aksiyonlar — ince, sessiz */}
@@ -64,7 +64,7 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, tr }: 
       </div>
 
       {/* alt bilgi — sessiz overlay */}
-      <div className="absolute inset-x-0 bottom-20 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 pr-20 pt-12 text-white">
+      <div className="absolute inset-x-0 bottom-20 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 pr-20 pt-12 text-white lg:rounded-b-3xl">
         <Link href={`/u/${reel.user_id}`} className="flex items-center gap-2.5">
           <span className="lp-monogram flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ring-1 ring-white/20">{reel.name[0]?.toUpperCase()}</span>
           <span className="font-semibold">{reel.name}</span>
@@ -75,6 +75,29 @@ function ReelItem({ reel, muted, onToggleMute, onLike, onComment, onGift, tr }: 
   );
 }
 
+function UpNextRow({ reel, active, onClick }: { reel: Reel; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center gap-3 rounded-2xl p-2 text-left transition ${active ? "bg-white/10 ring-1 ring-accent/40" : "hover:bg-white/5"}`}
+    >
+      <span className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-white/10">
+        <video src={reel.video} className="h-full w-full object-cover" muted preload="metadata" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5">
+          <span className="lp-monogram flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ring-1 ring-white/20">{reel.name[0]?.toUpperCase()}</span>
+          <span className="truncate text-sm font-medium text-white/90">{reel.name}</span>
+        </span>
+        {reel.text && <span className="mt-0.5 line-clamp-1 block text-xs text-white/50">{reel.text}</span>}
+      </span>
+      <span className="flex shrink-0 items-center gap-1 text-xs text-white/40">
+        <Heart size={12} strokeWidth={1.8} />{reel.reactions}
+      </span>
+    </button>
+  );
+}
+
 export default function Reels() {
   const tr = useLang().t.reels;
   const [reels, setReels] = useState<Reel[] | null>(null);
@@ -82,8 +105,16 @@ export default function Reels() {
   const [commentsFor, setCommentsFor] = useState<string | null>(null);
   const [giftFor, setGiftFor] = useState<Reel | null>(null);
   const [giftAnim, setGiftAnim] = useState<GiftT | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => { fetch("/api/reels").then((r) => r.json()).then((d) => setReels(d.reels || [])); }, []);
+  useEffect(() => { if (reels && reels.length && !activeId) setActiveId(reels[0].id); }, [reels, activeId]);
+
+  function jumpTo(id: string) {
+    itemRefs.current.get(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function like(id: string) {
     await fetch("/api/moments/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ moment_id: id, type: "begen" }) });
@@ -110,19 +141,34 @@ export default function Reels() {
   }
 
   return (
-    <div className="no-scrollbar -mt-6 h-[100dvh] snap-y snap-mandatory overflow-y-scroll bg-black">
-      {reels.map((r) => (
-        <ReelItem
-          key={r.id}
-          reel={r}
-          muted={muted}
-          onToggleMute={() => setMuted((v) => !v)}
-          onLike={() => like(r.id)}
-          onComment={() => setCommentsFor(r.id)}
-          onGift={() => setGiftFor(r)}
-          tr={tr}
-        />
-      ))}
+    <div className="lg:flex lg:h-[100dvh] lg:items-stretch lg:justify-center lg:gap-6 lg:bg-black lg:px-6">
+      <div ref={scrollRef} className="no-scrollbar -mt-6 h-[100dvh] snap-y snap-mandatory overflow-y-scroll bg-black lg:mt-0 lg:h-[100dvh] lg:shrink-0">
+        {reels.map((r) => (
+          <div key={r.id} ref={(el) => { if (el) itemRefs.current.set(r.id, el); else itemRefs.current.delete(r.id); }}>
+            <ReelItem
+              reel={r}
+              muted={muted}
+              onToggleMute={() => setMuted((v) => !v)}
+              onLike={() => like(r.id)}
+              onComment={() => setCommentsFor(r.id)}
+              onGift={() => setGiftFor(r)}
+              onActive={() => setActiveId(r.id)}
+              tr={tr}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* masaüstü: sıradaki videolar paneli */}
+      <div className="hidden lg:flex lg:my-4 lg:w-[340px] lg:shrink-0 lg:flex-col lg:rounded-3xl lg:border lg:border-white/10 lg:bg-white/[0.03] lg:p-3">
+        <p className="px-1.5 pb-2 pt-1 text-sm font-semibold text-white/70">Sıradaki videolar</p>
+        <div className="no-scrollbar flex-1 space-y-1 overflow-y-auto">
+          {reels.map((r) => (
+            <UpNextRow key={r.id} reel={r} active={r.id === activeId} onClick={() => jumpTo(r.id)} />
+          ))}
+        </div>
+      </div>
+
       {commentsFor && <MomentComments momentId={commentsFor} onClose={() => setCommentsFor(null)} onCount={(d) => setReels((rs) => rs?.map((r) => (r.id === commentsFor ? { ...r, comments: Math.max(0, r.comments + d) } : r)) || null)} />}
       {giftFor && <GiftStore otherName={giftFor.name} onSend={gift} onClose={() => setGiftFor(null)} />}
       {giftAnim && <GiftAnimation gift={giftAnim} fromMe onDone={() => setGiftAnim(null)} />}

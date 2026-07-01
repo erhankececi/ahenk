@@ -95,7 +95,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
       {user && <RecordVisit meId={user.id} targetId={params.id} />}
 
       {/* Header — Stitch: geri · AHENK · güvenlik */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.06] bg-bg/70 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] backdrop-blur-xl">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.06] bg-bg/70 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] backdrop-blur-xl lg:mx-auto lg:max-w-6xl lg:px-0 lg:pt-8">
         <div className="flex w-10 justify-start">
           <BackButton fallback="/kesfet" />
         </div>
@@ -109,71 +109,73 @@ export default async function UserProfile({ params }: { params: { id: string } }
         </div>
       </header>
 
-      {/* Hero — kilitli profil (foto sohbetle netleşir): monogram + onyx/pirinç degrade */}
-      <section className="relative aspect-[3/4] w-full overflow-hidden">
-        <div className="theme-bg absolute inset-0" />
-        <div className="absolute inset-0 grid place-items-center">
-          <span className="select-none font-display text-[200px] font-bold leading-none text-white/[0.06]">{initial}</span>
-        </div>
-        <div className="theme-accent pointer-events-none absolute left-1/2 top-1/3 h-56 w-56 -translate-x-1/2 rounded-full bg-current opacity-[0.08] blur-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/35 to-bg/10" />
-
-        <div className="absolute inset-x-0 bottom-0 space-y-3 p-6">
-          {/* Rozet satırı */}
-          <div className="flex flex-wrap items-center gap-2">
-            {uyum && (
-              <span className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent backdrop-blur-md">
-                <Star size={12} fill="currentColor" strokeWidth={0} /> %{uyum.score} {t.uyumSuffix}
-              </span>
-            )}
-            {p.is_verified && (
-              <span className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                <BadgeCheck size={12} /> {t.verified}
-              </span>
-            )}
+      {/* Masaüstü: solda foto/hero, sağda bilgiler — 2 sütun */}
+      <div className="lg:mx-auto lg:grid lg:max-w-6xl lg:grid-cols-[minmax(0,440px)_1fr] lg:items-start lg:gap-10 lg:px-0 lg:pb-16 lg:pt-8">
+        {/* Hero — kilitli profil (foto sohbetle netleşir): monogram + onyx/pirinç degrade */}
+        <section className="relative aspect-[3/4] w-full overflow-hidden lg:sticky lg:top-8 lg:rounded-[32px] lg:border lg:border-white/[0.07]">
+          <div className="theme-bg absolute inset-0" />
+          <div className="absolute inset-0 grid place-items-center">
+            <span className="select-none font-display text-[200px] font-bold leading-none text-white/[0.06]">{initial}</span>
           </div>
+          <div className="theme-accent pointer-events-none absolute left-1/2 top-1/3 h-56 w-56 -translate-x-1/2 rounded-full bg-current opacity-[0.08] blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/35 to-bg/10" />
 
-          {/* İsim · meslek · şehir */}
-          <div className="space-y-1">
-            <h1 className={`font-display text-[28px] font-semibold leading-none text-white drop-shadow-sm ${tierName(tier)}`}>
-              {p.name}
-              <span className="font-normal text-white/80">{p.age ? `, ${p.age}` : ""}</span>
-            </h1>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/70">
-              {p.profession && (
-                <span className="flex items-center gap-1.5"><Briefcase size={14} strokeWidth={1.6} /> {p.profession}</span>
+          <div className="absolute inset-x-0 bottom-0 space-y-3 p-6">
+            {/* Rozet satırı */}
+            <div className="flex flex-wrap items-center gap-2">
+              {uyum && (
+                <span className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent backdrop-blur-md">
+                  <Star size={12} fill="currentColor" strokeWidth={0} /> %{uyum.score} {t.uyumSuffix}
+                </span>
               )}
-              {p.profession && p.city && <span className="h-1 w-1 rounded-full bg-white/30" />}
-              {p.city && (
-                <span className="flex items-center gap-1.5"><MapPin size={14} strokeWidth={1.6} /> {p.city}</span>
+              {p.is_verified && (
+                <span className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                  <BadgeCheck size={12} /> {t.verified}
+                </span>
               )}
             </div>
-          </div>
 
-          {/* Netlik kartı */}
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-md">
-            <div className="flex flex-col gap-0.5">
-              <span className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-accent">
-                <Lock size={12} /> {t.clarityLabel} %{clarity}
-              </span>
-              <span className="text-[11px] text-white/55">{t.clarityHint}</span>
+            {/* İsim · meslek · şehir */}
+            <div className="space-y-1">
+              <h1 className={`font-display text-[28px] font-semibold leading-none text-white drop-shadow-sm ${tierName(tier)}`}>
+                {p.name}
+                <span className="font-normal text-white/80">{p.age ? `, ${p.age}` : ""}</span>
+              </h1>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/70">
+                {p.profession && (
+                  <span className="flex items-center gap-1.5"><Briefcase size={14} strokeWidth={1.6} /> {p.profession}</span>
+                )}
+                {p.profession && p.city && <span className="h-1 w-1 rounded-full bg-white/30" />}
+                {p.city && (
+                  <span className="flex items-center gap-1.5"><MapPin size={14} strokeWidth={1.6} /> {p.city}</span>
+                )}
+              </div>
             </div>
-            <div className="relative grid h-12 w-12 shrink-0 place-items-center">
-              <svg viewBox="0 0 48 48" className="h-12 w-12 -rotate-90">
-                <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
-                <circle
-                  cx="24" cy="24" r="20" fill="none" stroke="#C7A977" strokeWidth="3" strokeLinecap="round"
-                  strokeDasharray={`${(clarity / 100) * 125.6} 125.6`}
-                />
-              </svg>
-              <span className="absolute text-[10px] font-bold text-accent">%{clarity}</span>
+
+            {/* Netlik kartı */}
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-md">
+              <div className="flex flex-col gap-0.5">
+                <span className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-accent">
+                  <Lock size={12} /> {t.clarityLabel} %{clarity}
+                </span>
+                <span className="text-[11px] text-white/55">{t.clarityHint}</span>
+              </div>
+              <div className="relative grid h-12 w-12 shrink-0 place-items-center">
+                <svg viewBox="0 0 48 48" className="h-12 w-12 -rotate-90">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+                  <circle
+                    cx="24" cy="24" r="20" fill="none" stroke="#C7A977" strokeWidth="3" strokeLinecap="round"
+                    strokeDasharray={`${(clarity / 100) * 125.6} 125.6`}
+                  />
+                </svg>
+                <span className="absolute text-[10px] font-bold text-accent">%{clarity}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* Gövde */}
-      <section className="space-y-7 px-5 pb-44 pt-6">
+      <section className="space-y-7 px-5 pb-44 pt-6 lg:px-0 lg:pb-16 lg:pt-0">
         {/* Premium / kurucu / güven rozetleri (Ahenk ekstra — korunur) */}
         <div className="flex flex-wrap items-center gap-2">
           <PremiumBadge tier={tier} />
@@ -220,7 +222,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
 
         {/* Yaşam tarzı kartları (gerçek veri) */}
         {attrs.length > 0 && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
             {attrs.map((a) => (
               <div
                 key={a.label}
@@ -296,6 +298,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
         {/* Hikaye öne çıkanlar */}
         <StoryHighlights userId={params.id} mine={isSelf} />
       </section>
+      </div>
 
       {/* Alt aksiyonlar — mevcut endpoint/route'lar (interact / sohbet / mağaza) */}
       {user && !isSelf && (

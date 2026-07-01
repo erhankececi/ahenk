@@ -158,7 +158,7 @@ export default function MomentsFeed() {
   return (
     <div className="space-y-5 pb-6" onClick={() => menuFor && setMenuFor(null)}>
       {composing && (
-        <div className="rounded-[26px] ahenk-panel p-4">
+        <div className="rounded-[26px] ahenk-panel p-4 lg:max-w-xl">
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder={tmo.composerPlaceholder} className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 outline-none placeholder:text-text/35 focus:border-brand/60" />
           {files.length > 0 && (
             <div className="mt-2 grid grid-cols-4 gap-2">
@@ -188,6 +188,7 @@ export default function MomentsFeed() {
         </div>
       )}
 
+      <div className="space-y-5 lg:grid lg:grid-cols-2 lg:items-start lg:gap-5 lg:space-y-0 xl:grid-cols-3">
       {moments.map((m) => (
         <div key={m.id} className={`overflow-hidden rounded-[26px] ahenk-card-border ${m.highlighted ? "!border-brand/60" : ""}`}>
           <div className="relative flex items-center justify-between p-3">
@@ -254,6 +255,7 @@ export default function MomentsFeed() {
           )}
         </div>
       ))}
+      </div>
 
       {commentsFor && <MomentComments momentId={commentsFor} onClose={() => setCommentsFor(null)} onCount={(d) => setMoments((ms) => ms.map((m) => (m.id === commentsFor ? { ...m, comments: Math.max(0, m.comments + d) } : m)))} />}
       {giftFor && <GiftStore otherName={giftFor.name} onSend={hediyeGonder} onClose={() => setGiftFor(null)} />}

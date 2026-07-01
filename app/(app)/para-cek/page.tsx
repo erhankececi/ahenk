@@ -89,23 +89,23 @@ export default function ParaCek() {
   }
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <div className="mb-4 flex items-center gap-3">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:mx-auto lg:max-w-2xl lg:px-0 lg:pb-16 lg:pt-10">
+      <div className="mb-4 flex items-center gap-3 lg:mb-8">
         <Link href="/cuzdan" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-text transition hover:border-accent/40 hover:text-accent" aria-label="Geri">
           <ArrowLeft size={18} />
         </Link>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk cüzdan</p>
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">Para Çek</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">Para Çek</h1>
         </div>
       </div>
 
-      <Card className="lp-panel mb-4 p-5 text-center">
+      <Card className="lp-panel mb-4 p-5 text-center lg:mb-6 lg:p-8">
         <p className="t-caption text-muted">Jeton bakiyen</p>
         {balance == null ? (
           <Skeleton className="mx-auto mt-2 h-9 w-24" />
         ) : (
-          <p className="mt-1 flex items-center justify-center gap-2 text-4xl font-bold text-text">
+          <p className="mt-1 flex items-center justify-center gap-2 text-4xl font-bold text-text lg:text-5xl">
             <Coins className="text-accent" size={30} /> {balance}
           </p>
         )}
@@ -123,7 +123,7 @@ export default function ParaCek() {
       )}
 
       {!pending && (
-        <Card className="lp-panel mb-6 space-y-3 p-4">
+        <Card className="lp-panel mb-6 space-y-3 p-4 lg:space-y-4 lg:p-8">
           <div>
             <label className="t-caption text-muted">Çekilecek jeton</label>
             <input
@@ -132,7 +132,7 @@ export default function ParaCek() {
               step={50}
               value={jeton}
               onChange={(e) => setJeton(Math.floor(Number(e.target.value) || 0))}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-[#151318] px-3 py-2.5 text-base text-text outline-none transition focus:border-accent/50"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-[#151318] px-3 py-2.5 text-base text-text outline-none transition focus:border-accent/50 lg:py-3"
             />
             <p className="mt-1 text-sm font-semibold text-success">≈ ₺{tl} ödenecek</p>
           </div>
@@ -142,7 +142,7 @@ export default function ParaCek() {
               value={iban}
               onChange={(e) => setIban(e.target.value.toUpperCase())}
               placeholder="TR00 0000 0000 0000 0000 0000 00"
-              className="mt-1 w-full rounded-xl border border-white/10 bg-[#151318] px-3 py-2.5 text-base text-text outline-none transition focus:border-accent/50"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-[#151318] px-3 py-2.5 text-base text-text outline-none transition focus:border-accent/50 lg:py-3"
             />
           </div>
           <div>
@@ -151,13 +151,13 @@ export default function ParaCek() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ad Soyad"
-              className="mt-1 w-full rounded-xl border border-white/10 bg-[#151318] px-3 py-2.5 text-base text-text outline-none transition focus:border-accent/50"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-[#151318] px-3 py-2.5 text-base text-text outline-none transition focus:border-accent/50 lg:py-3"
             />
           </div>
           <button
             onClick={cek}
             disabled={sending}
-            className="lp-cta-gold flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold transition active:scale-95 disabled:opacity-50"
+            className="lp-cta-gold flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold transition active:scale-95 disabled:opacity-50 lg:cursor-pointer lg:py-3.5 lg:hover:brightness-110"
           >
             <Banknote size={18} /> {sending ? "Gönderiliyor…" : "Para çekme talebi gönder"}
           </button>
@@ -178,7 +178,7 @@ export default function ParaCek() {
           {history.map((w) => {
             const s = STATUS[w.status] || STATUS.pending;
             return (
-              <div key={w.id} className="flex items-center justify-between gap-3 px-4 py-3">
+              <div key={w.id} className="flex items-center justify-between gap-3 px-4 py-3 lg:px-6 lg:py-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-text">
                     ₺{w.amount_try} · {w.jeton} jeton

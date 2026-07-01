@@ -135,12 +135,12 @@ export default function Premium() {
           : "linear-gradient(150deg,#17151a,#070608 74%)";
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-5">
-      <div className="mx-auto w-full max-w-3xl">
-        <div className="mb-5 flex items-center justify-between gap-3">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-5 lg:mx-auto lg:max-w-6xl lg:px-8 lg:pb-16 lg:pt-10">
+      <div className="mx-auto w-full max-w-3xl lg:max-w-none">
+        <div className="mb-5 flex items-center justify-between gap-3 lg:mb-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tp.eyebrow}</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-text">{tp.title}</h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">{tp.title}</h1>
           </div>
 
           <Link href="/cuzdan" className="lp-chip hidden items-center gap-2 sm:inline-flex">
@@ -150,8 +150,8 @@ export default function Premium() {
         </div>
 
         {/* Üyelik kartı — statü, özellik değil */}
-        <section className="lp-panel mb-4 overflow-hidden p-0">
-          <div className="relative p-5">
+        <section className="lp-panel mb-4 overflow-hidden p-0 lg:mx-auto lg:mb-8 lg:max-w-3xl">
+          <div className="relative p-5 lg:p-7">
             <div className="absolute right-[-90px] top-[-90px] h-56 w-56 rounded-full bg-[#C7A977]/10 blur-3xl" />
             <div className="absolute bottom-[-100px] left-[-80px] h-52 w-52 rounded-full bg-white/[0.035] blur-3xl" />
 
@@ -213,7 +213,7 @@ export default function Premium() {
 
         {/* Web'de jeton köprüsü — IAP yalnız native; web kullanıcısı çıkmaza düşmesin. */}
         {!native && (
-          <Link href="/cuzdan" className="lp-panel-hover mb-5 flex items-center gap-3 px-4 py-3.5">
+          <Link href="/cuzdan" className="lp-panel-hover mb-5 flex items-center gap-3 px-4 py-3.5 lg:mx-auto lg:mb-8 lg:max-w-3xl">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent">
               <Coins size={20} />
             </div>
@@ -228,16 +228,16 @@ export default function Premium() {
         )}
 
         {/* Planlar */}
-        <section className="mb-5">
-          <div className="mb-3 flex items-end justify-between">
+        <section className="mb-5 lg:mb-8">
+          <div className="mb-3 flex items-end justify-between lg:mb-5">
             <div>
-              <p className="text-sm font-semibold text-text">{tp.packagesTitle}</p>
-              <p className="mt-0.5 text-xs text-muted">{tp.packagesDesc}</p>
+              <p className="text-sm font-semibold text-text lg:text-base">{tp.packagesTitle}</p>
+              <p className="mt-0.5 text-xs text-muted lg:text-sm">{tp.packagesDesc}</p>
             </div>
             <Crown size={18} className="text-accent" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:grid lg:grid-cols-3 lg:items-stretch lg:gap-5 lg:space-y-0">
             {TIERS.map((tier) => {
               const pkg = packages.find((p) => p.plan === tier.plan);
               const buColumn = plan === tier.plan && aktif;
@@ -247,12 +247,12 @@ export default function Premium() {
                 <div
                   key={tier.plan}
                   data-tier-class={legacyTierClass}
-                  className={`lp-panel-hover relative overflow-hidden p-0 ${
+                  className={`lp-panel-hover relative overflow-hidden p-0 lg:flex lg:h-full lg:flex-col ${
                     tier.plan === "legend" ? "border-[#C7A977]/45" : ""
-                  }`}
+                  } ${tier.plan === "platinum" ? "lg:scale-[1.02] lg:shadow-[0_24px_90px_rgba(199,169,119,0.14)]" : ""}`}
                 >
                   <div className="absolute right-[-70px] top-[-70px] h-44 w-44 rounded-full bg-[#C7A977]/8 blur-3xl" />
-                  <div className="relative p-4">
+                  <div className="relative flex flex-1 flex-col p-4 lg:p-5">
                     <div className="mb-4 flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent shadow-[0_16px_60px_rgba(199,169,119,0.09)]">
@@ -277,7 +277,7 @@ export default function Premium() {
                       )}
                     </div>
 
-                    <div className="mb-4 grid gap-2">
+                    <div className="mb-4 grid gap-2 lg:flex-1">
                       {(tierFeatures[tier.plan] ?? tier.features).map((f) => (
                         <div key={f.title} className="flex items-start gap-2.5 rounded-2xl border border-white/10 bg-[#0E0D10]/55 p-3">
                           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#C7A977]/30 bg-[#C7A977]/10 text-accent">
@@ -324,7 +324,7 @@ export default function Premium() {
         </section>
 
         {/* Planları karşılaştır */}
-        <section className="lp-panel mb-5 p-0">
+        <section className="lp-panel mb-5 p-0 lg:mb-8">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5">
             <div>
               <h2 className="text-sm font-semibold text-text">{tp.compareTitle}</h2>
@@ -371,7 +371,7 @@ export default function Premium() {
 
         {msg && (
           <p
-            className={`mb-5 rounded-[1.4rem] border px-4 py-3 text-sm leading-6 shadow-[0_18px_70px_rgba(0,0,0,0.20)] ${
+            className={`mb-5 rounded-[1.4rem] border px-4 py-3 text-sm leading-6 shadow-[0_18px_70px_rgba(0,0,0,0.20)] lg:mx-auto lg:max-w-3xl ${
               msg.ok
                 ? "border-[#C7A977]/30 bg-[#C7A977]/10 text-text"
                 : "border-red-400/20 bg-red-500/10 text-red-200"

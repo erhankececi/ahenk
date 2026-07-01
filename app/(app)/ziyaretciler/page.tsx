@@ -56,19 +56,19 @@ export default async function Ziyaretciler() {
   }
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <div className="mb-5">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:px-8 lg:pb-16 lg:pt-10">
+      <div className="mb-5 lg:mx-auto lg:max-w-6xl lg:mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tz.eyebrow}</p>
-        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">{tz.title}</h1>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">{tz.title}</h1>
       </div>
 
       {!premium ? (
-        <div className="lp-panel rounded-[1.75rem] p-8 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent">
+        <div className="lp-panel rounded-[1.75rem] p-8 text-center lg:mx-auto lg:max-w-3xl lg:p-12">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent lg:h-16 lg:w-16">
             <Lock size={26} />
           </span>
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text">{tz.seeAdmirers}</p>
-          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted">{tz.lockedCount.replace("{n}", String(visitCount))}</p>
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text lg:text-3xl">{tz.seeAdmirers}</p>
+          <p className="mb-6 mt-1.5 text-sm leading-6 text-muted lg:text-base">{tz.lockedCount.replace("{n}", String(visitCount))}</p>
           <Link
             href="/premium?source=visitors_locked"
             className="lp-cta-gold inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold"
@@ -85,19 +85,19 @@ export default async function Ziyaretciler() {
           <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">{tz.emptyDesc}</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 lg:mx-auto lg:max-w-6xl lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-3 xl:grid-cols-4">
           {visitors.map((v, i) => (
             <Link
               key={i}
               href={`/u/${v.id}`}
-              className="lp-panel-hover flex items-center gap-3 p-3"
+              className="lp-panel-hover flex items-center gap-3 p-3 lg:flex-col lg:items-center lg:gap-2 lg:rounded-2xl lg:p-5 lg:text-center"
             >
               <div className={`rounded-full ${tierFrame(v.tier)}`}>
-                <div className="lp-monogram flex h-11 w-11 items-center justify-center rounded-full font-bold">
+                <div className="lp-monogram flex h-11 w-11 items-center justify-center rounded-full font-bold lg:h-16 lg:w-16 lg:text-lg">
                   {v.name[0]}
                 </div>
               </div>
-              <div className="flex flex-1 flex-wrap items-center gap-2">
+              <div className="flex flex-1 flex-wrap items-center gap-2 lg:flex-none lg:flex-col lg:gap-1.5">
                 <p className="font-medium text-text">{v.name}</p>
                 <PremiumBadge tier={v.tier} />
               </div>

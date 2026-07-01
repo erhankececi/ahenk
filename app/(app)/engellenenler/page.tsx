@@ -35,19 +35,19 @@ export default function Engellenenler() {
   }
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <div className="mb-5 flex items-center gap-3">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:mx-auto lg:max-w-3xl lg:px-0 lg:pb-16 lg:pt-10">
+      <div className="mb-5 flex items-center gap-3 lg:mb-8">
         <BackButton fallback="/profil" />
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">Engellenenler</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">Engellenenler</h1>
         </div>
       </div>
 
       {rows === null ? (
         <p className="text-sm text-muted">Yükleniyor…</p>
       ) : rows.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center text-center">
+        <div className="mt-16 flex flex-col items-center text-center lg:mt-24">
           <span className="lp-monogram flex h-16 w-16 items-center justify-center rounded-2xl font-display text-2xl font-extrabold">A</span>
           <p className="mt-4 font-display text-lg font-semibold text-text">Kimseyi engellemedin</p>
           <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted">
@@ -55,17 +55,17 @@ export default function Engellenenler() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 lg:space-y-2.5">
           {rows.map((u) => (
-            <div key={u.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3">
-              <div className="lp-monogram flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold">
+            <div key={u.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3 lg:p-4 lg:transition lg:hover:border-accent/30">
+              <div className="lp-monogram flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold lg:h-12 lg:w-12 lg:text-lg">
                 {u.name[0]?.toUpperCase() || "?"}
               </div>
-              <p className="flex-1 truncate font-medium text-text">{u.name}</p>
+              <p className="flex-1 truncate font-medium text-text lg:text-base">{u.name}</p>
               <button
                 onClick={() => kaldir(u.id)}
                 disabled={busy === u.id}
-                className="lp-cta-ghost shrink-0 rounded-full px-3 py-1.5 text-sm transition disabled:opacity-50"
+                className="lp-cta-ghost shrink-0 rounded-full px-3 py-1.5 text-sm transition disabled:opacity-50 lg:px-4 lg:py-2 lg:hover:bg-elevated"
               >
                 {busy === u.id ? "…" : "Engeli kaldır"}
               </button>

@@ -31,54 +31,57 @@ export default async function Liderlik() {
   );
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <div className="mb-5 flex items-center gap-3">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:mx-auto lg:max-w-5xl lg:px-0">
+      <div className="mb-5 flex items-center gap-3 lg:mb-8">
         <BackButton fallback="/profil" />
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text">
-            <Trophy size={20} className="text-accent" /> {tl.title}
+          <h1 className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">
+            <Trophy size={20} className="text-accent lg:hidden" />
+            <Trophy size={26} className="hidden text-accent lg:block" /> {tl.title}
           </h1>
         </div>
       </div>
 
-      <section className="mb-6">
-        <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
-          <Gift size={17} className="text-accent" /> {tl.topGifters}
-        </p>
-        {!gifts || (gifts as any[]).length === 0 ? (
-          <p className="text-sm text-muted">{tl.noGifters}</p>
-        ) : (
-          <div className="space-y-1.5">
-            {(gifts as any[]).map((g, i) => (
-              <div key={g.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3">
-                <Rank i={i} />
-                <p className="flex-1 truncate font-medium text-text">{g.name || tl.someone}</p>
-                <span className="text-sm font-semibold text-accent">{g.total} {tl.jetonSuffix}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+        <section className="mb-6 lg:mb-0">
+          <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text lg:mb-4 lg:text-base">
+            <Gift size={17} className="text-accent" /> {tl.topGifters}
+          </p>
+          {!gifts || (gifts as any[]).length === 0 ? (
+            <p className="text-sm text-muted">{tl.noGifters}</p>
+          ) : (
+            <div className="space-y-1.5 lg:space-y-2">
+              {(gifts as any[]).map((g, i) => (
+                <div key={g.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3 lg:p-4">
+                  <Rank i={i} />
+                  <p className="flex-1 truncate font-medium text-text">{g.name || tl.someone}</p>
+                  <span className="text-sm font-semibold text-accent">{g.total} {tl.jetonSuffix}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <section>
-        <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
-          <Users size={17} className="text-accent" /> {tl.topInviters}
-        </p>
-        {!inviters || (inviters as any[]).length === 0 ? (
-          <p className="text-sm text-muted">{tl.noInviters}</p>
-        ) : (
-          <div className="space-y-1.5">
-            {(inviters as any[]).map((u, i) => (
-              <div key={u.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3">
-                <Rank i={i} />
-                <p className="flex-1 truncate font-medium text-text">{u.name || tl.someone}</p>
-                <span className="text-sm font-semibold text-accent">{u.davet} {tl.davetSuffix}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+        <section>
+          <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text lg:mb-4 lg:text-base">
+            <Users size={17} className="text-accent" /> {tl.topInviters}
+          </p>
+          {!inviters || (inviters as any[]).length === 0 ? (
+            <p className="text-sm text-muted">{tl.noInviters}</p>
+          ) : (
+            <div className="space-y-1.5 lg:space-y-2">
+              {(inviters as any[]).map((u, i) => (
+                <div key={u.id} className="lp-panel flex items-center gap-3 rounded-2xl p-3 lg:p-4">
+                  <Rank i={i} />
+                  <p className="flex-1 truncate font-medium text-text">{u.name || tl.someone}</p>
+                  <span className="text-sm font-semibold text-accent">{u.davet} {tl.davetSuffix}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

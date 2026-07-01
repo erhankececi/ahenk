@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { ChatWindow } from "@/components/ChatWindow";
 import { previewUrl, signPhoto } from "@/lib/storage";
 import { isActivePremium } from "@/lib/plans";
+import { getMatchListRows } from "@/lib/matchList";
+import { normalizeLang, getAppDict } from "@/lib/i18n";
+import MatchList from "@/components/MatchList";
 
 export default async function SohbetPage({ params }: { params: { matchId: string } }) {
   const supabase = createClient();
@@ -79,24 +83,44 @@ export default async function SohbetPage({ params }: { params: { matchId: string
     ? { kind: meetRow.kind as string, status: meetRow.status as string, fromMe: meetRow.from_user === user!.id }
     : null;
 
+  // Masaüstü split-pane: sol panelde eşleşme listesi (aktif sohbet vurgulanır) — sadece lg:'de kullanılır.
+  const tm = getAppDict(normalizeLang(cookies().get("lang")?.value)).mesajlar;
+  const rows = await getMatchListRows(user!.id, tm);
+
   return (
-    <ChatWindow
-      matchId={params.matchId}
-      meId={user!.id}
-      otherId={otherId}
-      otherName={other?.name || "Biri"}
-      otherVerified={other?.is_verified || false}
-      otherPhoto={otherPhoto}
-      revealLevel={match.reveal_level}
-      initial={messages || []}
-      myTier={myTier}
-      otherTier={(other?.tier as string) || "free"}
-      otherLang={(other?.lang as string) || "tr"}
-      myTheme={(meProf?.theme as string) || "default"}
-      initialChemistry={(match.chemistry_score as number) || 0}
-      metByMe={metByMe}
-      metBoth={metBoth}
-      meetInit={meetInit}
-    />
+    <div className="lg:-mb-8 lg:flex lg:h-dvh lg:min-h-0">
+      {/* Masaüstü: sol panel = eşleşme/konuşma listesi (WhatsApp Web tarzı split-pane) */}
+      <div className="hidden lg:flex lg:h-full lg:w-[380px] lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-border lg:px-4 lg:py-6">
+        <div className="mb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-0.04em] text-text">{tm.title}</h1>
+        </div>
+        {rows.length > 0 && (
+          <MatchList meId={user!.id} rows={rows} activeMatchId={params.matchId} />
+        )}
+      </div>
+
+      {/* Sağ panel (mobilde tam ekran, masaüstünde kalan genişlik) */}
+      <div className="lg:h-full lg:flex-1 lg:min-w-0">
+        <ChatWindow
+          matchId={params.matchId}
+          meId={user!.id}
+          otherId={otherId}
+          otherName={other?.name || "Biri"}
+          otherVerified={other?.is_verified || false}
+          otherPhoto={otherPhoto}
+          revealLevel={match.reveal_level}
+          initial={messages || []}
+          myTier={myTier}
+          otherTier={(other?.tier as string) || "free"}
+          otherLang={(other?.lang as string) || "tr"}
+          myTheme={(meProf?.theme as string) || "default"}
+          initialChemistry={(match.chemistry_score as number) || 0}
+          metByMe={metByMe}
+          metBoth={metBoth}
+          meetInit={meetInit}
+        />
+      </div>
+    </div>
   );
 }

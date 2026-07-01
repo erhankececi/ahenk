@@ -341,9 +341,45 @@ export default async function Profil() {
     </div>
   );
 
+  // ——— MASAÜSTÜ: SOL SÜTUN (fotoğraf galerisi) ———
+  const masaustuGaleri = (
+    <div className="hidden lg:block lg:sticky lg:top-6">
+      <section className="lp-panel overflow-hidden p-0">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#151318]">
+          {photos?.[0]?.url ? (
+            <img src={photos[0].url} className="h-full w-full object-cover" alt="" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[#0E0D10]">
+              <span className="lp-monogram text-6xl">A</span>
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-4">
+            <h2 className={`truncate text-xl font-semibold tracking-[-0.04em] text-text ${tierName(tier)}`}>
+              {p?.name || tpr.nameFallback}
+            </h2>
+            <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-sm text-white/80">
+              {yas(p?.birthdate) ? <span>{yas(p?.birthdate)}</span> : null}
+              {yas(p?.birthdate) && p?.city ? <span className="text-white/30">·</span> : null}
+              {p?.city ? <span>{p.city}</span> : null}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-text">{tpr.photosTitle}</h3>
+            <Sparkles size={16} className="text-accent" />
+          </div>
+          <PhotoManager userId={user!.id} initial={photos} />
+        </div>
+      </section>
+    </div>
+  );
+
   return (
     <div className={`lp-page min-h-dvh px-4 pb-28 pt-5 ${themeClass(p?.theme)}`}>
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="mx-auto w-full max-w-3xl lg:max-w-6xl">
         <div className="mb-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tpr.eyebrow}</p>
@@ -359,57 +395,63 @@ export default async function Profil() {
           </Link>
         </div>
 
-        <ProfileTabs
-          profil={profilTab}
-          icerik={icerikTab}
-          rozetler={rozetlerTab}
-          labels={{ profil: tpr.tabProfil, icerik: tpr.tabContent, rozetler: tpr.tabBadges }}
-        />
+        <div className="lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-8">
+          {masaustuGaleri}
 
-        <section className="mt-5 space-y-2">
-          <Link href="/onboarding" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
-              <Pencil size={18} />
-            </div>
-            <span className="font-medium text-text">{tpr.editProfile}</span>
-            <ChevronRight size={17} className="ml-auto text-muted" />
-          </Link>
+          <div className="lg:min-w-0">
+            <ProfileTabs
+              profil={profilTab}
+              icerik={icerikTab}
+              rozetler={rozetlerTab}
+              labels={{ profil: tpr.tabProfil, icerik: tpr.tabContent, rozetler: tpr.tabBadges }}
+            />
 
-          <Link href="/ayarlar" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
-              <Settings size={18} />
-            </div>
-            <span className="font-medium text-text">{tpr.settings}</span>
-            <ChevronRight size={17} className="ml-auto text-muted" />
-          </Link>
+            <section className="mt-5 space-y-2">
+              <Link href="/onboarding" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
+                  <Pencil size={18} />
+                </div>
+                <span className="font-medium text-text">{tpr.editProfile}</span>
+                <ChevronRight size={17} className="ml-auto text-muted" />
+              </Link>
 
-          {p?.is_admin && (
-            <Link href="/admin" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
-                <Shield size={18} />
+              <Link href="/ayarlar" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
+                  <Settings size={18} />
+                </div>
+                <span className="font-medium text-text">{tpr.settings}</span>
+                <ChevronRight size={17} className="ml-auto text-muted" />
+              </Link>
+
+              {p?.is_admin && (
+                <Link href="/admin" className="lp-panel-hover flex items-center gap-3 px-4 py-3.5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-accent">
+                    <Shield size={18} />
+                  </div>
+                  <span className="font-medium text-text">{tpr.adminPanel}</span>
+                  <ChevronRight size={17} className="ml-auto text-muted" />
+                </Link>
+              )}
+            </section>
+
+            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-[#151318]/60 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#0E0D10] text-muted">
+                  <Ban size={17} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-text">{tpr.safeTitle}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted">
+                    {tpr.safeDesc}
+                  </p>
+                </div>
               </div>
-              <span className="font-medium text-text">{tpr.adminPanel}</span>
-              <ChevronRight size={17} className="ml-auto text-muted" />
-            </Link>
-          )}
-        </section>
-
-        <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-[#151318]/60 p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#0E0D10] text-muted">
-              <Ban size={17} />
             </div>
-            <div>
-              <p className="text-sm font-medium text-text">{tpr.safeTitle}</p>
-              <p className="mt-1 text-xs leading-5 text-muted">
-                {tpr.safeDesc}
-              </p>
+
+            <div className="mt-5">
+              <ProfileActions />
             </div>
           </div>
-        </div>
-
-        <div className="mt-5">
-          <ProfileActions />
         </div>
       </div>
     </div>

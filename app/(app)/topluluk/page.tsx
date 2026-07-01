@@ -49,63 +49,67 @@ export default async function Topluluk() {
   ]);
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:mx-auto lg:max-w-6xl lg:px-0">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tt.eyebrow}</p>
       <div className="mt-1 flex items-center gap-2">
         <MapPin size={20} className="text-accent" />
-        <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">{tt.cityTitle.replace("{city}", city)}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">{tt.cityTitle.replace("{city}", city)}</h1>
       </div>
       <p className="mb-5 mt-1 flex items-center gap-1.5 text-sm text-muted">
         <Users size={14} /> {tt.memberCount.replace("{n}", String(count ?? 0))}
       </p>
 
-      {/* Etkinlikler */}
-      <div className="mb-6">
-        <div className="mb-2.5 flex items-center justify-between">
-          <p className="flex items-center gap-2 text-sm font-semibold text-text">
-            <CalendarHeart size={17} className="text-accent" /> {tt.cityEvents}
-          </p>
-          <Link href="/etkinlikler" className="text-xs text-accent">{tt.all}</Link>
-        </div>
-        {(events || []).length === 0 ? (
-          <p className="text-sm text-muted">{tt.noEvents}</p>
-        ) : (
-          <div className="space-y-2">
-            {(events || []).map((e) => (
-              <Link key={e.id} href="/etkinlikler" className="lp-panel-hover block p-3">
-                <p className="font-medium text-text">{e.title}</p>
-                {e.starts_at && (
-                  <p className="text-xs text-muted">
-                    {new Date(e.starts_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                )}
-              </Link>
-            ))}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] lg:items-start lg:gap-8">
+        {/* Etkinlikler */}
+        <div className="mb-6 lg:mb-0">
+          <div className="mb-2.5 flex items-center justify-between">
+            <p className="flex items-center gap-2 text-sm font-semibold text-text">
+              <CalendarHeart size={17} className="text-accent" /> {tt.cityEvents}
+            </p>
+            <Link href="/etkinlikler" className="text-xs text-accent">{tt.all}</Link>
           </div>
-        )}
-      </div>
-
-      {/* Popüler üyeler */}
-      <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
-        <Crown size={17} className="text-accent" /> {tt.popularMembers}
-      </p>
-      {(members || []).length === 0 ? (
-        <p className="text-sm text-muted">{tt.noMembers}</p>
-      ) : (
-        <div className="grid grid-cols-3 gap-2.5">
-          {(members || []).map((m: any) => (
-            <Link key={m.id} href={`/u/${m.id}`} className="lp-panel-hover flex flex-col items-center gap-1.5 p-3 text-center">
-              <span className="lp-monogram flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold">
-                {m.name?.[0]?.toUpperCase() || "?"}
-              </span>
-              <span className="flex items-center gap-1 truncate text-sm font-medium text-text">
-                {m.name}
-                {m.is_verified && <BadgeCheck size={13} className="text-accent" />}
-              </span>
-            </Link>
-          ))}
+          {(events || []).length === 0 ? (
+            <p className="text-sm text-muted">{tt.noEvents}</p>
+          ) : (
+            <div className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2.5 lg:space-y-0">
+              {(events || []).map((e) => (
+                <Link key={e.id} href="/etkinlikler" className="lp-panel-hover block p-3">
+                  <p className="font-medium text-text">{e.title}</p>
+                  {e.starts_at && (
+                    <p className="text-xs text-muted">
+                      {new Date(e.starts_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Popüler üyeler */}
+        <div>
+          <p className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-text">
+            <Crown size={17} className="text-accent" /> {tt.popularMembers}
+          </p>
+          {(members || []).length === 0 ? (
+            <p className="text-sm text-muted">{tt.noMembers}</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2.5 lg:grid-cols-4 lg:gap-3">
+              {(members || []).map((m: any) => (
+                <Link key={m.id} href={`/u/${m.id}`} className="lp-panel-hover flex flex-col items-center gap-1.5 p-3 text-center">
+                  <span className="lp-monogram flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold">
+                    {m.name?.[0]?.toUpperCase() || "?"}
+                  </span>
+                  <span className="flex items-center gap-1 truncate text-sm font-medium text-text">
+                    {m.name}
+                    {m.is_verified && <BadgeCheck size={13} className="text-accent" />}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

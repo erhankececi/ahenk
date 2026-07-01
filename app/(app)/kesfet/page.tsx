@@ -156,8 +156,11 @@ export default function Kesfet() {
   const kmText = kmLabel(filter.km);
   const kmNum = filter.km !== "all" ? parseInt(filter.km, 10) : null;
 
+  // Masaüstü yan panel: sıradaki adaylar kuyruğu (aktif kartı asla dahil etmez, salt önizleme)
+  const upNext = deck.slice(i + 1, i + 1 + 5);
+
   return (
-    <div className="px-5 pt-[calc(env(safe-area-inset-top)+18px)]">
+    <div className="px-5 pt-[calc(env(safe-area-inset-top)+18px)] lg:mx-auto lg:max-w-6xl lg:px-8">
       <WelcomeTour />
 
       {/* Header — Stitch referans: AHENK wordmark + tagline (sol) · filtre + bildirim (sağ) */}
@@ -199,14 +202,16 @@ export default function Kesfet() {
         ))}
       </div>
 
+      <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)_260px] lg:items-start lg:gap-8">
+
       {loading && (
-        <div className="aspect-[3/4] overflow-hidden rounded-[28px] border border-border bg-surface">
+        <div className="aspect-[3/4] overflow-hidden rounded-[28px] border border-border bg-surface lg:col-start-2">
           <div className="shimmer h-full w-full" />
         </div>
       )}
 
       {!loading && !current && (
-        <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
+        <div className="flex flex-col items-center justify-center px-8 py-16 text-center lg:col-start-2">
           <Sparkles className="mb-4 text-brand" size={36} strokeWidth={1.5} />
           <h2 className="font-display text-xl font-semibold">{tk.emptyTitle}</h2>
           <p className="mt-2 text-muted">
@@ -242,6 +247,58 @@ export default function Kesfet() {
 
       {current && (
         <>
+          {/* Masaüstü sol panel — hızlı filtre özeti + günlük istatistik (dekoratif/bilgi amaçlı, swipe state'ine dokunmaz) */}
+          <aside className="hidden lg:sticky lg:top-6 lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:gap-4">
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{tk.title}</p>
+              <div className="mt-3 space-y-2.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1.5 text-muted">
+                    <Flame size={14} strokeWidth={1.8} className="text-accent" /> {tk.chipOnline}
+                  </span>
+                  <span className="font-semibold text-text">{meta?.online ?? 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1.5 text-muted">
+                    <Sparkles size={14} strokeWidth={1.8} className="text-accent" /> {tk.title}
+                  </span>
+                  <span className="font-semibold text-text">{meta?.count ?? deck.length}</span>
+                </div>
+                {meta?.sehir && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-1.5 text-muted">
+                      <MapPin size={14} strokeWidth={1.8} className="text-accent" /> {tk.nearArea}
+                    </span>
+                    <span className="font-semibold text-text">{meta.sehir}</span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setFiltersOpen(true)}
+                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] py-2 text-xs font-medium transition hover:border-accent/50"
+              >
+                <SlidersHorizontal size={13} strokeWidth={1.8} /> {tk.filter}
+              </button>
+            </div>
+
+            {meta?.trendVibes && meta.trendVibes.length > 0 && (
+              <div className="rounded-2xl border border-border bg-surface p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{tk.chipPopuler}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {meta.trendVibes.slice(0, 8).map((v) => (
+                    <span
+                      key={v.label}
+                      className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-muted"
+                    >
+                      {v.label} <span className="text-accent">{v.n}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+
+          <div className="lg:col-start-2 lg:row-start-1">
           {kmNum && (
             <p className="mb-3 flex items-center gap-1.5 text-xs text-muted">
               <MapPin size={13} strokeWidth={1.6} />
@@ -461,8 +518,48 @@ export default function Kesfet() {
               {tk.inCommon}
             </button>
           </div>
+          </div>
+
+          {/* Masaüstü sağ panel — sıradaki profiller önizleme kuyruğu (dekoratif, gerçek deste indeksini değiştirmez) */}
+          <aside className="hidden lg:sticky lg:top-6 lg:col-start-3 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{tk.title} · {tk.chipYeni}</p>
+            {upNext.length > 0 ? (
+              upNext.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-2.5 transition hover:border-accent/40"
+                >
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-elevated">
+                    {c.photos?.[0] ? (
+                      <img src={c.photos[0]} className="h-full w-full scale-110 object-cover blur-md" alt="" />
+                    ) : (
+                      <div className="brand-gradient h-full w-full opacity-30" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium text-text">
+                      {c.name}
+                      {c.age ? `, ${c.age}` : ""}
+                    </p>
+                    <p className="truncate text-[11px] text-muted">
+                      {c.city || (c.online ? tk.online : "")}
+                    </p>
+                  </div>
+                  {c.ortakYuzde != null && (
+                    <span className="shrink-0 text-[11px] font-semibold text-accent">%{c.ortakYuzde}</span>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted">
+                {tk.emptyDefault}
+              </p>
+            )}
+          </aside>
         </>
       )}
+
+      </div>
 
       {/* Eşleşme popup */}
       <AnimatePresence>

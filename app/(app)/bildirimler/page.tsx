@@ -43,7 +43,7 @@ export default async function Bildirimler() {
   return (
     <div className="pb-6">
       <TopBar title={tn.title} />
-      <div className="px-4">
+      <div className="px-4 lg:mx-auto lg:max-w-3xl lg:px-0">
         <PushOptIn />
         {(notifs || []).length === 0 ? (
           <EmptyState
@@ -52,20 +52,20 @@ export default async function Bildirimler() {
             desc={tn.emptyDesc}
           />
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 lg:space-y-2.5">
             {(notifs || []).map((n) => {
               const m = META[n.type] || META.system;
               const Icon = m.icon;
-              const cls = `flex items-center gap-3 rounded-2xl p-3 ${
+              const cls = `flex items-center gap-3 rounded-2xl p-3 lg:gap-4 lg:p-4 ${
                 n.is_read ? "lp-panel" : "border border-accent/30 bg-accent/[0.06]"
               }`;
               const inner = (
                 <>
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent/25 bg-accent/10 text-accent">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent/25 bg-accent/10 text-accent lg:h-12 lg:w-12">
                     <Icon size={18} />
                   </span>
                   <div className="flex-1">
-                    <p className="text-sm text-text">{m.label(n.payload)}</p>
+                    <p className="text-sm text-text lg:text-base">{m.label(n.payload)}</p>
                     <p className="t-caption text-muted">{zamanFarki(n.created_at)}</p>
                   </div>
                 </>

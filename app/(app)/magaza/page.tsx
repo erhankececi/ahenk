@@ -92,12 +92,12 @@ export default function Magaza() {
       style={{ background: "#0E0D10" }}
     >
       {/* Üst bar */}
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between px-5" style={{ background: "rgba(14,13,16,0.85)", backdropFilter: "blur(12px)" }}>
+      <header className="sticky top-0 z-20 flex h-14 items-center justify-between px-5 lg:mx-auto lg:max-w-7xl lg:px-0" style={{ background: "rgba(14,13,16,0.85)", backdropFilter: "blur(12px)" }}>
         <Link href="/cuzdan" className="text-text/70 transition hover:text-text" aria-label={tm.back}><ArrowLeft size={22} strokeWidth={1.8} /></Link>
-        <h1 className="font-display text-[17px] font-bold tracking-tight">{tm.title}</h1>
+        <h1 className="font-display text-[17px] font-bold tracking-tight lg:text-[22px]">{tm.title}</h1>
         <Link
           href="/cuzdan"
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold text-accent"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold text-accent transition hover:border-accent/60 lg:px-3 lg:py-1.5"
           style={{ background: "#151318", border: "1px solid rgba(199,169,119,0.30)" }}
         >
           <Coins size={14} /> {(balance ?? 0).toLocaleString("tr-TR")}
@@ -106,17 +106,17 @@ export default function Magaza() {
       </header>
 
       {/* Alt açıklama */}
-      <p className="px-5 pt-2 text-[13px] text-text/55">{tm.subtitle}</p>
+      <p className="px-5 pt-2 text-[13px] text-text/55 lg:mx-auto lg:max-w-7xl lg:px-0">{tm.subtitle}</p>
 
       {/* Kategori sekmeleri */}
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 py-3">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 py-3 lg:mx-auto lg:max-w-7xl lg:overflow-visible lg:px-0">
         {TABS.map((t) => {
           const on = tab === t.id;
           return (
             <button
               key={t.id}
               onClick={() => { setTab(t.id); setSel(null); }}
-              className="shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium transition"
+              className="shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium transition lg:px-5 lg:py-2 lg:text-sm"
               style={
                 on
                   ? { background: "linear-gradient(160deg,#2a2418,#1a160e)", border: "1px solid rgba(199,169,119,0.55)", color: "#E8D9B8" }
@@ -131,7 +131,7 @@ export default function Magaza() {
 
       {/* Hero — seçili hediye büyük */}
       {selGift && (
-        <div className="px-5 pb-1">
+        <div className="px-5 pb-1 lg:mx-auto lg:max-w-7xl lg:px-0">
           <motion.div
             key={selGift.key}
             initial={{ opacity: 0, y: 8 }}
@@ -161,8 +161,8 @@ export default function Magaza() {
         </div>
       )}
 
-      {/* 2 sütun premium grid */}
-      <div className="grid grid-cols-2 gap-3 px-5 pt-2">
+      {/* 2 sütun premium grid — masaüstünde geniş katalog grid */}
+      <div className="grid grid-cols-2 gap-3 px-5 pt-2 lg:mx-auto lg:max-w-7xl lg:grid-cols-4 lg:gap-4 lg:px-0 xl:grid-cols-5">
         {items.map((g, i) => {
           const active = sel === g.key;
           return (
@@ -174,7 +174,7 @@ export default function Magaza() {
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setSel(active ? null : g.key)}
-              className="group relative flex flex-col overflow-hidden rounded-[20px] text-left"
+              className="group relative flex flex-col overflow-hidden rounded-[20px] text-left lg:transition-shadow"
               style={{
                 background: "linear-gradient(170deg,#18161B,#111014)",
                 border: active ? "1px solid rgba(199,169,119,0.6)" : "1px solid rgba(255,255,255,0.08)",
@@ -213,11 +213,11 @@ export default function Magaza() {
       </div>
 
       {/* Jeton satın al kartı */}
-      <div className="px-5 pt-5">
+      <div className="px-5 pt-5 lg:mx-auto lg:max-w-7xl lg:px-0">
         <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.99 }}>
           <Link
             href="/cuzdan"
-            className="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+            className="flex items-center gap-3 rounded-2xl px-4 py-3.5 lg:max-w-md"
             style={{ background: "#151318", border: "1px solid rgba(199,169,119,0.25)" }}
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-full text-accent" style={{ background: "rgba(199,169,119,0.12)" }}>
@@ -230,14 +230,14 @@ export default function Magaza() {
             <ChevronRight size={20} className="text-accent" />
           </Link>
         </motion.div>
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-text/45">
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-text/45 lg:justify-start lg:text-left">
           <GiftIcon size={13} /> {tm.sendHint}
         </p>
       </div>
 
       {/* Sticky alt bar — seçili hediye (gerçek aksiyon: Jeton Al; gönderme sohbette) */}
       {selGift && (
-        <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+84px)] z-30 mx-auto max-w-[460px] px-5 lg:bottom-6">
+        <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+84px)] z-30 mx-auto max-w-[460px] px-5 lg:bottom-6 lg:left-[84px] lg:max-w-[520px]">
           <div
             className="flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl"
             style={{ background: "rgba(21,19,26,0.95)", border: "1px solid rgba(199,169,119,0.32)", boxShadow: "0 22px 44px -22px rgba(0,0,0,0.92)" }}

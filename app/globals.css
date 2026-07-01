@@ -428,16 +428,10 @@ body {
 }
 
 @media (min-width: 1024px) {
+  /* Desktop: real app shell, not a phone mockup — content controls its own max-width. */
   .ahenk-app-main {
-    margin-block: 16px;
-    min-height: calc(100dvh - 32px);
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 34px;
-    box-shadow:
-      0 0 0 1px rgba(199,169,119,0.06),
-      0 30px 90px -42px rgba(0,0,0,0.90),
-      inset 0 1px 0 rgba(255,255,255,0.05);
+    max-width: 1600px;
+    min-height: 100dvh;
   }
 }
 
@@ -781,7 +775,7 @@ a[class*="brand-gradient"],
     linear-gradient(180deg, rgba(29,25,18,0.96), rgba(14,13,16,0.97)) !important;
 }
 
-/* App shell — desktop shows a real premium phone frame, mobile stays full screen */
+/* App shell — desktop uses a real wide app shell, mobile stays full screen */
 .ahenk-app-shell {
   min-height: 100dvh;
   background:
@@ -793,17 +787,6 @@ a[class*="brand-gradient"],
   background:
     radial-gradient(circle at 50% 0%, rgba(199,169,119,0.06), transparent 14rem),
     linear-gradient(180deg, #131217 0%, #100f14 58%, #0c0c0f 100%) !important;
-}
-@media (min-width: 1024px) {
-  .ahenk-app-main {
-    max-width: 430px !important;
-    border-radius: 36px !important;
-    border: 1px solid rgba(255,255,255,0.13) !important;
-    box-shadow:
-      0 0 0 1px rgba(199,169,119,0.07),
-      0 44px 120px -54px rgba(0,0,0,1),
-      inset 0 1px 0 rgba(255,255,255,0.06) !important;
-  }
 }
 .ahenk-app-main > div:first-child,
 .ahenk-app-main main,

@@ -29,21 +29,21 @@ export default function Etkilesimlerim() {
   }, [data, tab, q]);
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-6">
-      <div className="mb-4 flex items-center gap-3">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-6 lg:pb-10">
+      <div className="mb-4 flex items-center gap-3 lg:mx-auto lg:max-w-7xl">
         <Link href="/profil" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[#151318] text-text transition hover:border-accent/40 hover:text-accent" aria-label="Geri"><ArrowLeft size={18} /></Link>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Ahenk</p>
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text">Bağlantılarım</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">Bağlantılarım</h1>
         </div>
       </div>
 
-      <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto pb-1">
+      <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto pb-1 lg:mx-auto lg:max-w-7xl lg:overflow-visible">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition lg:px-5 lg:py-2.5 ${
               tab === t.key ? "ahenk-chip-active" : "ahenk-chip hover:text-text"
             }`}
           >
@@ -53,22 +53,22 @@ export default function Etkilesimlerim() {
         ))}
       </div>
 
-      <div className="ahenk-panel mb-4 flex items-center gap-2 rounded-2xl px-3">
+      <div className="ahenk-panel mb-4 flex items-center gap-2 rounded-2xl px-3 lg:mx-auto lg:max-w-7xl">
         <Search size={16} className="text-muted" />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="İsme göre ara…" className="w-full bg-transparent py-2.5 text-sm text-text outline-none placeholder:text-muted" />
       </div>
 
       {!data ? (
-        <div className="grid grid-cols-2 gap-3">{[0, 1, 2, 3].map((i) => <div key={i} className="shimmer h-40 rounded-2xl" />)}</div>
+        <div className="grid grid-cols-2 gap-3 lg:mx-auto lg:max-w-7xl lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="shimmer h-40 rounded-2xl lg:h-56" />)}</div>
       ) : list.length === 0 ? (
-        <div className="flex flex-col items-center py-16 text-center">
+        <div className="flex flex-col items-center py-16 text-center lg:mx-auto lg:max-w-7xl">
           <span className="lp-monogram flex h-14 w-14 items-center justify-center rounded-2xl font-display text-xl font-extrabold">A</span>
           <p className="mt-3.5 text-sm text-muted">
             {q ? "Sonuç yok." : tab === "matches" ? "Henüz eşleşmen yok." : tab === "liked" ? "Henüz kimseyi beğenmedin." : "Henüz süper beğeni atmadın."}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:mx-auto lg:max-w-7xl lg:grid-cols-4 lg:gap-4">
           {list.map((c) => (
             <Link
               key={c.id}

@@ -130,9 +130,9 @@ export default function Cuzdan() {
   }
 
   return (
-    <div className="lp-page min-h-dvh px-4 pb-28 pt-5">
-      <div className="mx-auto w-full max-w-3xl">
-        <div className="mb-5 flex items-center justify-between gap-3">
+    <div className="lp-page min-h-dvh px-4 pb-28 pt-5 lg:px-8 lg:pb-16 lg:pt-8">
+      <div className="mx-auto w-full max-w-3xl lg:max-w-4xl">
+        <div className="mb-5 flex items-center justify-between gap-3 lg:mb-8">
           <div className="flex min-w-0 items-center gap-3">
             <Link
               href="/profil"
@@ -143,7 +143,7 @@ export default function Cuzdan() {
             </Link>
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">{tc.eyebrow}</p>
-              <h1 className="mt-1 truncate text-2xl font-semibold tracking-[-0.04em] text-text">
+              <h1 className="mt-1 truncate text-2xl font-semibold tracking-[-0.04em] text-text lg:text-3xl">
                 {tc.title}
               </h1>
             </div>
@@ -155,21 +155,21 @@ export default function Cuzdan() {
         </div>
 
         {/* Bakiye */}
-        <Card className="lp-panel mb-4 overflow-hidden p-0">
+        <Card className="lp-panel mb-4 overflow-hidden p-0 lg:mb-6">
           <div className="relative">
             <div className="absolute inset-x-0 top-0 h-px bg-[#C7A977]/35" />
             <div className="absolute right-[-80px] top-[-80px] h-48 w-48 rounded-full bg-[#C7A977]/10 blur-3xl" />
             <div className="absolute bottom-[-90px] left-[-80px] h-48 w-48 rounded-full bg-white/[0.03] blur-3xl" />
 
-            <div className="relative p-5">
+            <div className="relative p-5 lg:p-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{tc.balanceLabel}</p>
                   {balance == null ? (
                     <Skeleton className="mt-3 h-12 w-36 rounded-2xl" />
                   ) : (
-                    <p className="mt-2 flex items-center gap-3 text-5xl font-semibold tracking-[-0.06em] text-text">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C7A977]/35 bg-[#C7A977]/12 text-accent shadow-[0_12px_40px_rgba(199,169,119,0.12)]">
+                    <p className="mt-2 flex items-center gap-3 text-5xl font-semibold tracking-[-0.06em] text-text lg:text-6xl">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C7A977]/35 bg-[#C7A977]/12 text-accent shadow-[0_12px_40px_rgba(199,169,119,0.12)] lg:h-14 lg:w-14">
                         <Coins size={25} />
                       </span>
                       {balance.toLocaleString("tr-TR")}
@@ -177,12 +177,12 @@ export default function Cuzdan() {
                   )}
                 </div>
 
-                <div className="lp-monogram flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.4rem] border border-[#C7A977]/25 bg-[#0E0D10]/70 text-4xl shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
+                <div className="lp-monogram flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.4rem] border border-[#C7A977]/25 bg-[#0E0D10]/70 text-4xl shadow-[0_18px_60px_rgba(0,0,0,0.35)] lg:h-20 lg:w-20 lg:text-5xl">
                   A
                 </div>
               </div>
 
-              <p className="mt-4 text-xs leading-5 text-muted">
+              <p className="mt-4 text-xs leading-5 text-muted lg:text-sm">
                 {tc.balanceHint}
               </p>
             </div>
@@ -202,7 +202,7 @@ export default function Cuzdan() {
         )}
 
         {/* Sekmeler: Jetonlar · Davet · Geçmiş */}
-        <div className="mb-5 grid grid-cols-3 gap-1.5 rounded-2xl border border-white/10 bg-[#151318]/70 p-1.5">
+        <div className="mb-5 grid grid-cols-3 gap-1.5 rounded-2xl border border-white/10 bg-[#151318]/70 p-1.5 lg:mb-8 lg:max-w-md">
           {([
             { id: "jeton", label: tc.tabJeton, Icon: Coins },
             { id: "davet", label: tc.tabDavet, Icon: Gift },
@@ -255,7 +255,7 @@ export default function Cuzdan() {
             <Zap size={17} className="text-accent" />
           </div>
 
-          <div className="space-y-2 p-3">
+          <div className="space-y-2 p-3 lg:space-y-3 lg:p-4">
             {SPEND.map((s) => {
               const afford = balance == null || balance >= s.jeton;
               return (
@@ -315,7 +315,7 @@ export default function Cuzdan() {
             <Coins size={17} className="text-accent" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 p-3">
+          <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-4">
             {PACKAGES.map((p) => (
               <button
                 key={p.id}
@@ -384,9 +384,9 @@ export default function Cuzdan() {
           ) : (
             <Card className="divide-y divide-white/10 border-0 bg-transparent p-0 shadow-none">
               {history.map((row, idx) => (
-                <div key={idx} className="flex items-center justify-between gap-3 px-4 py-3.5">
+                <div key={idx} className="flex items-center justify-between gap-3 px-4 py-3.5 lg:px-6 lg:py-4">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text">{row.reason || tc.movement}</p>
+                    <p className="truncate text-sm font-medium text-text lg:text-base">{row.reason || tc.movement}</p>
                     <p className="mt-0.5 text-xs text-muted">
                       {new Date(row.created_at).toLocaleString("tr-TR", {
                         day: "2-digit",
