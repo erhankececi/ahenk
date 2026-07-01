@@ -1,151 +1,513 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { Logo } from "@/components/Logo";
-import { GlassCard } from "@/components/ui";
-import { shortDate } from "@/lib/questions";
-import { Users, UserCheck, MessageSquare, HelpCircle, CheckCircle2, Coins, CreditCard, Wallet, Clock, Video, Radio, Flag, UserPlus } from "lucide-react";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { Users, Heart, Flag, Crown, Activity, TrendingUp, MessageSquare, ShieldAlert, BadgeCheck, Lightbulb, Banknote, Trash2, UserPlus, Globe, BarChart3 } from "lucide-react";
+import AdminReportResolve from "@/components/admin/AdminReportResolve";
+import AdminUserActions from "@/components/admin/AdminUserActions";
+import AdminVerifyReview from "@/components/admin/AdminVerifyReview";
+import AdminFeedbackResolve from "@/components/admin/AdminFeedbackResolve";
+import AdminWithdrawAction from "@/components/admin/AdminWithdrawAction";
+import AdminRestoreAction from "@/components/admin/AdminRestoreAction";
+import AdminMessageAudit from "@/components/admin/AdminMessageAudit";
+import AdminGrowth from "@/components/admin/AdminGrowth";
 
 export const dynamic = "force-dynamic";
 
-const ACTION_LABEL: Record<string, string> = {
-  approve_teacher: "Öğretmen onaylandı", reject_teacher: "Öğretmen reddedildi",
-  approve_coach: "Koç onaylandı", reject_coach: "Koç reddedildi", resolve_report: "Bildirim işlendi",
-};
-
-async function count(supabase: any, table: string, filter?: [string, string]) {
-  let q = supabase.from(table).select("*", { count: "exact", head: true });
-  if (filter) q = q.eq(filter[0], filter[1]);
-  const { count } = await q;
-  return count ?? 0;
+// Basit CSS bar grafiği (server-render; etkileşim yok)
+function Bars({ data, color = "bg-accent" }: { data: { label: string; n: number }[]; color?: string }) {
+  const max = Math.max(1, ...data.map((d) => d.n));
+  return (
+    <div className="flex h-24 items-end gap-px">
+      {data.map((d, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center justify-end" title={`${d.label}: ${d.n}`}>
+          <div className={`w-full rounded-t ${color}`} style={{ height: `${(d.n / max) * 100}%`, minHeight: d.n ? 3 : 0 }} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default async function Admin() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
 
-  if (profile?.role !== "admin") {
-    return (
-      <div className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-5 text-center">
-        <Logo size={26} />
-        <p className="mt-6 text-muted">Bu sayfa yöneticilere özeldir.</p>
-        <Link href="/ogrenci" className="mt-4 text-sm font-medium text-primary">Panele dön</Link>
-      </div>
-    );
+  const { data: me } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
+  if (!me?.is_admin) redirect("/kesfet");
+
+  // service role ile tüm verilere eriş
+  const admin = createAdminClient();
+  const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const weekAgo = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
+
+  const [
+    { count: users },
+    { count: matches },
+    { data: reports },
+    { data: recent },
+    { count: premium },
+    { count: dau },
+    { count: interactions },
+    { count: messages },
+    { count: churned },
+    { data: modQueue },
+    { data: verifs },
+    { data: feedback },
+    { data: withdrawals },
+    { data: deletedAccounts },
+  ] = await Promise.all([
+    admin.from("profiles").select("*", { count: "exact", head: true }),
+    admin.from("matches").select("*", { count: "exact", head: true }),
+    admin.from("reports").select("*").order("created_at", { ascending: false }).limit(20),
+    admin.from("profiles").select("id,name,city,behavior_score,is_verified,banned,created_at").order("created_at", { ascending: false }).limit(15),
+    admin.from("profiles").select("*", { count: "exact", head: true }).neq("premium_plan", "free"),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("last_active", dayAgo),
+    admin.from("interactions").select("*", { count: "exact", head: true }).neq("type", "gec"),
+    admin.from("messages").select("*", { count: "exact", head: true }),
+    admin.from("profiles").select("*", { count: "exact", head: true }).lt("last_active", weekAgo),
+    admin.from("moderation_queue").select("*").eq("status", "acik").order("created_at", { ascending: false }).limit(10),
+    admin.from("profiles").select("id,name,verification_path").eq("verification_status", "pending").limit(15),
+    admin.from("feedback").select("id,message,created_at,user_id").eq("handled", false).order("created_at", { ascending: false }).limit(20),
+    admin.from("withdrawals").select("id,user_id,jeton,amount_try,iban,full_name,created_at").eq("status", "pending").order("created_at", { ascending: true }).limit(30),
+    admin.from("profiles").select("id,name,city,deleted_at").not("deleted_at", "is", null).order("deleted_at", { ascending: false }).limit(50),
+  ]);
+
+  // --- Üye & Trafik analitiği ---
+  const nowMs = Date.now();
+  const D = 24 * 3600 * 1000;
+  const isoT = (ms: number) => new Date(ms).toISOString();
+  const [
+    { count: newToday }, { count: new7d }, { count: new30d },
+    { count: wau }, { count: mau }, { count: referredCount },
+    { count: vToday }, { count: v7d }, { count: v30d }, { count: vTotal },
+    { data: signupRows }, { data: visitRows },
+  ] = await Promise.all([
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 7 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 30 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("last_active", isoT(nowMs - 7 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).gt("last_active", isoT(nowMs - 30 * D)),
+    admin.from("profiles").select("*", { count: "exact", head: true }).not("referred_by", "is", null),
+    admin.from("site_visits").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - D)),
+    admin.from("site_visits").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 7 * D)),
+    admin.from("site_visits").select("*", { count: "exact", head: true }).gt("created_at", isoT(nowMs - 30 * D)),
+    admin.from("site_visits").select("*", { count: "exact", head: true }),
+    admin.from("profiles").select("created_at").gt("created_at", isoT(nowMs - 30 * D)).limit(100000),
+    admin.from("site_visits").select("created_at").gt("created_at", isoT(nowMs - 30 * D)).limit(200000),
+  ]);
+
+  const dailyT = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(nowMs - (29 - i) * D);
+    return { key: d.toISOString().slice(0, 10), label: d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit" }), n: 0 };
+  });
+  const hourlyT = Array.from({ length: 24 }, (_, i) => ({ label: `${i}`, n: 0 }));
+  const di = new Map(dailyT.map((d, i) => [d.key, i]));
+  const signupDaily = dailyT.map((d) => ({ ...d }));
+  const signupHourly = hourlyT.map((h) => ({ ...h }));
+  const visitDaily = dailyT.map((d) => ({ ...d, n: 0 }));
+  (signupRows || []).forEach((r: any) => {
+    const dk = new Date(r.created_at).toISOString().slice(0, 10);
+    if (di.has(dk)) signupDaily[di.get(dk)!].n++;
+    if (new Date(r.created_at).getTime() > nowMs - D) signupHourly[new Date(r.created_at).getHours()].n++;
+  });
+  (visitRows || []).forEach((r: any) => {
+    const dk = new Date(r.created_at).toISOString().slice(0, 10);
+    if (di.has(dk)) visitDaily[di.get(dk)!].n++;
+  });
+
+  // --- YASAL KAYITLAR (KVKK/5651): e-posta + kayıt/giriş + IP ---
+  let authUsers: any[] = [];
+  try {
+    const { data: au } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    authUsers = au?.users || [];
+  } catch {}
+  const authIds = authUsers.map((u) => u.id);
+  const profMap = new Map<string, any>();
+  const ipMap = new Map<string, { ip: string; at: string }>();
+  if (authIds.length) {
+    const [{ data: profs }, { data: ips }] = await Promise.all([
+      admin.from("profiles").select("id,name,member_no,city,last_active,banned").in("id", authIds),
+      admin.from("site_visits").select("user_id,ip,created_at").in("user_id", authIds).not("ip", "is", null).order("created_at", { ascending: false }).limit(5000),
+    ]);
+    (profs || []).forEach((p: any) => profMap.set(p.id, p));
+    (ips || []).forEach((r: any) => { if (r.user_id && !ipMap.has(r.user_id)) ipMap.set(r.user_id, { ip: r.ip, at: r.created_at }); });
+  }
+  const legalRows = authUsers
+    .map((u) => {
+      const p = profMap.get(u.id) || {};
+      const ipr = ipMap.get(u.id);
+      return {
+        id: u.id, email: u.email as string | undefined, created: u.created_at as string,
+        lastSignIn: u.last_sign_in_at as string | undefined, name: p.name, memberNo: p.member_no,
+        city: p.city, banned: p.banned, ip: ipr?.ip,
+      };
+    })
+    .sort((a, b) => new Date(b.created || 0).getTime() - new Date(a.created || 0).getTime());
+
+  const { data: accessLog } = await admin
+    .from("site_visits").select("user_id,ip,path,created_at").order("created_at", { ascending: false }).limit(60);
+
+  // Admin denetim kaydı (kim hangi mesajları inceledi)
+  const { data: auditLog } = await admin
+    .from("admin_audit").select("admin_id,action,target_user,meta,created_at").order("created_at", { ascending: false }).limit(30);
+
+  // Doğrulama selfie'leri private 'photos' kovasında → admin için imzalı URL.
+  const pendingVerifs = await Promise.all(
+    (verifs || []).map(async (v) => ({
+      id: v.id as string,
+      name: v.name as string,
+      url: v.verification_path
+        ? (await admin.storage.from("photos").createSignedUrl(v.verification_path as string, 600)).data?.signedUrl || null
+        : null,
+    }))
+  );
+
+  // Öneri sahiplerinin adları.
+  const fbIds = Array.from(new Set((feedback || []).map((f) => f.user_id).filter(Boolean)));
+  const fbNames = new Map<string, string>();
+  if (fbIds.length) {
+    const { data: fbProfs } = await admin.from("profiles_card").select("id,name").in("id", fbIds as string[]);
+    (fbProfs || []).forEach((p: any) => fbNames.set(p.id, p.name));
   }
 
-  const [pendingTeachers, pendingCoaches, totalQ, openQ, answeredQ] = await Promise.all([
-    count(supabase, "teacher_profiles", ["status", "pending"]),
-    count(supabase, "coach_profiles", ["status", "pending"]),
-    count(supabase, "questions"),
-    count(supabase, "questions", ["status", "open"]),
-    count(supabase, "questions", ["status", "answered"]),
-  ]);
-  const { data: tx } = await supabase.from("coin_transactions").select("id, amount, type, description, created_at").order("created_at", { ascending: false }).limit(8);
-
-  const [totalPay, paidPay, pendingPay] = await Promise.all([
-    count(supabase, "payment_orders"),
-    count(supabase, "payment_orders", ["status", "paid"]),
-    count(supabase, "payment_orders", ["status", "pending"]),
-  ]);
-  const { data: paidOrders } = await supabase.from("payment_orders").select("total_coins").eq("status", "paid");
-  const coinsSold = (paidOrders || []).reduce((s: number, o: any) => s + (o.total_coins || 0), 0);
-
-  const [totalRooms, liveRoomsCount, totalParticipations] = await Promise.all([
-    count(supabase, "live_rooms"),
-    count(supabase, "live_rooms", ["status", "live"]),
-    count(supabase, "room_participants"),
-  ]);
-
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const dayIso = startOfDay.toISOString();
-  async function countSince(table: string) {
-    const { count } = await supabase.from(table).select("*", { count: "exact", head: true }).gte("created_at", dayIso);
-    return count ?? 0;
+  // Moderasyon kuyruğundaki hesapların bilgisi (isim + aksiyon için).
+  const modIds = Array.from(new Set((modQueue || []).map((m) => m.user_id).filter(Boolean)));
+  const modInfo = new Map<string, any>();
+  if (modIds.length) {
+    const { data: mp } = await admin.from("profiles").select("id,name,is_verified,banned").in("id", modIds as string[]);
+    (mp || []).forEach((p: any) => modInfo.set(p.id, p));
   }
-  const [openReports, newUsersToday, questionsToday, joinsToday] = await Promise.all([
-    count(supabase, "reports", ["status", "open"]),
-    countSince("profiles"),
-    countSince("questions"),
-    countSince("room_participants"),
-  ]);
-  const { count: payToday } = await supabase.from("payment_orders").select("*", { count: "exact", head: true }).eq("status", "paid").gte("created_at", dayIso);
-  const { data: actions } = await supabase.from("admin_actions").select("id, action_type, target_type, created_at").order("created_at", { ascending: false }).limit(8);
 
-  const metrics = [
-    { icon: UserCheck, label: "Bekleyen Öğretmen", value: pendingTeachers, tone: "gold" },
-    { icon: Users, label: "Bekleyen Koç", value: pendingCoaches, tone: "gold" },
-    { icon: HelpCircle, label: "Toplam Soru", value: totalQ, tone: "primary" },
-    { icon: MessageSquare, label: "Açık Soru", value: openQ, tone: "primary" },
-    { icon: CheckCircle2, label: "Cevaplanan Soru", value: answeredQ, tone: "primary" },
-    { icon: CreditCard, label: "Toplam Ödeme", value: totalPay, tone: "primary" },
-    { icon: Wallet, label: "Başarılı Ödeme", value: paidPay, tone: "gold" },
-    { icon: Clock, label: "Bekleyen Ödeme", value: pendingPay, tone: "primary" },
-    { icon: Coins, label: "Satılan Jeton", value: coinsSold, tone: "gold" },
-    { icon: Video, label: "Toplam Oda", value: totalRooms, tone: "primary" },
-    { icon: Radio, label: "Canlı Oda", value: liveRoomsCount, tone: "primary" },
-    { icon: Users, label: "Toplam Katılım", value: totalParticipations, tone: "gold" },
-    { icon: Flag, label: "Açık Bildirim", value: openReports, tone: "gold" },
-    { icon: UserPlus, label: "Bugün Yeni Kullanıcı", value: newUsersToday, tone: "primary" },
-    { icon: HelpCircle, label: "Bugün Soru", value: questionsToday, tone: "primary" },
-    { icon: Radio, label: "Bugün Oda Katılımı", value: joinsToday, tone: "primary" },
-    { icon: Wallet, label: "Bugün Ödeme", value: payToday ?? 0, tone: "gold" },
+  const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
+
+  const stats = [
+    { icon: Users, label: "Kullanıcı", value: users ?? 0 },
+    { icon: Heart, label: "Eşleşme", value: matches ?? 0 },
+    { icon: Flag, label: "Açık şikayet", value: (reports || []).filter((r) => r.status === "acik").length },
+    { icon: Crown, label: "Premium", value: premium ?? 0 },
+  ];
+
+  const analytics = [
+    { icon: Activity, label: "Günlük aktif (DAU)", value: `${dau ?? 0}` },
+    { icon: TrendingUp, label: "Eşleşme dönüşümü", value: `%${pct(matches ?? 0, interactions ?? 0)}` },
+    { icon: Crown, label: "Premium dönüşümü", value: `%${pct(premium ?? 0, users ?? 0)}` },
+    { icon: Activity, label: "Kayıp oranı (churn)", value: `%${pct(churned ?? 0, users ?? 0)}` },
+    { icon: MessageSquare, label: "Eşleşme başına mesaj", value: matches ? (Math.round(((messages ?? 0) / matches) * 10) / 10).toString() : "0" },
+    { icon: MessageSquare, label: "Toplam mesaj", value: `${messages ?? 0}` },
   ];
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-3xl px-4 py-6">
-      <header className="mb-6 flex items-center justify-between border-b border-line pb-4">
-        <Link href="/"><Logo size={22} /></Link>
-        <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Admin Panel</span>
-      </header>
+    <div className="px-4 pb-10 pt-6">
+      <h1 className="mb-5 text-2xl font-bold brand-text">Admin Paneli</h1>
 
-      <h1 className="text-2xl font-bold">Genel Bakış</h1>
-      <p className="mt-1 text-sm text-muted">Başvuruları onayla, bildirilen içerikleri yönet, platformu izle.</p>
+      <AdminGrowth />
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {metrics.map((m) => (
-          <GlassCard key={m.label} className="p-5">
-            <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${m.tone === "gold" ? "bg-gold/12 text-gold" : "bg-primary/12 text-primary"}`}><m.icon size={20} /></span>
-            <p className="mt-3 text-3xl font-bold">{m.value}</p>
-            <p className="mt-1 text-xs leading-tight text-muted">{m.label}</p>
-          </GlassCard>
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-2xl border border-border bg-surface p-4">
+            <s.icon className="mb-2 text-brand" size={20} />
+            <p className="text-2xl font-bold">{s.value}</p>
+            <p className="text-sm text-muted">{s.label}</p>
+          </div>
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-4">
-        <Link href="/admin/applications" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Başvurular →</Link>
-        <Link href="/admin/reports" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Bildirimler →</Link>
-        <Link href="/admin/payments" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Ödemeler →</Link>
-        <Link href="/admin/rooms" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Odalar →</Link>
+      <h2 className="mb-2 font-semibold">Analitik</h2>
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        {analytics.map((a) => (
+          <div key={a.label} className="rounded-2xl border border-border bg-surface p-4">
+            <a.icon className="mb-2 text-brand-2" size={18} />
+            <p className="text-xl font-bold">{a.value}</p>
+            <p className="text-xs text-muted">{a.label}</p>
+          </div>
+        ))}
       </div>
 
-      <h2 className="mt-8 mb-3 font-bold">Son Coin Hareketleri</h2>
-      <GlassCard className="divide-y divide-line p-2">
-        {(!tx || tx.length === 0) && <p className="px-3 py-4 text-sm text-muted">Henüz hareket yok.</p>}
-        {(tx || []).map((t) => (
-          <div key={t.id} className="flex items-center justify-between px-3 py-3">
-            <div>
-              <p className="text-sm font-medium">{t.description || t.type}</p>
-              <p className="text-xs text-muted">{shortDate(t.created_at)}</p>
+      {/* Üyeler & Trafik */}
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <BarChart3 size={18} className="text-accent" /> Üyeler & Trafik
+      </h2>
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { icon: UserPlus, label: "Bugün katılan", value: newToday ?? 0 },
+          { icon: UserPlus, label: "Bu hafta", value: new7d ?? 0 },
+          { icon: UserPlus, label: "Bu ay", value: new30d ?? 0 },
+          { icon: Users, label: "Toplam üye", value: users ?? 0 },
+          { icon: Globe, label: "Bugün siteye giren", value: vToday ?? 0 },
+          { icon: Globe, label: "Bu hafta ziyaret", value: v7d ?? 0 },
+          { icon: Globe, label: "Bu ay ziyaret", value: v30d ?? 0 },
+          { icon: Globe, label: "Toplam ziyaret", value: vTotal ?? 0 },
+        ].map((s) => (
+          <div key={s.label} className="rounded-2xl border border-border bg-surface p-3">
+            <s.icon className="mb-1.5 text-accent" size={17} />
+            <p className="text-xl font-bold">{(s.value as number).toLocaleString("tr-TR")}</p>
+            <p className="text-[11px] text-muted">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mb-3 grid grid-cols-3 gap-3">
+        {[
+          { label: "Aktif (24s)", value: dau ?? 0 },
+          { label: "Aktif (7g)", value: wau ?? 0 },
+          { label: "Aktif (30g)", value: mau ?? 0 },
+        ].map((a) => (
+          <div key={a.label} className="rounded-2xl border border-border bg-surface p-3 text-center">
+            <p className="text-lg font-bold">{(a.value as number).toLocaleString("tr-TR")}</p>
+            <p className="text-[11px] text-muted">{a.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mb-3 rounded-2xl border border-border bg-surface p-3">
+        <p className="mb-2 text-xs text-muted">Üye katılımı — son 30 gün</p>
+        <Bars data={signupDaily} color="bg-accent" />
+      </div>
+      <div className="mb-3 rounded-2xl border border-border bg-surface p-3">
+        <p className="mb-2 text-xs text-muted">Site ziyaretleri — son 30 gün</p>
+        <Bars data={visitDaily} color="bg-brand" />
+      </div>
+      <div className="mb-3 rounded-2xl border border-border bg-surface p-3">
+        <p className="mb-2 text-xs text-muted">Bugünkü katılım — saatlik (0–23)</p>
+        <Bars data={signupHourly} color="bg-accent" />
+      </div>
+      <div className="mb-6 rounded-2xl border border-border bg-surface p-4">
+        <p className="mb-2 text-xs text-muted">Üye kaynağı</p>
+        <div className="flex items-center justify-around text-center">
+          <div><p className="text-xl font-bold">{((users ?? 0) - (referredCount ?? 0)).toLocaleString("tr-TR")}</p><p className="text-xs text-muted">Organik</p></div>
+          <div><p className="text-xl font-bold text-accent">{(referredCount ?? 0).toLocaleString("tr-TR")}</p><p className="text-xs text-muted">Davetle gelen</p></div>
+          <div><p className="text-xl font-bold">%{users ? Math.round(((referredCount ?? 0) / users) * 100) : 0}</p><p className="text-xs text-muted">Davet oranı</p></div>
+        </div>
+      </div>
+
+      {/* YASAL KAYITLAR (KVKK / 5651) */}
+      <h2 className="mb-1 flex items-center gap-2 font-semibold">
+        <ShieldAlert size={18} className="text-warning" /> Yasal kayıtlar — e-posta & IP ({legalRows.length})
+      </h2>
+      <p className="mb-2 text-xs text-muted">
+        KVKK/5651 — adli talep halinde kullanılır. Yalnız admin görür. Gizli tut.
+      </p>
+      <div className="mb-3 max-h-96 overflow-y-auto rounded-2xl border border-border bg-surface">
+        {legalRows.length === 0 && <p className="p-4 text-sm text-muted">Kayıt yok.</p>}
+        {legalRows.map((u) => (
+          <div key={u.id} className="border-b border-border/60 p-3 text-sm last:border-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate font-medium">
+                {u.name || "İsimsiz"}{u.memberNo ? <span className="text-muted"> · #{u.memberNo}</span> : null}
+                {u.banned && <span className="ml-1 text-xs text-error">(yasaklı)</span>}
+              </span>
+              <span className="shrink-0 text-[11px] text-muted">{u.city || "—"}</span>
             </div>
-            <span className={`font-bold ${t.amount < 0 ? "text-danger" : "text-success"}`}>{t.amount > 0 ? "+" : ""}{t.amount}</span>
+            <p className="select-all break-all font-mono text-xs text-accent">{u.email || "—"}</p>
+            <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted">
+              <span>Kayıt: {u.created ? new Date(u.created).toLocaleString("tr-TR") : "—"}</span>
+              <span>Son giriş: {u.lastSignIn ? new Date(u.lastSignIn).toLocaleString("tr-TR") : "—"}</span>
+              <span className="font-mono">IP: {u.ip || "—"}</span>
+            </div>
           </div>
         ))}
-      </GlassCard>
+      </div>
 
-      <h2 className="mt-8 mb-3 font-bold">Son Admin İşlemleri</h2>
-      <GlassCard className="divide-y divide-line p-2">
-        {(!actions || actions.length === 0) && <p className="px-3 py-4 text-sm text-muted">Henüz işlem yok.</p>}
-        {(actions || []).map((a) => (
-          <div key={a.id} className="flex items-center justify-between px-3 py-3">
-            <p className="text-sm font-medium">{ACTION_LABEL[a.action_type] || a.action_type}</p>
-            <p className="text-xs text-muted">{shortDate(a.created_at)}</p>
+      <h2 className="mb-1 flex items-center gap-2 font-semibold">
+        <Globe size={18} className="text-warning" /> Son erişim logları (IP · zaman)
+      </h2>
+      <div className="mb-6 max-h-72 overflow-y-auto rounded-2xl border border-border bg-surface">
+        {(accessLog || []).length === 0 && <p className="p-4 text-sm text-muted">Henüz erişim kaydı yok.</p>}
+        {(accessLog || []).map((a: any, i: number) => (
+          <div key={i} className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs last:border-0">
+            <span className="font-mono text-muted">{a.ip || "—"}</span>
+            <span className="truncate text-muted">{a.user_id ? (profMap.get(a.user_id)?.name || "üye") : "anonim"} · {a.path}</span>
+            <span className="shrink-0 text-muted">{new Date(a.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
           </div>
         ))}
-      </GlassCard>
+      </div>
+
+      {/* Mesaj inceleme (denetimli) */}
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <ShieldAlert size={18} className="text-warning" /> Mesaj içerik denetimi
+      </h2>
+      <div className="mb-3">
+        <AdminMessageAudit />
+      </div>
+      {(auditLog || []).length > 0 && (
+        <div className="mb-6 rounded-2xl border border-border bg-surface p-3">
+          <p className="mb-2 text-xs font-medium text-muted">Denetim kaydı — son incelemeler</p>
+          <div className="max-h-56 space-y-1 overflow-y-auto">
+            {(auditLog || []).map((a: any, i: number) => (
+              <p key={i} className="text-[11px] text-muted">
+                <span className="text-text">{profMap.get(a.admin_id)?.name || "admin"}</span> →{" "}
+                {a.action === "view_messages" ? "mesaj inceledi" : a.action}:{" "}
+                <span className="text-text">{profMap.get(a.target_user)?.name || "?"}</span>
+                {a.meta ? ` · ${a.meta}` : ""} · {new Date(a.created_at).toLocaleString("tr-TR")}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <BadgeCheck size={18} className="text-brand" /> Doğrulama istekleri
+      </h2>
+      <div className="mb-6 space-y-2">
+        {pendingVerifs.length === 0 && (
+          <p className="text-sm text-muted">Bekleyen doğrulama yok.</p>
+        )}
+        {pendingVerifs.map((v) => (
+          <div key={v.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3">
+            {v.url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={v.url} alt="selfie" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+            ) : (
+              <div className="h-14 w-14 shrink-0 rounded-xl bg-elevated" />
+            )}
+            <p className="flex-1 truncate text-sm font-medium">{v.name}</p>
+            <AdminVerifyReview userId={v.id} />
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <ShieldAlert size={18} className="text-brand-2" /> Moderasyon kuyruğu
+      </h2>
+      <div className="mb-6 space-y-2">
+        {(modQueue || []).length === 0 && (
+          <p className="text-sm text-muted">Bekleyen moderasyon kaydı yok.</p>
+        )}
+        {(modQueue || []).map((m) => {
+          const u = modInfo.get(m.user_id);
+          return (
+            <div key={m.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate font-medium">
+                  {u?.name || "Şüpheli hesap"}
+                  {u?.banned && <span className="ml-1 text-xs text-error">(yasaklı)</span>}
+                </span>
+                <span className="shrink-0 rounded-full bg-elevated px-2 py-0.5 text-xs">risk {m.risk_score ?? "-"}</span>
+              </div>
+              {Array.isArray(m.reasons) && m.reasons.length > 0 && (
+                <p className="mt-1 text-muted">{(m.reasons as string[]).join(", ")}</p>
+              )}
+              {u && (
+                <div className="mt-2 flex justify-end">
+                  <AdminUserActions userId={m.user_id} verified={!!u.is_verified} banned={!!u.banned} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <h2 className="mb-2 font-semibold">Son şikayetler</h2>
+      <div className="mb-6 space-y-2">
+        {(reports || []).length === 0 && <p className="text-sm text-muted">Şikayet yok.</p>}
+        {(reports || []).map((r) => (
+          <div key={r.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium">{r.reason}</span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-elevated px-2 py-0.5 text-xs">{r.status}</span>
+                <AdminReportResolve reportId={r.id} status={r.status} />
+              </div>
+            </div>
+            {r.details && <p className="mt-1 text-muted">{r.details}</p>}
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <Lightbulb size={18} className="text-accent" /> Öneriler & geri bildirim
+      </h2>
+      <div className="mb-6 space-y-2">
+        {(feedback || []).length === 0 && <p className="text-sm text-muted">Henüz öneri yok.</p>}
+        {(feedback || []).map((f) => (
+          <div key={f.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="flex items-start justify-between gap-2">
+              <p className="flex-1 whitespace-pre-wrap">{f.message}</p>
+              <AdminFeedbackResolve feedbackId={f.id} />
+            </div>
+            <p className="t-caption mt-1 text-muted">
+              {f.user_id ? fbNames.get(f.user_id) || "Bir kullanıcı" : "Silinmiş kullanıcı"} ·{" "}
+              {new Date(f.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <Banknote size={18} className="text-success" /> Para çekme talepleri
+        {(withdrawals || []).length > 0 && (
+          <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs text-success">
+            {(withdrawals || []).length}
+          </span>
+        )}
+      </h2>
+      <div className="mb-6 space-y-2">
+        {(withdrawals || []).length === 0 && (
+          <p className="text-sm text-muted">Bekleyen para çekme talebi yok.</p>
+        )}
+        {(withdrawals || []).map((w: any) => (
+          <div key={w.id} className="rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-semibold text-success">
+                  ₺{w.amount_try} <span className="text-muted">· {w.jeton} jeton</span>
+                </p>
+                <p className="truncate">{w.full_name}</p>
+                <p className="select-all break-all font-mono text-xs text-muted">{w.iban}</p>
+                <p className="t-caption mt-0.5 text-muted">
+                  {new Date(w.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+              <AdminWithdrawAction withdrawId={w.id} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 flex items-center gap-2 font-semibold">
+        <Trash2 size={18} className="text-warning" /> Silinen Hesaplar
+        {(deletedAccounts || []).length > 0 && (
+          <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs text-warning">
+            {(deletedAccounts || []).length}
+          </span>
+        )}
+      </h2>
+      <div className="mb-6 space-y-2">
+        {(deletedAccounts || []).length === 0 && (
+          <p className="text-sm text-muted">Silinmiş hesap yok.</p>
+        )}
+        {(deletedAccounts || []).map((u: any) => (
+          <div key={u.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="min-w-0">
+              <p className="truncate font-medium">{u.name || "İsimsiz"}</p>
+              <p className="t-caption text-muted">
+                {u.city || "—"} · silindi:{" "}
+                {new Date(u.deleted_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+            <AdminRestoreAction userId={u.id} />
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mb-2 font-semibold">Son kullanıcılar</h2>
+      <div className="space-y-2">
+        {(recent || []).map((u) => (
+          <div key={u.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-3 text-sm">
+            <div className="min-w-0">
+              <p className="truncate font-medium">
+                {u.name}
+                {u.banned && <span className="ml-1.5 text-xs text-error">(yasaklı)</span>}
+              </p>
+              <p className="truncate text-muted">
+                {u.city} · puan {u.behavior_score}
+              </p>
+            </div>
+            <AdminUserActions userId={u.id} verified={u.is_verified} banned={!!u.banned} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

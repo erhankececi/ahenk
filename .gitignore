@@ -9,6 +9,3 @@ out
 next-env.d.ts
 
 .vercel
-
-# Stitch MCP (gizli anahtar içerir)
-.mcp.json

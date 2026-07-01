@@ -1,0 +1,138 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { TrendingUp, Users, Coins, Heart, MessageCircle, Crown, Sparkles } from "lucide-react";
+
+type Huni = { key: string; label: string; value: number; pct: number };
+type Data = {
+  huni: Huni[];
+  hacim: { dau: number; wau: number; dailyAnswers: number; interactions: number; messages: number; kurucuUye: number };
+  eventler?: Record<string, number>;
+  kaynak?: Record<string, number>;
+  signups: number;
+};
+
+const SOURCE_LABEL: Record<string, string> = {
+  visitors_locked: "Ziyaretçiler kilidi",
+  likes_locked: "Beğenenler kilidi",
+  analysis_locked: "Analiz kilidi",
+  profile_card: "Profil kartı",
+  direct: "Doğrudan",
+};
+
+const EVENT_LABEL: Record<string, string> = {
+  referral_link_copied: "Davet linki kopyalandı",
+  referral_link_shared: "Davet paylaşıldı",
+  premium_paywall_viewed: "Premium görüntülendi",
+  premium_cta_clicked: "Premium CTA tıklandı",
+  coin_wallet_opened: "Cüzdan açıldı",
+  coin_purchase_clicked: "Jeton al tıklandı",
+  coin_checkout_started: "Jeton ödemesi başladı",
+  coin_purchase_success: "Jeton ödemesi tamamlandı",
+  premium_purchase_success: "Premium satın alındı",
+  gift_store_opened: "Hediye mağazası açıldı",
+  gift_send_clicked: "Hediye gönder tıklandı",
+};
+
+export default function AdminGrowth() {
+  const [d, setD] = useState<Data | null>(null);
+  const [err, setErr] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/growth")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setD)
+      .catch(() => setErr(true));
+  }, []);
+
+  if (err) return null;
+
+  const tr = (n: number) => n.toLocaleString("tr-TR");
+  const stats = d
+    ? [
+        { Icon: Users, label: "DAU", value: d.hacim.dau },
+        { Icon: Users, label: "WAU", value: d.hacim.wau },
+        { Icon: Sparkles, label: "Günlük yanıt", value: d.hacim.dailyAnswers },
+        { Icon: Heart, label: "Beğeni", value: d.hacim.interactions },
+        { Icon: MessageCircle, label: "Mesaj", value: d.hacim.messages },
+        { Icon: Crown, label: "Kurucu üye", value: d.hacim.kurucuUye },
+      ]
+    : [];
+
+  return (
+    <section className="lp-panel mb-5 rounded-2xl p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <TrendingUp size={18} className="text-accent" />
+        <h2 className="font-display text-sm font-semibold text-text">Growth Sağlık Paneli</h2>
+      </div>
+
+      {!d ? (
+        <div className="space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="shimmer h-7 rounded-lg" />)}</div>
+      ) : (
+        <>
+          {/* Aktivasyon hunisi */}
+          <div className="space-y-2">
+            {d.huni.map((h) => (
+              <div key={h.key}>
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span className="text-text/85">{h.label}</span>
+                  <span className="font-semibold text-accent">
+                    {tr(h.value)} <span className="text-muted">· %{h.pct}</span>
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.max(2, h.pct)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Hacim metrikleri */}
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {stats.map((s) => (
+              <div key={s.label} className="rounded-xl border border-white/10 bg-[#0E0D10]/60 p-2.5">
+                <s.Icon size={14} className="mb-1 text-accent" />
+                <p className="text-[10px] text-muted">{s.label}</p>
+                <p className="text-sm font-semibold text-text">{tr(s.value)}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* 30 günlük dönüşüm sinyalleri (granüler event'ler) */}
+          {d.eventler && Object.keys(d.eventler).length > 0 && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Son 30 gün · dönüşüm sinyalleri
+              </p>
+              <div className="space-y-1.5">
+                {Object.entries(EVENT_LABEL).map(([k, label]) => (
+                  <div key={k} className="flex items-center justify-between text-xs">
+                    <span className="text-text/80">{label}</span>
+                    <span className="font-semibold text-accent">{tr(d.eventler?.[k] ?? 0)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Premium isteği nereden geliyor? */}
+          {d.kaynak && Object.values(d.kaynak).some((v) => v > 0) && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Premium isteği nereden? · 30 gün
+              </p>
+              <div className="space-y-1.5">
+                {Object.entries(SOURCE_LABEL).map(([k, label]) => (
+                  <div key={k} className="flex items-center justify-between text-xs">
+                    <span className="text-text/80">{label}</span>
+                    <span className="font-semibold text-accent">{tr(d.kaynak?.[k] ?? 0)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
