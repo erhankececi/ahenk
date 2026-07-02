@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { Application, Container, FillGradient, Graphics, Text, TextStyle } from "pixi.js";
-import { buildMockGameState } from "@/lib/game101/mockData";
+import { MOCK_PLAYERS } from "@/lib/game101/mockData";
+import type { Tile as TileModel, TileColor } from "@/lib/game101/types";
+import type { OkeyGameTile } from "@/lib/game101/gameTypes";
 import { buildGameTable } from "./GameTable";
 import { buildPlayerSeat } from "./PlayerSeat";
 import { buildTileRack } from "./TileRack";
@@ -13,6 +15,37 @@ export interface GameCanvasProps {
   width: number;
   height: number;
   onSeatClick: (playerId: string) => void;
+  /** Benim (bottom) elimdeki taşlar — useOkeyGame'den gelir. */
+  myHand: OkeyGameTile[];
+  /** Atılan taş yığınının en üstteki taşı. */
+  discardTile: OkeyGameTile | null;
+  /** Kapalı çekme destesinde kalan taş sayısı. */
+  drawPileCount: number;
+  /** Sıra bende mi? ("SIRA SENDE" / "RAKİP OYNUYOR" pill'i için). */
+  isMyTurn: boolean;
+  /** Şu an seçili taşın id'si (yoksa null). */
+  selectedTileId: string | null;
+  /** Istakada bir taşa tıklanınca çağrılır. */
+  onSelectTile: (tileId: string) => void;
+}
+
+/** OkeyGameTile (gameTypes.ts) rengini eski Tile (types.ts) renk paletine eşler. */
+const COLOR_MAP: Record<OkeyGameTile["color"], TileColor> = {
+  red: "red",
+  blue: "blue",
+  black: "navy",
+  yellow: "gold",
+  joker: "gold",
+};
+
+/** useOkeyGame'in OkeyGameTile modelini Pixi tile bileşenlerinin beklediği Tile modeline çevirir. */
+function toTileModel(tile: OkeyGameTile): TileModel {
+  return {
+    id: tile.id,
+    value: tile.value,
+    color: COLOR_MAP[tile.color],
+    isJoker: !!tile.isOkey,
+  };
 }
 
 /**
@@ -20,10 +53,24 @@ export interface GameCanvasProps {
  * tek sahne grafiğinde koordine eder. PixiJS v8 API: async app.init, app.canvas,
  * Graphics fluent chain, FillGradient.
  */
-export default function GameCanvas({ width, height, onSeatClick }: GameCanvasProps) {
+export default function GameCanvas({
+  width,
+  height,
+  onSeatClick,
+  myHand,
+  discardTile,
+  drawPileCount,
+  isMyTurn,
+  selectedTileId,
+  onSelectTile,
+}: GameCanvasProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<Application | null>(null);
   const cleanupExtraRef = useRef<() => void>(() => {});
+  // TileRack'in setSelected'ını dışarıdan (selectedTileId değişince tam rebuild
+  // yapmadan) çağırabilmek için güncel referansı burada tutuyoruz.
+  const rackSetSelectedRef = useRef<((id: string | null) => void) | null>(null);
+  const turnPillSetLabelRef = useRef<((isMyTurn: boolean) => void) | null>(null);
 
   useEffect(() => {
     let destroyed = false;
@@ -46,7 +93,9 @@ export default function GameCanvas({ width, height, onSeatClick }: GameCanvasPro
       }
       hostRef.current.appendChild(app.canvas);
 
-      const state = buildMockGameState();
+      const myTiles = myHand.map(toTileModel);
+      const discard = discardTile ? toTileModel(discardTile) : null;
+      const players = MOCK_PLAYERS;
       const root = new Container();
       app.stage.addChild(root);
 
@@ -60,10 +109,10 @@ export default function GameCanvas({ width, height, onSeatClick }: GameCanvasPro
       // 2) Rakip koltukları (top/left/right) + kendi koltuk göstergesi.
       const seatSetters: Record<string, (active: boolean) => void> = {};
 
-      const topPlayer = state.players.find((p) => p.seat === "top")!;
-      const leftPlayer = state.players.find((p) => p.seat === "left")!;
-      const rightPlayer = state.players.find((p) => p.seat === "right")!;
-      const mePlayer = state.players.find((p) => p.seat === "bottom")!;
+      const topPlayer = players.find((p) => p.seat === "top")!;
+      const leftPlayer = players.find((p) => p.seat === "left")!;
+      const rightPlayer = players.find((p) => p.seat === "right")!;
+      const mePlayer = players.find((p) => p.seat === "bottom")!;
 
       const topSeat = buildPlayerSeat(topPlayer, "horizontal", onSeatClick);
       topSeat.container.position.set(cx, height * 0.115);
@@ -88,30 +137,37 @@ export default function GameCanvas({ width, height, onSeatClick }: GameCanvasPro
       seatSetters[mePlayer.id] = meSeat.setActive;
 
       // 3) Merkez: kapalı deste (sol-orta) + açık discard (sağ-orta) + SIRA SENDE pill.
-      const drawPile = buildDrawPile(state.drawPileCount);
+      const drawPile = buildDrawPile(drawPileCount);
       drawPile.position.set(cx - 70, cy + 6);
       root.addChild(drawPile);
 
-      const discard = buildDiscardArea(state.discardTile);
-      discard.position.set(cx + 70, cy + 6);
-      root.addChild(discard);
+      const discardArea = buildDiscardArea(discard);
+      discardArea.position.set(cx + 70, cy + 6);
+      root.addChild(discardArea);
 
-      const turnPill = buildTurnPill();
-      turnPill.position.set(cx, cy - height * 0.09);
-      root.addChild(turnPill);
+      const turnPill = buildTurnPill(isMyTurn);
+      turnPill.container.position.set(cx, cy - height * 0.09);
+      root.addChild(turnPill.container);
+      turnPillSetLabelRef.current = turnPill.setIsMyTurn;
 
       // 4) Alt kullanıcı ıstakası (2 sıra, sürükle-bırak).
-      const rack = buildTileRack(state.myTiles, app.ticker);
+      const rack = buildTileRack(myTiles, app.ticker, onSelectTile);
       rack.container.position.set(cx, height * 0.985 - rackHalfHeight());
       root.addChild(rack.container);
+      rack.setSelected(selectedTileId);
+      rackSetSelectedRef.current = rack.setSelected;
 
-      // Aktif sırayı görsel olarak yansıt (mock: her zaman "me").
+      // Aktif sırayı görsel olarak yansıt: sıra bendeyse kendi koltuğum
+      // vurgulanır; rakipteyse (hangi rakip olduğu bu fazda ayrıntılı takip
+      // edilmiyor) hiçbir rakip koltuğu özel olarak vurgulanmaz.
       Object.entries(seatSetters).forEach(([id, setActive]) => {
-        setActive(id === state.currentTurnPlayerId);
+        setActive(isMyTurn && id === mePlayer.id);
       });
 
       cleanupExtraRef.current = () => {
         rack.destroy();
+        rackSetSelectedRef.current = null;
+        turnPillSetLabelRef.current = null;
       };
     })();
 
@@ -132,10 +188,28 @@ export default function GameCanvas({ width, height, onSeatClick }: GameCanvasPro
         hostRef.current.innerHTML = "";
       }
     };
-    // width/height değiştiğinde (letterbox yeniden hesaplandığında) sahneyi
-    // sıfırdan kur — aksi halde Pixi canvas ilk mount boyutunda kilitli kalır
-    // ve dış konteyner büyüdükçe içerik köşede küçük kalır.
-  }, [width, height, onSeatClick]);
+    // width/height değiştiğinde (letterbox yeniden hesaplandığında) VEYA oyun
+    // state'i (el/discard/deste/sıra) değiştiğinde sahneyi sıfırdan kur — bu
+    // fazda (mock/prototip) kabul edilebilir, aksi halde dış konteyner
+    // büyüdükçe içerik köşede küçük kalır. selectedTileId ve onSelectTile
+    // BİLEREK dependency array'de YOK: seçim değişince (veya sürükleme
+    // sırasında) sahne asla yeniden kurulmaz — bkz. aşağıdaki ayrı effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height, onSeatClick, myHand, discardTile, drawPileCount, isMyTurn]);
+
+  // selectedTileId değişince TAM rebuild yapmadan yalnızca ıstakadaki taşın
+  // kendi setSelected'ını çağırır (TileRack zaten bunu destekliyor).
+  useEffect(() => {
+    rackSetSelectedRef.current?.(selectedTileId);
+  }, [selectedTileId]);
+
+  // isMyTurn değiştiğinde pill metnini rebuild olmadan güncellemek de
+  // mümkün, ama pill zaten yukarıdaki rebuild bağımlılığında — bu effect
+  // yalnızca aynı render içinde ilk kurulumdan hemen sonra senkron kalmasını
+  // garanti eder (guard: turnPillSetLabelRef henüz set edilmemiş olabilir).
+  useEffect(() => {
+    turnPillSetLabelRef.current?.(isMyTurn);
+  }, [isMyTurn]);
 
   return <div ref={hostRef} className="absolute inset-0" />;
 }
@@ -148,11 +222,20 @@ function rackHalfHeight() {
   return (rows * (tileH + gapY) - gapY + pad * 2) / 2;
 }
 
-/** "SIRA SENDE" — altın çerçeveli pill/badge, masa üstünde ortada. */
-function buildTurnPill(): Container {
+interface BuiltTurnPill {
+  container: Container;
+  setIsMyTurn: (isMyTurn: boolean) => void;
+}
+
+/**
+ * Sıra göstergesi pill/badge — masa üstünde ortada. Sıra bendeyse "SIRA
+ * SENDE", değilse "RAKİP OYNUYOR" gösterir. setIsMyTurn ile metin rebuild
+ * olmadan güncellenebilir (genişlik/arka plan da yeniden hesaplanır).
+ */
+function buildTurnPill(isMyTurn: boolean): BuiltTurnPill {
   const container = new Container();
   const label = new Text({
-    text: "SIRA SENDE",
+    text: isMyTurn ? "SIRA SENDE" : "RAKİP OYNUYOR",
     style: new TextStyle({
       fontFamily: "Manrope, Inter, system-ui, sans-serif",
       fontSize: 15,
@@ -163,24 +246,43 @@ function buildTurnPill(): Container {
   });
   label.anchor.set(0.5);
 
-  const paddingX = 22;
-  const paddingY = 10;
-  const w = label.width + paddingX * 2;
-  const h = label.height + paddingY * 2;
+  const bg = new Graphics();
+  const innerGlow = new Graphics();
 
-  const grad = new FillGradient(0, -h / 2, 0, h / 2);
-  grad.addColorStop(0, 0x3a2c17);
-  grad.addColorStop(1, 0x241a0d);
+  const redraw = (myTurn: boolean) => {
+    label.text = myTurn ? "SIRA SENDE" : "RAKİP OYNUYOR";
 
-  const bg = new Graphics()
-    .roundRect(-w / 2, -h / 2, w, h, h / 2)
-    .fill(grad)
-    .stroke({ width: 1.5, color: 0xc7a977, alpha: 0.9 });
+    const paddingX = 22;
+    const paddingY = 10;
+    const w = label.width + paddingX * 2;
+    const h = label.height + paddingY * 2;
 
-  const innerGlow = new Graphics()
-    .roundRect(-w / 2 + 3, -h / 2 + 3, w - 6, h - 6, h / 2 - 3)
-    .stroke({ width: 1, color: 0xdbbf8e, alpha: 0.45 });
+    const grad = new FillGradient(0, -h / 2, 0, h / 2);
+    if (myTurn) {
+      grad.addColorStop(0, 0x3a2c17);
+      grad.addColorStop(1, 0x241a0d);
+    } else {
+      grad.addColorStop(0, 0x2a2420);
+      grad.addColorStop(1, 0x171412);
+    }
+
+    bg.clear()
+      .roundRect(-w / 2, -h / 2, w, h, h / 2)
+      .fill(grad)
+      .stroke({ width: 1.5, color: 0xc7a977, alpha: myTurn ? 0.9 : 0.5 });
+
+    innerGlow
+      .clear()
+      .roundRect(-w / 2 + 3, -h / 2 + 3, w - 6, h - 6, h / 2 - 3)
+      .stroke({ width: 1, color: 0xdbbf8e, alpha: myTurn ? 0.45 : 0.2 });
+  };
+
+  redraw(isMyTurn);
 
   container.addChild(bg, innerGlow, label);
-  return container;
+
+  return {
+    container,
+    setIsMyTurn: redraw,
+  };
 }

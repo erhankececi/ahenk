@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { X } from "lucide-react";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import VoiceControls from "./VoiceControls";
 import ActionButtons from "./ActionButtons";
 import MiniProfileOverlay from "./MiniProfileOverlay";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
+import { useOkeyGame } from "@/lib/game101/useOkeyGame";
 
 const GameCanvas = dynamic(() => import("./GameCanvas"), { ssr: false });
 
@@ -41,6 +42,22 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [stageSize, setStageSize] = useState({ width: DESIGN_W, height: DESIGN_H });
 
+  // roomId verilmezse (ör. /oyun/101/prototip akışı) hook'a sabit bir mock
+  // roomId veriyoruz — böylece prototip akışının görünümü/davranışı bozulmaz,
+  // ama artık gerçek (mock) state kullanılır.
+  const {
+    myHand,
+    discardTile,
+    drawPileCount,
+    isMyTurn,
+    selectedTileId,
+    selectTile,
+    drawTile,
+    discardSelectedTile,
+    turnStartedAt,
+    turnDurationSec,
+  } = useOkeyGame(roomId ?? "prototip", roomName);
+
   const handleSeatClick = useCallback((playerId: string) => {
     setSelectedPlayerId(playerId);
   }, []);
@@ -48,6 +65,21 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
   const selectedPlayer = selectedPlayerId
     ? MOCK_PLAYERS.find((p) => p.id === selectedPlayerId) ?? null
     : null;
+
+  // Turn timer: her ~1sn'de bir kalan süreyi hesaplayan local state.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const remainingSec = useMemo(() => {
+    if (turnStartedAt === null) return turnDurationSec;
+    const elapsed = (now - turnStartedAt) / 1000;
+    return Math.max(0, Math.ceil(turnDurationSec - elapsed));
+  }, [now, turnStartedAt, turnDurationSec]);
+
+  const timerProgress = turnDurationSec > 0 ? remainingSec / turnDurationSec : 0;
 
   // Fullscreen + orientation lock isteği (sessizce başarısız olabilir).
   useEffect(() => {
@@ -123,7 +155,16 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             width={stageSize.width}
             height={stageSize.height}
             onSeatClick={handleSeatClick}
+            myHand={myHand}
+            discardTile={discardTile}
+            drawPileCount={drawPileCount}
+            isMyTurn={isMyTurn}
+            selectedTileId={selectedTileId}
+            onSelectTile={selectTile}
           />
+
+          {/* Sıra süresi göstergesi: 30 saniyelik dairesel geri sayım (DOM overlay). */}
+          <TurnTimerRing remainingSec={remainingSec} progress={timerProgress} isMyTurn={isMyTurn} />
 
           {/* Sağ üst kontrol çemberleri: mikrofon/ses/sohbet/ayarlar + çıkış. */}
           <div className="pointer-events-auto absolute right-3 top-3 z-10 flex items-center gap-2">
@@ -145,8 +186,12 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             </div>
           ) : null}
 
-          {/* Sağ-alt aksiyon butonları (TAŞ ÇEK / SERİ AÇ / ÇİFT AÇ / BİTİR). */}
-          <ActionButtons />
+          {/* Sağ-alt aksiyon butonları (TAŞ ÇEK / TAŞ AT / SERİ AÇ / ÇİFT AÇ / BİTİR). */}
+          <ActionButtons
+            onDraw={drawTile}
+            onDiscard={discardSelectedTile}
+            canDiscard={selectedTileId !== null}
+          />
 
           {/* Mini profil kartı: bir koltuğa tıklanınca beliren avatar/isim/bio/etiket kartı. */}
           {selectedPlayer ? (
@@ -166,5 +211,57 @@ function IconCircle({ icon }: { icon: React.ReactNode }) {
     <span className="flex h-8 w-8 items-center justify-center rounded-full border border-brand/30 bg-black/40 text-brand backdrop-blur-sm">
       {icon}
     </span>
+  );
+}
+
+interface TurnTimerRingProps {
+  remainingSec: number;
+  /** 1 (süre yeni başladı) -> 0 (süre doldu). */
+  progress: number;
+  isMyTurn: boolean;
+}
+
+/**
+ * Sıra süresi için basit dairesel geri sayım — Pixi'ye ihtiyaç yok, DOM/SVG
+ * overlay. Sol üstte, oda etiketinin altında/yanında görünür.
+ */
+function TurnTimerRing({ remainingSec, progress, isMyTurn }: TurnTimerRingProps) {
+  const size = 44;
+  const strokeWidth = 3.5;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clampedProgress = Math.min(1, Math.max(0, progress));
+  const dashOffset = circumference * (1 - clampedProgress);
+
+  return (
+    <div className="pointer-events-none absolute left-3 bottom-3 z-10 sm:left-4 sm:bottom-4">
+      <div className="relative flex h-11 w-11 items-center justify-center">
+        <svg width={size} height={size} className="-rotate-90">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="rgba(0,0,0,0.4)"
+            stroke="rgba(199,169,119,0.25)"
+            strokeWidth={strokeWidth}
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={isMyTurn ? "#c7a977" : "rgba(199,169,119,0.45)"}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            style={{ transition: "stroke-dashoffset 1s linear" }}
+          />
+        </svg>
+        <span className="absolute text-[11px] font-bold tabular-nums text-brand-2">
+          {remainingSec}
+        </span>
+      </div>
+    </div>
   );
 }

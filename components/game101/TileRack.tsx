@@ -7,6 +7,8 @@ import { buildOpenTile, TILE_H, TILE_W } from "./Tile";
 export interface BuiltTileRack {
   container: Container;
   destroy: () => void;
+  /** Dışarıdan (React state'i) seçili taşı senkron etmek için — tam rebuild gerektirmez. */
+  setSelected: (id: string | null) => void;
 }
 
 const COLS = 11;
@@ -19,8 +21,16 @@ const EASE = 0.22; // yumuşak yerleşim easing katsayısı
  * Alt kullanıcı ıstakası — 2 sıra, sürükle-bırak ile yer değiştirme.
  * Seçili taş scale+shadow ile büyür; bırakılan taş hedef slota yumuşak
  * easing (lerp) ile oturur (ani zıplama yok).
+ *
+ * onTileSelect verilirse, bir taş tıklanınca (sürükleme değil, basit tap)
+ * dışarıya taşın id'si bildirilir — React tarafındaki useOkeyGame.selectTile
+ * buna bağlanır.
  */
-export function buildTileRack(tiles: TileModel[], ticker: Ticker): BuiltTileRack {
+export function buildTileRack(
+  tiles: TileModel[],
+  ticker: Ticker,
+  onTileSelect?: (tileId: string) => void,
+): BuiltTileRack {
   const container = new Container();
   container.sortableChildren = true;
 
@@ -130,6 +140,7 @@ export function buildTileRack(tiles: TileModel[], ticker: Ticker): BuiltTileRack
         y: local.y - entry.built.container.position.y,
       };
       setSelected(id);
+      onTileSelect?.(id);
       container.sortChildren();
     };
   }
@@ -184,5 +195,5 @@ export function buildTileRack(tiles: TileModel[], ticker: Ticker): BuiltTileRack
     ticker.remove(tickFn);
   };
 
-  return { container, destroy };
+  return { container, destroy, setSelected };
 }
