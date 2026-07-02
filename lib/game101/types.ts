@@ -12,6 +12,8 @@ export interface Tile {
   color: TileColor;
   /** Joker (sahte okey) taşı mı? */
   isJoker?: boolean;
+  /** Gösterge taşından hesaplanan "gerçek okey" mi? (hafif parıltı efekti için) */
+  isOkey?: boolean;
 }
 
 export type SeatPosition = "bottom" | "top" | "left" | "right";

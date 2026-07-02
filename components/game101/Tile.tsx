@@ -37,6 +37,16 @@ export function buildOpenTile(tile: TileModel): BuiltTile {
     .fill({ color: 0x000000, alpha: 0.35 });
   container.addChild(shadow);
 
+  // Gerçek okey taşı (isOkey) için hafif altın/brass dış parıltı — abartısız,
+  // fiziksel jokerin (isJoker/yıldız) yıldız ikonuyla KARIŞTIRILMAZ, bu
+  // yalnızca normal renkli/sayılı taşın etrafında yumuşak bir dış çizgidir.
+  if (tile.isOkey) {
+    const glow = new Graphics()
+      .roundRect(-TILE_W / 2 - 3, -TILE_H / 2 - 3, TILE_W + 6, TILE_H + 6, 13)
+      .stroke({ width: 2.5, color: 0xf3d17a, alpha: 0.55 });
+    container.addChild(glow);
+  }
+
   const base = new Graphics();
   drawTileBase(base, false);
   container.addChild(base);
@@ -92,6 +102,13 @@ export function buildOpenTile(tile: TileModel): BuiltTile {
       .circle(0, 22, 3)
       .fill({ color: TILE_NUMBER_COLORS[tile.color], alpha: 0.55 });
     container.addChild(dot);
+  }
+
+  if (tile.isOkey) {
+    const cornerGlow = new Graphics()
+      .circle(TILE_W / 2 - 10, -TILE_H / 2 + 10, 3)
+      .fill({ color: 0xf3d17a, alpha: 0.9 });
+    container.addChild(cornerGlow);
   }
 
   container.eventMode = "static";

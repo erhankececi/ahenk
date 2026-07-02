@@ -10,7 +10,7 @@
 // (lib/ altında, component değil).
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { OkeyGameState, OkeyGameTile } from "./gameTypes";
+import type { OkeyGameState, OkeyGameTile, OkeyTileColor } from "./gameTypes";
 import { buildMockGameState } from "./mockGame";
 import { discardTile as discardTileAction, drawTile as drawTileAction, performMockOpponentTurn, selectTile as selectTileAction } from "./gameActions";
 
@@ -42,6 +42,12 @@ export interface UseOkeyGameResult {
   turnStartedAt: number | null;
   /** Sıra süresi (saniye) — görsel geri sayım İKİNCİ aşamada eklenecek. */
   turnDurationSec: number;
+  /** Bu el için açılan gösterge taşı (hands/drawPile/discardPile içinde YOK, ayrı render edilir). */
+  indicatorTile: OkeyGameTile | null;
+  /** Göstergeden hesaplanan okey rengi (gösterge yoksa null). */
+  okeyColor: OkeyTileColor | null;
+  /** Göstergeden hesaplanan okey değeri (gösterge yoksa null). */
+  okeyValue: number | null;
 }
 
 /**
@@ -110,5 +116,8 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     lastAction: gameState.lastAction,
     turnStartedAt: gameState.turnStartedAt,
     turnDurationSec: gameState.turnDurationSec,
+    indicatorTile: gameState.indicatorTile,
+    okeyColor: gameState.okeyColor,
+    okeyValue: gameState.okeyValue,
   };
 }

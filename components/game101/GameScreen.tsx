@@ -56,6 +56,9 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     discardSelectedTile,
     turnStartedAt,
     turnDurationSec,
+    indicatorTile,
+    okeyColor,
+    okeyValue,
   } = useOkeyGame(roomId ?? "prototip", roomName);
 
   const handleSeatClick = useCallback((playerId: string) => {
@@ -161,6 +164,9 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             isMyTurn={isMyTurn}
             selectedTileId={selectedTileId}
             onSelectTile={selectTile}
+            indicatorTile={indicatorTile}
+            okeyColor={okeyColor}
+            okeyValue={okeyValue}
           />
 
           {/* Sıra süresi göstergesi: 30 saniyelik dairesel geri sayım (DOM overlay). */}

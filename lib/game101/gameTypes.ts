@@ -20,12 +20,16 @@ export interface OkeyGameTile {
   /** 1-13 arası taş değeri. Joker taşta anlamsızdır (0 kullanılır). */
   value: number;
   /**
-   * "Sahte okey" mi? (bu oyunda okey taşı olarak KULLANILABİLEN, oyuna
-   * göre belirlenen normal taş). Gerçek kural mantığı bu görevde YOK —
-   * alan yalnızca ileride kullanılmak üzere state'te tutulur.
+   * Fiziksel joker taşı mı (destede sabit 2 adet, baskılı "OKEY" yazılı
+   * taş)? Resmi terim "sahte okey" olsa da bu, oyunun başından beri
+   * sabit joker olan FİZİKSEL taştır (rengi/sayısı yoktur, hep joker).
    */
   isFakeOkey?: boolean;
-  /** Fiziksel joker taşı mı (baskılı "OKEY" taşı)? */
+  /**
+   * "Gerçek okey" mi? Gösterge taşına göre HESAPLANAN, göstergeyle aynı
+   * renk ve değeri göstergeden 1 fazla (13 ise 1'e sarar) olan NORMAL
+   * sayılı taş. Destede bu özellikte 2 fiziksel taş bulunur.
+   */
   isOkey?: boolean;
   /** Taşın şu an kimin elinde/alanında olduğu (mock — UI/debug amaçlı). */
   owner?: string;
@@ -70,4 +74,14 @@ export interface OkeyGameState {
   turnStartedAt: number | null;
   /** Sıra süresi (saniye). Görsel geri sayım İKİNCİ aşamada eklenecek. */
   turnDurationSec: number;
+  /** Bu el için açılan gösterge taşı (dağıtılan ellere/drawPile'a DAHİL DEĞİL — ayrı tutulur). */
+  indicatorTile: OkeyGameTile | null;
+  /** Göstergeden hesaplanan okey rengi (gösterge yoksa null). */
+  okeyColor: OkeyTileColor | null;
+  /** Göstergeden hesaplanan okey değeri (13 sonrası 1'e sarar; gösterge yoksa null). */
+  okeyValue: number | null;
+  /** Bu eli dağıtan/başlatan koltuk. */
+  dealerSeat: OkeySeatPosition;
+  /** Kaçıncı el (1'den başlar). */
+  roundNo: number;
 }

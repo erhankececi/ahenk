@@ -4,12 +4,13 @@ import { useEffect, useRef } from "react";
 import { Application, Container, FillGradient, Graphics, Text, TextStyle } from "pixi.js";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
 import type { Tile as TileModel, TileColor } from "@/lib/game101/types";
-import type { OkeyGameTile } from "@/lib/game101/gameTypes";
+import type { OkeyGameTile, OkeyTileColor } from "@/lib/game101/gameTypes";
 import { buildGameTable } from "./GameTable";
 import { buildPlayerSeat } from "./PlayerSeat";
 import { buildTileRack } from "./TileRack";
 import { buildDrawPile } from "./DrawPile";
 import { buildDiscardArea } from "./DiscardArea";
+import { buildOpenTile } from "./Tile";
 
 export interface GameCanvasProps {
   width: number;
@@ -27,6 +28,12 @@ export interface GameCanvasProps {
   selectedTileId: string | null;
   /** Istakada bir taşa tıklanınca çağrılır. */
   onSelectTile: (tileId: string) => void;
+  /** Bu el için açılan gösterge taşı (masa ortasında küçük render + etiket). */
+  indicatorTile: OkeyGameTile | null;
+  /** Göstergeden hesaplanan okey rengi (gösterge yoksa null). */
+  okeyColor: OkeyTileColor | null;
+  /** Göstergeden hesaplanan okey değeri (gösterge yoksa null). */
+  okeyValue: number | null;
 }
 
 /** OkeyGameTile (gameTypes.ts) rengini eski Tile (types.ts) renk paletine eşler. */
@@ -44,7 +51,8 @@ function toTileModel(tile: OkeyGameTile): TileModel {
     id: tile.id,
     value: tile.value,
     color: COLOR_MAP[tile.color],
-    isJoker: !!tile.isOkey,
+    isJoker: !!tile.isFakeOkey,
+    isOkey: !!tile.isOkey,
   };
 }
 
@@ -63,6 +71,9 @@ export default function GameCanvas({
   isMyTurn,
   selectedTileId,
   onSelectTile,
+  indicatorTile,
+  okeyColor,
+  okeyValue,
 }: GameCanvasProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<Application | null>(null);
@@ -145,6 +156,17 @@ export default function GameCanvas({
       discardArea.position.set(cx + 70, cy + 6);
       root.addChild(discardArea);
 
+      // Gösterge taşı: deste/discard çiftinin solunda, küçük ölçekte — ayrı
+      // bir "GÖSTERGE" etiketiyle. hands/drawPile/discardPile içinde yer
+      // almadığından burada ayrı render edilir; "SIRA SENDE" pill'iyle
+      // (üstte, ortada) çakışmaması için piles satırıyla aynı yükseklikte,
+      // daha solda konumlanır.
+      if (indicatorTile) {
+        const indicatorGroup = buildIndicatorDisplay(toTileModel(indicatorTile));
+        indicatorGroup.position.set(cx - 190, cy + 6);
+        root.addChild(indicatorGroup);
+      }
+
       const turnPill = buildTurnPill(isMyTurn);
       turnPill.container.position.set(cx, cy - height * 0.09);
       root.addChild(turnPill.container);
@@ -195,7 +217,7 @@ export default function GameCanvas({
     // BİLEREK dependency array'de YOK: seçim değişince (veya sürükleme
     // sırasında) sahne asla yeniden kurulmaz — bkz. aşağıdaki ayrı effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height, onSeatClick, myHand, discardTile, drawPileCount, isMyTurn]);
+  }, [width, height, onSeatClick, myHand, discardTile, drawPileCount, isMyTurn, indicatorTile, okeyColor, okeyValue]);
 
   // selectedTileId değişince TAM rebuild yapmadan yalnızca ıstakadaki taşın
   // kendi setSelected'ını çağırır (TileRack zaten bunu destekliyor).
@@ -212,6 +234,36 @@ export default function GameCanvas({
   }, [isMyTurn]);
 
   return <div ref={hostRef} className="absolute inset-0" />;
+}
+
+/**
+ * Gösterge taşı göstergesi — küçük ölçekte gösterge taşı render'ı + üstünde
+ * "GÖSTERGE" etiketi (brass renginde, küçük). buildOpenTile'ı küçük ölçekte
+ * tekrar kullanır; taş kendisi normal isOkey glow'unu almaz (gösterge taşının
+ * kendisi "gerçek okey" değildir, göstergedir).
+ */
+function buildIndicatorDisplay(tile: TileModel): Container {
+  const group = new Container();
+
+  const label = new Text({
+    text: "GÖSTERGE",
+    style: new TextStyle({
+      fontFamily: "Inter, system-ui, sans-serif",
+      fontSize: 10,
+      fontWeight: "700",
+      fill: 0xc7a977,
+      letterSpacing: 1.5,
+    }),
+  });
+  label.anchor.set(0.5);
+  label.position.set(0, -44);
+  group.addChild(label);
+
+  const built = buildOpenTile({ ...tile, isOkey: false });
+  built.container.scale.set(0.62);
+  group.addChild(built.container);
+
+  return group;
 }
 
 function rackHalfHeight() {
