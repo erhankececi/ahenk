@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Copy, Flag, Layers, ListOrdered, Send, type LucideIcon } from "lucide-react";
-import GameToast from "./GameToast";
 
 type ActionId = "draw" | "discard" | "run" | "pair" | "finish";
 
@@ -21,7 +20,6 @@ const ACTIONS: ActionDef[] = [
 ];
 
 const LOCKED_TOAST_MESSAGE = "Bu hamle sonraki fazda aktif olacak.";
-const TOAST_DURATION_MS = 2200;
 
 export interface ActionButtonsProps {
   /** Desteden taş çeker (sıra bendeyse). */
@@ -30,6 +28,12 @@ export interface ActionButtonsProps {
   onDiscard: () => void;
   /** "TAŞ AT" butonunun aktif olup olmadığı (bir taş seçili mi). */
   canDiscard: boolean;
+  /**
+   * Kısa bir bilgi mesajını dışarıya (paylaşılan tek GameToast'a) bildirir.
+   * GameScreen tarafından verilir — böylece HandSortControls ile aynı toast
+   * slotunu paylaşır, iki ayrı toast asla çakışmaz.
+   */
+  onNotify: (message: string) => void;
 }
 
 /**
@@ -37,27 +41,17 @@ export interface ActionButtonsProps {
  * kabartma buton hissi — Pixi canvas'ın ÜSTÜNDE DOM overlay katmanı.
  *
  * TAŞ ÇEK / TAŞ AT gerçek hook aksiyonlarını tetikler. SERİ AÇ / ÇİFT AÇ /
- * BİTİR bu fazda henüz aktif değil — tıklanınca kısa bir "kilitli" toast'ı
- * gösterilir.
+ * BİTİR bu fazda henüz aktif değil — tıklanınca kısa bir "kilitli" mesajı
+ * onNotify ile paylaşılan toast'a bildirilir.
  */
-export default function ActionButtons({ onDraw, onDiscard, canDiscard }: ActionButtonsProps) {
+export default function ActionButtons({ onDraw, onDiscard, canDiscard, onNotify }: ActionButtonsProps) {
   const [pulsingId, setPulsingId] = useState<ActionId | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pulse = useCallback((id: ActionId) => {
     setPulsingId(id);
     window.setTimeout(() => {
       setPulsingId((current) => (current === id ? null : current));
     }, 260);
-  }, []);
-
-  const showLockedToast = useCallback(() => {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setToastMessage(LOCKED_TOAST_MESSAGE);
-    toastTimeoutRef.current = setTimeout(() => {
-      setToastMessage(null);
-    }, TOAST_DURATION_MS);
   }, []);
 
   const handleClick = useCallback(
@@ -73,31 +67,27 @@ export default function ActionButtons({ onDraw, onDiscard, canDiscard }: ActionB
         case "run":
         case "pair":
         case "finish":
-          showLockedToast();
+          onNotify(LOCKED_TOAST_MESSAGE);
           break;
       }
     },
-    [canDiscard, onDiscard, onDraw, pulse, showLockedToast],
+    [canDiscard, onDiscard, onDraw, onNotify, pulse],
   );
 
   return (
-    <>
-      <div className="pointer-events-none absolute bottom-3 right-3 z-10 sm:bottom-4 sm:right-4">
-        <div className="pointer-events-auto grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {ACTIONS.map((action) => (
-            <ActionButton
-              key={action.id}
-              action={action}
-              isPulsing={pulsingId === action.id}
-              disabled={action.id === "discard" && !canDiscard}
-              onClick={() => handleClick(action.id)}
-            />
-          ))}
-        </div>
+    <div className="pointer-events-none absolute bottom-3 right-3 z-10 sm:bottom-4 sm:right-4">
+      <div className="pointer-events-auto grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {ACTIONS.map((action) => (
+          <ActionButton
+            key={action.id}
+            action={action}
+            isPulsing={pulsingId === action.id}
+            disabled={action.id === "discard" && !canDiscard}
+            onClick={() => handleClick(action.id)}
+          />
+        ))}
       </div>
-
-      <GameToast message={toastMessage} />
-    </>
+    </div>
   );
 }
 

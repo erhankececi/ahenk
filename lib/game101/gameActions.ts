@@ -134,3 +134,24 @@ export function findPlayerBySeat(
 ): OkeyGamePlayer | undefined {
   return players.find((p) => p.seat === seat);
 }
+
+/**
+ * Ahenk 101 — Görev 6: benim (bottom) elimi verilen yeni sırayla değiştirir
+ * (immutable — yeni bir OkeyGameState döner). Taş sayısının/id'lerinin
+ * değişmediği varsayılır (çağıran taraf sorumludur — handAnalysis.ts'teki
+ * dizme fonksiyonları zaten aynı taşları yeniden sıralar); burada ekstra
+ * validasyon YAPILMAZ (basit tutulur). lastActionText verilirse
+ * state.lastAction onunla güncellenir, verilmezse makul bir varsayılan
+ * ("El düzenlendi.") kullanılır.
+ */
+export function reorderHand(
+  state: OkeyGameState,
+  newHandOrder: OkeyGameTile[],
+  lastActionText?: string,
+): OkeyGameState {
+  return {
+    ...state,
+    hands: { ...state.hands, bottom: newHandOrder },
+    lastAction: lastActionText ?? "El düzenlendi.",
+  };
+}

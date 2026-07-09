@@ -12,7 +12,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { OkeyGameState, OkeyGameTile, OkeyTileColor } from "./gameTypes";
 import { buildMockGameState } from "./mockGame";
-import { discardTile as discardTileAction, drawTile as drawTileAction, performMockOpponentTurn, selectTile as selectTileAction } from "./gameActions";
+import {
+  discardTile as discardTileAction,
+  drawTile as drawTileAction,
+  performMockOpponentTurn,
+  reorderHand as reorderHandAction,
+  selectTile as selectTileAction,
+} from "./gameActions";
+import {
+  compactHand,
+  sortByColorAndValue,
+  sortByValue,
+  sortPairsFirst,
+} from "./handAnalysis";
 
 /** Mock rakip hamlesinin sıra bana geçtikten ne kadar sonra tetikleneceği. */
 const MOCK_OPPONENT_DELAY_MS = 1000;
@@ -36,6 +48,14 @@ export interface UseOkeyGameResult {
   drawTile: () => void;
   /** Seçili taş varsa onu atar ve sırayı rakibe devreder; seçili taş yoksa no-op. */
   discardSelectedTile: () => void;
+  /** Elimi renklerine göre (her renk içinde sayıya göre) dizer. */
+  sortHandByColor: () => void;
+  /** Elimi sayılarına göre dizer (aynı sayılar yan yana). */
+  sortHandByValue: () => void;
+  /** Elimdeki çiftleri (aynı renk+sayı ikilileri) öne alır. */
+  sortHandByPairs: () => void;
+  /** Elimdeki boşlukları temizler (taşları soldan sıkı diz). */
+  compactMyHand: () => void;
   /** Son aksiyonun kısa açıklaması (debug / gelecekte toast bildirimi için). */
   lastAction: string | null;
   /** Aktif sıranın başladığı epoch ms zamanı (turn timer için). Sıra yoksa null. */
@@ -101,6 +121,30 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     });
   }, []);
 
+  const sortHandByColor = useCallback(() => {
+    setGameState((prev) =>
+      reorderHandAction(prev, sortByColorAndValue(prev.hands.bottom), "El renklerine göre dizildi."),
+    );
+  }, []);
+
+  const sortHandByValue = useCallback(() => {
+    setGameState((prev) =>
+      reorderHandAction(prev, sortByValue(prev.hands.bottom), "El sayılara göre dizildi."),
+    );
+  }, []);
+
+  const sortHandByPairs = useCallback(() => {
+    setGameState((prev) =>
+      reorderHandAction(prev, sortPairsFirst(prev.hands.bottom), "Çiftler öne alındı."),
+    );
+  }, []);
+
+  const compactMyHand = useCallback(() => {
+    setGameState((prev) =>
+      reorderHandAction(prev, compactHand(prev.hands.bottom), "Boşluklar temizlendi."),
+    );
+  }, []);
+
   const discardTop = gameState.discardPile[gameState.discardPile.length - 1] ?? null;
 
   return {
@@ -113,6 +157,10 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     selectTile,
     drawTile,
     discardSelectedTile,
+    sortHandByColor,
+    sortHandByValue,
+    sortHandByPairs,
+    compactMyHand,
     lastAction: gameState.lastAction,
     turnStartedAt: gameState.turnStartedAt,
     turnDurationSec: gameState.turnDurationSec,

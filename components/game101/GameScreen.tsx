@@ -7,9 +7,13 @@ import Link from "next/link";
 import RotateDeviceNotice from "./RotateDeviceNotice";
 import VoiceControls from "./VoiceControls";
 import ActionButtons from "./ActionButtons";
+import HandSortControls from "./HandSortControls";
+import GameToast from "./GameToast";
 import MiniProfileOverlay from "./MiniProfileOverlay";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
 import { useOkeyGame } from "@/lib/game101/useOkeyGame";
+
+const TOAST_DURATION_MS = 2200;
 
 const GameCanvas = dynamic(() => import("./GameCanvas"), { ssr: false });
 
@@ -54,6 +58,11 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     selectTile,
     drawTile,
     discardSelectedTile,
+    sortHandByColor,
+    sortHandByValue,
+    sortHandByPairs,
+    compactMyHand,
+    lastAction,
     turnStartedAt,
     turnDurationSec,
     indicatorTile,
@@ -64,6 +73,50 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
   const handleSeatClick = useCallback((playerId: string) => {
     setSelectedPlayerId(playerId);
   }, []);
+
+  // Tek, paylaşılan toast state'i: hem ActionButtons'ın "kilitli hamle"
+  // mesajları hem de HandSortControls'ın (hook'un lastAction'ı üzerinden)
+  // dizme bildirimleri AYNI GameToast'ı kullanır — böylece iki ayrı toast
+  // tetikleyicisi asla üst üste binmez, her zaman en sonuncusu gösterilir.
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const notify = useCallback((message: string) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToastMessage(message);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, TOAST_DURATION_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  // El dizme butonlarına basınca hook, state.lastAction'ı Türkçe bir
+  // açıklamayla günceller (ör. "El renklerine göre dizildi.") — burada o
+  // değişimi izleyip paylaşılan toast'a yansıtıyoruz. Yalnızca dizme
+  // aksiyonlarının mesajlarını yakalamak için basit bir metin filtresi
+  // kullanılır (taş çekme/atma/rakip mesajları burada tekrar toast'a
+  // dönüştürülmez — onlar zaten ayrı görsel geri bildirimlere sahip).
+  const sortActionMessages = useRef(
+    new Set([
+      "El renklerine göre dizildi.",
+      "El sayılara göre dizildi.",
+      "Çiftler öne alındı.",
+      "Boşluklar temizlendi.",
+      "El düzenlendi.",
+    ]),
+  );
+  useEffect(() => {
+    if (lastAction && sortActionMessages.current.has(lastAction)) {
+      notify(lastAction);
+    }
+    // notify değişmez (useCallback, boş dep) — yalnızca lastAction izlenir.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastAction]);
 
   const selectedPlayer = selectedPlayerId
     ? MOCK_PLAYERS.find((p) => p.id === selectedPlayerId) ?? null
@@ -197,7 +250,19 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             onDraw={drawTile}
             onDiscard={discardSelectedTile}
             canDiscard={selectedTileId !== null}
+            onNotify={notify}
           />
+
+          {/* Sol-alt el dizme kısayolları (RENK DİZ / SAYI DİZ / ÇİFT DİZ / ELİ TOPLA) — ıstakanın hemen üstünde, ActionButtons ile çakışmaz. */}
+          <HandSortControls
+            onSortColor={sortHandByColor}
+            onSortValue={sortHandByValue}
+            onSortPairs={sortHandByPairs}
+            onCompact={compactMyHand}
+          />
+
+          {/* Paylaşılan tek toast — hem ActionButtons hem HandSortControls buraya bildirir. */}
+          <GameToast message={toastMessage} />
 
           {/* Mini profil kartı: bir koltuğa tıklanınca beliren avatar/isim/bio/etiket kartı. */}
           {selectedPlayer ? (

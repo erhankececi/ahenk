@@ -173,7 +173,11 @@ export default function GameCanvas({
       turnPillSetLabelRef.current = turnPill.setIsMyTurn;
 
       // 4) Alt kullanıcı ıstakası (2 sıra, sürükle-bırak).
-      const rack = buildTileRack(myTiles, app.ticker, onSelectTile);
+      // myHand (OkeyGameTile[]) ayrıca grup ipucu (run/set/pair) analizinde
+      // kullanılmak üzere ham haliyle de veriliyor — TileRack, toTileModel
+      // ile dönüştürülmüş görsel taşlardan bağımsız olarak renk/value/id
+      // bilgisine buradan erişir (id'ler her iki modelde de aynıdır).
+      const rack = buildTileRack(myTiles, app.ticker, onSelectTile, myHand);
       rack.container.position.set(cx, height * 0.985 - rackHalfHeight());
       root.addChild(rack.container);
       rack.setSelected(selectedTileId);
