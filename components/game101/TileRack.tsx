@@ -5,6 +5,17 @@ import type { Tile as TileModel } from "@/lib/game101/types";
 import type { OkeyGameTile } from "@/lib/game101/gameTypes";
 import { findPairCandidates, findRunCandidates, findSetCandidates } from "@/lib/game101/handAnalysis";
 import { buildOpenTile, TILE_H, TILE_W } from "./Tile";
+import {
+  RACK_SLOTS_PER_ROW,
+  RACK_TOTAL_SLOTS,
+  compactAssignment,
+  findFirstEmptySlotIndex,
+  findSlotIndexByTileId,
+  hasSameTileIdSet,
+  reconcileAssignment,
+  swapSlots,
+  type RackSlotAssignment,
+} from "@/lib/game101/rackSlots";
 
 export interface BuiltTileRack {
   container: Container;
@@ -13,30 +24,65 @@ export interface BuiltTileRack {
   setSelected: (id: string | null) => void;
 }
 
-const COLS = 11;
-const GAP_X = 6;
-const GAP_Y = 10;
-const PAD = 14;
+/**
+ * Istakadaki her taşın (Tile.tsx'in paylaşılan TILE_W/TILE_H tabanına göre)
+ * uygulanan NOMİNAL (hedeflenen, sahne genişliğine göre henüz kısıtlanmamış)
+ * görsel büyütme katsayısı. Alt oyuncunun ıstakası "ana odak" olduğundan
+ * diğer alanlardan (DiscardArea/DrawPile/openedMelds vb., hepsi Tile.tsx'in
+ * paylaşılan sabitlerini kullanır) belirgin şekilde daha büyük görünmesi için
+ * sadece BURADA, container ölçeğiyle uygulanır — TILE_W/TILE_H kendisi
+ * DEĞİŞMEZ (diğer tüketicileri etkilememek için). Gerçekte uygulanan ölçek
+ * getEffectiveRackTileScale() ile sahne genişliğine göre küçültülebilir.
+ */
+const RACK_TILE_SCALE = 1.2;
+
+const GAP_X = 4;
+const GAP_Y = 8;
+const PAD = 12;
 const EASE = 0.22; // yumuşak yerleşim easing katsayısı
 const GROUP_HINT_COLOR = 0xc7a977;
 
 /**
- * Verilen taş sayısını 2 satıra dengeli böler (ör. 21 -> 11+10, 22 -> 11+11).
- * Her satır en fazla COLS taş barındırabilir; ilk satır her zaman ceil(n/2)
- * (COLS'u aşmayacak şekilde), ikinci satır kalanı alır. Böylece taş sayısı
- * 21'den 22'ye çıktığında (TAŞ ÇEK sonrası) satırlar simetrik/dengeli kalır
- * ve taşlar üst üste binmez.
+ * Nominal RACK_TILE_SCALE (1.2) ile sabit 15 slot/satır, dar sahnelerde
+ * (fullscreen isteği başarısız olduğunda, küçük pencerede, veya bu oyunun
+ * zaten desteklediği mobil landscape modunda — bkz. RotateDeviceNotice/
+ * fullscreen+orientation-lock kodu — telefon genişlikleri 1280'den ÇOK daha
+ * dar olabilir) ıstakayı sahne genişliğinin dışına taşırabilir:
+ * 15*(64*1.2+4)-4+24 ≈ 1232px. Bu fonksiyon, ıstakanın mevcut sahne
+ * genişliğinin %92'sine TAM OLARAK sığacak ölçeği DOĞRUSAL DENKLEMİ ÇÖZEREK
+ * hesaplar (orantısal/yaklaşık ölçekleme YANLIŞ sonuç verir, çünkü GAP_X/PAD
+ * taş boyutuyla birlikte küçülmez — sabit kalır — bu yüzden basit oran
+ * hesaplaması dar sahnelerde taşmayı ÖNLEYEMEZ, gerçek denklem çözülmeli).
+ * Alt sınır (0.3) yalnızca patolojik (ör. stageWidth<=0) girdilere karşı
+ * savunmadır — normal/gerçekçi genişliklerde asla devreye girmez ve TAŞMAMA
+ * garantisini BOZMAZ (taşmamak, sabit bir okunabilirlik tabanından daha
+ * öncelikli — 15 slot/satır sabit olduğundan çok dar ekranlarda taşlar
+ * küçülmek zorunda, alternatifi taşmadır ki bu daha kötü).
+ * GameCanvas.tsx'teki rackHalfHeight() de dikey konumlandırmayı TUTARLI
+ * tutmak için AYNI fonksiyonu kullanır.
  */
-function rowSplit(count: number): { row0: number; row1: number } {
-  const row0 = Math.min(COLS, Math.ceil(count / 2));
-  const row1 = Math.min(COLS, count - row0);
-  return { row0, row1 };
+export function getEffectiveRackTileScale(stageWidth: number): number {
+  const maxRackW = stageWidth * 0.92;
+  const nominalRackW = RACK_SLOTS_PER_ROW * (TILE_W * RACK_TILE_SCALE + GAP_X) - GAP_X + PAD * 2;
+  if (nominalRackW <= maxRackW) return RACK_TILE_SCALE;
+
+  // rackW(scale) = RACK_SLOTS_PER_ROW*TILE_W*scale + (RACK_SLOTS_PER_ROW-1)*GAP_X + PAD*2
+  // rackW(scale) <= maxRackW için scale'i tam olarak çöz (yaklaşık DEĞİL).
+  const fixedWidth = (RACK_SLOTS_PER_ROW - 1) * GAP_X + PAD * 2;
+  const fitScale = (maxRackW - fixedWidth) / (RACK_SLOTS_PER_ROW * TILE_W);
+  return Math.max(0.3, Math.min(RACK_TILE_SCALE, fitScale));
 }
 
 /**
- * Alt kullanıcı ıstakası — 2 sıra, sürükle-bırak ile yer değiştirme.
- * Seçili taş scale+shadow ile büyür; bırakılan taş hedef slota yumuşak
- * easing (lerp) ile oturur (ani zıplama yok).
+ * Alt kullanıcı ıstakası — SABİT 2 sıra x 15 sütun (30 slot) grid. El kaç taş
+ * içerirse içersin (21/22/23...) ıstaka her zaman aynı 30 slotu çizer; boş
+ * slotlar da görsel olarak (boş kanal) yer kaplamaya devam eder. Slot
+ * yerleşimi (hangi taş hangi slotta) kalıcı bir React ref üzerinden
+ * (assignmentRef, GameCanvas'ta tutulur) build çağrıları arasında KORUNUR —
+ * bkz. lib/game101/rackSlots.ts.
+ *
+ * Sürükle-bırak ile serbest yerleştirme: boş slota bırakılan taş oraya
+ * taşınır; dolu slota bırakılan taş SWAP yapar (iki taş yer değiştirir).
  *
  * onTileSelect verilirse, bir taş tıklanınca (sürükleme değil, basit tap)
  * dışarıya taşın id'si bildirilir — React tarafındaki useOkeyGame.selectTile
@@ -46,18 +92,33 @@ function rowSplit(count: number): { row0: number; row1: number } {
  * run/set/pair aday grupları ıstaka üzerinde abartısız ince bir brass çizgi
  * katmanıyla vurgulanır (isOkey parıltısı / isFakeOkey yıldızıyla ÇAKIŞMAZ —
  * ayrı, taşların ALTINDA duran bir katmandır).
+ *
+ * assignmentRef: GameCanvas'ın kendi useRef'i — Pixi Application her
+ * rebuild'de sıfırdan kurulsa da bu ref React component instance'ında
+ * yaşamaya devam eder, böylece slot yerleşimi TAŞ ÇEK/AT gibi işlemler
+ * arasında korunur.
+ *
+ * stageWidth: GameCanvas'ın o anki sahne genişliği — getEffectiveRackTileScale
+ * ile ıstakanın sahne dışına taşmasını önlemek için kullanılır.
  */
 export function buildTileRack(
   tiles: TileModel[],
   ticker: Ticker,
-  onTileSelect?: (tileId: string) => void,
-  analysisTiles?: OkeyGameTile[],
+  onTileSelect: ((tileId: string) => void) | undefined,
+  analysisTiles: OkeyGameTile[] | undefined,
+  assignmentRef: { current: RackSlotAssignment | null },
+  stageWidth: number,
 ): BuiltTileRack {
   const container = new Container();
   container.sortableChildren = true;
 
-  const rackW = COLS * (TILE_W + GAP_X) - GAP_X + PAD * 2;
-  const rackH = 2 * (TILE_H + GAP_Y) - GAP_Y + PAD * 2;
+  const scale = getEffectiveRackTileScale(stageWidth);
+  const scaleSelected = scale * 1.12;
+  const slotW = TILE_W * scale;
+  const slotH = TILE_H * scale;
+
+  const rackW = RACK_SLOTS_PER_ROW * (slotW + GAP_X) - GAP_X + PAD * 2;
+  const rackH = 2 * (slotH + GAP_Y) - GAP_Y + PAD * 2;
 
   // Istaka gövdesi: ceviz ahşap + brass trim tepsi.
   const trayGrad = new Graphics();
@@ -74,6 +135,23 @@ export function buildTileRack(
   inset.zIndex = 1;
   container.addChild(inset);
 
+  // Slot kanal/ayraç çizgileri: ince, abartısız — gerçek iki sıralı ıstaka
+  // hissi için her slot arası zayıf bir dikey çizgi + sıra ortası yatay çizgi.
+  const channelLines = new Graphics();
+  channelLines.zIndex = 1.2;
+  for (let col = 1; col < RACK_SLOTS_PER_ROW; col++) {
+    const x = -rackW / 2 + PAD + col * (slotW + GAP_X) - GAP_X / 2;
+    channelLines
+      .moveTo(x, -rackH / 2 + 10)
+      .lineTo(x, rackH / 2 - 10)
+      .stroke({ width: 1, color: 0xc7a977, alpha: 0.08 });
+  }
+  channelLines
+    .moveTo(-rackW / 2 + 8, 0)
+    .lineTo(rackW / 2 - 8, 0)
+    .stroke({ width: 1, color: 0xc7a977, alpha: 0.12 });
+  container.addChild(channelLines);
+
   // Grup ipucu katmanı: taşların ALTINDA, gövdenin ÜSTÜNDE — Tile.tsx'teki
   // isOkey/isFakeOkey efektlerine hiç dokunmadan ayrı bir Graphics katmanı.
   const groupHintLayer = new Graphics();
@@ -85,18 +163,43 @@ export function buildTileRack(
   dropHintLayer.zIndex = 1.8;
   container.addChild(dropHintLayer);
 
-  let order = [...tiles];
-
-  const slotPos = (index: number) => {
-    const { row0 } = rowSplit(order.length);
-    const row = index < row0 ? 0 : 1;
-    const col = index < row0 ? index : index - row0;
-    const x = -rackW / 2 + PAD + TILE_W / 2 + col * (TILE_W + GAP_X);
-    const y = -rackH / 2 + PAD + TILE_H / 2 + row * (TILE_H + GAP_Y);
+  /** Sabit slot index (0-29) -> yerel koordinat. row0=0..14, row1=15..29. */
+  const slotPos = (slotIndex: number) => {
+    const row = slotIndex < RACK_SLOTS_PER_ROW ? 0 : 1;
+    const col = slotIndex % RACK_SLOTS_PER_ROW;
+    const x = -rackW / 2 + PAD + slotW / 2 + col * (slotW + GAP_X);
+    const y = -rackH / 2 + PAD + slotH / 2 + row * (slotH + GAP_Y);
     return { x, y };
   };
 
-  const allSlotPositions = () => order.map((_, i) => slotPos(i));
+  const allSlotPositions = () => {
+    const positions: { x: number; y: number }[] = [];
+    for (let i = 0; i < RACK_TOTAL_SLOTS; i++) positions.push(slotPos(i));
+    return positions;
+  };
+
+  // --- Slot ataması: önceki assignment varsa uzlaştır/yeniden diz, yoksa
+  // ilk kurulumda boşluksuz sırala. ---
+  const tileIds = tiles.map((t) => t.id);
+  let assignment: RackSlotAssignment;
+  if (!assignmentRef.current) {
+    assignment = compactAssignment(tileIds);
+  } else {
+    const assignedIds = assignmentRef.current.filter((v): v is string => v !== null);
+    if (hasSameTileIdSet(assignedIds, tileIds)) {
+      // Aynı küme (sadece sıra değişmiş olabilir) -> RENK DİZ/SAYI DİZ/ÇİFT
+      // DİZ/ELİ TOPLA gibi bir yeniden-sıralama işlemi: boşlukları temizle,
+      // yeni sıraya göre baştan diz.
+      assignment = compactAssignment(tileIds);
+    } else {
+      // Küme değişmiş (TAŞ ÇEK/AT/SERİ AÇ/ÇİFT AÇ/İŞLE/BİTİR) -> mevcut
+      // pozisyonları ve boşlukları koruyarak uzlaştır.
+      assignment = reconcileAssignment(assignmentRef.current, tileIds);
+    }
+  }
+  assignmentRef.current = assignment;
+
+  const tileById = new Map(tiles.map((t) => [t.id, t]));
 
   interface Entry {
     built: ReturnType<typeof buildOpenTile>;
@@ -107,40 +210,40 @@ export function buildTileRack(
 
   const entries = new Map<string, Entry>();
 
-  order.forEach((tile, i) => {
+  assignment.forEach((tileId, slotIndex) => {
+    if (!tileId) return;
+    const tile = tileById.get(tileId);
+    if (!tile) return; // savunma: teorik olarak olmamalı (reconcile/compact garanti eder)
     const built = buildOpenTile(tile);
-    const pos = slotPos(i);
+    const pos = slotPos(slotIndex);
     built.container.position.set(pos.x, pos.y);
+    built.container.scale.set(scale);
     built.container.zIndex = 2;
     container.addChild(built.container);
     entries.set(tile.id, { built, target: pos, selected: false, dragging: false });
   });
 
-  /** Grup ipucu çizgilerini (run/set/pair) mevcut `order`e göre yeniden çizer. */
+  /** Grup ipucu çizgilerini (run/set/pair) mevcut assignment'a göre yeniden çizer. */
   function redrawGroupHints() {
     groupHintLayer.clear();
     if (!analysisTiles || analysisTiles.length === 0) return;
 
-    const positionById = new Map<string, { x: number; y: number }>();
-    order.forEach((tile, i) => {
-      positionById.set(tile.id, slotPos(i));
-    });
+    const drawUnderline = (ids: string[], color: number) => {
+      ids.forEach((id) => {
+        const slotIndex = findSlotIndexByTileId(assignmentRef.current ?? assignment, id);
+        if (slotIndex === -1) return;
+        const pos = slotPos(slotIndex);
+        const lineY = pos.y + slotH / 2 - 4;
+        groupHintLayer
+          .moveTo(pos.x - slotW / 2 + 6, lineY)
+          .lineTo(pos.x + slotW / 2 - 6, lineY)
+          .stroke({ width: 2, color, alpha: 0.55 });
+      });
+    };
 
     const runGroups = findRunCandidates(analysisTiles);
     const setGroups = findSetCandidates(analysisTiles);
     const pairGroups = findPairCandidates(analysisTiles);
-
-    const drawUnderline = (ids: string[], color: number) => {
-      ids.forEach((id) => {
-        const pos = positionById.get(id);
-        if (!pos) return;
-        const lineY = pos.y + TILE_H / 2 - 3;
-        groupHintLayer
-          .moveTo(pos.x - TILE_W / 2 + 6, lineY)
-          .lineTo(pos.x + TILE_W / 2 - 6, lineY)
-          .stroke({ width: 2, color, alpha: 0.55 });
-      });
-    };
 
     // Run/set adayları biraz daha belirgin, çiftler daha ince — dashboard
     // gibi durmaması için tek renk (brass) ve tek kalınlık ailesi kullanılır.
@@ -169,59 +272,12 @@ export function buildTileRack(
     }
   }
 
-  function reorderFromPositions() {
-    // Her taşın en yakın boş slotuna göre yeni sırayı hesapla (basit greedy).
-    const items = order.map((t) => entries.get(t.id)!);
+  /** Verilen yerel pozisyona en yakın slotu (dolu ya da boş, TÜM 30 slot arasından) bulur. */
+  function nearestSlotIndex(pos: { x: number; y: number }): number {
     const slots = allSlotPositions();
-    const used = new Array(slots.length).fill(false);
-    const assignment: (string | null)[] = new Array(slots.length).fill(null);
-
-    items.forEach((entry, tileIdx) => {
-      const cur = entry.built.container.position;
-      let bestSlot = 0;
-      let bestDist = Infinity;
-      slots.forEach((slot, slotIdx) => {
-        if (used[slotIdx]) return;
-        const d = (cur.x - slot.x) ** 2 + (cur.y - slot.y) ** 2;
-        if (d < bestDist) {
-          bestDist = d;
-          bestSlot = slotIdx;
-        }
-      });
-      used[bestSlot] = true;
-      assignment[bestSlot] = order[tileIdx].id;
-    });
-
-    order = assignment.map((id) => order.find((t) => t.id === id)!);
-    order.forEach((tile, i) => {
-      const entry = entries.get(tile.id)!;
-      entry.target = slotPos(i);
-    });
-    redrawGroupHints();
-  }
-
-  /** Sürüklenen taşa en yakın boş (başka taşın hedefi olmayan) slotu bulur — drop placeholder için. */
-  function nearestSlotIndex(pos: { x: number; y: number }, excludeId: string): number {
-    const slots = allSlotPositions();
-    const occupiedByOthers = new Set(
-      order
-        .filter((t) => t.id !== excludeId)
-        .map((t) => {
-          const e = entries.get(t.id)!;
-          const s = slots.reduce(
-            (best, slot, idx) => {
-              const d = (e.target.x - slot.x) ** 2 + (e.target.y - slot.y) ** 2;
-              return d < best.d ? { d, idx } : best;
-            },
-            { d: Infinity, idx: -1 },
-          );
-          return s.idx;
-        }),
-    );
     let bestIdx = 0;
     let bestDist = Infinity;
     slots.forEach((slot, idx) => {
-      if (occupiedByOthers.has(idx)) return;
       const d = (pos.x - slot.x) ** 2 + (pos.y - slot.y) ** 2;
       if (d < bestDist) {
         bestDist = d;
@@ -234,13 +290,46 @@ export function buildTileRack(
   function drawDropHint(slotIdx: number | null) {
     dropHintLayer.clear();
     if (slotIdx === null) return;
-    const slots = allSlotPositions();
-    const pos = slots[slotIdx];
-    if (!pos) return;
+    const pos = slotPos(slotIdx);
     dropHintLayer
-      .roundRect(pos.x - TILE_W / 2 - 2, pos.y - TILE_H / 2 - 2, TILE_W + 4, TILE_H + 4, 11)
+      .roundRect(pos.x - slotW / 2 - 2, pos.y - slotH / 2 - 2, slotW + 4, slotH + 4, 11)
       .fill({ color: 0xf3d17a, alpha: 0.1 })
       .stroke({ width: 1.75, color: 0xf3d17a, alpha: 0.65 });
+  }
+
+  /** Sürüklenen taşı bırakma noktasına en yakın slota yerleştirir (boşsa taşı, doluysa SWAP). */
+  function dropAtNearestSlot(id: string) {
+    const entry = entries.get(id);
+    if (!entry) return;
+    const current = assignmentRef.current ?? assignment;
+    const fromIndex = findSlotIndexByTileId(current, id);
+    const toIndex = nearestSlotIndex(entry.built.container.position);
+
+    let next: RackSlotAssignment;
+    if (fromIndex === -1) {
+      // Teorik olarak olmamalı ama savunma: bulunamazsa ilk boş slota koy.
+      const empty = findFirstEmptySlotIndex(current);
+      next = current.slice();
+      if (empty !== -1) next[empty] = id;
+    } else if (toIndex === fromIndex) {
+      next = current.slice();
+    } else {
+      // Boş slota taşıma da, dolu slotla SWAP da aynı swapSlots ile
+      // yapılabilir (biri null olsa bile çalışır — rackSlots.ts'e bakınız).
+      next = swapSlots(current, fromIndex, toIndex);
+    }
+
+    assignment = next;
+    assignmentRef.current = next;
+
+    // Tüm taşların hedeflerini yeni assignment'a göre güncelle.
+    next.forEach((tileId, slotIndex) => {
+      if (!tileId) return;
+      const e = entries.get(tileId);
+      if (e) e.target = slotPos(slotIndex);
+    });
+
+    redrawGroupHints();
   }
 
   function onPointerDown(id: string) {
@@ -272,7 +361,7 @@ export function buildTileRack(
     const local = container.toLocal(e.global);
     entry.built.container.position.set(local.x - dragOffset.x, local.y - dragOffset.y);
 
-    const targetSlot = nearestSlotIndex(entry.built.container.position, dragId);
+    const targetSlot = nearestSlotIndex(entry.built.container.position);
     drawDropHint(targetSlot);
   }
 
@@ -281,9 +370,10 @@ export function buildTileRack(
     const entry = entries.get(dragId)!;
     entry.dragging = false;
     entry.built.container.zIndex = 2;
+    const id = dragId;
     dragId = null;
     drawDropHint(null);
-    reorderFromPositions();
+    dropAtNearestSlot(id);
     container.sortChildren();
   }
 
@@ -306,9 +396,9 @@ export function buildTileRack(
       pos.x += (entry.target.x - pos.x) * EASE;
       pos.y += (entry.target.y - pos.y) * EASE;
 
-      // Seçili taş hafif yukarı kalkar (scale zaten setSelected'ta stroke ile
-      // vurgulanıyor; burada ek olarak y ofseti + scale lerp uygulanır).
-      const targetScale = entry.selected ? 1.12 : 1;
+      // Seçili taş hafif büyür (base scale = sahneye göre uyarlanmış scale,
+      // seçiliyken scaleSelected — mevcut seçili-taş büyüme mantığıyla orantılı).
+      const targetScale = entry.selected ? scaleSelected : scale;
       entry.built.container.scale.x += (targetScale - entry.built.container.scale.x) * 0.25;
       entry.built.container.scale.y += (targetScale - entry.built.container.scale.y) * 0.25;
     });
@@ -317,6 +407,9 @@ export function buildTileRack(
 
   const destroy = () => {
     ticker.remove(tickFn);
+    // NOT: assignmentRef'e KASITLI olarak dokunulmuyor — ref, bu TileRack
+    // instance'ından bağımsız olarak GameCanvas component'inde yaşamaya
+    // devam etmeli (bir sonraki rebuild'de slot yerleşimini korumak için).
   };
 
   return { container, destroy, setSelected };

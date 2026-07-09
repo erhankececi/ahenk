@@ -7,10 +7,11 @@ import type { Tile as TileModel, TileColor } from "@/lib/game101/types";
 import type { OkeyGameTile, OkeyTileColor } from "@/lib/game101/gameTypes";
 import { buildGameTable } from "./GameTable";
 import { buildPlayerSeat } from "./PlayerSeat";
-import { buildTileRack } from "./TileRack";
+import { buildTileRack, getEffectiveRackTileScale } from "./TileRack";
 import { buildDrawPile } from "./DrawPile";
 import { buildDiscardArea } from "./DiscardArea";
 import { buildOpenTile } from "./Tile";
+import type { RackSlotAssignment } from "@/lib/game101/rackSlots";
 
 export interface GameCanvasProps {
   width: number;
@@ -82,6 +83,12 @@ export default function GameCanvas({
   // yapmadan) çağırabilmek için güncel referansı burada tutuyoruz.
   const rackSetSelectedRef = useRef<((id: string | null) => void) | null>(null);
   const turnPillSetLabelRef = useRef<((isMyTurn: boolean) => void) | null>(null);
+  // Istaka slot yerleşimi (hangi taş hangi slotta) — GameCanvas component
+  // instance'ında yaşar, sahne-kurma useEffect'i myHand her değiştiğinde
+  // (TAŞ ÇEK/AT/SERİ AÇ/... hepsi myHand'i değiştirir) TÜM Pixi Application'ı
+  // yıkıp yeniden kursa da bu ref React re-render'ları arasında YAŞAMAYA
+  // DEVAM EDER, böylece slot yerleşimi (boşluklar dahil) korunur.
+  const rackAssignmentRef = useRef<RackSlotAssignment | null>(null);
 
   useEffect(() => {
     let destroyed = false;
@@ -177,8 +184,8 @@ export default function GameCanvas({
       // kullanılmak üzere ham haliyle de veriliyor — TileRack, toTileModel
       // ile dönüştürülmüş görsel taşlardan bağımsız olarak renk/value/id
       // bilgisine buradan erişir (id'ler her iki modelde de aynıdır).
-      const rack = buildTileRack(myTiles, app.ticker, onSelectTile, myHand);
-      rack.container.position.set(cx, height * 0.985 - rackHalfHeight());
+      const rack = buildTileRack(myTiles, app.ticker, onSelectTile, myHand, rackAssignmentRef, width);
+      rack.container.position.set(cx, height * 0.985 - rackHalfHeight(width));
       root.addChild(rack.container);
       rack.setSelected(selectedTileId);
       rackSetSelectedRef.current = rack.setSelected;
@@ -270,11 +277,23 @@ function buildIndicatorDisplay(tile: TileModel): Container {
   return group;
 }
 
-function rackHalfHeight() {
+/**
+ * TileRack.tsx'teki GAP_Y/PAD ile birebir aynı değerler + getEffectiveRackTileScale
+ * (TileRack.tsx ile PAYLAŞILAN, sahne genişliğine duyarlı ölçek fonksiyonu)
+ * kullanılarak ıstakanın toplam yüksekliğinin yarısını hesaplar (rack
+ * container'ının dikey konumlandırması için — rack kendi merkezine göre
+ * çizildiğinden, alt kenarı sahnenin altına hizalamak üzere bu ofset
+ * gerekir). stageWidth parametresi TileRack.tsx'in kullandığı ÖLÇEKLE
+ * BİREBİR AYNI sonucu üretmek için buildTileRack'e verilen width ile aynı
+ * olmalı (aksi halde dar sahnelerde ıstaka ölçeği küçülür ama bu fonksiyon
+ * hâlâ nominal (1.2x) yüksekliği varsayar, dikey konum yanlış hesaplanır).
+ */
+function rackHalfHeight(stageWidth: number) {
   const rows = 2;
-  const tileH = 88;
-  const gapY = 10;
-  const pad = 14;
+  const scale = getEffectiveRackTileScale(stageWidth);
+  const tileH = 88 * scale; // Tile.tsx TILE_H * sahneye uyarlanmış ölçek
+  const gapY = 8;
+  const pad = 12;
   return (rows * (tileH + gapY) - gapY + pad * 2) / 2;
 }
 
