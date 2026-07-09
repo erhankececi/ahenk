@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Copy, Flag, Layers, ListOrdered, Send, type LucideIcon } from "lucide-react";
+import { Copy, Flag, Layers, ListOrdered, PlusSquare, Send, type LucideIcon } from "lucide-react";
 
-type ActionId = "draw" | "discard" | "run" | "pair" | "finish";
+type ActionId = "draw" | "discard" | "run" | "pair" | "process" | "finish";
 
 interface ActionDef {
   id: ActionId;
@@ -16,6 +16,7 @@ const ACTIONS: ActionDef[] = [
   { id: "discard", label: "TAŞ AT", icon: Send },
   { id: "run", label: "SERİ AÇ", icon: ListOrdered },
   { id: "pair", label: "ÇİFT AÇ", icon: Copy },
+  { id: "process", label: "İŞLE", icon: PlusSquare },
   { id: "finish", label: "BİTİR", icon: Flag },
 ];
 
@@ -38,6 +39,8 @@ export interface ActionButtonsProps {
   onOpenRun: () => void;
   /** "ÇİFT AÇ" — gerçek validasyon + toast + önizleme mantığı GameScreen'de çalışır. */
   onOpenPair: () => void;
+  /** "İŞLE" — seçili taşı uygun açık meld'e işler; guard/toast mantığı GameScreen'de çalışır. */
+  onProcess: () => void;
 }
 
 /**
@@ -55,6 +58,7 @@ export default function ActionButtons({
   onNotify,
   onOpenRun,
   onOpenPair,
+  onProcess,
 }: ActionButtonsProps) {
   const [pulsingId, setPulsingId] = useState<ActionId | null>(null);
 
@@ -81,12 +85,15 @@ export default function ActionButtons({
         case "pair":
           onOpenPair();
           break;
+        case "process":
+          onProcess();
+          break;
         case "finish":
           onNotify(LOCKED_TOAST_MESSAGE);
           break;
       }
     },
-    [canDiscard, onDiscard, onDraw, onNotify, onOpenPair, onOpenRun, pulse],
+    [canDiscard, onDiscard, onDraw, onNotify, onOpenPair, onOpenRun, onProcess, pulse],
   );
 
   return (

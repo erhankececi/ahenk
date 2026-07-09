@@ -15,6 +15,7 @@ import OpenedMeldsArea from "./OpenedMeldsArea";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
 import { useOkeyGame } from "@/lib/game101/useOkeyGame";
 import { evaluatePairOpen, evaluateRunOpen, type OpenValidationResult } from "@/lib/game101/meldValidation";
+import { getProcessableMelds } from "@/lib/game101/meldProcessing";
 
 const TOAST_DURATION_MS = 2200;
 
@@ -75,6 +76,7 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     myOpenType,
     hasOpened,
     openMelds,
+    processTileToMeld,
   } = useOkeyGame(roomId ?? "prototip", roomName);
 
   const handleSeatClick = useCallback((playerId: string) => {
@@ -169,6 +171,72 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     setPreviewOverlay(null);
     notify(previewOverlay.type === "run" ? "Seri masaya açıldı." : "Çiftler masaya açıldı.");
   }, [notify, openMelds, previewOverlay]);
+
+  // Görev 9 (Faz 2): seçili taşın gerçek OkeyGameTile nesnesi + bu taşın
+  // işlenebileceği açık meld'ler. selectedTileId elde artık yoksa (ör. az
+  // önce atıldıysa) selectedTile null olur, processableMelds boş kalır.
+  const selectedTile = useMemo(
+    () => myHand.find((t) => t.id === selectedTileId) ?? null,
+    [myHand, selectedTileId],
+  );
+
+  const processableMelds = useMemo(
+    () => (selectedTile ? getProcessableMelds(selectedTile, openedMelds, okeyColor, okeyValue) : []),
+    [selectedTile, openedMelds, okeyColor, okeyValue],
+  );
+
+  const processableMeldIds = useMemo(() => processableMelds.map((m) => m.id), [processableMelds]);
+
+  // Bir meld kartına doğrudan tıklanınca (OpenedMeldsArea'dan) çağrılır.
+  const handleMeldClick = useCallback(
+    (meldId: string) => {
+      if (!isMyTurn) {
+        notify("Sıra sende değil.");
+        return;
+      }
+      if (!hasOpened) {
+        notify("İşleme yapmak için önce açmalısın.");
+        return;
+      }
+      if (!selectedTileId || !selectedTile) {
+        notify("İşlemek için önce elinden bir taş seç.");
+        return;
+      }
+      if (!processableMeldIds.includes(meldId)) {
+        notify("Bu taş seçili gruba işlenemez.");
+        return;
+      }
+      processTileToMeld(selectedTileId, meldId);
+      notify("Taş işlendi.");
+    },
+    [isMyTurn, hasOpened, selectedTileId, selectedTile, processableMeldIds, processTileToMeld, notify],
+  );
+
+  // "İŞLE" butonuna basınca (ActionButtons) çağrılır.
+  const handleProcessButtonClick = useCallback(() => {
+    if (!isMyTurn) {
+      notify("Sıra sende değil.");
+      return;
+    }
+    if (!hasOpened) {
+      notify("İşleme yapmak için önce açmalısın.");
+      return;
+    }
+    if (!selectedTileId) {
+      notify("İşlemek için önce taş seç.");
+      return;
+    }
+    if (processableMeldIds.length === 0) {
+      notify("Bu taş mevcut gruplara işlenemez.");
+      return;
+    }
+    if (processableMeldIds.length === 1) {
+      processTileToMeld(selectedTileId, processableMeldIds[0]);
+      notify("Taş işlendi.");
+      return;
+    }
+    notify("Birden fazla grup uygun, işlemek istediğin grubu seç.");
+  }, [isMyTurn, hasOpened, selectedTileId, processableMeldIds, processTileToMeld, notify]);
 
   // El dizme butonlarına basınca hook, state.lastAction'ı Türkçe bir
   // açıklamayla günceller (ör. "El renklerine göre dizildi.") — burada o
@@ -328,6 +396,7 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             onNotify={notify}
             onOpenRun={handleOpenRun}
             onOpenPair={handleOpenPair}
+            onProcess={handleProcessButtonClick}
           />
 
           {/* Sol-alt el dizme kısayolları (RENK DİZ / SAYI DİZ / ÇİFT DİZ / ELİ TOPLA) — ıstakanın hemen üstünde, ActionButtons ile çakışmaz. */}
@@ -363,7 +432,12 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
           ) : null}
 
           {/* Masaya açılmış seri/çiftlerim — açtıktan sonra kalıcı olarak görünür. */}
-          <OpenedMeldsArea melds={openedMelds} openType={myOpenType} />
+          <OpenedMeldsArea
+            melds={openedMelds}
+            openType={myOpenType}
+            processableMeldIds={processableMeldIds}
+            onMeldClick={handleMeldClick}
+          />
         </div>
       )}
     </div>

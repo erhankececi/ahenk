@@ -18,6 +18,7 @@ import {
   drawTile as drawTileAction,
   openMelds as openMeldsAction,
   performMockOpponentTurn,
+  processTileToMeld as processTileToMeldAction,
   reorderHand as reorderHandAction,
   selectTile as selectTileAction,
 } from "./gameActions";
@@ -82,6 +83,14 @@ export interface UseOkeyGameResult {
    * no-op. Sırayı değiştirmez, geri sayımı sıfırlamaz.
    */
   openMelds: (melds: OkeyMeld[], openType: "run" | "pair") => void;
+  /**
+   * Elimdeki tileId'li taşı, openedMelds içindeki meldId'li açık meld'e
+   * işler (attach eder). Yalnızca kendi sıramdayken, daha önce açtıysam
+   * (hasOpened=true) ve taş o meld'e uygunsa (meldProcessing.ts —
+   * canAddTileToMeld) etkilidir; aksi halde no-op. Sırayı değiştirmez,
+   * geri sayımı sıfırlamaz.
+   */
+  processTileToMeld: (tileId: string, meldId: string, position?: "start" | "end") => void;
 }
 
 /**
@@ -163,6 +172,13 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     setGameState((prev) => openMeldsAction(prev, melds, openType));
   }, []);
 
+  const processTileToMeld = useCallback(
+    (tileId: string, meldId: string, position?: "start" | "end") => {
+      setGameState((prev) => processTileToMeldAction(prev, tileId, meldId, position));
+    },
+    [],
+  );
+
   const discardTop = gameState.discardPile[gameState.discardPile.length - 1] ?? null;
 
   return {
@@ -189,5 +205,6 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     myOpenType: gameState.myOpenType,
     hasOpened: gameState.hasOpened,
     openMelds,
+    processTileToMeld,
   };
 }

@@ -10,6 +10,7 @@
 
 import type { OkeyGamePlayer, OkeyGameState, OkeyGameTile, OkeySeatPosition } from "./gameTypes";
 import type { OkeyMeld } from "./meldValidation";
+import { addTileToMeld, canAddTileToMeld, colorNameTr } from "./meldProcessing";
 
 function opponentSeatAfter(seat: OkeySeatPosition): OkeySeatPosition {
   // Sıra sırası: bottom (ben) -> right -> top -> left -> bottom ...
@@ -209,5 +210,81 @@ export function reorderHand(
     ...state,
     hands: { ...state.hands, bottom: newHandOrder },
     lastAction: lastActionText ?? "El düzenlendi.",
+  };
+}
+
+/**
+ * Ahenk 101 — Görev 9 (Faz 1): benim (bottom) elimdeki bir taşı, daha önce
+ * açılmış (openedMelds içindeki) bir meld'e "işler" (attach eder) — tile.id
+ * bazlı elden çıkarma + meldProcessing.ts'teki addTileToMeld ile immutable
+ * meld güncellemesi.
+ *
+ * Guard'lar (sağlanmazsa state AYNEN döner, no-op):
+ * - Sıra bende değilse (currentTurnSeat !== "bottom").
+ * - hasOpened false ise (henüz hiç seri/çift açmadıysam işleme yapamam).
+ * - tileId elimde (hands.bottom) bulunamazsa.
+ * - meldId openedMelds içinde bulunamazsa.
+ * - canAddTileToMeld(tile, meld, okeyColor, okeyValue) false ise (bkz.
+ *   meldProcessing.ts — pair meld'lere v1'de işleme tamamen kapalı, run/set
+ *   kuralları için o dosyadaki docstring'lere bakın).
+ *
+ * Başarılı olursa:
+ * - Taş id bazlı elden çıkarılır.
+ * - addTileToMeld ile güncellenmiş meld, openedMelds dizisinde İLGİLİ
+ *   meld'in yerine konur (immutable, .map ile id eşleşeni değiştirilir).
+ * - selectedTileId temizlenir (işlenen taş o an seçiliyse zaten elde
+ *   olmadığından sahipsiz kalmasın diye — seçili başka bir taş olsa da bu
+ *   v1'de basitçe null'lanır, spec'te "selectedTileId temizle" olarak
+ *   belirtildi).
+ * - lastAction: "Taş işlendi: <Renk> <Değer>" (Renk = Türkçe renk adı,
+ *   Değer = taşın etkin değeri — meldProcessing.ts'teki effectiveValue
+ *   mantığıyla tutarlı: normal taş kendi value'su, isFakeOkey okeyValue).
+ *   isOkey (wildcard) taşta renk adı run'ın rengi olarak yazılır (taşın
+ *   kendi rengi "joker" olduğundan anlamsız olurdu) — meld'in rengi
+ *   addTileToMeld sonrası label'dan değil, meld.type'a göre ayrıca
+ *   hesaplanır (aşağıya bakın).
+ * - currentTurnSeat VE turnStartedAt'a DOKUNULMAZ (sıra değişmez, geri
+ *   sayım kesilmez — Görev 8'deki openMelds ile TUTARLI).
+ */
+export function processTileToMeld(
+  state: OkeyGameState,
+  tileId: string,
+  meldId: string,
+  position?: "start" | "end",
+): OkeyGameState {
+  if (state.currentTurnSeat !== "bottom") return state;
+  if (!state.hasOpened) return state;
+
+  const tileIndex = state.hands.bottom.findIndex((t) => t.id === tileId);
+  if (tileIndex === -1) return state;
+  const tile = state.hands.bottom[tileIndex];
+
+  const meldIndex = state.openedMelds.findIndex((m) => m.id === meldId);
+  if (meldIndex === -1) return state;
+  const meld = state.openedMelds[meldIndex];
+
+  if (!canAddTileToMeld(tile, meld, state.okeyColor, state.okeyValue)) return state;
+
+  const updatedMeld = addTileToMeld(meld, tile, position, state.okeyColor, state.okeyValue);
+
+  const myHand = state.hands.bottom.filter((t) => t.id !== tileId);
+  const openedMelds = state.openedMelds.map((m) => (m.id === meldId ? updatedMeld : m));
+
+  // Etkin renk/değer: renk için meld'in (güncellenmiş) rengini, joker
+  // taşlarda anlamlı bir renk bulunamıyorsa taşın kendi rengini fallback
+  // olarak kullan.
+  const effectiveColorSource =
+    tile.color !== "joker" ? tile.color : (state.okeyColor ?? "joker");
+  const colorLabel =
+    effectiveColorSource !== "joker" ? colorNameTr(effectiveColorSource) : "Okey";
+  const effectiveValueLabel =
+    tile.isFakeOkey && state.okeyValue != null ? state.okeyValue : tile.value;
+
+  return {
+    ...state,
+    hands: { ...state.hands, bottom: myHand },
+    openedMelds,
+    selectedTileId: null,
+    lastAction: `Taş işlendi: ${colorLabel} ${effectiveValueLabel}`,
   };
 }
