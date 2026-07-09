@@ -9,6 +9,13 @@ export interface OpenPreviewOverlayProps {
   type: "run" | "pair";
   result: OpenValidationResult;
   onClose: () => void;
+  /**
+   * "ONAYLA VE AÇ" butonuna basınca çağrılır (yalnızca result.canOpen true
+   * iken buton görünür). Overlay'i kapatma/toast gösterme kararı BURADA
+   * verilmez — çağıran taraf (GameScreen) sorumludur; bu component sadece
+   * tetikleyicidir.
+   */
+  onConfirm: () => void;
 }
 
 /** Rozet arkaplanı için renk -> Tailwind sınıfı eşlemesi (Tile.tsx paletiyle uyumlu, kaba). */
@@ -30,9 +37,11 @@ function tileBadgeClass(color: OkeyTileColor): string {
  * hafif: tam ekran karartma YOK (yalnızca panelin kendisi), oyun sahnesi
  * arkada görünmeye devam eder.
  *
- * Yalnızca görsel önizleme — "Onayla ve aç" YOK, taşlar elden silinmez.
+ * Görev 8 (Faz 2): "ONAYLA VE AÇ" birincil aksiyon butonu eklendi (yalnızca
+ * result.canOpen true iken görünür) — basınca yalnızca onConfirm() çağrılır,
+ * taşları elden silme/overlay kapatma kararı GameScreen'de verilir.
  */
-export default function OpenPreviewOverlay({ type, result, onClose }: OpenPreviewOverlayProps) {
+export default function OpenPreviewOverlay({ type, result, onClose, onConfirm }: OpenPreviewOverlayProps) {
   const title = type === "run" ? "Seri Açma Önizleme" : "Çift Açma Önizleme";
   const metricLabel = type === "run" ? "Toplam Puan" : "Çift Sayısı";
   const metricValue = result.totalScore;
@@ -72,13 +81,25 @@ export default function OpenPreviewOverlay({ type, result, onClose }: OpenPrevie
             </div>
           ) : null}
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-3 w-full rounded-full border border-brand/25 bg-gradient-to-b from-[#221d17] to-[#141110] px-4 py-2 text-xs font-semibold text-text/90 transition active:scale-95"
-          >
-            Kapat
-          </button>
+          <div className="mt-3 flex flex-col gap-2">
+            {result.canOpen ? (
+              <button
+                type="button"
+                onClick={onConfirm}
+                className="w-full rounded-full border border-brand/60 bg-gradient-to-b from-brand-2 to-brand px-4 py-2.5 text-xs font-extrabold tracking-wide text-[#0E0D10] shadow-[0_1px_0_rgb(255_255_255/0.35)_inset,0_6px_16px_-6px_rgb(0_0_0/0.65)] transition active:scale-95"
+              >
+                ONAYLA VE AÇ
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full rounded-full border border-brand/25 bg-gradient-to-b from-[#221d17] to-[#141110] px-4 py-2 text-xs font-semibold text-text/90 transition active:scale-95"
+            >
+              Kapat
+            </button>
+          </div>
         </div>
       </div>
     </div>

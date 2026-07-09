@@ -231,5 +231,8 @@ export function buildMockGameState(options: BuildMockGameStateOptions = {}): Oke
     okeyValue,
     dealerSeat,
     roundNo,
+    openedMelds: [],
+    myOpenType: "none",
+    hasOpened: false,
   };
 }

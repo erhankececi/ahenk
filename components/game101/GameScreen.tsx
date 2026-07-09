@@ -11,6 +11,7 @@ import HandSortControls from "./HandSortControls";
 import GameToast from "./GameToast";
 import MiniProfileOverlay from "./MiniProfileOverlay";
 import OpenPreviewOverlay from "./OpenPreviewOverlay";
+import OpenedMeldsArea from "./OpenedMeldsArea";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
 import { useOkeyGame } from "@/lib/game101/useOkeyGame";
 import { evaluatePairOpen, evaluateRunOpen, type OpenValidationResult } from "@/lib/game101/meldValidation";
@@ -70,6 +71,10 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     indicatorTile,
     okeyColor,
     okeyValue,
+    openedMelds,
+    myOpenType,
+    hasOpened,
+    openMelds,
   } = useOkeyGame(roomId ?? "prototip", roomName);
 
   const handleSeatClick = useCallback((playerId: string) => {
@@ -103,10 +108,24 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     };
   }, []);
 
-  // SERİ AÇ: myHand/okeyColor/okeyValue üzerinden evaluateRunOpen çalıştırır.
-  // canOpen=true ise önizleme panelini açar, false ise yalnızca toast gösterir
-  // (taş silme/BİTİR YOK — bu fazın kapsamı dışında).
+  // SERİ AÇ: önce sıra/karşı-tip/tekrar-açma guard'ları kontrol edilir; hiçbiri
+  // engellemiyorsa myHand/okeyColor/okeyValue üzerinden evaluateRunOpen
+  // çalıştırılır. canOpen=true ise önizleme panelini açar, false ise yalnızca
+  // toast gösterir (Görev 7 akışı — burada dokunulmadı).
   const handleOpenRun = useCallback(() => {
+    if (!isMyTurn) {
+      notify("Sadece kendi sıranda açabilirsin.");
+      return;
+    }
+    if (myOpenType === "pair") {
+      notify("Çift açtığın için seri açamazsın.");
+      return;
+    }
+    if (myOpenType === "run") {
+      notify("Seri zaten açıldı.");
+      return;
+    }
+
     const result = evaluateRunOpen(myHand, okeyColor, okeyValue);
     if (result.canOpen) {
       notify(`Seri açılabilir: toplam ${result.totalScore} puan`);
@@ -114,10 +133,24 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     } else {
       notify(`Seri açmak için en az 101 puan gerekir. Şu an: ${result.totalScore}`);
     }
-  }, [myHand, notify, okeyColor, okeyValue]);
+  }, [isMyTurn, myHand, myOpenType, notify, okeyColor, okeyValue]);
 
-  // ÇİFT AÇ: myHand/okeyColor/okeyValue üzerinden evaluatePairOpen çalıştırır.
+  // ÇİFT AÇ: aynı guard deseni (sıra/karşı-tip/tekrar-açma), ardından
+  // myHand/okeyColor/okeyValue üzerinden evaluatePairOpen çalıştırılır.
   const handleOpenPair = useCallback(() => {
+    if (!isMyTurn) {
+      notify("Sadece kendi sıranda açabilirsin.");
+      return;
+    }
+    if (myOpenType === "run") {
+      notify("Seri açtığın için çift açamazsın.");
+      return;
+    }
+    if (myOpenType === "pair") {
+      notify("Çift zaten açıldı.");
+      return;
+    }
+
     const result = evaluatePairOpen(myHand, okeyColor, okeyValue);
     if (result.canOpen) {
       notify(`Çift açılabilir: ${result.totalScore} çift bulundu`);
@@ -125,7 +158,17 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     } else {
       notify(`Çift açmak için en az 5 çift gerekir. Şu an: ${result.totalScore} çift`);
     }
-  }, [myHand, notify, okeyColor, okeyValue]);
+  }, [isMyTurn, myHand, myOpenType, notify, okeyColor, okeyValue]);
+
+  // ONAYLA VE AÇ: önizlemedeki meld'leri gerçekten elden çıkarıp masaya
+  // açar (openMelds), önizleme panelini kapatır ve kısa bir onay toast'ı
+  // gösterir. previewOverlay null ise no-op.
+  const handleConfirmOpen = useCallback(() => {
+    if (!previewOverlay) return;
+    openMelds(previewOverlay.result.melds, previewOverlay.type);
+    setPreviewOverlay(null);
+    notify(previewOverlay.type === "run" ? "Seri masaya açıldı." : "Çiftler masaya açıldı.");
+  }, [notify, openMelds, previewOverlay]);
 
   // El dizme butonlarına basınca hook, state.lastAction'ı Türkçe bir
   // açıklamayla günceller (ör. "El renklerine göre dizildi.") — burada o
@@ -306,14 +349,21 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             />
           ) : null}
 
-          {/* SERİ AÇ / ÇİFT AÇ önizleme paneli — yalnızca canOpen=true iken açılır. */}
+          {/* SERİ AÇ / ÇİFT AÇ önizleme paneli — yalnızca canOpen=true iken açılır.
+              hasOpened=true olduktan sonra guard'lar sayesinde bu panel bir daha
+              hiç açılmaz, bu yüzden OpenedMeldsArea ile aynı üst-orta bölgeyi
+              zamansal çakışma olmadan paylaşabilir. */}
           {previewOverlay ? (
             <OpenPreviewOverlay
               type={previewOverlay.type}
               result={previewOverlay.result}
               onClose={() => setPreviewOverlay(null)}
+              onConfirm={handleConfirmOpen}
             />
           ) : null}
+
+          {/* Masaya açılmış seri/çiftlerim — açtıktan sonra kalıcı olarak görünür. */}
+          <OpenedMeldsArea melds={openedMelds} openType={myOpenType} />
         </div>
       )}
     </div>

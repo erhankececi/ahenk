@@ -9,6 +9,7 @@
 // hesaplama) burada YOK.
 
 import type { OkeyGamePlayer, OkeyGameState, OkeyGameTile, OkeySeatPosition } from "./gameTypes";
+import type { OkeyMeld } from "./meldValidation";
 
 function opponentSeatAfter(seat: OkeySeatPosition): OkeySeatPosition {
   // Sıra sırası: bottom (ben) -> right -> top -> left -> bottom ...
@@ -133,6 +134,61 @@ export function findPlayerBySeat(
   seat: OkeySeatPosition,
 ): OkeyGamePlayer | undefined {
   return players.find((p) => p.seat === seat);
+}
+
+/**
+ * Ahenk 101 — Görev 8 (Faz 1): benim (bottom) elimden, verilen meld'lerin
+ * içindeki taşları (tile.id bazlı) çıkarır ve openedMelds'e ekler.
+ *
+ * Guard'lar (sağlanmazsa state AYNEN döner, no-op):
+ * - Sıra bende değilse (currentTurnSeat !== "bottom") açılamaz.
+ * - hasOpened zaten true ise açılamaz — bu TEK bayrak hem "aynı tipi tekrar
+ *   açma" hem "karşı tipi açma" kuralını birlikte karşılar (seri açan çift
+ *   açamaz, çift açan seri açamaz, ilk açan tekrar ilk açma yapamaz).
+ *
+ * Elden çıkarma value/color KIYASLAMASI yapmaz — yalnızca melds içindeki
+ * taşların GERÇEK tile.id'lerine göre filtreler (gerçek okey wildcard olarak
+ * kullanılmış olsa da, sahte okey fiziksel taş olarak kullanılmış olsa da
+ * kendi tile.id'siyle çıkar).
+ *
+ * Sıra DEĞİŞMEZ (currentTurnSeat'e dokunulmaz — açtıktan sonra taş atmaya
+ * devam edebilmeli) ve turnStartedAt SIFIRLANMAZ (geri sayım kesintisiz
+ * devam eder — sıra değişmediği için).
+ *
+ * Bu görevde açılan taşlara (openedMelds) ileri işlem/UI YAPILMAZ.
+ */
+export function openMelds(
+  state: OkeyGameState,
+  melds: OkeyMeld[],
+  openType: "run" | "pair",
+): OkeyGameState {
+  if (state.currentTurnSeat !== "bottom") return state;
+  if (state.hasOpened) return state;
+
+  const openedTileIds = new Set(melds.flatMap((meld) => meld.tiles.map((t) => t.id)));
+  const myHand = state.hands.bottom.filter((tile) => !openedTileIds.has(tile.id));
+
+  const lastAction =
+    openType === "run"
+      ? `Seri açıldı: toplam ${melds.reduce((sum, m) => sum + m.score, 0)} puan`
+      : `Çift açıldı: ${melds.length} çift`;
+
+  // Açılan taşlardan biri o an seçiliyse (selectedTileId), açma sonrası o
+  // taş elde artık yok — seçim sahipsiz kalmasın diye temizlenir (aksi halde
+  // TAŞ AT görünüşte aktif kalır ama tıklanınca discardTile bulamadığı için
+  // sessizce no-op yapar).
+  const selectedTileId =
+    state.selectedTileId && openedTileIds.has(state.selectedTileId) ? null : state.selectedTileId;
+
+  return {
+    ...state,
+    hands: { ...state.hands, bottom: myHand },
+    openedMelds: [...state.openedMelds, ...melds],
+    hasOpened: true,
+    myOpenType: openType,
+    lastAction,
+    selectedTileId,
+  };
 }
 
 /**

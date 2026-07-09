@@ -9,6 +9,14 @@
 // `OkeyGameTile` / `OkeyGamePlayer` kullanılıyor.
 //
 // Backend/Supabase/socket/Colyseus YOK. Sadece local mock state + tipler.
+//
+// Görev 8 (Faz 1): OkeyMeld tipini burada TEKRAR TANIMLAMIYORUZ — tek doğru
+// kaynak lib/game101/meldValidation.ts. Buradan yalnızca type-only import
+// edilir (import type). meldValidation.ts da gameTypes.ts'ten type-only
+// import yapıyor (OkeyGameTile/OkeyTileColor) — bu döngüsel type-only import
+// TypeScript'te derleme zamanında tamamen elenir (erasable), tsc --noEmit
+// hata vermez (bu görev sonunda doğrulandı).
+import type { OkeyMeld } from "./meldValidation";
 
 /** Klasik 101 taş renkleri (joker taşın rengi yoktur ama alan yine de tutulur). */
 export type OkeyTileColor = "red" | "blue" | "black" | "yellow" | "joker";
@@ -84,4 +92,17 @@ export interface OkeyGameState {
   dealerSeat: OkeySeatPosition;
   /** Kaçıncı el (1'den başlar). */
   roundNo: number;
+  /**
+   * Görev 8: Benim (bottom) açtığım seri/çift meld'leri. Bu meld'lerin
+   * içindeki tiles, elden GERÇEKTEN çıkarılmış (id bazlı) taşların
+   * kopyalarıdır. Bu fazda açılan taşlara ileri işlem (UI render, karşı
+   * oyuncu ekleme vb.) YAPILMAZ — sadece state'te tutulur.
+   */
+  openedMelds: OkeyMeld[];
+  /** Benim ilk açtığım tip ("none" = henüz açmadım). Bir kez run/pair olduktan sonra değişmez. */
+  myOpenType: "none" | "run" | "pair";
+  /** Benim (bottom) bu elde en az bir kez seri/çift açıp açmadığım. */
+  hasOpened: boolean;
+  /** Açtığım anda roundNo neydi (opsiyonel — debug/gelecekte kullanım için). */
+  openedAtRoundNo?: number;
 }

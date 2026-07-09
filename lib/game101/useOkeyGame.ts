@@ -11,10 +11,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { OkeyGameState, OkeyGameTile, OkeyTileColor } from "./gameTypes";
+import type { OkeyMeld } from "./meldValidation";
 import { buildMockGameState } from "./mockGame";
 import {
   discardTile as discardTileAction,
   drawTile as drawTileAction,
+  openMelds as openMeldsAction,
   performMockOpponentTurn,
   reorderHand as reorderHandAction,
   selectTile as selectTileAction,
@@ -68,6 +70,18 @@ export interface UseOkeyGameResult {
   okeyColor: OkeyTileColor | null;
   /** Göstergeden hesaplanan okey değeri (gösterge yoksa null). */
   okeyValue: number | null;
+  /** Benim (bottom) açtığım seri/çift meld'leri (bu fazda ileri UI işlemi yok). */
+  openedMelds: OkeyMeld[];
+  /** Benim ilk açtığım tip ("none" = henüz açmadım). */
+  myOpenType: "none" | "run" | "pair";
+  /** Bu elde en az bir kez seri/çift açıp açmadığım. */
+  hasOpened: boolean;
+  /**
+   * Verilen meld'lerdeki taşları (id bazlı) elimden çıkarıp açar. Yalnızca
+   * kendi sıramdayken ve daha önce hiç açmamışken etkilidir; aksi halde
+   * no-op. Sırayı değiştirmez, geri sayımı sıfırlamaz.
+   */
+  openMelds: (melds: OkeyMeld[], openType: "run" | "pair") => void;
 }
 
 /**
@@ -145,6 +159,10 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     );
   }, []);
 
+  const openMelds = useCallback((melds: OkeyMeld[], openType: "run" | "pair") => {
+    setGameState((prev) => openMeldsAction(prev, melds, openType));
+  }, []);
+
   const discardTop = gameState.discardPile[gameState.discardPile.length - 1] ?? null;
 
   return {
@@ -167,5 +185,9 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     indicatorTile: gameState.indicatorTile,
     okeyColor: gameState.okeyColor,
     okeyValue: gameState.okeyValue,
+    openedMelds: gameState.openedMelds,
+    myOpenType: gameState.myOpenType,
+    hasOpened: gameState.hasOpened,
+    openMelds,
   };
 }
