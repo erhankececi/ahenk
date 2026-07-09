@@ -20,8 +20,6 @@ const ACTIONS: ActionDef[] = [
   { id: "finish", label: "BİTİR", icon: Flag },
 ];
 
-const LOCKED_TOAST_MESSAGE = "Bu hamle sonraki fazda aktif olacak.";
-
 export interface ActionButtonsProps {
   /** Desteden taş çeker (sıra bendeyse). */
   onDraw: () => void;
@@ -41,6 +39,8 @@ export interface ActionButtonsProps {
   onOpenPair: () => void;
   /** "İŞLE" — seçili taşı uygun açık meld'e işler; guard/toast mantığı GameScreen'de çalışır. */
   onProcess: () => void;
+  /** "BİTİR" — gerçek validasyon + toast + el bitirme mantığı GameScreen'de çalışır. */
+  onFinish: () => void;
 }
 
 /**
@@ -59,6 +59,7 @@ export default function ActionButtons({
   onOpenRun,
   onOpenPair,
   onProcess,
+  onFinish,
 }: ActionButtonsProps) {
   const [pulsingId, setPulsingId] = useState<ActionId | null>(null);
 
@@ -89,11 +90,11 @@ export default function ActionButtons({
           onProcess();
           break;
         case "finish":
-          onNotify(LOCKED_TOAST_MESSAGE);
+          onFinish();
           break;
       }
     },
-    [canDiscard, onDiscard, onDraw, onNotify, onOpenPair, onOpenRun, onProcess, pulse],
+    [canDiscard, onDiscard, onDraw, onFinish, onOpenPair, onOpenRun, onProcess, pulse],
   );
 
   return (

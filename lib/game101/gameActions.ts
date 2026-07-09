@@ -11,6 +11,7 @@
 import type { OkeyGamePlayer, OkeyGameState, OkeyGameTile, OkeySeatPosition } from "./gameTypes";
 import type { OkeyMeld } from "./meldValidation";
 import { addTileToMeld, canAddTileToMeld, colorNameTr } from "./meldProcessing";
+import { canFinishWithSelectedTile } from "./finishValidation";
 
 function opponentSeatAfter(seat: OkeySeatPosition): OkeySeatPosition {
   // Sıra sırası: bottom (ben) -> right -> top -> left -> bottom ...
@@ -34,6 +35,7 @@ export function selectTile(state: OkeyGameState, tileId: string): OkeyGameState 
  * ekler. Sıra bende değilse veya deste boşsa no-op (aynı state döner).
  */
 export function drawTile(state: OkeyGameState): OkeyGameState {
+  if (state.phase !== "playing") return state;
   if (state.currentTurnSeat !== "bottom") return state;
   if (state.drawPile.length === 0) return state;
 
@@ -55,6 +57,7 @@ export function drawTile(state: OkeyGameState): OkeyGameState {
  * rakip) devreder. Seçili taş yoksa veya sıra bende değilse no-op.
  */
 export function discardTile(state: OkeyGameState, tileId: string): OkeyGameState {
+  if (state.phase !== "playing") return state;
   if (state.currentTurnSeat !== "bottom") return state;
 
   const tileIndex = state.hands.bottom.findIndex((t) => t.id === tileId);
@@ -163,6 +166,7 @@ export function openMelds(
   melds: OkeyMeld[],
   openType: "run" | "pair",
 ): OkeyGameState {
+  if (state.phase !== "playing") return state;
   if (state.currentTurnSeat !== "bottom") return state;
   if (state.hasOpened) return state;
 
@@ -252,6 +256,7 @@ export function processTileToMeld(
   meldId: string,
   position?: "start" | "end",
 ): OkeyGameState {
+  if (state.phase !== "playing") return state;
   if (state.currentTurnSeat !== "bottom") return state;
   if (!state.hasOpened) return state;
 
@@ -286,5 +291,49 @@ export function processTileToMeld(
     openedMelds,
     selectedTileId: null,
     lastAction: `Taş işlendi: ${colorLabel} ${effectiveValueLabel}`,
+  };
+}
+
+/**
+ * Ahenk 101 — Görev 10 (Faz 1): benim (bottom) elimdeki son taşı atarak eli
+ * bitirir. canFinishWithSelectedTile (finishValidation.ts) ile doğrular:
+ * sıra bende olmalı, daha önce açmış olmalıyım (hasOpened), elimde tam 1 taş
+ * kalmalı ve o taş seçili olmalı. Herhangi biri sağlanmazsa no-op (state
+ * AYNEN döner).
+ *
+ * Başarılı olursa:
+ * - Son taş elden çıkarılır, discardPile'ın üstüne eklenir (owner temizlenir).
+ * - selectedTileId null'lanır.
+ * - phase "roundEnded" olur.
+ * - winnerSeat "bottom", winnerPlayerId "me" olarak set edilir (mockGame.ts'te
+ *   "bottom" koltuğunun id'si "me" — buradaki sabit değer bununla tutarlıdır).
+ * - finalDiscardTile, atılan taşın owner'ı temizlenmiş kopyasıdır.
+ * - finishedAt = Date.now().
+ * - lastAction = "El bitti. Kazanan: Sen" (birebir).
+ * - currentTurnSeat'e DOKUNULMAZ (sıra ilerlemez).
+ */
+export function finishRound(state: OkeyGameState): OkeyGameState {
+  const validation = canFinishWithSelectedTile(state);
+  if (!validation.canFinish || !validation.discardTileId) return state;
+
+  const discardTileId = validation.discardTileId;
+  const tileIndex = state.hands.bottom.findIndex((t) => t.id === discardTileId);
+  if (tileIndex === -1) return state;
+
+  const myHand = [...state.hands.bottom];
+  const [finishedTile] = myHand.splice(tileIndex, 1);
+  const finalDiscardTile: OkeyGameTile = { ...finishedTile, owner: undefined };
+
+  return {
+    ...state,
+    hands: { ...state.hands, bottom: myHand },
+    discardPile: [...state.discardPile, finalDiscardTile],
+    selectedTileId: null,
+    phase: "roundEnded",
+    winnerSeat: "bottom",
+    winnerPlayerId: "me",
+    finalDiscardTile,
+    finishedAt: Date.now(),
+    lastAction: "El bitti. Kazanan: Sen",
   };
 }

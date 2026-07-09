@@ -105,4 +105,17 @@ export interface OkeyGameState {
   hasOpened: boolean;
   /** Açtığım anda roundNo neydi (opsiyonel — debug/gelecekte kullanım için). */
   openedAtRoundNo?: number;
+  /**
+   * Görev 10 (Faz 1): eli bitiren koltuk. phase "roundEnded" olduğunda set
+   * edilir; bu fazda yalnızca "bottom" (ben) BİTİR diyebildiğinden pratikte
+   * hep "bottom" olur, ama tip ileride diğer koltuklar için de kullanılabilsin
+   * diye OkeySeatPosition olarak tutulur.
+   */
+  winnerSeat?: OkeySeatPosition;
+  /** Eli bitiren oyuncunun id'si (mock akışta "bottom" koltuğunun id'si "me"). */
+  winnerPlayerId?: string;
+  /** Elin bittiği epoch ms zamanı (Date.now()) — roundEnded overlay'de gösterilebilir. */
+  finishedAt?: number;
+  /** BİTİR ile atılan son taşın kendisi (owner temizlenmiş kopya) — overlay'de gösterilebilir. */
+  finalDiscardTile?: OkeyGameTile;
 }

@@ -16,6 +16,7 @@ import { buildMockGameState } from "./mockGame";
 import {
   discardTile as discardTileAction,
   drawTile as drawTileAction,
+  finishRound as finishRoundAction,
   openMelds as openMeldsAction,
   performMockOpponentTurn,
   processTileToMeld as processTileToMeldAction,
@@ -91,6 +92,27 @@ export interface UseOkeyGameResult {
    * geri sayımı sıfırlamaz.
    */
   processTileToMeld: (tileId: string, meldId: string, position?: "start" | "end") => void;
+  /** Oyun fazı ("waiting" | "dealing" | "playing" | "roundEnded"). */
+  phase: OkeyGameState["phase"];
+  /** Eli bitiren koltuk (yalnızca phase "roundEnded" iken anlamlı). */
+  winnerSeat: OkeyGameState["winnerSeat"];
+  /** Eli bitiren oyuncunun id'si (mock akışta "bottom" için "me"). */
+  winnerPlayerId: OkeyGameState["winnerPlayerId"];
+  /** BİTİR ile atılan son taş (yalnızca phase "roundEnded" iken set). */
+  finalDiscardTile: OkeyGameState["finalDiscardTile"];
+  /**
+   * Görev 10 (Faz 1): elimde tam 1 taş kalmışsa, daha önce açtıysam
+   * (hasOpened) ve sıra bendeyse o son taşı atarak eli bitirir; state
+   * "roundEnded" fazına geçer. Koşullardan biri sağlanmazsa (veya son taş
+   * seçili değilse) no-op. Sırayı DEĞİŞTİRMEZ.
+   */
+  finishRound: () => void;
+  /**
+   * Görev 10 (Faz 1): "Yeni El Başlat" — mevcut roomId/roomName ile
+   * sıfırdan bir mock oyun state'i kurar (buildMockGameState), yani yeni
+   * bir deste karıştırılır/dağıtılır ve phase tekrar "playing" olur.
+   */
+  startNewRound: () => void;
 }
 
 /**
@@ -179,6 +201,14 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     [],
   );
 
+  const finishRound = useCallback(() => {
+    setGameState((prev) => finishRoundAction(prev));
+  }, []);
+
+  const startNewRound = useCallback(() => {
+    setGameState(buildMockGameState({ roomId, roomName }));
+  }, [roomId, roomName]);
+
   const discardTop = gameState.discardPile[gameState.discardPile.length - 1] ?? null;
 
   return {
@@ -206,5 +236,11 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     hasOpened: gameState.hasOpened,
     openMelds,
     processTileToMeld,
+    phase: gameState.phase,
+    winnerSeat: gameState.winnerSeat,
+    winnerPlayerId: gameState.winnerPlayerId,
+    finalDiscardTile: gameState.finalDiscardTile,
+    finishRound,
+    startNewRound,
   };
 }

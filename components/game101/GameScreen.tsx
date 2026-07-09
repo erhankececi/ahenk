@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import RotateDeviceNotice from "./RotateDeviceNotice";
 import VoiceControls from "./VoiceControls";
 import ActionButtons from "./ActionButtons";
@@ -12,6 +13,7 @@ import GameToast from "./GameToast";
 import MiniProfileOverlay from "./MiniProfileOverlay";
 import OpenPreviewOverlay from "./OpenPreviewOverlay";
 import OpenedMeldsArea from "./OpenedMeldsArea";
+import RoundEndOverlay from "./RoundEndOverlay";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
 import { useOkeyGame } from "@/lib/game101/useOkeyGame";
 import { evaluatePairOpen, evaluateRunOpen, type OpenValidationResult } from "@/lib/game101/meldValidation";
@@ -46,6 +48,7 @@ export interface GameScreenProps {
  */
 export default function GameScreen({ roomId, roomName, tableType }: GameScreenProps = {}) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
   const [isPortrait, setIsPortrait] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [stageSize, setStageSize] = useState({ width: DESIGN_W, height: DESIGN_H });
@@ -77,6 +80,11 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     hasOpened,
     openMelds,
     processTileToMeld,
+    phase,
+    winnerSeat,
+    finalDiscardTile,
+    finishRound,
+    startNewRound,
   } = useOkeyGame(roomId ?? "prototip", roomName);
 
   const handleSeatClick = useCallback((playerId: string) => {
@@ -238,6 +246,40 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     notify("Birden fazla grup uygun, işlemek istediğin grubu seç.");
   }, [isMyTurn, hasOpened, selectedTileId, processableMeldIds, processTileToMeld, notify]);
 
+  // "BİTİR" butonuna basınca (ActionButtons) çağrılır. Sırayla: sıra bende mi,
+  // açtım mı, elimde tam 1 taş mı, o taş seçili mi — kontrol eder. Hepsi
+  // sağlanıyorsa finishRound() çağırır (phase "roundEnded" olur).
+  const handleFinish = useCallback(() => {
+    if (!isMyTurn) {
+      notify("Sıra sende değil.");
+      return;
+    }
+    if (!hasOpened) {
+      notify("Bitirmek için önce açmalısın.");
+      return;
+    }
+    if (myHand.length > 1) {
+      notify("Bitirmek için elinde sadece son taş kalmalı.");
+      return;
+    }
+    if (myHand.length === 1 && !selectedTileId) {
+      notify("Bitirmek için son taşını seç.");
+      return;
+    }
+    finishRound();
+    notify("El bitti.");
+  }, [isMyTurn, hasOpened, myHand, selectedTileId, finishRound, notify]);
+
+  // "Odaya Dön": gerçek roomId prop'u verilmişse oda bekleme ekranına, aksi
+  // halde (prototip akışı — gerçek oda yok) masa listesine yönlendirir.
+  const handleBackToRoom = useCallback(() => {
+    if (roomId) {
+      router.push(`/oyun/101/oda/${roomId}`);
+    } else {
+      router.push("/oyun/101/masalar");
+    }
+  }, [roomId, router]);
+
   // El dizme butonlarına basınca hook, state.lastAction'ı Türkçe bir
   // açıklamayla günceller (ör. "El renklerine göre dizildi.") — burada o
   // değişimi izleyip paylaşılan toast'a yansıtıyoruz. Yalnızca dizme
@@ -397,6 +439,7 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             onOpenRun={handleOpenRun}
             onOpenPair={handleOpenPair}
             onProcess={handleProcessButtonClick}
+            onFinish={handleFinish}
           />
 
           {/* Sol-alt el dizme kısayolları (RENK DİZ / SAYI DİZ / ÇİFT DİZ / ELİ TOPLA) — ıstakanın hemen üstünde, ActionButtons ile çakışmaz. */}
@@ -438,6 +481,20 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             processableMeldIds={processableMeldIds}
             onMeldClick={handleMeldClick}
           />
+
+          {/* El bitti overlay'i — TAM EKRAN karartma, oyunla etkileşimi tamamen
+              engeller. Yalnızca phase "roundEnded" iken mount edilir; diğer
+              tüm overlay'lerin/ActionButtons'ın ÜSTÜNDE en yüksek z-index'te. */}
+          {phase === "roundEnded" ? (
+            <RoundEndOverlay
+              winnerLabel={winnerSeat === "bottom" ? "Sen" : "Rakip"}
+              finalDiscardTile={finalDiscardTile ?? null}
+              openedMelds={openedMelds}
+              myOpenType={myOpenType}
+              onNewRound={startNewRound}
+              onBackToRoom={handleBackToRoom}
+            />
+          ) : null}
         </div>
       )}
     </div>
