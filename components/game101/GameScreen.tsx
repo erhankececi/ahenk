@@ -10,8 +10,10 @@ import ActionButtons from "./ActionButtons";
 import HandSortControls from "./HandSortControls";
 import GameToast from "./GameToast";
 import MiniProfileOverlay from "./MiniProfileOverlay";
+import OpenPreviewOverlay from "./OpenPreviewOverlay";
 import { MOCK_PLAYERS } from "@/lib/game101/mockData";
 import { useOkeyGame } from "@/lib/game101/useOkeyGame";
+import { evaluatePairOpen, evaluateRunOpen, type OpenValidationResult } from "@/lib/game101/meldValidation";
 
 const TOAST_DURATION_MS = 2200;
 
@@ -74,6 +76,12 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     setSelectedPlayerId(playerId);
   }, []);
 
+  // SERİ AÇ / ÇİFT AÇ önizleme paneli: yalnızca canOpen=true olduğunda
+  // açılır, taş silme/BİTİR yapmaz — saf görsel önizleme (Görev 7, Faz 2).
+  const [previewOverlay, setPreviewOverlay] = useState<
+    { type: "run" | "pair"; result: OpenValidationResult } | null
+  >(null);
+
   // Tek, paylaşılan toast state'i: hem ActionButtons'ın "kilitli hamle"
   // mesajları hem de HandSortControls'ın (hook'un lastAction'ı üzerinden)
   // dizme bildirimleri AYNI GameToast'ı kullanır — böylece iki ayrı toast
@@ -94,6 +102,30 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
   }, []);
+
+  // SERİ AÇ: myHand/okeyColor/okeyValue üzerinden evaluateRunOpen çalıştırır.
+  // canOpen=true ise önizleme panelini açar, false ise yalnızca toast gösterir
+  // (taş silme/BİTİR YOK — bu fazın kapsamı dışında).
+  const handleOpenRun = useCallback(() => {
+    const result = evaluateRunOpen(myHand, okeyColor, okeyValue);
+    if (result.canOpen) {
+      notify(`Seri açılabilir: toplam ${result.totalScore} puan`);
+      setPreviewOverlay({ type: "run", result });
+    } else {
+      notify(`Seri açmak için en az 101 puan gerekir. Şu an: ${result.totalScore}`);
+    }
+  }, [myHand, notify, okeyColor, okeyValue]);
+
+  // ÇİFT AÇ: myHand/okeyColor/okeyValue üzerinden evaluatePairOpen çalıştırır.
+  const handleOpenPair = useCallback(() => {
+    const result = evaluatePairOpen(myHand, okeyColor, okeyValue);
+    if (result.canOpen) {
+      notify(`Çift açılabilir: ${result.totalScore} çift bulundu`);
+      setPreviewOverlay({ type: "pair", result });
+    } else {
+      notify(`Çift açmak için en az 5 çift gerekir. Şu an: ${result.totalScore} çift`);
+    }
+  }, [myHand, notify, okeyColor, okeyValue]);
 
   // El dizme butonlarına basınca hook, state.lastAction'ı Türkçe bir
   // açıklamayla günceller (ör. "El renklerine göre dizildi.") — burada o
@@ -251,6 +283,8 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             onDiscard={discardSelectedTile}
             canDiscard={selectedTileId !== null}
             onNotify={notify}
+            onOpenRun={handleOpenRun}
+            onOpenPair={handleOpenPair}
           />
 
           {/* Sol-alt el dizme kısayolları (RENK DİZ / SAYI DİZ / ÇİFT DİZ / ELİ TOPLA) — ıstakanın hemen üstünde, ActionButtons ile çakışmaz. */}
@@ -269,6 +303,15 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
             <MiniProfileOverlay
               player={selectedPlayer}
               onClose={() => setSelectedPlayerId(null)}
+            />
+          ) : null}
+
+          {/* SERİ AÇ / ÇİFT AÇ önizleme paneli — yalnızca canOpen=true iken açılır. */}
+          {previewOverlay ? (
+            <OpenPreviewOverlay
+              type={previewOverlay.type}
+              result={previewOverlay.result}
+              onClose={() => setPreviewOverlay(null)}
             />
           ) : null}
         </div>

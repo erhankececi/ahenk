@@ -34,6 +34,10 @@ export interface ActionButtonsProps {
    * slotunu paylaşır, iki ayrı toast asla çakışmaz.
    */
   onNotify: (message: string) => void;
+  /** "SERİ AÇ" — gerçek validasyon + toast + önizleme mantığı GameScreen'de çalışır. */
+  onOpenRun: () => void;
+  /** "ÇİFT AÇ" — gerçek validasyon + toast + önizleme mantığı GameScreen'de çalışır. */
+  onOpenPair: () => void;
 }
 
 /**
@@ -44,7 +48,14 @@ export interface ActionButtonsProps {
  * BİTİR bu fazda henüz aktif değil — tıklanınca kısa bir "kilitli" mesajı
  * onNotify ile paylaşılan toast'a bildirilir.
  */
-export default function ActionButtons({ onDraw, onDiscard, canDiscard, onNotify }: ActionButtonsProps) {
+export default function ActionButtons({
+  onDraw,
+  onDiscard,
+  canDiscard,
+  onNotify,
+  onOpenRun,
+  onOpenPair,
+}: ActionButtonsProps) {
   const [pulsingId, setPulsingId] = useState<ActionId | null>(null);
 
   const pulse = useCallback((id: ActionId) => {
@@ -65,13 +76,17 @@ export default function ActionButtons({ onDraw, onDiscard, canDiscard, onNotify 
           if (canDiscard) onDiscard();
           break;
         case "run":
+          onOpenRun();
+          break;
         case "pair":
+          onOpenPair();
+          break;
         case "finish":
           onNotify(LOCKED_TOAST_MESSAGE);
           break;
       }
     },
-    [canDiscard, onDiscard, onDraw, onNotify, pulse],
+    [canDiscard, onDiscard, onDraw, onNotify, onOpenPair, onOpenRun, pulse],
   );
 
   return (
