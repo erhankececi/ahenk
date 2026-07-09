@@ -16,7 +16,14 @@
 // import yapıyor (OkeyGameTile/OkeyTileColor) — bu döngüsel type-only import
 // TypeScript'te derleme zamanında tamamen elenir (erasable), tsc --noEmit
 // hata vermez (bu görev sonunda doğrulandı).
+//
+// Görev 12 (Faz 1): aynı desende, RoundScoreResult tipi için
+// lib/game101/scoring.ts'ten type-only import edilir. scoring.ts de
+// gameTypes.ts'ten (OkeyGameState/OkeyGameTile/OkeySeatPosition/OkeyTileColor)
+// type-only import yapıyor — bu döngüsel type-only import da Görev 8'deki
+// gibi derleme zamanında tamamen elenir (tsc --noEmit ile doğrulandı).
 import type { OkeyMeld } from "./meldValidation";
+import type { RoundScoreResult } from "./scoring";
 
 /** Klasik 101 taş renkleri (joker taşın rengi yoktur ama alan yine de tutulur). */
 export type OkeyTileColor = "red" | "blue" | "black" | "yellow" | "joker";
@@ -118,4 +125,16 @@ export interface OkeyGameState {
   finishedAt?: number;
   /** BİTİR ile atılan son taşın kendisi (owner temizlenmiş kopya) — overlay'de gösterilebilir. */
   finalDiscardTile?: OkeyGameTile;
+  /**
+   * Görev 12 (Faz 1): bu elin puanlama sonucu. phase "roundEnded" olduğunda
+   * finishRound tarafından set edilir (lib/game101/scoring.ts —
+   * calculateRoundScore). Round başlamadan/bitmeden önce undefined'dır.
+   */
+  roundScore?: RoundScoreResult;
+  /**
+   * Oyuncu id'sine göre KÜMÜLATİF (birden çok el boyunca biriken) toplam
+   * skor. Bu görevde YAZILMIYOR ve OKUNMUYOR — yalnızca ileride çoklu-el
+   * skor takibi eklenebilsin diye tip olarak hazırlanıyor.
+   */
+  totalScores?: Record<string, number>;
 }

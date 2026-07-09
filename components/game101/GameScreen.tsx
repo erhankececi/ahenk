@@ -83,6 +83,7 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
     phase,
     winnerSeat,
     finalDiscardTile,
+    roundScore,
     finishRound,
     startNewRound,
   } = useOkeyGame(roomId ?? "prototip", roomName);
@@ -491,6 +492,7 @@ export default function GameScreen({ roomId, roomName, tableType }: GameScreenPr
               finalDiscardTile={finalDiscardTile ?? null}
               openedMelds={openedMelds}
               myOpenType={myOpenType}
+              roundScore={roundScore ?? null}
               onNewRound={startNewRound}
               onBackToRoom={handleBackToRoom}
             />

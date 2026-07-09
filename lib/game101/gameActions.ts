@@ -12,6 +12,7 @@ import type { OkeyGamePlayer, OkeyGameState, OkeyGameTile, OkeySeatPosition } fr
 import type { OkeyMeld } from "./meldValidation";
 import { addTileToMeld, canAddTileToMeld, colorNameTr } from "./meldProcessing";
 import { canFinishWithSelectedTile } from "./finishValidation";
+import { calculateRoundScore } from "./scoring";
 
 function opponentSeatAfter(seat: OkeySeatPosition): OkeySeatPosition {
   // Sıra sırası: bottom (ben) -> right -> top -> left -> bottom ...
@@ -311,6 +312,12 @@ export function processTileToMeld(
  * - finishedAt = Date.now().
  * - lastAction = "El bitti. Kazanan: Sen" (birebir).
  * - currentTurnSeat'e DOKUNULMAZ (sıra ilerlemez).
+ *
+ * Görev 12 (Faz 1): yukarıdaki alanlar (özellikle winnerSeat/winnerPlayerId/
+ * hasOpened/hands) set edilmiş YENİ state objesi oluşturulduktan SONRA, o
+ * (zaten güncel) state calculateRoundScore'a (lib/game101/scoring.ts) verilir
+ * ve sonucu roundScore alanına yazılır — calculateRoundScore, eski/hazırlık
+ * öncesi state ile DEĞİL, bu bitmiş-el state'iyle çağrılmalıdır.
  */
 export function finishRound(state: OkeyGameState): OkeyGameState {
   const validation = canFinishWithSelectedTile(state);
@@ -324,7 +331,7 @@ export function finishRound(state: OkeyGameState): OkeyGameState {
   const [finishedTile] = myHand.splice(tileIndex, 1);
   const finalDiscardTile: OkeyGameTile = { ...finishedTile, owner: undefined };
 
-  return {
+  const finishedState: OkeyGameState = {
     ...state,
     hands: { ...state.hands, bottom: myHand },
     discardPile: [...state.discardPile, finalDiscardTile],
@@ -335,5 +342,10 @@ export function finishRound(state: OkeyGameState): OkeyGameState {
     finalDiscardTile,
     finishedAt: Date.now(),
     lastAction: "El bitti. Kazanan: Sen",
+  };
+
+  return {
+    ...finishedState,
+    roundScore: calculateRoundScore(finishedState),
   };
 }

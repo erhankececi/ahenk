@@ -3,6 +3,7 @@
 import { Flag, RotateCcw, DoorOpen } from "lucide-react";
 import type { OkeyGameTile, OkeyTileColor } from "@/lib/game101/gameTypes";
 import type { OkeyMeld } from "@/lib/game101/meldValidation";
+import type { RoundScoreResult } from "@/lib/game101/scoring";
 
 export interface RoundEndOverlayProps {
   /** "Kazanan: Sen" gibi bir etiket üretmek için kullanılan kazanan adı. */
@@ -13,6 +14,12 @@ export interface RoundEndOverlayProps {
   openedMelds: OkeyMeld[];
   /** Benim açtığım tip ("none" ise özet bölümü hiç render edilmez). */
   myOpenType: "none" | "run" | "pair";
+  /**
+   * Görev 12 (Faz 2): bu elin puanlama sonucu (lib/game101/scoring.ts).
+   * null ise "El Sonu Puanları" bölümü hiç render edilmez (savunma —
+   * phase "roundEnded" iken normalde her zaman dolu gelir).
+   */
+  roundScore: RoundScoreResult | null;
   /** "Yeni El Başlat" birincil aksiyonu. */
   onNewRound: () => void;
   /** "Odaya Dön" ikincil aksiyonu. */
@@ -46,6 +53,7 @@ export default function RoundEndOverlay({
   finalDiscardTile,
   openedMelds,
   myOpenType,
+  roundScore,
   onNewRound,
   onBackToRoom,
 }: RoundEndOverlayProps) {
@@ -102,6 +110,48 @@ export default function RoundEndOverlay({
                         </span>
                       ))}
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {roundScore ? (
+            <div className="mt-4 w-full">
+              <p className="text-[11px] font-semibold text-brand-2">El Sonu Puanları</p>
+              <div className="mt-2 flex max-h-[220px] flex-col gap-1.5 overflow-y-auto pr-0.5">
+                {roundScore.scores.map((score) => (
+                  <div
+                    key={score.playerId}
+                    className={[
+                      "rounded-lg border px-2.5 py-2",
+                      score.isWinner
+                        ? "border-brand/50 bg-brand/10 shadow-[0_0_0_1px_rgb(199_169_119/0.15)]"
+                        : "border-brand/15 bg-black/20",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-[11px] font-semibold text-text/85">{score.name}</p>
+                      <span
+                        className={[
+                          "shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold tracking-wide",
+                          score.isWinner
+                            ? "bg-brand/25 text-brand-2"
+                            : score.hasOpened
+                              ? "bg-emerald-500/15 text-emerald-200"
+                              : "bg-white/10 text-muted",
+                        ].join(" ")}
+                      >
+                        {score.isWinner ? "Kazanan" : score.hasOpened ? "Açtı" : "Açmadı"}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-[10px] text-muted">
+                      <span className="tabular-nums">{score.remainingTileCount} taş</span>
+                      <span className="font-bold tabular-nums text-brand/80">
+                        {score.totalRoundScore} puan
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-[10px] leading-tight text-text/60">{score.note}</p>
                   </div>
                 ))}
               </div>

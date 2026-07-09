@@ -101,6 +101,12 @@ export interface UseOkeyGameResult {
   /** BİTİR ile atılan son taş (yalnızca phase "roundEnded" iken set). */
   finalDiscardTile: OkeyGameState["finalDiscardTile"];
   /**
+   * Görev 12 (Faz 1): bu elin puanlama sonucu (lib/game101/scoring.ts —
+   * calculateRoundScore). Yalnızca phase "roundEnded" iken (finishRound
+   * başarıyla çalıştıktan sonra) dolu; öncesinde undefined'dır.
+   */
+  roundScore: OkeyGameState["roundScore"];
+  /**
    * Görev 10 (Faz 1): elimde tam 1 taş kalmışsa, daha önce açtıysam
    * (hasOpened) ve sıra bendeyse o son taşı atarak eli bitirir; state
    * "roundEnded" fazına geçer. Koşullardan biri sağlanmazsa (veya son taş
@@ -240,6 +246,7 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     winnerSeat: gameState.winnerSeat,
     winnerPlayerId: gameState.winnerPlayerId,
     finalDiscardTile: gameState.finalDiscardTile,
+    roundScore: gameState.roundScore,
     finishRound,
     startNewRound,
   };
