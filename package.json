@@ -9,7 +9,8 @@
     "lint": "next lint",
     "cap:sync": "cap sync",
     "cap:ios": "cap sync ios && cap open ios",
-    "cap:android": "cap sync android && cap open android"
+    "cap:android": "cap sync android && cap open android",
+    "game101:dev": "tsx server/game101/index.ts"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.1",
@@ -17,10 +18,15 @@
     "@capacitor/core": "^6.2.1",
     "@capacitor/ios": "^6.2.1",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
+    "@colyseus/schema": "^4.0.27",
     "@revenuecat/purchases-capacitor": "^8.0.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
     "clsx": "^2.1.1",
+    "colyseus": "^0.17.10",
+    "colyseus.js": "^0.16.22",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "framer-motion": "^11.5.4",
     "lucide-react": "^0.441.0",
     "next": "^14.2.35",
@@ -30,12 +36,15 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^20.16.5",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.12",
+    "tsx": "^4.23.0",
     "typescript": "^5.6.2"
   }
 }
