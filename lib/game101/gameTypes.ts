@@ -22,8 +22,15 @@
 // gameTypes.ts'ten (OkeyGameState/OkeyGameTile/OkeySeatPosition/OkeyTileColor)
 // type-only import yapıyor — bu döngüsel type-only import da Görev 8'deki
 // gibi derleme zamanında tamamen elenir (tsc --noEmit ile doğrulandı).
+//
+// Görev 13 (Faz 1): aynı desende, OkeyGameEvent tipi için
+// lib/game101/events.ts'ten type-only import edilir (events.ts de bu
+// dosyadan yalnızca OkeySeatPosition'ı type-only import eder) — döngüsel
+// type-only import, yukarıdakilerle aynı gerekçeyle derleme zamanında
+// tamamen elenir.
 import type { OkeyMeld } from "./meldValidation";
 import type { RoundScoreResult } from "./scoring";
+import type { OkeyGameEvent } from "./events";
 
 /** Klasik 101 taş renkleri (joker taşın rengi yoktur ama alan yine de tutulur). */
 export type OkeyTileColor = "red" | "blue" | "black" | "yellow" | "joker";
@@ -137,4 +144,18 @@ export interface OkeyGameState {
    * skor takibi eklenebilsin diye tip olarak hazırlanıyor.
    */
   totalScores?: Record<string, number>;
+  /**
+   * Görev 13 (Faz 1): lib/game101/gameReducer.ts'in applyGameCommand'ının
+   * ürettiği son event. Yalnızca reducer üzerinden (BAŞARILI komutlarda)
+   * güncellenir — bu fazda gameActions.ts/useOkeyGame.ts hâlâ bu alana hiç
+   * dokunmaz, bu yüzden reducer üzerinden hiç geçilmemiş bir state'te
+   * undefined kalır. Opsiyoneldir, zorunlu değildir.
+   */
+  lastEvent?: OkeyGameEvent;
+  /**
+   * Görev 13 (Faz 1): son N (en fazla 20) event'in KIRPILMIŞ geçmişi —
+   * çok büyümesin diye reducer her ekleyişte .slice(-20) uygular. Aynı
+   * şekilde yalnızca reducer üzerinden güncellenir, opsiyoneldir.
+   */
+  eventLog?: OkeyGameEvent[];
 }

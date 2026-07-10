@@ -12,23 +12,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { OkeyGameState, OkeyGameTile, OkeyTileColor } from "./gameTypes";
 import type { OkeyMeld } from "./meldValidation";
+import type { OkeyGameCommand } from "./commands";
 import { buildMockGameState } from "./mockGame";
-import {
-  discardTile as discardTileAction,
-  drawTile as drawTileAction,
-  finishRound as finishRoundAction,
-  openMelds as openMeldsAction,
-  performMockOpponentTurn,
-  processTileToMeld as processTileToMeldAction,
-  reorderHand as reorderHandAction,
-  selectTile as selectTileAction,
-} from "./gameActions";
-import {
-  compactHand,
-  sortByColorAndValue,
-  sortByValue,
-  sortPairsFirst,
-} from "./handAnalysis";
+import { performMockOpponentTurn, selectTile as selectTileAction } from "./gameActions";
+import { applyGameCommand } from "./gameReducer";
 
 /** Mock rakip hamlesinin sıra bana geçtikten ne kadar sonra tetikleneceği. */
 const MOCK_OPPONENT_DELAY_MS = 1000;
@@ -157,63 +144,99 @@ export function useOkeyGame(roomId?: string, roomName?: string): UseOkeyGameResu
     };
   }, [gameState.currentTurnSeat, gameState.phase]);
 
+  // Ahenk 101 — Görev 13 (Faz 2): tüm oyun aksiyonları artık gameActions.ts
+  // fonksiyonlarını DOĞRUDAN çağırmak yerine bir OkeyGameCommand (commands.ts)
+  // inşa edip lib/game101/gameReducer.ts'in applyGameCommand'ına dispatch
+  // eder. Gerçek state mutasyonu hâlâ gameActions.ts'te (applyGameCommand
+  // onu sarmalıyor) — bu SADECE bir dispatch/mimari değişikliği, UI'a
+  // giden dönüş şekli (UseOkeyGameResult) ve davranış (guard'lar, no-op'lar,
+  // başarı mesajları) BİREBİR AYNI kalır.
+  //
+  // buildCommand bir fonksiyon olarak alınır (sabit obje değil) ki
+  // discardSelectedTile gibi "önce prev.selectedTileId'ye bak, yoksa hiç
+  // dispatch etme" şeklindeki MEVCUT no-op korumasını, eski koddaki gibi
+  // setGameState'in functional-updater'ı İÇİNDE (her zaman en güncel prev
+  // ile) uygulayabilelim — dışarıdan (updater dışından) okunan bir
+  // gameState referansına bel bağlamak stale-closure riski taşırdı.
+  const dispatchCommand = useCallback(
+    (
+      buildCommand: (
+        prev: OkeyGameState,
+      ) => Omit<OkeyGameCommand, "playerId" | "seat"> | null,
+    ) => {
+      setGameState((prev) => {
+        const partialCommand = buildCommand(prev);
+        if (partialCommand === null) return prev;
+
+        const command = {
+          ...partialCommand,
+          playerId: "me",
+          seat: "bottom",
+        } as OkeyGameCommand;
+
+        const { state: nextState, events } = applyGameCommand(prev, command);
+        // Debug/izleme amaçlı — UI davranışını DEĞİŞTİRMEZ.
+        for (const event of events) {
+          console.debug(`[game101] ${event.type}: ${event.message}`);
+        }
+        return nextState;
+      });
+    },
+    [],
+  );
+
   const selectTile = useCallback((tileId: string) => {
     setGameState((prev) => selectTileAction(prev, tileId));
   }, []);
 
   const drawTile = useCallback(() => {
-    setGameState((prev) => drawTileAction(prev));
-  }, []);
+    dispatchCommand(() => ({ type: "DRAW_TILE" }));
+  }, [dispatchCommand]);
 
   const discardSelectedTile = useCallback(() => {
-    setGameState((prev) => {
-      if (!prev.selectedTileId) return prev;
-      return discardTileAction(prev, prev.selectedTileId);
+    dispatchCommand((prev) => {
+      if (!prev.selectedTileId) return null;
+      return { type: "DISCARD_TILE", payload: { tileId: prev.selectedTileId } };
     });
-  }, []);
+  }, [dispatchCommand]);
 
   const sortHandByColor = useCallback(() => {
-    setGameState((prev) =>
-      reorderHandAction(prev, sortByColorAndValue(prev.hands.bottom), "El renklerine göre dizildi."),
-    );
-  }, []);
+    dispatchCommand(() => ({ type: "SORT_HAND_BY_COLOR" }));
+  }, [dispatchCommand]);
 
   const sortHandByValue = useCallback(() => {
-    setGameState((prev) =>
-      reorderHandAction(prev, sortByValue(prev.hands.bottom), "El sayılara göre dizildi."),
-    );
-  }, []);
+    dispatchCommand(() => ({ type: "SORT_HAND_BY_VALUE" }));
+  }, [dispatchCommand]);
 
   const sortHandByPairs = useCallback(() => {
-    setGameState((prev) =>
-      reorderHandAction(prev, sortPairsFirst(prev.hands.bottom), "Çiftler öne alındı."),
-    );
-  }, []);
+    dispatchCommand(() => ({ type: "SORT_HAND_BY_PAIRS" }));
+  }, [dispatchCommand]);
 
   const compactMyHand = useCallback(() => {
-    setGameState((prev) =>
-      reorderHandAction(prev, compactHand(prev.hands.bottom), "Boşluklar temizlendi."),
-    );
-  }, []);
+    dispatchCommand(() => ({ type: "COMPACT_HAND" }));
+  }, [dispatchCommand]);
 
-  const openMelds = useCallback((melds: OkeyMeld[], openType: "run" | "pair") => {
-    setGameState((prev) => openMeldsAction(prev, melds, openType));
-  }, []);
+  const openMelds = useCallback(
+    (melds: OkeyMeld[], openType: "run" | "pair") => {
+      dispatchCommand(() => ({ type: "OPEN_MELDS", payload: { melds, openType } }));
+    },
+    [dispatchCommand],
+  );
 
   const processTileToMeld = useCallback(
     (tileId: string, meldId: string, position?: "start" | "end") => {
-      setGameState((prev) => processTileToMeldAction(prev, tileId, meldId, position));
+      dispatchCommand(() => ({ type: "PROCESS_TILE", payload: { tileId, meldId, position } }));
     },
-    [],
+    [dispatchCommand],
   );
 
   const finishRound = useCallback(() => {
-    setGameState((prev) => finishRoundAction(prev));
-  }, []);
+    dispatchCommand(() => ({ type: "FINISH_ROUND" }));
+  }, [dispatchCommand]);
 
   const startNewRound = useCallback(() => {
-    setGameState(buildMockGameState({ roomId, roomName }));
-  }, [roomId, roomName]);
+    dispatchCommand(() => ({ type: "START_NEW_ROUND" }));
+  }, [dispatchCommand]);
 
   const discardTop = gameState.discardPile[gameState.discardPile.length - 1] ?? null;
 
